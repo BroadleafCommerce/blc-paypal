@@ -3,6 +3,11 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.sonatype.oss</groupId>
+        <artifactId>oss-parent</artifactId>
+        <version>7</version>
+    </parent>
     <groupId>org.broadleafcommerce</groupId>
     <artifactId>broadleaf-third-party-integration</artifactId>
     <packaging>pom</packaging>
@@ -54,10 +59,14 @@
         </repository>
     </repositories>
     <properties>
-        <webappDirectory>${project.build.directory}/${project.build.finalName}</webappDirectory>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <blc.version>1.6.0-M2-SNAPSHOT</blc.version>
     </properties>
+    <scm>
+        <connection>scm:git@github.com:BroadleafCommerce/BroadleafCommerceThirdPartyIntegrationModules.git</connection>
+        <developerConnection>scm:git@github.com:BroadleafCommerce/BroadleafCommerceThirdPartyIntegrationModules.git</developerConnection>
+        <url>https://github.com/BroadleafCommerce/BroadleafCommerceThirdPartyIntegrationModules</url>
+    </scm>
     <build>
         <pluginManagement>
             <plugins>
