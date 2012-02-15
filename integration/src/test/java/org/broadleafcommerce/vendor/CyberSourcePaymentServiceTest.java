@@ -22,7 +22,6 @@ import java.util.Locale;
 
 import org.broadleafcommerce.common.money.Money;
 import org.broadleafcommerce.test.BaseTest;
-import org.broadleafcommerce.test.ThirdPartyIntegrationBaseTest;
 import org.broadleafcommerce.vendor.cybersource.service.CyberSourceServiceManager;
 import org.broadleafcommerce.vendor.cybersource.service.message.CyberSourceBillingRequest;
 import org.broadleafcommerce.vendor.cybersource.service.message.CyberSourceItemRequest;

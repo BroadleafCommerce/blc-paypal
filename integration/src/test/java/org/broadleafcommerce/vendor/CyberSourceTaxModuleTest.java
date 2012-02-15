@@ -39,7 +39,6 @@ import org.broadleafcommerce.profile.core.domain.AddressImpl;
 import org.broadleafcommerce.profile.core.domain.CountryImpl;
 import org.broadleafcommerce.profile.core.domain.StateImpl;
 import org.broadleafcommerce.test.BaseTest;
-import org.broadleafcommerce.test.ThirdPartyIntegrationBaseTest;
 import org.broadleafcommerce.vendor.cybersource.service.CyberSourceServiceManager;
 import org.springframework.test.annotation.Rollback;
 import org.testng.annotations.Test;
