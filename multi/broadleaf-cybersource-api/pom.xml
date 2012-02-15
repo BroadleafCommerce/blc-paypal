@@ -1,14 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<parent>
-		<artifactId>broadleaf-third-party-integration</artifactId>
+		<artifactId>multi</artifactId>
 		<groupId>org.broadleafcommerce</groupId>
 		<version>1.6.0-SNAPSHOT</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
-	<artifactId>broadleaf-usps-schemas</artifactId>
-	<name>BroadleafCommerce USPS Schemas</name>
-	<description>BroadleafCommerce USPS Schemas</description>
+	<artifactId>broadleaf-cybersource-api</artifactId>
+	<name>BroadleafCommerce CyberSource API</name>
+	<properties>
+		<cybersource.version>1.49</cybersource.version>
+	</properties>
+	<description>BroadleafCommerce CyberSource API</description>
     <url>http://www.broadleafcommerce.org</url>
     <licenses>
         <license>
@@ -50,37 +53,37 @@
 		<plugins>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>xmlbeans-maven-plugin</artifactId>
-				<version>2.3.3</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>xmlbeans</goal>
-						</goals>
-					</execution>
-				</executions>
-				<inherited>true</inherited>
+				<artifactId>axistools-maven-plugin</artifactId>
+				<version>1.4</version>
 				<configuration>
-					<schemaDirectory>${basedir}/src/main/resources</schemaDirectory>
+					<wsdlFiles>
+						<wsdlFile>CyberSourceTransaction_${cybersource.version}.wsdl</wsdlFile>
+					</wsdlFiles>
+					<mappings>
+						<mapping>
+							<namespace>urn:schemas-cybersource-com:transaction-data:TransactionProcessor</namespace>
+							<targetPackage>org.broadleafcommerce.vendor.cybersource.service.api</targetPackage>
+						</mapping>
+						<mapping>
+							<namespace>urn:schemas-cybersource-com:transaction-data-1.49</namespace>
+							<targetPackage>org.broadleafcommerce.vendor.cybersource.service.api</targetPackage>
+						</mapping>
+					</mappings>
 				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>build-helper-maven-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>add-source</id>
-						<phase>generate-sources</phase>
 						<goals>
-							<goal>add-source</goal>
+							<goal>wsdl2java</goal>
 						</goals>
-						<configuration>
-							<sources>
-								<source>${basedir}/generated-sources/xmlbeans</source>
-							</sources>
-						</configuration>
 					</execution>
 				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>javax.mail</groupId>
+						<artifactId>mail</artifactId>
+						<version>1.4.4</version>
+					</dependency>
+				</dependencies>
 			</plugin>
 		</plugins>
 	</build>
@@ -112,8 +115,36 @@
     </profiles>
 	<dependencies>
 		<dependency>
-			<groupId>org.apache.xmlbeans</groupId>
-			<artifactId>xmlbeans</artifactId>
+			<groupId>org.apache.axis</groupId>
+			<artifactId>axis</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>wss4j</groupId>
+			<artifactId>wss4j</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>xml-security</groupId>
+			<artifactId>xmlsec</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>commons-discovery</groupId>
+			<artifactId>commons-discovery</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>axis</groupId>
+			<artifactId>axis-jaxrpc</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>axis</groupId>
+			<artifactId>axis-saaj</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>axis</groupId>
+			<artifactId>axis-wsdl4j</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>axis</groupId>
+			<artifactId>axis-ant</artifactId>
 		</dependency>
 	</dependencies>
 </project>
