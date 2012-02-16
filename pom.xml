@@ -61,6 +61,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <blc.version>1.6.0-M2-SNAPSHOT</blc.version>
+        <blc.config.dir>src/main/resources</blc.config.dir>
     </properties>
     <scm>
         <connection>scm:git@github.com:BroadleafCommerce/BroadleafCommerceThirdPartyIntegrationModules.git</connection>
