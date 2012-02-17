@@ -54,6 +54,8 @@ public class CyberSourceCreditCardModuleTest extends BaseTest {
 		if (serviceManager.getMerchantId().equals("?")) {
             return;
         }
+        
+        System.out.println("***Initiating testSuccessfulCyberSourceCCModulePayment***");
 		
 		/*
 		 * authorize

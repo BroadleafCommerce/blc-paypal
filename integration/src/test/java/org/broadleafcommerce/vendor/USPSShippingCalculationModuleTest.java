@@ -57,6 +57,9 @@ public class USPSShippingCalculationModuleTest extends BaseTest {
         if (shippingCalculationService.getUspsUserName().equals("?")) {
             return;
         }
+
+        System.out.println("***Initiating testSuccessfulShippingModuleCalc***");
+
         FulfillmentGroup fg = new FulfillmentGroupImpl();
         fg.setService(ShippingServiceType.USPS.getType());
         fg.setMethod(USPSServiceMethod.PRIORITYMAIL.getType());

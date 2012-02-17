@@ -43,6 +43,9 @@ public class CyberSourceTaxServiceTest extends BaseTest {
         if (serviceManager.getMerchantId().equals("?")) {
             return;
         }
+
+        System.out.println("***Initiating testSuccessfulCyberSourceTax***");
+
         CyberSourceTaxRequest taxRequest = new CyberSourceTaxRequest();
         taxRequest.setCurrency(Currency.getInstance(Locale.US).getCurrencyCode());
         taxRequest.setNexus("CA");

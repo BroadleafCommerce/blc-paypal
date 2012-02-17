@@ -58,7 +58,9 @@ public class CyberSourceTaxModuleTest extends BaseTest {
 		if (serviceManager.getMerchantId().equals("?")) {
             return;
         }
-		
+
+        System.out.println("***Initiating testSuccessfulCyberSourceTaxModule***");
+
 		CyberSourceTaxModule module = new CyberSourceTaxModule();
 		module.setServiceManager(serviceManager);
 		ArrayList<String> nexus = new ArrayList<String>();

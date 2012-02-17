@@ -43,7 +43,9 @@ public class CyberSourcePaymentServiceTest extends BaseTest {
         if (serviceManager.getMerchantId().equals("?")) {
             return;
         }
-        
+
+        System.out.println("***Initiating testSuccessfulCyberSourceCCPayment***");
+
         /*
          * authorize the amount
          */

@@ -44,6 +44,9 @@ public class USPSShippingServiceTest extends BaseTest {
         if (shippingCalculationService.getUspsUserName().equals("?")) {
             return;
         }
+
+        System.out.println("***Initiating testSuccessfulShippingCalc***");
+
         USPSShippingPriceRequest request = new USPSShippingPriceRequest();
         USPSContainerItemRequest itemRequest = new USPSContainerItem();
         itemRequest.setService(USPSServiceType.ALL);
