@@ -74,9 +74,7 @@
                         <configuration>
                             <sources>
                                 <source>../multi/broadleaf-cybersource/src/main/java</source>
-                                <source>../multi/broadleaf-cybersource-api/target/generated-sources/axistools/wsdl2java</source>
                                 <source>../shipping/broadleaf-usps/src/main/java</source>
-                                <source>../shipping/broadleaf-usps-schemas/target/generated-sources/xmlbeans</source>
                             </sources>
                         </configuration>
                     </execution>
