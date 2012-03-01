@@ -48,5 +48,6 @@
         </developer>
     </developers>
 	<modules>
-	</modules>
+        <module>broadleaf-paypal</module>
+    </modules>
 </project>
