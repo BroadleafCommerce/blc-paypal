@@ -17,6 +17,7 @@
 package org.broadleafcommerce.vendor.paypal.service.payment;
 
 import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
+import org.broadleafcommerce.common.vendor.service.monitor.ServiceStatusDetectable;
 import org.broadleafcommerce.common.vendor.service.type.ServiceStatusType;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalPaymentRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalPaymentResponse;
@@ -24,7 +25,7 @@ import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalPayment
 /**
  * @author Jeff Fischer
  */
-public interface PayPalPaymentService {
+public interface PayPalPaymentService extends ServiceStatusDetectable {
 
     public PayPalPaymentResponse process(PayPalPaymentRequest paymentRequest) throws PaymentException;
 
@@ -34,9 +35,9 @@ public interface PayPalPaymentService {
 
     public void setFailureReportingThreshold(Integer failureReportingThreshold);
 
-    public String getMerchantId();
+    public String getUser();
 
-    public void setMerchantId(String merchantId);
+    public void setUser(String merchantId);
 
     public String getServerUrl();
 

@@ -28,6 +28,7 @@ public class PayPalItemRequest implements java.io.Serializable {
 	private static final long serialVersionUID = 1L;
 
 	private Long id;
+    private String systemId;
 	private String shortDescription;
 	private String description;
 	private Money unitPrice;
@@ -71,47 +72,46 @@ public class PayPalItemRequest implements java.io.Serializable {
 
 	protected void setId(Long id) {
 		/*
-		 * This value should only be controlled by the 
+		 * This value should only be controlled by the
 		 * Broadleaf internal CyberSource implementation code
 		 */
 		this.id = id;
 	}
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		result = prime * result + ((quantity == null) ? 0 : quantity.hashCode());
-		result = prime * result + ((unitPrice == null) ? 0 : unitPrice.hashCode());
-		return result;
-	}
+    public String getSystemId() {
+        return systemId;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-        PayPalItemRequest other = (PayPalItemRequest) obj;
-		if (id == null) {
-			if (other.id != null)
-				return false;
-		} else if (!id.equals(other.id))
-			return false;
-		if (quantity == null) {
-			if (other.quantity != null)
-				return false;
-		} else if (!quantity.equals(other.quantity))
-			return false;
-		if (unitPrice == null) {
-			if (other.unitPrice != null)
-				return false;
-		} else if (!unitPrice.equals(other.unitPrice))
-			return false;
-		return true;
-	}
-	
+    public void setSystemId(String systemId) {
+        this.systemId = systemId;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        PayPalItemRequest that = (PayPalItemRequest) o;
+
+        if (description != null ? !description.equals(that.description) : that.description != null) return false;
+        if (id != null ? !id.equals(that.id) : that.id != null) return false;
+        if (quantity != null ? !quantity.equals(that.quantity) : that.quantity != null) return false;
+        if (shortDescription != null ? !shortDescription.equals(that.shortDescription) : that.shortDescription != null)
+            return false;
+        if (systemId != null ? !systemId.equals(that.systemId) : that.systemId != null) return false;
+        if (unitPrice != null ? !unitPrice.equals(that.unitPrice) : that.unitPrice != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id != null ? id.hashCode() : 0;
+        result = 31 * result + (systemId != null ? systemId.hashCode() : 0);
+        result = 31 * result + (shortDescription != null ? shortDescription.hashCode() : 0);
+        result = 31 * result + (description != null ? description.hashCode() : 0);
+        result = 31 * result + (unitPrice != null ? unitPrice.hashCode() : 0);
+        result = 31 * result + (quantity != null ? quantity.hashCode() : 0);
+        return result;
+    }
 }

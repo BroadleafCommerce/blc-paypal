@@ -16,6 +16,11 @@
 
 package org.broadleafcommerce.vendor.paypal.service.payment.message;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.broadleafcommerce.common.vendor.service.message.PaymentResponse;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalTransactionType;
 
@@ -28,16 +33,11 @@ public class PayPalPaymentResponse implements PaymentResponse {
 		
 	private static final long serialVersionUID = 1L;
 	
-	protected boolean isErrorDetected = false;
-    protected String errorText;
-	protected String merchantReferenceCode;
-    protected String requestID;
-    protected String decision;
-    protected Integer reasonCode;
-    protected String[] missingField;
-    protected String[] invalidField;
-    protected String requestToken;
+    private boolean isErrorDetected = false;
+    private String errorText;
     private PayPalTransactionType transactionType;
+    private List<PayPalErrorResponse> errorResponses = new ArrayList<PayPalErrorResponse>();
+    private Map<String, String> passThroughErrors = new HashMap<String, String>();
 
     public PayPalTransactionType getTransactionType() {
 		return transactionType;
@@ -70,61 +70,49 @@ public class PayPalPaymentResponse implements PaymentResponse {
 	public void setErrorText(String errorText) {
 		this.errorText = errorText;
 	}
-	
-	public String getMerchantReferenceCode() {
-		return merchantReferenceCode;
-	}
 
-	public void setMerchantReferenceCode(String merchantReferenceCode) {
-		this.merchantReferenceCode = merchantReferenceCode;
-	}
+    public List<PayPalErrorResponse> getErrorResponses() {
+        return errorResponses;
+    }
 
-	public String getRequestID() {
-		return requestID;
-	}
+    public void setErrorResponses(List<PayPalErrorResponse> errorResponses) {
+        this.errorResponses = errorResponses;
+    }
 
-	public void setRequestID(String requestID) {
-		this.requestID = requestID;
-	}
+    public Map<String, String> getPassThroughErrors() {
+        return passThroughErrors;
+    }
 
-	public String getDecision() {
-		return decision;
-	}
+    public void setPassThroughErrors(Map<String, String> passThroughErrors) {
+        this.passThroughErrors = passThroughErrors;
+    }
 
-	public void setDecision(String decision) {
-		this.decision = decision;
-	}
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
-	public Integer getReasonCode() {
-		return reasonCode;
-	}
+        PayPalPaymentResponse that = (PayPalPaymentResponse) o;
 
-	public void setReasonCode(Integer reasonCode) {
-		this.reasonCode = reasonCode;
-	}
+        if (isErrorDetected != that.isErrorDetected) return false;
+        if (errorResponses != null ? !errorResponses.equals(that.errorResponses) : that.errorResponses != null)
+            return false;
+        if (errorText != null ? !errorText.equals(that.errorText) : that.errorText != null) return false;
+        if (passThroughErrors != null ? !passThroughErrors.equals(that.passThroughErrors) : that.passThroughErrors != null)
+            return false;
+        if (transactionType != null ? !transactionType.equals(that.transactionType) : that.transactionType != null)
+            return false;
 
-	public String[] getMissingField() {
-		return missingField;
-	}
+        return true;
+    }
 
-	public void setMissingField(String[] missingField) {
-		this.missingField = missingField;
-	}
-
-	public String[] getInvalidField() {
-		return invalidField;
-	}
-
-	public void setInvalidField(String[] invalidField) {
-		this.invalidField = invalidField;
-	}
-
-	public String getRequestToken() {
-		return requestToken;
-	}
-
-	public void setRequestToken(String requestToken) {
-		this.requestToken = requestToken;
-	}
-
+    @Override
+    public int hashCode() {
+        int result = (isErrorDetected ? 1 : 0);
+        result = 31 * result + (errorText != null ? errorText.hashCode() : 0);
+        result = 31 * result + (transactionType != null ? transactionType.hashCode() : 0);
+        result = 31 * result + (errorResponses != null ? errorResponses.hashCode() : 0);
+        result = 31 * result + (passThroughErrors != null ? passThroughErrors.hashCode() : 0);
+        return result;
+    }
 }
