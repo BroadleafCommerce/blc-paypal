@@ -27,7 +27,7 @@ import org.broadleafcommerce.core.payment.service.type.PaymentInfoType;
  * @author jfischer
  *
  */
-public class PayPalCreditCardModule implements PaymentModule {
+public class PayPalPaymentModule implements PaymentModule {
 
     @Override
     public PaymentResponseItem authorize(PaymentContext paymentContext) throws PaymentException {

@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.broadleafcommerce.common.vendor.service.message.PaymentResponse;
+import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalMethodType;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalTransactionType;
 
 /**
@@ -34,10 +35,13 @@ public class PayPalPaymentResponse implements PaymentResponse {
 	private static final long serialVersionUID = 1L;
 	
     private boolean isErrorDetected = false;
+    private boolean isSuccessful = true;
     private String errorText;
     private PayPalTransactionType transactionType;
+    private PayPalMethodType methodType;
     private List<PayPalErrorResponse> errorResponses = new ArrayList<PayPalErrorResponse>();
     private Map<String, String> passThroughErrors = new HashMap<String, String>();
+    private String responseToken;
 
     public PayPalTransactionType getTransactionType() {
 		return transactionType;
@@ -87,6 +91,31 @@ public class PayPalPaymentResponse implements PaymentResponse {
         this.passThroughErrors = passThroughErrors;
     }
 
+    public PayPalMethodType getMethodType() {
+        return methodType;
+    }
+
+    public void setMethodType(PayPalMethodType methodType) {
+        this.methodType = methodType;
+    }
+
+    public boolean isSuccessful() {
+
+        return isSuccessful;
+    }
+
+    public void setSuccessful(boolean successful) {
+        isSuccessful = successful;
+    }
+
+    public String getResponseToken() {
+        return responseToken;
+    }
+
+    public void setResponseToken(String responseToken) {
+        this.responseToken = responseToken;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -95,10 +124,14 @@ public class PayPalPaymentResponse implements PaymentResponse {
         PayPalPaymentResponse that = (PayPalPaymentResponse) o;
 
         if (isErrorDetected != that.isErrorDetected) return false;
+        if (isSuccessful != that.isSuccessful) return false;
         if (errorResponses != null ? !errorResponses.equals(that.errorResponses) : that.errorResponses != null)
             return false;
         if (errorText != null ? !errorText.equals(that.errorText) : that.errorText != null) return false;
+        if (methodType != null ? !methodType.equals(that.methodType) : that.methodType != null) return false;
         if (passThroughErrors != null ? !passThroughErrors.equals(that.passThroughErrors) : that.passThroughErrors != null)
+            return false;
+        if (responseToken != null ? !responseToken.equals(that.responseToken) : that.responseToken != null)
             return false;
         if (transactionType != null ? !transactionType.equals(that.transactionType) : that.transactionType != null)
             return false;
@@ -109,10 +142,13 @@ public class PayPalPaymentResponse implements PaymentResponse {
     @Override
     public int hashCode() {
         int result = (isErrorDetected ? 1 : 0);
+        result = 31 * result + (isSuccessful ? 1 : 0);
         result = 31 * result + (errorText != null ? errorText.hashCode() : 0);
         result = 31 * result + (transactionType != null ? transactionType.hashCode() : 0);
+        result = 31 * result + (methodType != null ? methodType.hashCode() : 0);
         result = 31 * result + (errorResponses != null ? errorResponses.hashCode() : 0);
         result = 31 * result + (passThroughErrors != null ? passThroughErrors.hashCode() : 0);
+        result = 31 * result + (responseToken != null ? responseToken.hashCode() : 0);
         return result;
     }
 }

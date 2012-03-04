@@ -28,4 +28,59 @@ public class PayPalErrorResponse implements Serializable {
     private String longMessage;
     private String severityCode;
 
+    public String getErrorCode() {
+        return errorCode;
+    }
+
+    public void setErrorCode(String errorCode) {
+        this.errorCode = errorCode;
+    }
+
+    public String getLongMessage() {
+        return longMessage;
+    }
+
+    public void setLongMessage(String longMessage) {
+        this.longMessage = longMessage;
+    }
+
+    public String getSeverityCode() {
+        return severityCode;
+    }
+
+    public void setSeverityCode(String severityCode) {
+        this.severityCode = severityCode;
+    }
+
+    public String getShortMessage() {
+        return shortMessage;
+    }
+
+    public void setShortMessage(String shortMessage) {
+        this.shortMessage = shortMessage;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        PayPalErrorResponse that = (PayPalErrorResponse) o;
+
+        if (errorCode != null ? !errorCode.equals(that.errorCode) : that.errorCode != null) return false;
+        if (longMessage != null ? !longMessage.equals(that.longMessage) : that.longMessage != null) return false;
+        if (severityCode != null ? !severityCode.equals(that.severityCode) : that.severityCode != null) return false;
+        if (shortMessage != null ? !shortMessage.equals(that.shortMessage) : that.shortMessage != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = errorCode != null ? errorCode.hashCode() : 0;
+        result = 31 * result + (shortMessage != null ? shortMessage.hashCode() : 0);
+        result = 31 * result + (longMessage != null ? longMessage.hashCode() : 0);
+        result = 31 * result + (severityCode != null ? severityCode.hashCode() : 0);
+        return result;
+    }
 }

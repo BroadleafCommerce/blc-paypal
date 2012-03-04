@@ -29,6 +29,7 @@ import org.apache.commons.logging.LogFactory;
 import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
 import org.broadleafcommerce.common.vendor.service.type.ServiceStatusType;
 import org.broadleafcommerce.profile.core.service.IdGenerationService;
+import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalErrorResponse;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalItemRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalPaymentRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalPaymentResponse;
@@ -76,14 +77,57 @@ public class PayPalPaymentServiceImpl implements PayPalPaymentService {
             throw new PaymentException(e);
         }
         clearStatus();
-        return buildResponse(response);
+        
+        PayPalPaymentResponse payPalPaymentResponse = new PayPalPaymentResponse();
+        payPalPaymentResponse.setTransactionType(paymentRequest.getTransactionType());
+        payPalPaymentResponse.setMethodType(paymentRequest.getMethodType());
+        
+        return buildResponse(response, payPalPaymentResponse);
     }
     
-    protected PayPalPaymentResponse buildResponse(String rawResponse) {
-        PayPalPaymentResponse response = new PayPalPaymentResponse();
-        String ack = getResponseValue(rawResponse, "ACK");
-        if (ack.toLowerCase().equals("success")) {
-            //TODO finish building the response
+    protected PayPalPaymentResponse buildResponse(String rawResponse, PayPalPaymentResponse response) {
+        String ack = getResponseValue(rawResponse, MessageConstants.ACK);
+        if (ack.toLowerCase().equals(MessageConstants.SUCCESS)) {
+            response.setErrorDetected(false);
+            response.setSuccessful(true);
+            response.setResponseToken(getResponseValue(rawResponse, MessageConstants.TOKEN));
+        } else if (ack.toLowerCase().equals(MessageConstants.SUCCESSWITHWARNINGS)) {
+            response.setSuccessful(true);
+            response.setErrorDetected(true);
+            response.setResponseToken(getResponseValue(rawResponse, MessageConstants.TOKEN));
+        } else {
+            response.setSuccessful(false);
+            response.setErrorDetected(true);
+        }
+        if (response.isErrorDetected()) {
+            boolean eof = false;
+            int errorNumber = 0;
+            while (!eof) {
+                String errorCode = getResponseValue(rawResponse, MessageConstants.ERRORCODE + errorNumber);
+                if (errorCode != null) {
+                    PayPalErrorResponse errorResponse = new PayPalErrorResponse();
+                    errorResponse.setErrorCode(errorCode);
+                    errorResponse.setShortMessage(getResponseValue(rawResponse, MessageConstants.ERRORSHORTMESSAGE + errorNumber));
+                    errorResponse.setLongMessage(getResponseValue(rawResponse, MessageConstants.ERRORLONGMESSAGE + errorNumber));
+                    errorResponse.setSeverityCode(getResponseValue(rawResponse, MessageConstants.ERRORSEVERITYCODE + errorNumber));
+                    response.getErrorResponses().add(errorResponse);
+                } else {
+                    eof = true;
+                }
+                errorNumber++;
+            }
+
+            errorNumber = 0;
+            eof = false;
+            while (!eof) {
+                String passThroughErrorName = getResponseValue(rawResponse, MessageConstants.ERRORPASSTHROUGHNAME + errorNumber);
+                if (passThroughErrorName != null) {
+                    response.getPassThroughErrors().put(passThroughErrorName, getResponseValue(rawResponse, MessageConstants.ERRORPASSTHROUGHVALUE + errorNumber));
+                } else {
+                    eof = true;
+                }
+                errorNumber++;
+            }
         }
         return null;
     }
@@ -95,6 +139,7 @@ public class PayPalPaymentServiceImpl implements PayPalPaymentService {
         if (paymentRequest.getMethodType() == PayPalMethodType.CHECKOUT) {
             setNvpsForCheckout(nvps, paymentRequest);
         }
+        //TODO implement the other methods
         /*if(method.equals("checkout")) {
             setNvpsForCheckout(nvps, order);
         } else if(method.equals("details")) {
@@ -108,43 +153,47 @@ public class PayPalPaymentServiceImpl implements PayPalPaymentService {
     }
     
     protected void setNvpsForCheckout(List<NameValuePair> nvps, PayPalPaymentRequest paymentRequest) {
-        nvps.add(new NameValuePair("USER", user));
-        nvps.add(new NameValuePair("PWD", password));
-        nvps.add(new NameValuePair("SIGNATURE", signature));
-        nvps.add(new NameValuePair("VERSION", libVersion));
-        nvps.add(new NameValuePair("PAYMENTREQUEST_0_PAYMENTACTION", "Sale"));
+        nvps.add(new NameValuePair(MessageConstants.USER, user));
+        nvps.add(new NameValuePair(MessageConstants.PASSWORD, password));
+        nvps.add(new NameValuePair(MessageConstants.SIGNATURE, signature));
+        nvps.add(new NameValuePair(MessageConstants.VERSION, libVersion));
+        nvps.add(new NameValuePair(MessageConstants.PAYMENTACTION, MessageConstants.SALEACTION));
 
         setCostNvps(nvps, paymentRequest);
 
-        nvps.add(new NameValuePair("RETURNURL", paymentRequest.getParamsRequest().getReturnUrl()));
-        nvps.add(new NameValuePair("CANCELURL", paymentRequest.getParamsRequest().getCancelUrl()));
+        nvps.add(new NameValuePair(MessageConstants.RETURNURL, paymentRequest.getParamsRequest().getReturnUrl()));
+        nvps.add(new NameValuePair(MessageConstants.CANCELURL, paymentRequest.getParamsRequest().getCancelUrl()));
         for (Map.Entry<String, String> entry : paymentRequest.getParamsRequest().getAdditionalParams().entrySet()) {
             nvps.add(new NameValuePair(entry.getKey(), entry.getValue()));
         }
-        nvps.add(new NameValuePair("METHOD", "SetExpressCheckout"));
+        nvps.add(new NameValuePair(MessageConstants.METHOD, MessageConstants.EXPRESSCHECKOUTACTION));
     }
     
     protected void setCostNvps(List<NameValuePair> nvps, PayPalPaymentRequest paymentRequest) {
         int counter = 0;
         for (PayPalItemRequest itemRequest : paymentRequest.getItemRequests()) {
-            nvps.add(new NameValuePair("L_PAYMENTREQUEST_0_NAME" + counter, itemRequest.getShortDescription()));
-            nvps.add(new NameValuePair("L_PAYMENTREQUEST_0_NUMBER" + counter, itemRequest.getSystemId()));
-            nvps.add(new NameValuePair("L_PAYMENTREQUEST_0_DESC" + counter, itemRequest.getDescription()));
-            nvps.add(new NameValuePair("L_PAYMENTREQUEST_0_AMT" + counter, itemRequest.getUnitPrice().toString()));
-            nvps.add(new NameValuePair("L_PAYMENTREQUEST_0_QTY" + counter, String.valueOf(itemRequest.getQuantity())));
+            nvps.add(new NameValuePair(MessageConstants.NAMEREQUEST + counter, itemRequest.getShortDescription()));
+            nvps.add(new NameValuePair(MessageConstants.NUMBERREQUEST + counter, itemRequest.getSystemId()));
+            nvps.add(new NameValuePair(MessageConstants.DESCRIPTIONREQUEST + counter, itemRequest.getDescription()));
+            nvps.add(new NameValuePair(MessageConstants.AMOUNTREQUEST + counter, itemRequest.getUnitPrice().toString()));
+            nvps.add(new NameValuePair(MessageConstants.QUANTITYREQUEST + counter, String.valueOf(itemRequest.getQuantity())));
             counter++;
         }
-        nvps.add(new NameValuePair("PAYMENTREQUEST_0_ITEMAMT", paymentRequest.getSummaryRequest().getSubTotal().toString()));
-        nvps.add(new NameValuePair("PAYMENTREQUEST_0_TAXAMT", paymentRequest.getSummaryRequest().getTotalTax().toString()));
-        nvps.add(new NameValuePair("PAYMENTREQUEST_0_SHIPPINGAMT", paymentRequest.getSummaryRequest().getTotalShipping().toString()));
-        nvps.add(new NameValuePair("PAYMENTREQUEST_0_SHIPDISCAMT", "-" + paymentRequest.getSummaryRequest().getShippingDiscount().toString()));
-        nvps.add(new NameValuePair("PAYMENTREQUEST_0_AMT", paymentRequest.getSummaryRequest().getGrandTotal().toString()));
+        nvps.add(new NameValuePair(MessageConstants.SUBTOTALREQUEST, paymentRequest.getSummaryRequest().getSubTotal().toString()));
+        nvps.add(new NameValuePair(MessageConstants.TAXREQUEST, paymentRequest.getSummaryRequest().getTotalTax().toString()));
+        nvps.add(new NameValuePair(MessageConstants.SHIPPINGREQUEST, paymentRequest.getSummaryRequest().getTotalShipping().toString()));
+        nvps.add(new NameValuePair(MessageConstants.SHIPPINGDISCOUNTREQUEST, "-" + paymentRequest.getSummaryRequest().getShippingDiscount().toString()));
+        nvps.add(new NameValuePair(MessageConstants.GRANDTOTALREQUEST, paymentRequest.getSummaryRequest().getGrandTotal().toString()));
     }
 
     protected String getResponseValue(String resp, String valueName) {
-        int tokenBegin = resp.indexOf(valueName) + valueName.length() + 1;
-        int tokenEnd = resp.indexOf('&', tokenBegin);
-        return resp.substring(tokenBegin, tokenEnd);
+        int keyBegin = resp.indexOf(valueName);
+        if (keyBegin >= 0) {
+            int tokenBegin = keyBegin + valueName.length() + 1;
+            int tokenEnd = resp.indexOf('&', tokenBegin);
+            return resp.substring(tokenBegin, tokenEnd);
+        }
+        return null;
     }
 
     public Integer getFailureReportingThreshold() {
