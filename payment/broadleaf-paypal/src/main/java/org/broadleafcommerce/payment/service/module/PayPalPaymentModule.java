@@ -75,7 +75,7 @@ public class PayPalPaymentModule implements PaymentModule {
         }
         request.setTransactionType(PayPalTransactionType.AUTHORIZEANDCAPTURE);
 
-        Assert.isTrue(paymentContext.getPaymentInfo().getAdditionalFields().containsKey(MessageConstants.PAYPALMETHODTYPE), "When using Broadleaf Commerce PayPal support, the additionalFields in the PaymentInfo instance must specify a key (PayPalMethodType) and the appropriate value");
+        Assert.isTrue(paymentContext.getPaymentInfo().getAdditionalFields().containsKey(MessageConstants.PAYPALMETHODTYPE), "When using Broadleaf Commerce PayPal support, the additionalFields in the PaymentInfo instance must specify a key (PAYPALMETHODTYPE) and the appropriate value");
         request.setMethodType(PayPalMethodType.getInstance(paymentContext.getPaymentInfo().getAdditionalFields().get(MessageConstants.PAYPALMETHODTYPE)));
 
         Assert.isTrue(TotalledPaymentInfo.class.isAssignableFrom(paymentContext.getPaymentInfo().getClass()), "When using Broadleaf Commerce PayPal support, all PaymentInfo instances must be instances of TotalledPaymentInfo");
