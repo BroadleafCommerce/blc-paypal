@@ -26,6 +26,7 @@ public class MessageConstants {
     public static final String SUCCESS = "success";
     public static final String SUCCESSWITHWARNINGS = "successwithwarnings";
     public static final String TOKEN = "TOKEN";
+    public static final String CORRELATIONID = "CORRELATIONID";
     
     public static final String USER = "USER";
     public static final String PASSWORD = "PWD";

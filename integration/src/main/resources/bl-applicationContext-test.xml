@@ -61,7 +61,9 @@
 		<property name="propertyLocations">
 			<set>
 				<value>classpath:config/bc/</value>
-				<value>classpath:config/bc/test/</value>
+                <value>classpath:config/bc/cybersource/</value>
+                <value>classpath:config/bc/usps/</value>
+				<value>classpath:config/bc/override/</value>
 			</set>
 		</property>
 		<property name="environments">

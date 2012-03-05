@@ -27,7 +27,7 @@ import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalTransactio
  * @author jfischer
  *
  */
-public abstract class PayPalPaymentRequest implements Serializable {
+public class PayPalPaymentRequest implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -36,7 +36,6 @@ public abstract class PayPalPaymentRequest implements Serializable {
 	protected PayPalTransactionType transactionType;
     protected PayPalMethodType methodType;
     protected PayPalSummaryRequest summaryRequest;
-    protected PayPalParamsRequest paramsRequest;
 
 	public PayPalTransactionType getTransactionType() {
 		return transactionType;
@@ -78,14 +77,6 @@ public abstract class PayPalPaymentRequest implements Serializable {
         this.methodType = methodType;
     }
 
-    public PayPalParamsRequest getParamsRequest() {
-        return paramsRequest;
-    }
-
-    public void setParamsRequest(PayPalParamsRequest paramsRequest) {
-        this.paramsRequest = paramsRequest;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -96,8 +87,6 @@ public abstract class PayPalPaymentRequest implements Serializable {
         if (currency != null ? !currency.equals(that.currency) : that.currency != null) return false;
         if (itemRequests != null ? !itemRequests.equals(that.itemRequests) : that.itemRequests != null) return false;
         if (methodType != null ? !methodType.equals(that.methodType) : that.methodType != null) return false;
-        if (paramsRequest != null ? !paramsRequest.equals(that.paramsRequest) : that.paramsRequest != null)
-            return false;
         if (summaryRequest != null ? !summaryRequest.equals(that.summaryRequest) : that.summaryRequest != null)
             return false;
         if (transactionType != null ? !transactionType.equals(that.transactionType) : that.transactionType != null)
@@ -113,7 +102,6 @@ public abstract class PayPalPaymentRequest implements Serializable {
         result = 31 * result + (transactionType != null ? transactionType.hashCode() : 0);
         result = 31 * result + (methodType != null ? methodType.hashCode() : 0);
         result = 31 * result + (summaryRequest != null ? summaryRequest.hashCode() : 0);
-        result = 31 * result + (paramsRequest != null ? paramsRequest.hashCode() : 0);
         return result;
     }
 }

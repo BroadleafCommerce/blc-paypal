@@ -16,6 +16,8 @@
 
 package org.broadleafcommerce.vendor.paypal.service.payment;
 
+import java.util.Map;
+
 import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
 import org.broadleafcommerce.common.vendor.service.monitor.ServiceStatusDetectable;
 import org.broadleafcommerce.common.vendor.service.type.ServiceStatusType;
@@ -42,5 +44,33 @@ public interface PayPalPaymentService extends ServiceStatusDetectable {
     public String getServerUrl();
 
     public void setServerUrl(String serverUrl);
+
+    public String getLibVersion();
+
+    public void setLibVersion(String libVersion);
+
+    public String getSignature();
+
+    public void setSignature(String signature);
+
+    public String getPassword();
+
+    public void setPassword(String password);
+
+    public String getUserRedirectUrl();
+
+    public void setUserRedirectUrl(String userRedirectUrl);
+
+    public Map<String, String> getAdditionalConfig();
+
+    public void setAdditionalConfig(Map<String, String> additionalConfig);
+
+    public String getCancelUrl();
+
+    public void setCancelUrl(String cancelUrl);
+
+    public String getReturnUrl();
+
+    public void setReturnUrl(String returnUrl);
 
 }

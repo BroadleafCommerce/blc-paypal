@@ -28,7 +28,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
 import org.broadleafcommerce.common.vendor.service.type.ServiceStatusType;
-import org.broadleafcommerce.profile.core.service.IdGenerationService;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalErrorResponse;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalItemRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalPaymentRequest;
@@ -52,7 +51,10 @@ public class PayPalPaymentServiceImpl implements PayPalPaymentService {
     protected Integer failureReportingThreshold;
     protected Integer failureCount = 0;
     protected Boolean isUp = true;
-    protected IdGenerationService idGenerationService;
+    protected String userRedirectUrl;
+    protected String returnUrl;
+    protected String cancelUrl;
+    protected Map<String, String> additionalConfig;
 
     protected synchronized void clearStatus() {
         isUp = true;
@@ -81,12 +83,19 @@ public class PayPalPaymentServiceImpl implements PayPalPaymentService {
         PayPalPaymentResponse payPalPaymentResponse = new PayPalPaymentResponse();
         payPalPaymentResponse.setTransactionType(paymentRequest.getTransactionType());
         payPalPaymentResponse.setMethodType(paymentRequest.getMethodType());
+        buildResponse(response, payPalPaymentResponse);
+        if (paymentRequest.getMethodType() == PayPalMethodType.CHECKOUT) {
+            payPalPaymentResponse.setUserRedirectUrl(getUserRedirectUrl() + "?cmd=_express-checkout&token=" + payPalPaymentResponse.getResponseToken());
+        }
+        //TODO handle the redirect urls for the other method types
         
-        return buildResponse(response, payPalPaymentResponse);
+        return payPalPaymentResponse;
     }
     
-    protected PayPalPaymentResponse buildResponse(String rawResponse, PayPalPaymentResponse response) {
+    protected void buildResponse(String rawResponse, PayPalPaymentResponse response) {
+        response.setCorrelationId(getResponseValue(rawResponse, MessageConstants.CORRELATIONID));
         String ack = getResponseValue(rawResponse, MessageConstants.ACK);
+        response.setAck(ack);
         if (ack.toLowerCase().equals(MessageConstants.SUCCESS)) {
             response.setErrorDetected(false);
             response.setSuccessful(true);
@@ -129,17 +138,17 @@ public class PayPalPaymentServiceImpl implements PayPalPaymentService {
                 errorNumber++;
             }
         }
-        return null;
     }
 
     protected String communicateWithVendor(PayPalPaymentRequest paymentRequest) throws IOException {
+        //TODO incorporate different currency type
         HttpClient httpClient = new HttpClient();
         PostMethod postMethod = new PostMethod(getServerUrl());
         List<NameValuePair> nvps = new ArrayList<NameValuePair>();
         if (paymentRequest.getMethodType() == PayPalMethodType.CHECKOUT) {
             setNvpsForCheckout(nvps, paymentRequest);
         }
-        //TODO implement the other methods
+        //TODO implement the other methods (process and details)
         /*if(method.equals("checkout")) {
             setNvpsForCheckout(nvps, order);
         } else if(method.equals("details")) {
@@ -161,9 +170,9 @@ public class PayPalPaymentServiceImpl implements PayPalPaymentService {
 
         setCostNvps(nvps, paymentRequest);
 
-        nvps.add(new NameValuePair(MessageConstants.RETURNURL, paymentRequest.getParamsRequest().getReturnUrl()));
-        nvps.add(new NameValuePair(MessageConstants.CANCELURL, paymentRequest.getParamsRequest().getCancelUrl()));
-        for (Map.Entry<String, String> entry : paymentRequest.getParamsRequest().getAdditionalParams().entrySet()) {
+        nvps.add(new NameValuePair(MessageConstants.RETURNURL, getReturnUrl()));
+        nvps.add(new NameValuePair(MessageConstants.CANCELURL, getCancelUrl()));
+        for (Map.Entry<String, String> entry : getAdditionalConfig().entrySet()) {
             nvps.add(new NameValuePair(entry.getKey(), entry.getValue()));
         }
         nvps.add(new NameValuePair(MessageConstants.METHOD, MessageConstants.EXPRESSCHECKOUTACTION));
@@ -191,6 +200,9 @@ public class PayPalPaymentServiceImpl implements PayPalPaymentService {
         if (keyBegin >= 0) {
             int tokenBegin = keyBegin + valueName.length() + 1;
             int tokenEnd = resp.indexOf('&', tokenBegin);
+            if (tokenEnd < 0) {
+                tokenEnd = resp.length();
+            }
             return resp.substring(tokenBegin, tokenEnd);
         }
         return null;
@@ -227,14 +239,6 @@ public class PayPalPaymentServiceImpl implements PayPalPaymentService {
     public void setServerUrl(String serverUrl) {
         this.serverUrl = serverUrl;
     }
-
-    public IdGenerationService getIdGenerationService() {
-        return idGenerationService;
-    }
-
-    public void setIdGenerationService(IdGenerationService idGenerationService) {
-        this.idGenerationService = idGenerationService;
-    }
     
     public String getServiceName() {
         return getClass().getName();
@@ -262,5 +266,37 @@ public class PayPalPaymentServiceImpl implements PayPalPaymentService {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getUserRedirectUrl() {
+        return userRedirectUrl;
+    }
+
+    public void setUserRedirectUrl(String userRedirectUrl) {
+        this.userRedirectUrl = userRedirectUrl;
+    }
+
+    public Map<String, String> getAdditionalConfig() {
+        return additionalConfig;
+    }
+
+    public void setAdditionalConfig(Map<String, String> additionalConfig) {
+        this.additionalConfig = additionalConfig;
+    }
+
+    public String getCancelUrl() {
+        return cancelUrl;
+    }
+
+    public void setCancelUrl(String cancelUrl) {
+        this.cancelUrl = cancelUrl;
+    }
+
+    public String getReturnUrl() {
+        return returnUrl;
+    }
+
+    public void setReturnUrl(String returnUrl) {
+        this.returnUrl = returnUrl;
     }
 }
