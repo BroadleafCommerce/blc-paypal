@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package org.broadleafcommerce.vendor.paypal.service.payment.message;
+package org.broadleafcommerce.vendor.paypal.service.payment.message.details;
+
+import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalRequest;
 
 /**
  * @author Jeff Fischer

@@ -44,11 +44,11 @@ public class MessageConstants {
     public static final String DESCRIPTIONREQUEST = "L_PAYMENTREQUEST_n_DESCm";
     public static final String AMOUNTREQUEST = "L_PAYMENTREQUEST_n_AMTm";
     public static final String QUANTITYREQUEST = "L_PAYMENTREQUEST_n_QTYm";
-    public static final String SUBTOTALREQUEST = "PAYMENTREQUEST_n_ITEMAMTm";
-    public static final String TAXREQUEST = "PAYMENTREQUEST_n_TAXAMTm";
-    public static final String SHIPPINGREQUEST = "PAYMENTREQUEST_n_SHIPPINGAMTm";
-    public static final String SHIPPINGDISCOUNTREQUEST = "PAYMENTREQUEST_n_SHIPDISCAMTm";
-    public static final String GRANDTOTALREQUEST = "PAYMENTREQUEST_n_AMTm";
+    public static final String SUBTOTALREQUEST = "PAYMENTREQUEST_n_ITEMAMT";
+    public static final String TAXREQUEST = "PAYMENTREQUEST_n_TAXAMT";
+    public static final String SHIPPINGREQUEST = "PAYMENTREQUEST_n_SHIPPINGAMT";
+    public static final String SHIPPINGDISCOUNTREQUEST = "PAYMENTREQUEST_n_SHIPDISCAMT";
+    public static final String GRANDTOTALREQUEST = "PAYMENTREQUEST_n_AMT";
     public static final String ERRORCODE = "L_ERRORCODEn";
     public static final String ERRORSHORTMESSAGE = "L_SHORTMESSAGEn";
     public static final String ERRORLONGMESSAGE = "L_LONGMESSAGEn";

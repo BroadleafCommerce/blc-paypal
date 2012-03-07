@@ -139,11 +139,11 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
             nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.QUANTITYREQUEST, new Integer[] {0, counter}, new String[] {"n", "m"}), String.valueOf(itemRequest.getQuantity())));
             counter++;
         }
-        nvps.add(new NameValuePair(MessageConstants.SUBTOTALREQUEST, paymentRequest.getSummaryRequest().getSubTotal().toString()));
-        nvps.add(new NameValuePair(MessageConstants.TAXREQUEST, paymentRequest.getSummaryRequest().getTotalTax().toString()));
-        nvps.add(new NameValuePair(MessageConstants.SHIPPINGREQUEST, paymentRequest.getSummaryRequest().getTotalShipping().toString()));
-        nvps.add(new NameValuePair(MessageConstants.SHIPPINGDISCOUNTREQUEST, "-" + paymentRequest.getSummaryRequest().getShippingDiscount().toString()));
-        nvps.add(new NameValuePair(MessageConstants.GRANDTOTALREQUEST, paymentRequest.getSummaryRequest().getGrandTotal().toString()));
+        nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.SUBTOTALREQUEST, new Integer[] {0}, new String[] {"n"}), paymentRequest.getSummaryRequest().getSubTotal().toString()));
+        nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.TAXREQUEST, new Integer[] {0}, new String[] {"n"}), paymentRequest.getSummaryRequest().getTotalTax().toString()));
+        nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.SHIPPINGREQUEST, new Integer[] {0}, new String[] {"n"}), paymentRequest.getSummaryRequest().getTotalShipping().toString()));
+        nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.SHIPPINGDISCOUNTREQUEST, new Integer[] {0}, new String[] {"n"}), "-" + paymentRequest.getSummaryRequest().getShippingDiscount().toString()));
+        nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.GRANDTOTALREQUEST, new Integer[] {0}, new String[] {"n"}), paymentRequest.getSummaryRequest().getGrandTotal().toString()));
     }
     
     protected String replaceNumericBoundProperty(String property, Integer[] number, String[] positions) {
