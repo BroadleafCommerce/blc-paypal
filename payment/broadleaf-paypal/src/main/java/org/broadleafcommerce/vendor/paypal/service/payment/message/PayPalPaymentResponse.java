@@ -30,7 +30,7 @@ import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalTransactio
  * @author jfischer
  *
  */
-public class PayPalPaymentResponse implements PaymentResponse {
+public class PayPalPaymentResponse extends PayPalResponse implements PaymentResponse {
 		
 	private static final long serialVersionUID = 1L;
 	
@@ -41,11 +41,10 @@ public class PayPalPaymentResponse implements PaymentResponse {
     private PayPalMethodType methodType;
     private List<PayPalErrorResponse> errorResponses = new ArrayList<PayPalErrorResponse>();
     private Map<String, String> passThroughErrors = new HashMap<String, String>();
-    private String responseToken;
     private String userRedirectUrl;
     private String correlationId;
     private String ack;
-
+    
     public PayPalTransactionType getTransactionType() {
 		return transactionType;
 	}
@@ -111,14 +110,6 @@ public class PayPalPaymentResponse implements PaymentResponse {
         isSuccessful = successful;
     }
 
-    public String getResponseToken() {
-        return responseToken;
-    }
-
-    public void setResponseToken(String responseToken) {
-        this.responseToken = responseToken;
-    }
-
     public String getUserRedirectUrl() {
         return userRedirectUrl;
     }
@@ -146,7 +137,8 @@ public class PayPalPaymentResponse implements PaymentResponse {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof PayPalPaymentResponse)) return false;
+        if (!super.equals(o)) return false;
 
         PayPalPaymentResponse that = (PayPalPaymentResponse) o;
 
@@ -161,8 +153,6 @@ public class PayPalPaymentResponse implements PaymentResponse {
         if (methodType != null ? !methodType.equals(that.methodType) : that.methodType != null) return false;
         if (passThroughErrors != null ? !passThroughErrors.equals(that.passThroughErrors) : that.passThroughErrors != null)
             return false;
-        if (responseToken != null ? !responseToken.equals(that.responseToken) : that.responseToken != null)
-            return false;
         if (transactionType != null ? !transactionType.equals(that.transactionType) : that.transactionType != null)
             return false;
         if (userRedirectUrl != null ? !userRedirectUrl.equals(that.userRedirectUrl) : that.userRedirectUrl != null)
@@ -173,14 +163,14 @@ public class PayPalPaymentResponse implements PaymentResponse {
 
     @Override
     public int hashCode() {
-        int result = (isErrorDetected ? 1 : 0);
+        int result = super.hashCode();
+        result = 31 * result + (isErrorDetected ? 1 : 0);
         result = 31 * result + (isSuccessful ? 1 : 0);
         result = 31 * result + (errorText != null ? errorText.hashCode() : 0);
         result = 31 * result + (transactionType != null ? transactionType.hashCode() : 0);
         result = 31 * result + (methodType != null ? methodType.hashCode() : 0);
         result = 31 * result + (errorResponses != null ? errorResponses.hashCode() : 0);
         result = 31 * result + (passThroughErrors != null ? passThroughErrors.hashCode() : 0);
-        result = 31 * result + (responseToken != null ? responseToken.hashCode() : 0);
         result = 31 * result + (userRedirectUrl != null ? userRedirectUrl.hashCode() : 0);
         result = 31 * result + (correlationId != null ? correlationId.hashCode() : 0);
         result = 31 * result + (ack != null ? ack.hashCode() : 0);

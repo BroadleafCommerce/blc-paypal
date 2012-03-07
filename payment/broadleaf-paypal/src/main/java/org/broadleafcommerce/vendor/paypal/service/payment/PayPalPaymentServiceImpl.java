@@ -17,9 +17,7 @@
 package org.broadleafcommerce.vendor.paypal.service.payment;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.NameValuePair;
@@ -28,11 +26,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
 import org.broadleafcommerce.common.vendor.service.type.ServiceStatusType;
-import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalErrorResponse;
-import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalItemRequest;
-import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalPaymentRequest;
-import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalPaymentResponse;
-import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalMethodType;
+import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalRequest;
+import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalResponse;
 
 /**
  * 
@@ -43,18 +38,12 @@ public class PayPalPaymentServiceImpl implements PayPalPaymentService {
 	
 	private static final Log LOG = LogFactory.getLog(PayPalPaymentServiceImpl.class);
 
-    protected String user;
-    protected String password;
-    protected String signature;
     protected String serverUrl;
-    protected String libVersion;
     protected Integer failureReportingThreshold;
     protected Integer failureCount = 0;
     protected Boolean isUp = true;
-    protected String userRedirectUrl;
-    protected String returnUrl;
-    protected String cancelUrl;
-    protected Map<String, String> additionalConfig;
+    protected PayPalRequestGenerator requestGenerator;
+    protected PayPalResponseGenerator responseGenerator;
 
     protected synchronized void clearStatus() {
         isUp = true;
@@ -70,7 +59,7 @@ public class PayPalPaymentServiceImpl implements PayPalPaymentService {
     }
 
     @Override
-    public PayPalPaymentResponse process(PayPalPaymentRequest paymentRequest) throws PaymentException {
+    public PayPalResponse process(PayPalRequest paymentRequest) throws PaymentException {
         String response;
         try {
             response = communicateWithVendor(paymentRequest);
@@ -80,140 +69,21 @@ public class PayPalPaymentServiceImpl implements PayPalPaymentService {
         }
         clearStatus();
         
-        PayPalPaymentResponse payPalPaymentResponse = new PayPalPaymentResponse();
-        payPalPaymentResponse.setTransactionType(paymentRequest.getTransactionType());
-        payPalPaymentResponse.setMethodType(paymentRequest.getMethodType());
-        buildResponse(response, payPalPaymentResponse);
-        if (paymentRequest.getMethodType() == PayPalMethodType.CHECKOUT) {
-            payPalPaymentResponse.setUserRedirectUrl(getUserRedirectUrl() + "?cmd=_express-checkout&token=" + payPalPaymentResponse.getResponseToken());
-        }
-        //TODO handle the redirect urls for the other method types
-        
-        return payPalPaymentResponse;
-    }
-    
-    protected void buildResponse(String rawResponse, PayPalPaymentResponse response) {
-        response.setCorrelationId(getResponseValue(rawResponse, MessageConstants.CORRELATIONID));
-        String ack = getResponseValue(rawResponse, MessageConstants.ACK);
-        response.setAck(ack);
-        if (ack.toLowerCase().equals(MessageConstants.SUCCESS)) {
-            response.setErrorDetected(false);
-            response.setSuccessful(true);
-            response.setResponseToken(getResponseValue(rawResponse, MessageConstants.TOKEN));
-        } else if (ack.toLowerCase().equals(MessageConstants.SUCCESSWITHWARNINGS)) {
-            response.setSuccessful(true);
-            response.setErrorDetected(true);
-            response.setResponseToken(getResponseValue(rawResponse, MessageConstants.TOKEN));
-        } else {
-            response.setSuccessful(false);
-            response.setErrorDetected(true);
-        }
-        if (response.isErrorDetected()) {
-            boolean eof = false;
-            int errorNumber = 0;
-            while (!eof) {
-                String errorCode = getResponseValue(rawResponse, MessageConstants.ERRORCODE + errorNumber);
-                if (errorCode != null) {
-                    PayPalErrorResponse errorResponse = new PayPalErrorResponse();
-                    errorResponse.setErrorCode(errorCode);
-                    errorResponse.setShortMessage(getResponseValue(rawResponse, MessageConstants.ERRORSHORTMESSAGE + errorNumber));
-                    errorResponse.setLongMessage(getResponseValue(rawResponse, MessageConstants.ERRORLONGMESSAGE + errorNumber));
-                    errorResponse.setSeverityCode(getResponseValue(rawResponse, MessageConstants.ERRORSEVERITYCODE + errorNumber));
-                    response.getErrorResponses().add(errorResponse);
-                } else {
-                    eof = true;
-                }
-                errorNumber++;
-            }
-
-            errorNumber = 0;
-            eof = false;
-            while (!eof) {
-                String passThroughErrorName = getResponseValue(rawResponse, MessageConstants.ERRORPASSTHROUGHNAME + errorNumber);
-                if (passThroughErrorName != null) {
-                    response.getPassThroughErrors().put(passThroughErrorName, getResponseValue(rawResponse, MessageConstants.ERRORPASSTHROUGHVALUE + errorNumber));
-                } else {
-                    eof = true;
-                }
-                errorNumber++;
-            }
-        }
+        return responseGenerator.buildResponse(response, paymentRequest);
     }
 
-    protected String communicateWithVendor(PayPalPaymentRequest paymentRequest) throws IOException {
+    protected String communicateWithVendor(PayPalRequest paymentRequest) throws IOException {
         //TODO incorporate different currency type
         HttpClient httpClient = new HttpClient();
         PostMethod postMethod = new PostMethod(getServerUrl());
-        List<NameValuePair> nvps = new ArrayList<NameValuePair>();
-        if (paymentRequest.getMethodType() == PayPalMethodType.CHECKOUT) {
-            setNvpsForCheckout(nvps, paymentRequest);
-        }
-        //TODO implement the other methods (process and details)
-        /*if(method.equals("checkout")) {
-            setNvpsForCheckout(nvps, order);
-        } else if(method.equals("details")) {
-            setNvpsForDetails(nvps);
-        } else {
-            setNvpsForProcess(nvps, order);
-        }*/
+        List<NameValuePair> nvps = requestGenerator.buildRequest(paymentRequest);
         postMethod.setRequestBody(nvps.toArray(new NameValuePair[nvps.size()]));
         httpClient.executeMethod(postMethod);
         return postMethod.getResponseBodyAsString();
     }
-    
-    protected void setNvpsForCheckout(List<NameValuePair> nvps, PayPalPaymentRequest paymentRequest) {
-        nvps.add(new NameValuePair(MessageConstants.USER, user));
-        nvps.add(new NameValuePair(MessageConstants.PASSWORD, password));
-        nvps.add(new NameValuePair(MessageConstants.SIGNATURE, signature));
-        nvps.add(new NameValuePair(MessageConstants.VERSION, libVersion));
-        nvps.add(new NameValuePair(MessageConstants.PAYMENTACTION, MessageConstants.SALEACTION));
-
-        setCostNvps(nvps, paymentRequest);
-
-        nvps.add(new NameValuePair(MessageConstants.RETURNURL, getReturnUrl()));
-        nvps.add(new NameValuePair(MessageConstants.CANCELURL, getCancelUrl()));
-        for (Map.Entry<String, String> entry : getAdditionalConfig().entrySet()) {
-            nvps.add(new NameValuePair(entry.getKey(), entry.getValue()));
-        }
-        nvps.add(new NameValuePair(MessageConstants.METHOD, MessageConstants.EXPRESSCHECKOUTACTION));
-    }
-    
-    protected void setCostNvps(List<NameValuePair> nvps, PayPalPaymentRequest paymentRequest) {
-        int counter = 0;
-        for (PayPalItemRequest itemRequest : paymentRequest.getItemRequests()) {
-            nvps.add(new NameValuePair(MessageConstants.NAMEREQUEST + counter, itemRequest.getShortDescription()));
-            nvps.add(new NameValuePair(MessageConstants.NUMBERREQUEST + counter, itemRequest.getSystemId()));
-            nvps.add(new NameValuePair(MessageConstants.DESCRIPTIONREQUEST + counter, itemRequest.getDescription()));
-            nvps.add(new NameValuePair(MessageConstants.AMOUNTREQUEST + counter, itemRequest.getUnitPrice().toString()));
-            nvps.add(new NameValuePair(MessageConstants.QUANTITYREQUEST + counter, String.valueOf(itemRequest.getQuantity())));
-            counter++;
-        }
-        nvps.add(new NameValuePair(MessageConstants.SUBTOTALREQUEST, paymentRequest.getSummaryRequest().getSubTotal().toString()));
-        nvps.add(new NameValuePair(MessageConstants.TAXREQUEST, paymentRequest.getSummaryRequest().getTotalTax().toString()));
-        nvps.add(new NameValuePair(MessageConstants.SHIPPINGREQUEST, paymentRequest.getSummaryRequest().getTotalShipping().toString()));
-        nvps.add(new NameValuePair(MessageConstants.SHIPPINGDISCOUNTREQUEST, "-" + paymentRequest.getSummaryRequest().getShippingDiscount().toString()));
-        nvps.add(new NameValuePair(MessageConstants.GRANDTOTALREQUEST, paymentRequest.getSummaryRequest().getGrandTotal().toString()));
-    }
-
-    protected String getResponseValue(String resp, String valueName) {
-        int keyBegin = resp.indexOf(valueName);
-        if (keyBegin >= 0) {
-            int tokenBegin = keyBegin + valueName.length() + 1;
-            int tokenEnd = resp.indexOf('&', tokenBegin);
-            if (tokenEnd < 0) {
-                tokenEnd = resp.length();
-            }
-            return resp.substring(tokenBegin, tokenEnd);
-        }
-        return null;
-    }
 
     public Integer getFailureReportingThreshold() {
         return failureReportingThreshold;
-    }
-
-    public String getUser() {
-        return user;
     }
 
     public String getServerUrl() {
@@ -232,10 +102,6 @@ public class PayPalPaymentServiceImpl implements PayPalPaymentService {
         this.failureReportingThreshold = failureReportingThreshold;
     }
 
-    public void setUser(String user) {
-        this.user = user;
-    }
-
     public void setServerUrl(String serverUrl) {
         this.serverUrl = serverUrl;
     }
@@ -244,59 +110,19 @@ public class PayPalPaymentServiceImpl implements PayPalPaymentService {
         return getClass().getName();
     }
 
-    public String getLibVersion() {
-        return libVersion;
+    public PayPalRequestGenerator getRequestGenerator() {
+        return requestGenerator;
     }
 
-    public void setLibVersion(String libVersion) {
-        this.libVersion = libVersion;
+    public void setRequestGenerator(PayPalRequestGenerator requestGenerator) {
+        this.requestGenerator = requestGenerator;
     }
 
-    public String getSignature() {
-        return signature;
+    public PayPalResponseGenerator getResponseGenerator() {
+        return responseGenerator;
     }
 
-    public void setSignature(String signature) {
-        this.signature = signature;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getUserRedirectUrl() {
-        return userRedirectUrl;
-    }
-
-    public void setUserRedirectUrl(String userRedirectUrl) {
-        this.userRedirectUrl = userRedirectUrl;
-    }
-
-    public Map<String, String> getAdditionalConfig() {
-        return additionalConfig;
-    }
-
-    public void setAdditionalConfig(Map<String, String> additionalConfig) {
-        this.additionalConfig = additionalConfig;
-    }
-
-    public String getCancelUrl() {
-        return cancelUrl;
-    }
-
-    public void setCancelUrl(String cancelUrl) {
-        this.cancelUrl = cancelUrl;
-    }
-
-    public String getReturnUrl() {
-        return returnUrl;
-    }
-
-    public void setReturnUrl(String returnUrl) {
-        this.returnUrl = returnUrl;
+    public void setResponseGenerator(PayPalResponseGenerator responseGenerator) {
+        this.responseGenerator = responseGenerator;
     }
 }

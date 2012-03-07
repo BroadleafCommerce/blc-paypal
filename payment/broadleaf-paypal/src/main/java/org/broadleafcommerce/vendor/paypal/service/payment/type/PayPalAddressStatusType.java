@@ -23,36 +23,30 @@ import java.util.Map;
 import org.broadleafcommerce.common.BroadleafEnumerationType;
 
 /**
- * An extendible enumeration of transaction types.
- * 
- * @author jfischer
+ * @author Jeff Fischer
  */
-public class PayPalMethodType implements Serializable, BroadleafEnumerationType {
+public class PayPalAddressStatusType implements Serializable, BroadleafEnumerationType {
 
     private static final long serialVersionUID = 1L;
 
-    private static final Map<String, PayPalMethodType> TYPES = new HashMap<String, PayPalMethodType>();
+    private static final Map<String, PayPalAddressStatusType> TYPES = new HashMap<String, PayPalAddressStatusType>();
 
-    public static final PayPalMethodType CHECKOUT  = new PayPalMethodType("CHECKOUT", "Checkout");
-    public static final PayPalMethodType DETAILS = new PayPalMethodType("DETAILS", "Details");
-    public static final PayPalMethodType PROCESS = new PayPalMethodType("PROCESS", "Process");
-    public static final PayPalMethodType REFUND = new PayPalMethodType("REFUND", "Refund");
-    public static final PayPalMethodType CAPTURE = new PayPalMethodType("CAPTURE", "Capture");
-    public static final PayPalMethodType VOID = new PayPalMethodType("VOID", "Void");
+    public static final PayPalAddressStatusType NONE  = new PayPalAddressStatusType("NONE", "none");
+    public static final PayPalAddressStatusType CONFIRMED = new PayPalAddressStatusType("CONFIRMED", "Confirmed");
+    public static final PayPalAddressStatusType UNCONFIRMED = new PayPalAddressStatusType("UNCONFIRMED", "Unconfirmed");
 
-
-    public static PayPalMethodType getInstance(final String type) {
+    public static PayPalAddressStatusType getInstance(final String type) {
         return TYPES.get(type);
     }
 
     private String type;
     private String friendlyType;
 
-    public PayPalMethodType() {
+    public PayPalAddressStatusType() {
         //do nothing
     }
 
-    public PayPalMethodType(final String type, final String friendlyType) {
+    public PayPalAddressStatusType(final String type, final String friendlyType) {
     	this.friendlyType = friendlyType;
         setType(type);
     }
@@ -88,7 +82,7 @@ public class PayPalMethodType implements Serializable, BroadleafEnumerationType 
             return false;
         if (getClass() != obj.getClass())
             return false;
-        PayPalMethodType other = (PayPalMethodType) obj;
+        PayPalAddressStatusType other = (PayPalAddressStatusType) obj;
         if (type == null) {
             if (other.type != null)
                 return false;

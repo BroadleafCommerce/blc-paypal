@@ -16,27 +16,18 @@
 
 package org.broadleafcommerce.vendor.paypal.service.payment;
 
-import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
-import org.broadleafcommerce.common.vendor.service.monitor.ServiceStatusDetectable;
-import org.broadleafcommerce.common.vendor.service.type.ServiceStatusType;
+import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalPaymentRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalResponse;
 
 /**
  * @author Jeff Fischer
  */
-public interface PayPalPaymentService extends ServiceStatusDetectable {
+public interface PayPalResponseGenerator {
 
-    public PayPalResponse process(PayPalRequest paymentRequest) throws PaymentException;
+    public PayPalResponse buildResponse(String response, PayPalRequest paymentRequest);
 
-    public ServiceStatusType getServiceStatus();
+    String getUserRedirectUrl();
 
-    public Integer getFailureReportingThreshold();
-
-    public void setFailureReportingThreshold(Integer failureReportingThreshold);
-
-    public String getServerUrl();
-
-    public void setServerUrl(String serverUrl);
-
+    void setUserRedirectUrl(String userRedirectUrl);
 }

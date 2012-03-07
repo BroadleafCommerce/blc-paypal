@@ -16,10 +16,8 @@
 
 package org.broadleafcommerce.vendor.paypal.service.payment.message;
 
-import java.io.Serializable;
 import java.util.List;
 
-import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalMethodType;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalTransactionType;
 
 /**
@@ -27,15 +25,18 @@ import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalTransactio
  * @author jfischer
  *
  */
-public class PayPalPaymentRequest implements Serializable {
+public class PayPalPaymentRequest extends PayPalRequest {
 
 	private static final long serialVersionUID = 1L;
 
 	protected String currency;
+    private String payerID;
+    private String token;
 	protected List<PayPalItemRequest> itemRequests = new AutoNumberMemberIdList();
 	protected PayPalTransactionType transactionType;
-    protected PayPalMethodType methodType;
     protected PayPalSummaryRequest summaryRequest;
+    protected String referenceNumber;
+
 
 	public PayPalTransactionType getTransactionType() {
 		return transactionType;
@@ -69,27 +70,48 @@ public class PayPalPaymentRequest implements Serializable {
         this.summaryRequest = summaryRequest;
     }
 
-    public PayPalMethodType getMethodType() {
-        return methodType;
+    public String getReferenceNumber() {
+        return referenceNumber;
     }
 
-    public void setMethodType(PayPalMethodType methodType) {
-        this.methodType = methodType;
+    public void setReferenceNumber(String referenceNumber) {
+        this.referenceNumber = referenceNumber;
+    }
+
+    public String getPayerID() {
+        return payerID;
+    }
+
+    public void setPayerID(String payerID) {
+        this.payerID = payerID;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof PayPalPaymentRequest)) return false;
+        if (!super.equals(o)) return false;
 
-        PayPalPaymentRequest that = (PayPalPaymentRequest) o;
+        PayPalPaymentRequest request = (PayPalPaymentRequest) o;
 
-        if (currency != null ? !currency.equals(that.currency) : that.currency != null) return false;
-        if (itemRequests != null ? !itemRequests.equals(that.itemRequests) : that.itemRequests != null) return false;
-        if (methodType != null ? !methodType.equals(that.methodType) : that.methodType != null) return false;
-        if (summaryRequest != null ? !summaryRequest.equals(that.summaryRequest) : that.summaryRequest != null)
+        if (currency != null ? !currency.equals(request.currency) : request.currency != null) return false;
+        if (itemRequests != null ? !itemRequests.equals(request.itemRequests) : request.itemRequests != null)
             return false;
-        if (transactionType != null ? !transactionType.equals(that.transactionType) : that.transactionType != null)
+        if (payerID != null ? !payerID.equals(request.payerID) : request.payerID != null) return false;
+        if (referenceNumber != null ? !referenceNumber.equals(request.referenceNumber) : request.referenceNumber != null)
+            return false;
+        if (summaryRequest != null ? !summaryRequest.equals(request.summaryRequest) : request.summaryRequest != null)
+            return false;
+        if (token != null ? !token.equals(request.token) : request.token != null) return false;
+        if (transactionType != null ? !transactionType.equals(request.transactionType) : request.transactionType != null)
             return false;
 
         return true;
@@ -97,11 +119,14 @@ public class PayPalPaymentRequest implements Serializable {
 
     @Override
     public int hashCode() {
-        int result = currency != null ? currency.hashCode() : 0;
+        int result = super.hashCode();
+        result = 31 * result + (currency != null ? currency.hashCode() : 0);
+        result = 31 * result + (payerID != null ? payerID.hashCode() : 0);
+        result = 31 * result + (token != null ? token.hashCode() : 0);
         result = 31 * result + (itemRequests != null ? itemRequests.hashCode() : 0);
         result = 31 * result + (transactionType != null ? transactionType.hashCode() : 0);
-        result = 31 * result + (methodType != null ? methodType.hashCode() : 0);
         result = 31 * result + (summaryRequest != null ? summaryRequest.hashCode() : 0);
+        result = 31 * result + (referenceNumber != null ? referenceNumber.hashCode() : 0);
         return result;
     }
 }

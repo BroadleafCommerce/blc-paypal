@@ -16,27 +16,44 @@
 
 package org.broadleafcommerce.vendor.paypal.service.payment;
 
-import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
-import org.broadleafcommerce.common.vendor.service.monitor.ServiceStatusDetectable;
-import org.broadleafcommerce.common.vendor.service.type.ServiceStatusType;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.httpclient.NameValuePair;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalRequest;
-import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalResponse;
 
 /**
  * @author Jeff Fischer
  */
-public interface PayPalPaymentService extends ServiceStatusDetectable {
+public interface PayPalRequestGenerator {
 
-    public PayPalResponse process(PayPalRequest paymentRequest) throws PaymentException;
+    List<NameValuePair> buildRequest(PayPalRequest paymentRequest);
 
-    public ServiceStatusType getServiceStatus();
+    Map<String, String> getAdditionalConfig();
 
-    public Integer getFailureReportingThreshold();
+    void setAdditionalConfig(Map<String, String> additionalConfig);
 
-    public void setFailureReportingThreshold(Integer failureReportingThreshold);
+    String getCancelUrl();
 
-    public String getServerUrl();
+    void setCancelUrl(String cancelUrl);
 
-    public void setServerUrl(String serverUrl);
+    String getLibVersion();
 
+    void setLibVersion(String libVersion);
+
+    String getPassword();
+
+    void setPassword(String password);
+
+    String getReturnUrl();
+
+    void setReturnUrl(String returnUrl);
+
+    String getSignature();
+
+    void setSignature(String signature);
+
+    String getUser();
+
+    void setUser(String user);
 }
