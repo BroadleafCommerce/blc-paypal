@@ -109,51 +109,51 @@ public class PayPalResponseGeneratorImpl implements PayPalResponseGenerator {
         }
 
         PayPalPaymentDetails paymentDetails = new PayPalPaymentDetails();
-        String paymentRequestAmount = getResponseValue(rawResponse, MessageConstants.PAYMENTREQUESTAMOUNT);
+        String paymentRequestAmount = getResponseValue(rawResponse, MessageConstants.DETAILSPAYMENTAMOUNT);
         if (!StringUtils.isEmpty(paymentRequestAmount)) {
             paymentDetails.setAmount(new Money(paymentRequestAmount, Money.defaultCurrency()));
         }
-        paymentDetails.setCurrencyCode(getResponseValue(rawResponse, MessageConstants.PAYMENTREQUESTCURRENCYCODE));
-        String paymentRequestItemTotal = getResponseValue(rawResponse, MessageConstants.PAYMENTREQUESTITEMTOTAL);
+        paymentDetails.setCurrencyCode(getResponseValue(rawResponse, MessageConstants.DETAILSPAYMENTCURRENCYCODE));
+        String paymentRequestItemTotal = getResponseValue(rawResponse, MessageConstants.DETAILSPAYMENTITEMTOTAL);
         if (!StringUtils.isEmpty(paymentRequestItemTotal)) {
             paymentDetails.setItemTotal(new Money(paymentRequestItemTotal, Money.defaultCurrency()));
         }
-        String paymentRequestShippingTotal = getResponseValue(rawResponse, MessageConstants.PAYMENTREQUESTSHIPPINGTOTAL);
+        String paymentRequestShippingTotal = getResponseValue(rawResponse, MessageConstants.DETAILSPAYMENTSHIPPINGTOTAL);
         if (!StringUtils.isEmpty(paymentRequestShippingTotal)) {
             paymentDetails.setShippingTotal(new Money(paymentRequestShippingTotal, Money.defaultCurrency()));
         }
-        String paymentRequestShippingDiscount = getResponseValue(rawResponse, MessageConstants.PAYMENTREQUESTSHIPPINGDICSOUNT);
+        String paymentRequestShippingDiscount = getResponseValue(rawResponse, MessageConstants.DETAILSPAYMENTSHIPPINGDISCOUNT);
         if (!StringUtils.isEmpty(paymentRequestShippingDiscount)) {
             paymentDetails.setShippingDiscount(new Money(paymentRequestShippingDiscount, Money.defaultCurrency()));
         }
-        String paymentRequestTotalTax = getResponseValue(rawResponse, MessageConstants.PAYMENTREQUESTTOTALTAX);
+        String paymentRequestTotalTax = getResponseValue(rawResponse, MessageConstants.DETAILSPAYMENTTOTALTAX);
         if (!StringUtils.isEmpty(paymentRequestTotalTax)) {
             paymentDetails.setTotalTax(new Money(paymentRequestTotalTax, Money.defaultCurrency()));
         }
-        paymentDetails.setReferenceNumber(getResponseValue(rawResponse, MessageConstants.PAYMENTREQUESTREFERENCENUMBER));
-        paymentDetails.setTransactionId(getResponseValue(rawResponse, MessageConstants.PAYMENTREQUESTTRANSACTIONID));
-        paymentDetails.setPaymentMethod(getResponseValue(rawResponse, MessageConstants.PAYMENTREQUESTPAYMENTMETHOD));
-        paymentDetails.setPaymentRequestId(getResponseValue(rawResponse, MessageConstants.PAYMENTREQUESTPAYMENTREQUESTID));
+        paymentDetails.setReferenceNumber(getResponseValue(rawResponse, MessageConstants.DETAILSPAYMENTREFERENCENUMBER));
+        paymentDetails.setTransactionId(getResponseValue(rawResponse, MessageConstants.DETAILSPAYMENTTRANSACTIONID));
+        paymentDetails.setPaymentMethod(getResponseValue(rawResponse, MessageConstants.DETAILSPAYMENTALLOWEDMETHOD));
+        paymentDetails.setPaymentRequestId(getResponseValue(rawResponse, MessageConstants.DETAILSPAYMENTREQUESTID));
         response.setPaymentDetails(paymentDetails);
         
         eof = false;
         number = 0;
         while (!eof) {
-            String paymentRequestItemName = getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.PAYMENTREQUESTITEMNAME, new Integer[]{0, number}, new String[]{"n", "m"}));
+            String paymentRequestItemName = getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTITEMNAME, new Integer[]{0, number}, new String[]{"n", "m"}));
             if (!StringUtils.isEmpty(paymentRequestItemName)) {
                 PayPalPaymentItemDetails itemDetails = new PayPalPaymentItemDetails();
                 itemDetails.setName(paymentRequestItemName);
-                itemDetails.setDescription(getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.PAYMENTREQUESTITEMDESCRIPTION, new Integer[]{0, number}, new String[]{"n", "m"})));
-                String paymentRequestItemAmount = getResponseValue(rawResponse, MessageConstants.PAYMENTREQUESTITEMAMOUNT);
+                itemDetails.setDescription(getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTITEMDESCRIPTION, new Integer[]{0, number}, new String[]{"n", "m"})));
+                String paymentRequestItemAmount = getResponseValue(rawResponse, MessageConstants.DETAILSPAYMENTITEMAMOUNT);
                 if (!StringUtils.isEmpty(paymentRequestItemAmount)) {
                     itemDetails.setAmount(new Money(paymentRequestItemAmount, Money.defaultCurrency()));
                 }
-                itemDetails.setItemNumber(getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.PAYMENTREQUESTITEMNUMBER, new Integer[]{0, number}, new String[]{"n", "m"})));
-                String paymentRequestItemQuantity = getResponseValue(rawResponse, MessageConstants.PAYMENTREQUESTITEMQUANTITY);
+                itemDetails.setItemNumber(getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTITEMNUMBER, new Integer[]{0, number}, new String[]{"n", "m"})));
+                String paymentRequestItemQuantity = getResponseValue(rawResponse, MessageConstants.DETAILSPAYMENTITEMQUANTITY);
                 if (!StringUtils.isEmpty(paymentRequestItemQuantity)) {
                     itemDetails.setQuantity(Integer.valueOf(paymentRequestItemQuantity));
                 }
-                String paymentRequestItemTax = getResponseValue(rawResponse, MessageConstants.PAYMENTREQUESTITEMTAX);
+                String paymentRequestItemTax = getResponseValue(rawResponse, MessageConstants.DETAILSPAYMENTITEMTAX);
                 if (!StringUtils.isEmpty(paymentRequestItemTax)) {
                     itemDetails.setTax(new Money(paymentRequestItemTax, Money.defaultCurrency()));
                 }
@@ -167,14 +167,14 @@ public class PayPalResponseGeneratorImpl implements PayPalResponseGenerator {
         eof = false;
         int errorNumber = 0;
         while (!eof) {
-            String errorCode = getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.PAYMENTREQUESTERRORCODE, new Integer[]{errorNumber}, new String[]{"n"}));
+            String errorCode = getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTERRORCODE, new Integer[]{errorNumber}, new String[]{"n"}));
             if (errorCode != null) {
                 PayPalDetailsErrorResponse errorResponse = new PayPalDetailsErrorResponse();
                 errorResponse.setErrorCode(errorCode);
-                errorResponse.setShortMessage(getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.PAYMENTREQUESTERORRSHORTMESSAGE, new Integer[]{errorNumber}, new String[]{"n"})));
-                errorResponse.setLongMessage(getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.PAYMENTREQUESTERRORLONGMESSAGE, new Integer[]{errorNumber}, new String[]{"n"})));
-                errorResponse.setSeverityCode(getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.PAYMENTREQUESTERRORSEVERITYCODE, new Integer[]{errorNumber}, new String[]{"n"})));
-                errorResponse.setAck(getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.PAYMENTREQUESTERRORACK, new Integer[]{errorNumber}, new String[]{"n"})));
+                errorResponse.setShortMessage(getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTERRORSHORTMESSAGE, new Integer[]{errorNumber}, new String[]{"n"})));
+                errorResponse.setLongMessage(getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTERRORLONGMESSAGE, new Integer[]{errorNumber}, new String[]{"n"})));
+                errorResponse.setSeverityCode(getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTERRORSEVERITYCODE, new Integer[]{errorNumber}, new String[]{"n"})));
+                errorResponse.setAck(getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTERRORACK, new Integer[]{errorNumber}, new String[]{"n"})));
                 response.getErrorResponses().add(errorResponse);
             } else {
                 eof = true;
