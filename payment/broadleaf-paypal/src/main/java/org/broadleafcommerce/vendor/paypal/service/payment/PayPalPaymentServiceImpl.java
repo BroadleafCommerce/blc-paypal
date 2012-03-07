@@ -16,11 +16,6 @@
 
 package org.broadleafcommerce.vendor.paypal.service.payment;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.methods.PostMethod;
@@ -33,6 +28,12 @@ import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalItemReq
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalPaymentRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalPaymentResponse;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalMethodType;
+import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalTransactionType;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 
@@ -55,6 +56,8 @@ public class PayPalPaymentServiceImpl implements PayPalPaymentService {
     protected String returnUrl;
     protected String cancelUrl;
     protected Map<String, String> additionalConfig;
+    protected String token;
+    protected String transactionID;
 
     protected synchronized void clearStatus() {
         isUp = true;
@@ -84,8 +87,15 @@ public class PayPalPaymentServiceImpl implements PayPalPaymentService {
         payPalPaymentResponse.setTransactionType(paymentRequest.getTransactionType());
         payPalPaymentResponse.setMethodType(paymentRequest.getMethodType());
         buildResponse(response, payPalPaymentResponse);
+        token = payPalPaymentResponse.getResponseToken();
         if (paymentRequest.getMethodType() == PayPalMethodType.CHECKOUT) {
-            payPalPaymentResponse.setUserRedirectUrl(getUserRedirectUrl() + "?cmd=_express-checkout&token=" + payPalPaymentResponse.getResponseToken());
+            payPalPaymentResponse.setUserRedirectUrl(getUserRedirectUrl() + "?cmd=_express-checkout&token=" + token);
+        } else if(paymentRequest.getMethodType() == PayPalMethodType.PROCESS) {
+            payPalPaymentResponse.setUserRedirectUrl("/orders/viewOrderConfirmation.htm?orderNumber=" + paymentRequest.getOrderNumber());
+        } else if(paymentRequest.getMethodType() == PayPalMethodType.DETAILS) {
+            payPalPaymentResponse.setUserRedirectUrl("checkout/checkoutReview");
+        } else  {
+            payPalPaymentResponse.setUserRedirectUrl("");
         }
         //TODO handle the redirect urls for the other method types
         
@@ -147,27 +157,36 @@ public class PayPalPaymentServiceImpl implements PayPalPaymentService {
         List<NameValuePair> nvps = new ArrayList<NameValuePair>();
         if (paymentRequest.getMethodType() == PayPalMethodType.CHECKOUT) {
             setNvpsForCheckout(nvps, paymentRequest);
+        } else if (paymentRequest.getMethodType() == PayPalMethodType.PROCESS) {
+            setNvpsForProcess(nvps, paymentRequest);
+        } else if (paymentRequest.getMethodType() == PayPalMethodType.DETAILS) {
+            setNvpsForDetails(nvps);
+        } else if (paymentRequest.getMethodType() == PayPalMethodType.REFUND) {
+            setNvpsForRefund(nvps);
+        } else if (paymentRequest.getMethodType() == PayPalMethodType.CAPTURE) {
+            setNvpsForCapture(nvps, paymentRequest);
+        } else if (paymentRequest.getMethodType() == PayPalMethodType.VOID) {
+            setNvpsForVoid(nvps);
+        } else if (paymentRequest.getMethodType() == PayPalMethodType.REAUTHORIZATION) {
+            setNvpsForReauthorization(nvps, paymentRequest);
         }
         //TODO implement the other methods (process and details)
-        /*if(method.equals("checkout")) {
-            setNvpsForCheckout(nvps, order);
-        } else if(method.equals("details")) {
-            setNvpsForDetails(nvps);
-        } else {
-            setNvpsForProcess(nvps, order);
-        }*/
+
         postMethod.setRequestBody(nvps.toArray(new NameValuePair[nvps.size()]));
         httpClient.executeMethod(postMethod);
         return postMethod.getResponseBodyAsString();
     }
-    
+
     protected void setNvpsForCheckout(List<NameValuePair> nvps, PayPalPaymentRequest paymentRequest) {
         nvps.add(new NameValuePair(MessageConstants.USER, user));
         nvps.add(new NameValuePair(MessageConstants.PASSWORD, password));
         nvps.add(new NameValuePair(MessageConstants.SIGNATURE, signature));
         nvps.add(new NameValuePair(MessageConstants.VERSION, libVersion));
-        nvps.add(new NameValuePair(MessageConstants.PAYMENTACTION, MessageConstants.SALEACTION));
-
+        if (paymentRequest.getTransactionType() == PayPalTransactionType.AUTHORIZEANDCAPTURE) {
+            nvps.add(new NameValuePair(MessageConstants.PAYMENTACTION, MessageConstants.SALEACTION));
+        } else if (paymentRequest.getTransactionType() == PayPalTransactionType.AUTHORIZE) {
+            nvps.add(new NameValuePair(MessageConstants.PAYMENTACTION, MessageConstants.AUTHORIZATIONACTION));
+        }
         setCostNvps(nvps, paymentRequest);
 
         nvps.add(new NameValuePair(MessageConstants.RETURNURL, getReturnUrl()));
@@ -183,7 +202,7 @@ public class PayPalPaymentServiceImpl implements PayPalPaymentService {
         for (PayPalItemRequest itemRequest : paymentRequest.getItemRequests()) {
             nvps.add(new NameValuePair(MessageConstants.NAMEREQUEST + counter, itemRequest.getShortDescription()));
             nvps.add(new NameValuePair(MessageConstants.NUMBERREQUEST + counter, itemRequest.getSystemId()));
-            nvps.add(new NameValuePair(MessageConstants.DESCRIPTIONREQUEST + counter, itemRequest.getDescription()));
+            //nvps.add(new NameValuePair(MessageConstants.DESCRIPTIONREQUEST + counter, itemRequest.getDescription()));
             nvps.add(new NameValuePair(MessageConstants.AMOUNTREQUEST + counter, itemRequest.getUnitPrice().toString()));
             nvps.add(new NameValuePair(MessageConstants.QUANTITYREQUEST + counter, String.valueOf(itemRequest.getQuantity())));
             counter++;
@@ -194,6 +213,83 @@ public class PayPalPaymentServiceImpl implements PayPalPaymentService {
         nvps.add(new NameValuePair(MessageConstants.SHIPPINGDISCOUNTREQUEST, "-" + paymentRequest.getSummaryRequest().getShippingDiscount().toString()));
         nvps.add(new NameValuePair(MessageConstants.GRANDTOTALREQUEST, paymentRequest.getSummaryRequest().getGrandTotal().toString()));
     }
+
+    private void setNvpsForProcess(List<NameValuePair> nvps, PayPalPaymentRequest paymentRequest) {
+
+        nvps.add(new NameValuePair(MessageConstants.USER, user));
+        nvps.add(new NameValuePair(MessageConstants.PASSWORD, password));
+        nvps.add(new NameValuePair(MessageConstants.SIGNATURE, signature));
+        nvps.add(new NameValuePair(MessageConstants.VERSION, libVersion));
+        nvps.add(new NameValuePair(MessageConstants.PAYMENTACTION, MessageConstants.SALEACTION));
+        nvps.add(new NameValuePair(MessageConstants.TOKEN, paymentRequest.getToken()));
+        nvps.add(new NameValuePair(MessageConstants.PAYERID, paymentRequest.getPayerID()));
+
+        for (Map.Entry<String, String> entry : getAdditionalConfig().entrySet()) {
+            nvps.add(new NameValuePair(entry.getKey(), entry.getValue()));
+        }
+        nvps.add(new NameValuePair(MessageConstants.GRANDTOTALREQUEST, paymentRequest.getSummaryRequest().getGrandTotal().toString()));
+        nvps.add(new NameValuePair(MessageConstants.METHOD, MessageConstants.PROCESSPAYMENTACTION));
+    }
+
+    private void setNvpsForDetails(List<NameValuePair> nvps) {
+
+        nvps.add(new NameValuePair(MessageConstants.USER, user));
+        nvps.add(new NameValuePair(MessageConstants.PASSWORD, password));
+        nvps.add(new NameValuePair(MessageConstants.SIGNATURE, signature));
+        nvps.add(new NameValuePair(MessageConstants.VERSION, libVersion));
+        nvps.add(new NameValuePair(MessageConstants.TOKEN, token));
+
+        for (Map.Entry<String, String> entry : getAdditionalConfig().entrySet()) {
+            nvps.add(new NameValuePair(entry.getKey(), entry.getValue()));
+        }
+        nvps.add(new NameValuePair(MessageConstants.METHOD, MessageConstants.PAYMENTDETAILSACTION));
+    }
+
+    private void setNvpsForRefund(List<NameValuePair> nvps) {
+
+        nvps.add(new NameValuePair(MessageConstants.TRANSACTIONID, transactionID));
+
+        for (Map.Entry<String, String> entry : getAdditionalConfig().entrySet()) {
+            nvps.add(new NameValuePair(entry.getKey(), entry.getValue()));
+        }
+        nvps.add(new NameValuePair(MessageConstants.METHOD, MessageConstants.REFUNDACTION));
+    }
+
+    //Only for authorization or order payment actions, not for sale payment actions
+    private void setNvpsForCapture(List<NameValuePair> nvps, PayPalPaymentRequest paymentRequest) {
+
+        nvps.add(new NameValuePair(MessageConstants.TRANSACTIONID, transactionID));
+        nvps.add(new NameValuePair(MessageConstants.GRANDTOTALREQUEST, paymentRequest.getSummaryRequest().getGrandTotal().toString()));
+        nvps.add(new NameValuePair(MessageConstants.COMPLETETYPE, MessageConstants.CAPTURECOMPLETE));
+        for (Map.Entry<String, String> entry : getAdditionalConfig().entrySet()) {
+            nvps.add(new NameValuePair(entry.getKey(), entry.getValue()));
+        }
+        nvps.add(new NameValuePair(MessageConstants.METHOD, MessageConstants.CAPTUREACTION));
+    }
+
+    //Only for authorization or order payment actions, not for sale payment actions
+    private void setNvpsForVoid(List<NameValuePair> nvps) {
+
+        nvps.add(new NameValuePair(MessageConstants.TRANSACTIONID, transactionID));
+
+        for (Map.Entry<String, String> entry : getAdditionalConfig().entrySet()) {
+            nvps.add(new NameValuePair(entry.getKey(), entry.getValue()));
+        }
+        nvps.add(new NameValuePair(MessageConstants.METHOD, MessageConstants.VOIDACTION));
+    }
+
+    //Only for authorization or order payment actions, not for sale payment actions
+    private void setNvpsForReauthorization(List<NameValuePair> nvps, PayPalPaymentRequest paymentRequest) {
+
+        nvps.add(new NameValuePair(MessageConstants.TRANSACTIONID, transactionID));
+        nvps.add(new NameValuePair(MessageConstants.GRANDTOTALREQUEST, paymentRequest.getSummaryRequest().getGrandTotal().toString()));
+        
+        for (Map.Entry<String, String> entry : getAdditionalConfig().entrySet()) {
+            nvps.add(new NameValuePair(entry.getKey(), entry.getValue()));
+        }
+        nvps.add(new NameValuePair(MessageConstants.METHOD, MessageConstants.REAUTHORIZATIONACTION));
+    }
+
 
     protected String getResponseValue(String resp, String valueName) {
         int keyBegin = resp.indexOf(valueName);
@@ -207,6 +303,7 @@ public class PayPalPaymentServiceImpl implements PayPalPaymentService {
         }
         return null;
     }
+
 
     public Integer getFailureReportingThreshold() {
         return failureReportingThreshold;

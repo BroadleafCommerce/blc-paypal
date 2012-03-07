@@ -16,11 +16,11 @@
 
 package org.broadleafcommerce.vendor.paypal.service.payment.message;
 
-import java.io.Serializable;
-import java.util.List;
-
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalMethodType;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalTransactionType;
+
+import java.io.Serializable;
+import java.util.List;
 
 /**
  * 
@@ -32,10 +32,13 @@ public class PayPalPaymentRequest implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	protected String currency;
+    private String payerID;
+    private String token;
 	protected List<PayPalItemRequest> itemRequests = new AutoNumberMemberIdList();
 	protected PayPalTransactionType transactionType;
     protected PayPalMethodType methodType;
     protected PayPalSummaryRequest summaryRequest;
+    private String orderNumber;
 
 	public PayPalTransactionType getTransactionType() {
 		return transactionType;
@@ -103,5 +106,29 @@ public class PayPalPaymentRequest implements Serializable {
         result = 31 * result + (methodType != null ? methodType.hashCode() : 0);
         result = 31 * result + (summaryRequest != null ? summaryRequest.hashCode() : 0);
         return result;
+    }
+
+    public String getPayerID() {
+        return payerID;
+    }
+
+    public void setPayerID(String payerID) {
+        this.payerID = payerID;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    public String getOrderNumber() {
+        return orderNumber;
+    }
+
+    public void setOrderNumber(String orderNumber) {
+        this.orderNumber = orderNumber;
     }
 }

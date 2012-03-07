@@ -47,12 +47,71 @@ public class PayPalPaymentModule implements PaymentModule {
 
     @Override
     public PaymentResponseItem authorize(PaymentContext paymentContext) throws PaymentException {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        //authorize from SetExpressCheckout "Authorization"
+        PayPalPaymentRequest request = new PayPalPaymentRequest();
+        for(AmountItem amountItem : paymentContext.getPaymentInfo().getAmountItems()) {
+            PayPalItemRequest itemRequest = new PayPalItemRequest();
+            itemRequest.setDescription(amountItem.getDescription());
+            itemRequest.setShortDescription(amountItem.getShortDescription());
+            itemRequest.setQuantity(amountItem.getQuantity());
+            itemRequest.setUnitPrice(new Money(amountItem.getUnitPrice()));
+            itemRequest.setSystemId(amountItem.getSystemId());
+            request.getItemRequests().add(itemRequest);
+        }
+        request.setTransactionType(PayPalTransactionType.AUTHORIZE);
+
+        Assert.isTrue(paymentContext.getPaymentInfo().getAdditionalFields().containsKey(MessageConstants.PAYPALMETHODTYPE), "When using Broadleaf Commerce PayPal support, the additionalFields in the PaymentInfo instance must specify a key (PAYPALMETHODTYPE) and the appropriate value");
+        request.setMethodType(PayPalMethodType.getInstance(paymentContext.getPaymentInfo().getAdditionalFields().get(MessageConstants.PAYPALMETHODTYPE)));
+
+        Assert.isTrue(TotalledPaymentInfo.class.isAssignableFrom(paymentContext.getPaymentInfo().getClass()), "When using Broadleaf Commerce PayPal support, all PaymentInfo instances must be instances of TotalledPaymentInfo");
+        TotalledPaymentInfo totalledPaymentInfo = (TotalledPaymentInfo) paymentContext.getPaymentInfo();
+        PayPalSummaryRequest summaryRequest = new PayPalSummaryRequest();
+        summaryRequest.setGrandTotal(totalledPaymentInfo.getAmount());
+        summaryRequest.setShippingDiscount(totalledPaymentInfo.getShippingDiscount());
+        summaryRequest.setSubTotal(totalledPaymentInfo.getSubTotal());
+        summaryRequest.setTotalShipping(totalledPaymentInfo.getTotalShipping());
+        summaryRequest.setTotalTax(totalledPaymentInfo.getTotalTax());
+        request.setSummaryRequest(summaryRequest);
+
+        PayPalPaymentResponse response;
+        try {
+            response = payPalPaymentService.process(request);
+        } catch (org.broadleafcommerce.common.vendor.service.exception.PaymentException e) {
+            throw new PaymentException(e);
+        }
+
+        PaymentResponseItem responseItem = buildBasicResponse(response);
+        responseItem.setAmountPaid(paymentContext.getPaymentInfo().getAmount());
+
+        return responseItem;
     }
 
     @Override
     public PaymentResponseItem reverseAuthorize(PaymentContext paymentContext) throws PaymentException {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        //void authorization from DoVoid
+        PayPalPaymentRequest request = new PayPalPaymentRequest();
+
+        request.setTransactionType(PayPalTransactionType.REVERSEAUTHORIZE);
+        Assert.isTrue(paymentContext.getPaymentInfo().getAdditionalFields().containsKey(MessageConstants.PAYPALMETHODTYPE), "When using Broadleaf Commerce PayPal support, the additionalFields in the PaymentInfo instance must specify a key (PAYPALMETHODTYPE) and the appropriate value");
+        request.setMethodType(PayPalMethodType.getInstance(paymentContext.getPaymentInfo().getAdditionalFields().get(MessageConstants.PAYPALMETHODTYPE)));
+
+        Assert.isTrue(TotalledPaymentInfo.class.isAssignableFrom(paymentContext.getPaymentInfo().getClass()), "When using Broadleaf Commerce PayPal support, all PaymentInfo instances must be instances of TotalledPaymentInfo");
+        TotalledPaymentInfo totalledPaymentInfo = (TotalledPaymentInfo) paymentContext.getPaymentInfo();
+        PayPalSummaryRequest summaryRequest = new PayPalSummaryRequest();
+        summaryRequest.setGrandTotal(totalledPaymentInfo.getAmount());
+        request.setSummaryRequest(summaryRequest);
+
+        PayPalPaymentResponse response;
+        try {
+            response = payPalPaymentService.process(request);
+        } catch (org.broadleafcommerce.common.vendor.service.exception.PaymentException e) {
+            throw new PaymentException(e);
+        }
+
+        PaymentResponseItem responseItem = buildBasicResponse(response);
+        responseItem.setAmountPaid(paymentContext.getPaymentInfo().getAmount());
+
+        return responseItem;
     }
 
     @Override
@@ -87,7 +146,11 @@ public class PayPalPaymentModule implements PaymentModule {
         summaryRequest.setTotalShipping(totalledPaymentInfo.getTotalShipping());
         summaryRequest.setTotalTax(totalledPaymentInfo.getTotalTax());
         request.setSummaryRequest(summaryRequest);
-
+        if(request.getMethodType().equals(PayPalMethodType.PROCESS)){
+            request.setPayerID(paymentContext.getPaymentInfo().getAdditionalFields().get("payerID"));
+            request.setToken(paymentContext.getPaymentInfo().getAdditionalFields().get("token"));
+            request.setOrderNumber(paymentContext.getPaymentInfo().getAdditionalFields().get("orderNumber"));
+        }
         PayPalPaymentResponse response;
         try {
             response = payPalPaymentService.process(request);
@@ -106,8 +169,8 @@ public class PayPalPaymentModule implements PaymentModule {
         responseItem.setTransactionTimestamp(SystemTime.asDate());
         responseItem.setMiddlewareResponseCode(response.getAck());
         responseItem.setMiddlewareResponseText(response.getAck());
-        responseItem.setReferenceNumber(response.getCorrelationId());
-        responseItem.setTransactionId(response.getResponseToken());
+        responseItem.setReferenceNumber(response.getResponseToken());
+        responseItem.setTransactionId(response.getCorrelationId());
         responseItem.setTransactionSuccess(response.isSuccessful());
         responseItem.setAuthorizationCode(response.getAck());
         for (PayPalErrorResponse errorResponse : response.getErrorResponses()) {
@@ -125,7 +188,30 @@ public class PayPalPaymentModule implements PaymentModule {
 
     @Override
     public PaymentResponseItem credit(PaymentContext paymentContext) throws PaymentException {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        //PayPal Refund
+        PayPalPaymentRequest request = new PayPalPaymentRequest();
+        request.setTransactionType(PayPalTransactionType.CREDIT);
+
+        Assert.isTrue(paymentContext.getPaymentInfo().getAdditionalFields().containsKey(MessageConstants.PAYPALMETHODTYPE), "When using Broadleaf Commerce PayPal support, the additionalFields in the PaymentInfo instance must specify a key (PAYPALMETHODTYPE) and the appropriate value");
+        request.setMethodType(PayPalMethodType.getInstance(paymentContext.getPaymentInfo().getAdditionalFields().get(MessageConstants.PAYPALMETHODTYPE)));
+
+        Assert.isTrue(TotalledPaymentInfo.class.isAssignableFrom(paymentContext.getPaymentInfo().getClass()), "When using Broadleaf Commerce PayPal support, all PaymentInfo instances must be instances of TotalledPaymentInfo");
+        TotalledPaymentInfo totalledPaymentInfo = (TotalledPaymentInfo) paymentContext.getPaymentInfo();
+        PayPalSummaryRequest summaryRequest = new PayPalSummaryRequest();
+        summaryRequest.setGrandTotal(totalledPaymentInfo.getAmount());
+        request.setSummaryRequest(summaryRequest);
+
+        PayPalPaymentResponse response;
+        try {
+            response = payPalPaymentService.process(request);
+        } catch (org.broadleafcommerce.common.vendor.service.exception.PaymentException e) {
+            throw new PaymentException(e);
+        }
+
+        PaymentResponseItem responseItem = buildBasicResponse(response);
+        responseItem.setAmountPaid(paymentContext.getPaymentInfo().getAmount());
+
+        return responseItem;
     }
 
     @Override

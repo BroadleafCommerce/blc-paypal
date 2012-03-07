@@ -16,11 +16,11 @@
 
 package org.broadleafcommerce.vendor.paypal.service.payment.type;
 
+import org.broadleafcommerce.common.BroadleafEnumerationType;
+
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.broadleafcommerce.common.BroadleafEnumerationType;
 
 /**
  * An extendible enumeration of transaction types.
@@ -36,6 +36,11 @@ public class PayPalMethodType implements Serializable, BroadleafEnumerationType 
     public static final PayPalMethodType CHECKOUT  = new PayPalMethodType("CHECKOUT", "Checkout");
     public static final PayPalMethodType DETAILS = new PayPalMethodType("DETAILS", "Details");
     public static final PayPalMethodType PROCESS = new PayPalMethodType("PROCESS", "Process");
+    public static final PayPalMethodType REFUND = new PayPalMethodType("REFUND", "Refund");
+    public static final PayPalMethodType CAPTURE = new PayPalMethodType("CAPTURE", "Capture");
+    public static final PayPalMethodType VOID = new PayPalMethodType("VOID", "Void");
+    public static final PayPalMethodType REAUTHORIZATION = new PayPalMethodType("REAUTHORIZATION", "Reauhorization");
+
 
     public static PayPalMethodType getInstance(final String type) {
         return TYPES.get(type);

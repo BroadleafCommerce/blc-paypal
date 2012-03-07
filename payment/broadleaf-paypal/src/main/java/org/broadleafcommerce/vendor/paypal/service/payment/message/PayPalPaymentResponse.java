@@ -16,14 +16,14 @@
 
 package org.broadleafcommerce.vendor.paypal.service.payment.message;
 
+import org.broadleafcommerce.common.vendor.service.message.PaymentResponse;
+import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalMethodType;
+import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalTransactionType;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.broadleafcommerce.common.vendor.service.message.PaymentResponse;
-import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalMethodType;
-import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalTransactionType;
 
 /**
  * 
@@ -42,6 +42,7 @@ public class PayPalPaymentResponse implements PaymentResponse {
     private List<PayPalErrorResponse> errorResponses = new ArrayList<PayPalErrorResponse>();
     private Map<String, String> passThroughErrors = new HashMap<String, String>();
     private String responseToken;
+    private String payerID;
     private String userRedirectUrl;
     private String correlationId;
     private String ack;
@@ -117,6 +118,14 @@ public class PayPalPaymentResponse implements PaymentResponse {
 
     public void setResponseToken(String responseToken) {
         this.responseToken = responseToken;
+    }
+
+    public String getPayerID() {
+        return payerID;
+    }
+
+    public void setPayerID(String payerID) {
+        this.payerID = payerID;
     }
 
     public String getUserRedirectUrl() {

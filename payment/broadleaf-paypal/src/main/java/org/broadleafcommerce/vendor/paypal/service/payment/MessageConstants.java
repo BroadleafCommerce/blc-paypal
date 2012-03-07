@@ -26,7 +26,9 @@ public class MessageConstants {
     public static final String SUCCESS = "success";
     public static final String SUCCESSWITHWARNINGS = "successwithwarnings";
     public static final String TOKEN = "TOKEN";
+    public static final String PAYERID = "PAYERID";
     public static final String CORRELATIONID = "CORRELATIONID";
+    public static final String TRANSACTIONID = "TRANSACTIONID";
     
     public static final String USER = "USER";
     public static final String PASSWORD = "PWD";
@@ -52,7 +54,17 @@ public class MessageConstants {
     public static final String ERRORSEVERITYCODE = "L_SEVERITYCODE";
     public static final String ERRORPASSTHROUGHNAME = "L_ERRORPARAMID";
     public static final String ERRORPASSTHROUGHVALUE = "L_ERRORPARAMVALUE";
+    public static final String COMPLETETYPE = "COMPLETETYPE";
+    public static final String CAPTURECOMPLETE = "Complete";
     
     public static final String SALEACTION = "Sale";
+    public static final String AUTHORIZATIONACTION = "Authorization";
     public static final String EXPRESSCHECKOUTACTION = "SetExpressCheckout";
+    public static final String PROCESSPAYMENTACTION = "DoExpressCheckoutPayment";
+    public static final String PAYMENTDETAILSACTION = "GetExpressCheckoutDetails";
+    public static final String REFUNDACTION = "RefundTransaction";
+    public static final String CAPTUREACTION = "DoCapture";
+    public static final String REAUTHORIZATIONACTION = "DoReauthorization";
+    public static final String VOIDACTION = "DoVoid";
+
 }
