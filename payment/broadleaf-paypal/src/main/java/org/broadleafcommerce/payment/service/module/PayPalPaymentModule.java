@@ -102,6 +102,7 @@ public class PayPalPaymentModule implements PaymentModule {
         PayPalSummaryRequest summaryRequest = new PayPalSummaryRequest();
         summaryRequest.setGrandTotal(totalledPaymentInfo.getAmount());
         request.setSummaryRequest(summaryRequest);
+        request.setTransactionID(paymentContext.getPaymentInfo().getAdditionalFields().get("transactionID"));
 
         PayPalPaymentResponse response;
         try {
@@ -152,8 +153,6 @@ public class PayPalPaymentModule implements PaymentModule {
         if(request.getMethodType().equals(PayPalMethodType.PROCESS)){
             request.setPayerID(paymentContext.getPaymentInfo().getAdditionalFields().get("payerID"));
             request.setToken(paymentContext.getPaymentInfo().getAdditionalFields().get("token"));
-            //TODO Not sure why we need this?
-            //request.setOrderNumber(paymentContext.getPaymentInfo().getAdditionalFields().get("orderNumber"));
         }
         PayPalPaymentResponse response;
         try {
@@ -161,13 +160,13 @@ public class PayPalPaymentModule implements PaymentModule {
         } catch (org.broadleafcommerce.common.vendor.service.exception.PaymentException e) {
             throw new PaymentException(e);
         }
-        
+
         PaymentResponseItem responseItem = buildBasicResponse(response);
         responseItem.setAmountPaid(paymentContext.getPaymentInfo().getAmount());
 
         return responseItem;
     }
-    
+
     protected PaymentResponseItem buildBasicResponse(PayPalPaymentResponse response) {
         PaymentResponseItem responseItem = new PaymentResponseItemImpl();
         responseItem.setTransactionTimestamp(SystemTime.asDate());
@@ -186,7 +185,7 @@ public class PayPalPaymentModule implements PaymentModule {
         }
         responseItem.getAdditionalFields().putAll(response.getPassThroughErrors());
         responseItem.getAdditionalFields().put(MessageConstants.REDIRECTURL, response.getUserRedirectUrl());
-        
+
         return responseItem;
     }
 
@@ -204,6 +203,36 @@ public class PayPalPaymentModule implements PaymentModule {
         PayPalSummaryRequest summaryRequest = new PayPalSummaryRequest();
         summaryRequest.setGrandTotal(totalledPaymentInfo.getAmount());
         request.setSummaryRequest(summaryRequest);
+        request.setTransactionID(paymentContext.getPaymentInfo().getAdditionalFields().get("transactionID"));
+
+        PayPalPaymentResponse response;
+        try {
+            response = (PayPalPaymentResponse) payPalPaymentService.process(request);
+        } catch (org.broadleafcommerce.common.vendor.service.exception.PaymentException e) {
+            throw new PaymentException(e);
+        }
+
+        PaymentResponseItem responseItem = buildBasicResponse(response);
+        responseItem.setAmountPaid(paymentContext.getPaymentInfo().getAmount());
+
+        return responseItem;
+    }
+
+
+    public PaymentResponseItem capture(PaymentContext paymentContext) throws PaymentException {
+        //PayPal Capture
+        PayPalPaymentRequest request = new PayPalPaymentRequest();
+        request.setTransactionType(PayPalTransactionType.CAPTURE);
+
+        Assert.isTrue(paymentContext.getPaymentInfo().getAdditionalFields().containsKey(MessageConstants.PAYPALMETHODTYPE), "When using Broadleaf Commerce PayPal support, the additionalFields in the PaymentInfo instance must specify a key (PAYPALMETHODTYPE) and the appropriate value");
+        request.setMethodType(PayPalMethodType.getInstance(paymentContext.getPaymentInfo().getAdditionalFields().get(MessageConstants.PAYPALMETHODTYPE)));
+
+        Assert.isTrue(TotalledPaymentInfo.class.isAssignableFrom(paymentContext.getPaymentInfo().getClass()), "When using Broadleaf Commerce PayPal support, all PaymentInfo instances must be instances of TotalledPaymentInfo");
+        TotalledPaymentInfo totalledPaymentInfo = (TotalledPaymentInfo) paymentContext.getPaymentInfo();
+        PayPalSummaryRequest summaryRequest = new PayPalSummaryRequest();
+        summaryRequest.setGrandTotal(totalledPaymentInfo.getAmount());
+        request.setSummaryRequest(summaryRequest);
+        request.setTransactionID(paymentContext.getPaymentInfo().getAdditionalFields().get("transactionID"));
 
         PayPalPaymentResponse response;
         try {

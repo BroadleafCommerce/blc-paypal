@@ -16,26 +16,17 @@
 
 package org.broadleafcommerce.vendor.paypal.service.payment;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-
 import org.apache.commons.lang.StringUtils;
 import org.broadleafcommerce.common.money.Money;
-import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalErrorResponse;
-import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalPaymentRequest;
-import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalPaymentResponse;
-import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalRequest;
-import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalResponse;
-import org.broadleafcommerce.vendor.paypal.service.payment.message.details.PayPalDetailsErrorResponse;
-import org.broadleafcommerce.vendor.paypal.service.payment.message.details.PayPalDetailsRequest;
-import org.broadleafcommerce.vendor.paypal.service.payment.message.details.PayPalDetailsResponse;
-import org.broadleafcommerce.vendor.paypal.service.payment.message.details.PayPalPayerAddress;
-import org.broadleafcommerce.vendor.paypal.service.payment.message.details.PayPalPaymentDetails;
-import org.broadleafcommerce.vendor.paypal.service.payment.message.details.PayPalPaymentItemDetails;
+import org.broadleafcommerce.vendor.paypal.service.payment.message.*;
+import org.broadleafcommerce.vendor.paypal.service.payment.message.details.*;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalAddressStatusType;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalCheckoutStatusType;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalMethodType;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalPayerStatusType;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 
 /**
  * @author Jeff Fischer
@@ -51,11 +42,124 @@ public class PayPalResponseGeneratorImpl implements PayPalResponseGenerator {
             payPalResponse = buildCheckoutResponse(response, (PayPalPaymentRequest) paymentRequest);
         } else if (paymentRequest.getMethodType() == PayPalMethodType.DETAILS) {
             payPalResponse = buildDetailsResponse(response, (PayPalDetailsRequest) paymentRequest);
+        } else if (paymentRequest.getMethodType() == PayPalMethodType.PROCESS) {
+            payPalResponse = buildProcessResponse(response, (PayPalPaymentRequest) paymentRequest);
+        } else if (paymentRequest.getMethodType() == PayPalMethodType.REFUND){
+            payPalResponse = buildRefundResponse(response, (PayPalPaymentRequest) paymentRequest);
         } else {
             throw new IllegalArgumentException("Method type not supported: " + paymentRequest.getMethodType().getFriendlyType());
         }
 
         return payPalResponse;
+    }
+
+    protected PayPalResponse buildRefundResponse(String rawResponse, PayPalPaymentRequest paymentRequest) {
+        PayPalPaymentResponse response = new PayPalPaymentResponse();
+        response.setTransactionType(paymentRequest.getTransactionType());
+        response.setMethodType(paymentRequest.getMethodType());
+        response.setCorrelationId(getResponseValue(rawResponse, MessageConstants.CORRELATIONID));
+        response.setReferenceNumber(getResponseValue(rawResponse, MessageConstants.INVNUM));
+        String ack = getResponseValue(rawResponse, MessageConstants.ACK);
+        response.setAck(ack);
+        if (ack.toLowerCase().equals(MessageConstants.SUCCESS)) {
+            response.setErrorDetected(false);
+            response.setSuccessful(true);
+        } else if (ack.toLowerCase().equals(MessageConstants.SUCCESSWITHWARNINGS)) {
+            response.setSuccessful(true);
+            response.setErrorDetected(true);
+            response.setResponseToken(getResponseValue(rawResponse, MessageConstants.TOKEN));
+        } else {
+            response.setSuccessful(false);
+            response.setErrorDetected(true);
+        }
+        if (response.isErrorDetected()) {
+            boolean eof = false;
+            int errorNumber = 0;
+            while (!eof) {
+                String errorCode = getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.ERRORCODE, new Integer[]{errorNumber}, new String[]{"n"}));
+                if (errorCode != null) {
+                    PayPalErrorResponse errorResponse = new PayPalErrorResponse();
+                    errorResponse.setErrorCode(errorCode);
+                    errorResponse.setShortMessage(getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.ERRORSHORTMESSAGE, new Integer[]{errorNumber}, new String[]{"n"})));
+                    errorResponse.setLongMessage(getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.ERRORLONGMESSAGE, new Integer[]{errorNumber}, new String[]{"n"})));
+                    errorResponse.setSeverityCode(getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.ERRORSEVERITYCODE, new Integer[]{errorNumber}, new String[]{"n"})));
+                    response.getErrorResponses().add(errorResponse);
+                } else {
+                    eof = true;
+                }
+                errorNumber++;
+            }
+
+            errorNumber = 0;
+            eof = false;
+            while (!eof) {
+                String passThroughErrorName = getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.ERRORPASSTHROUGHNAME, new Integer[]{errorNumber}, new String[]{"n"}));
+                if (passThroughErrorName != null) {
+                    response.getPassThroughErrors().put(passThroughErrorName, getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.ERRORPASSTHROUGHVALUE, new Integer[]{errorNumber}, new String[]{"n"})));
+                } else {
+                    eof = true;
+                }
+                errorNumber++;
+            }
+        }
+        response.setUserRedirectUrl("/orders/viewOrderConfirmation.htm?orderNumber=");
+
+        return response;
+    }
+
+    protected PayPalResponse buildProcessResponse(String rawResponse, PayPalPaymentRequest paymentRequest) {
+        PayPalPaymentResponse response = new PayPalPaymentResponse();
+        response.setTransactionType(paymentRequest.getTransactionType());
+        response.setMethodType(paymentRequest.getMethodType());
+        response.setCorrelationId(getResponseValue(rawResponse, MessageConstants.CORRELATIONID));
+        response.setReferenceNumber(getResponseValue(rawResponse, MessageConstants.INVNUM));
+        String ack = getResponseValue(rawResponse, MessageConstants.ACK);
+        response.setAck(ack);
+        if (ack.toLowerCase().equals(MessageConstants.SUCCESS)) {
+            response.setErrorDetected(false);
+            response.setSuccessful(true);
+            response.setResponseToken(getResponseValue(rawResponse, MessageConstants.TRANSACTIONID));
+        } else if (ack.toLowerCase().equals(MessageConstants.SUCCESSWITHWARNINGS)) {
+            response.setSuccessful(true);
+            response.setErrorDetected(true);
+            response.setResponseToken(getResponseValue(rawResponse, MessageConstants.TOKEN));
+        } else {
+            response.setSuccessful(false);
+            response.setErrorDetected(true);
+        }
+        if (response.isErrorDetected()) {
+            boolean eof = false;
+            int errorNumber = 0;
+            while (!eof) {
+                String errorCode = getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.ERRORCODE, new Integer[]{errorNumber}, new String[]{"n"}));
+                if (errorCode != null) {
+                    PayPalErrorResponse errorResponse = new PayPalErrorResponse();
+                    errorResponse.setErrorCode(errorCode);
+                    errorResponse.setShortMessage(getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.ERRORSHORTMESSAGE, new Integer[]{errorNumber}, new String[]{"n"})));
+                    errorResponse.setLongMessage(getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.ERRORLONGMESSAGE, new Integer[]{errorNumber}, new String[]{"n"})));
+                    errorResponse.setSeverityCode(getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.ERRORSEVERITYCODE, new Integer[]{errorNumber}, new String[]{"n"})));
+                    response.getErrorResponses().add(errorResponse);
+                } else {
+                    eof = true;
+                }
+                errorNumber++;
+            }
+
+            errorNumber = 0;
+            eof = false;
+            while (!eof) {
+                String passThroughErrorName = getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.ERRORPASSTHROUGHNAME, new Integer[]{errorNumber}, new String[]{"n"}));
+                if (passThroughErrorName != null) {
+                    response.getPassThroughErrors().put(passThroughErrorName, getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.ERRORPASSTHROUGHVALUE, new Integer[]{errorNumber}, new String[]{"n"})));
+                } else {
+                    eof = true;
+                }
+                errorNumber++;
+            }
+        }
+        response.setUserRedirectUrl("/orders/viewOrderConfirmation.htm?orderNumber=");
+
+        return response;
     }
 
     protected PayPalDetailsResponse buildDetailsResponse(String rawResponse, PayPalDetailsRequest paymentRequest) {

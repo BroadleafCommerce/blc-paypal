@@ -43,19 +43,21 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
     @Override
     public List<NameValuePair> buildRequest(PayPalRequest request) {
         List<NameValuePair> nvps = new ArrayList<NameValuePair>();
-        setBaseNvps(nvps);
 
         if (request.getMethodType() == PayPalMethodType.CHECKOUT) {
+            setBaseNvps(nvps);
             setNvpsForCheckout(nvps, (PayPalPaymentRequest) request);
         } else if (request.getMethodType() == PayPalMethodType.PROCESS) {
+            setBaseNvps(nvps);
             setNvpsForProcess(nvps, (PayPalPaymentRequest) request);
         } else if (request.getMethodType() == PayPalMethodType.REFUND) {
-            setNvpsForRefund(nvps);
+            setNvpsForRefund(nvps, (PayPalPaymentRequest) request);
         } else if (request.getMethodType() == PayPalMethodType.CAPTURE) {
             setNvpsForCapture(nvps, (PayPalPaymentRequest) request);
         } else if (request.getMethodType() == PayPalMethodType.VOID) {
-            setNvpsForVoid(nvps);
+            setNvpsForVoid(nvps, (PayPalPaymentRequest) request);
         } else if (request.getMethodType() == PayPalMethodType.DETAILS) {
+            setBaseNvps(nvps);
             setNvpsForDetails(nvps, (PayPalDetailsRequest) request);
         } else {
             throw new IllegalArgumentException("Method type not supported: " + request.getMethodType().getFriendlyType());
@@ -69,9 +71,8 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
         nvps.add(new NameValuePair(MessageConstants.METHOD, MessageConstants.PAYMENTDETAILSACTION));
     }
 
-    protected void setNvpsForVoid(List<NameValuePair> nvps) {
-        //TODO this was previously set on the PayPalPaymentServiceImpl, which is incorrect
-        //nvps.add(new NameValuePair(MessageConstants.TRANSACTIONID, transactionID));
+    protected void setNvpsForVoid(List<NameValuePair> nvps, PayPalPaymentRequest paymentRequest) {
+        nvps.add(new NameValuePair(MessageConstants.TRANSACTIONID, paymentRequest.getTransactionID()));
 
         for (Map.Entry<String, String> entry : getAdditionalConfig().entrySet()) {
             nvps.add(new NameValuePair(entry.getKey(), entry.getValue()));
@@ -80,8 +81,7 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
     }
 
     protected void setNvpsForCapture(List<NameValuePair> nvps, PayPalPaymentRequest paymentRequest) {
-        //TODO this was previously set on the PayPalPaymentServiceImpl, which is incorrect
-        //nvps.add(new NameValuePair(MessageConstants.TRANSACTIONID, transactionID));
+        nvps.add(new NameValuePair(MessageConstants.TRANSACTIONID, paymentRequest.getTransactionID()));
         nvps.add(new NameValuePair(MessageConstants.GRANDTOTALREQUEST, paymentRequest.getSummaryRequest().getGrandTotal().toString()));
         nvps.add(new NameValuePair(MessageConstants.COMPLETETYPE, MessageConstants.CAPTURECOMPLETE));
         for (Map.Entry<String, String> entry : getAdditionalConfig().entrySet()) {
@@ -90,9 +90,8 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
         nvps.add(new NameValuePair(MessageConstants.METHOD, MessageConstants.CAPTUREACTION));
     }
 
-    protected void setNvpsForRefund(List<NameValuePair> nvps) {
-        //TODO this was previously set on the PayPalPaymentServiceImpl, which is incorrect
-        //nvps.add(new NameValuePair(MessageConstants.TRANSACTIONID, transactionID));
+    protected void setNvpsForRefund(List<NameValuePair> nvps, PayPalPaymentRequest paymentRequest) {
+        nvps.add(new NameValuePair(MessageConstants.TRANSACTIONID, paymentRequest.getTransactionID()));
 
         for (Map.Entry<String, String> entry : getAdditionalConfig().entrySet()) {
             nvps.add(new NameValuePair(entry.getKey(), entry.getValue()));
@@ -101,18 +100,14 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
     }
 
     protected void setNvpsForProcess(List<NameValuePair> nvps, PayPalPaymentRequest paymentRequest) {
-        nvps.add(new NameValuePair(MessageConstants.USER, user));
-        nvps.add(new NameValuePair(MessageConstants.PASSWORD, password));
-        nvps.add(new NameValuePair(MessageConstants.SIGNATURE, signature));
-        nvps.add(new NameValuePair(MessageConstants.VERSION, libVersion));
-        nvps.add(new NameValuePair(MessageConstants.PAYMENTACTION, MessageConstants.SALEACTION));
+        nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.PAYMENTACTION, new Integer[] {0}, new String[] {"n"}), MessageConstants.SALEACTION));
         nvps.add(new NameValuePair(MessageConstants.TOKEN, paymentRequest.getToken()));
         nvps.add(new NameValuePair(MessageConstants.PAYERID, paymentRequest.getPayerID()));
 
         for (Map.Entry<String, String> entry : getAdditionalConfig().entrySet()) {
             nvps.add(new NameValuePair(entry.getKey(), entry.getValue()));
         }
-        nvps.add(new NameValuePair(MessageConstants.GRANDTOTALREQUEST, paymentRequest.getSummaryRequest().getGrandTotal().toString()));
+        nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.GRANDTOTALREQUEST, new Integer[] {0}, new String[] {"n"}), paymentRequest.getSummaryRequest().getGrandTotal().toString()));
         nvps.add(new NameValuePair(MessageConstants.METHOD, MessageConstants.PROCESSPAYMENTACTION));
     }
     
@@ -124,7 +119,7 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
     }
     
     protected void setNvpsForCheckout(List<NameValuePair> nvps, PayPalPaymentRequest paymentRequest) {
-        nvps.add(new NameValuePair(MessageConstants.PAYMENTACTION, MessageConstants.SALEACTION));
+        nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.PAYMENTACTION, new Integer[] {0}, new String[] {"n"}), MessageConstants.SALEACTION));
         nvps.add(new NameValuePair(MessageConstants.INVNUM, paymentRequest.getReferenceNumber()));
 
         setCostNvps(nvps, paymentRequest);

@@ -36,6 +36,7 @@ public class PayPalPaymentRequest extends PayPalRequest {
 	protected PayPalTransactionType transactionType;
     protected PayPalSummaryRequest summaryRequest;
     protected String referenceNumber;
+    private String transactionID;
 
 
 	public PayPalTransactionType getTransactionType() {
@@ -128,5 +129,13 @@ public class PayPalPaymentRequest extends PayPalRequest {
         result = 31 * result + (summaryRequest != null ? summaryRequest.hashCode() : 0);
         result = 31 * result + (referenceNumber != null ? referenceNumber.hashCode() : 0);
         return result;
+    }
+
+    public String getTransactionID() {
+        return transactionID;
+    }
+
+    public void setTransactionID(String transactionID) {
+        this.transactionID = transactionID;
     }
 }
