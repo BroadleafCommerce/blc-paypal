@@ -16,19 +16,22 @@
 
 package org.broadleafcommerce.vendor.paypal.service.payment;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+
 import org.apache.commons.lang.StringUtils;
 import org.broadleafcommerce.common.money.Money;
-import org.broadleafcommerce.vendor.paypal.service.payment.message.details.PayPalDetailsErrorResponse;
-import org.broadleafcommerce.vendor.paypal.service.payment.message.details.PayPalDetailsRequest;
-import org.broadleafcommerce.vendor.paypal.service.payment.message.details.PayPalDetailsResponse;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalErrorResponse;
-import org.broadleafcommerce.vendor.paypal.service.payment.message.details.PayPalPayerAddress;
-import org.broadleafcommerce.vendor.paypal.service.payment.message.details.PayPalPaymentDetails;
-import org.broadleafcommerce.vendor.paypal.service.payment.message.details.PayPalPaymentItemDetails;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalPaymentRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalPaymentResponse;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalResponse;
+import org.broadleafcommerce.vendor.paypal.service.payment.message.details.PayPalDetailsErrorResponse;
+import org.broadleafcommerce.vendor.paypal.service.payment.message.details.PayPalDetailsRequest;
+import org.broadleafcommerce.vendor.paypal.service.payment.message.details.PayPalDetailsResponse;
+import org.broadleafcommerce.vendor.paypal.service.payment.message.details.PayPalPayerAddress;
+import org.broadleafcommerce.vendor.paypal.service.payment.message.details.PayPalPaymentDetails;
+import org.broadleafcommerce.vendor.paypal.service.payment.message.details.PayPalPaymentItemDetails;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalAddressStatusType;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalCheckoutStatusType;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalMethodType;
@@ -109,31 +112,31 @@ public class PayPalResponseGeneratorImpl implements PayPalResponseGenerator {
         }
 
         PayPalPaymentDetails paymentDetails = new PayPalPaymentDetails();
-        String paymentRequestAmount = getResponseValue(rawResponse, MessageConstants.DETAILSPAYMENTAMOUNT);
+        String paymentRequestAmount = getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTAMOUNT, new Integer[]{0}, new String[]{"n"}));
         if (!StringUtils.isEmpty(paymentRequestAmount)) {
             paymentDetails.setAmount(new Money(paymentRequestAmount, Money.defaultCurrency()));
         }
-        paymentDetails.setCurrencyCode(getResponseValue(rawResponse, MessageConstants.DETAILSPAYMENTCURRENCYCODE));
-        String paymentRequestItemTotal = getResponseValue(rawResponse, MessageConstants.DETAILSPAYMENTITEMTOTAL);
+        paymentDetails.setCurrencyCode(getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTCURRENCYCODE, new Integer[]{0}, new String[]{"n"})));
+        String paymentRequestItemTotal = getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTITEMTOTAL, new Integer[]{0}, new String[]{"n"}));
         if (!StringUtils.isEmpty(paymentRequestItemTotal)) {
             paymentDetails.setItemTotal(new Money(paymentRequestItemTotal, Money.defaultCurrency()));
         }
-        String paymentRequestShippingTotal = getResponseValue(rawResponse, MessageConstants.DETAILSPAYMENTSHIPPINGTOTAL);
+        String paymentRequestShippingTotal = getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTSHIPPINGTOTAL, new Integer[]{0}, new String[]{"n"}));
         if (!StringUtils.isEmpty(paymentRequestShippingTotal)) {
             paymentDetails.setShippingTotal(new Money(paymentRequestShippingTotal, Money.defaultCurrency()));
         }
-        String paymentRequestShippingDiscount = getResponseValue(rawResponse, MessageConstants.DETAILSPAYMENTSHIPPINGDISCOUNT);
+        String paymentRequestShippingDiscount = getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTSHIPPINGDISCOUNT, new Integer[]{0}, new String[]{"n"}));
         if (!StringUtils.isEmpty(paymentRequestShippingDiscount)) {
             paymentDetails.setShippingDiscount(new Money(paymentRequestShippingDiscount, Money.defaultCurrency()));
         }
-        String paymentRequestTotalTax = getResponseValue(rawResponse, MessageConstants.DETAILSPAYMENTTOTALTAX);
+        String paymentRequestTotalTax = getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTTOTALTAX, new Integer[]{0}, new String[]{"n"}));
         if (!StringUtils.isEmpty(paymentRequestTotalTax)) {
             paymentDetails.setTotalTax(new Money(paymentRequestTotalTax, Money.defaultCurrency()));
         }
-        paymentDetails.setReferenceNumber(getResponseValue(rawResponse, MessageConstants.DETAILSPAYMENTREFERENCENUMBER));
-        paymentDetails.setTransactionId(getResponseValue(rawResponse, MessageConstants.DETAILSPAYMENTTRANSACTIONID));
-        paymentDetails.setPaymentMethod(getResponseValue(rawResponse, MessageConstants.DETAILSPAYMENTALLOWEDMETHOD));
-        paymentDetails.setPaymentRequestId(getResponseValue(rawResponse, MessageConstants.DETAILSPAYMENTREQUESTID));
+        paymentDetails.setReferenceNumber(getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTREFERENCENUMBER, new Integer[]{0}, new String[]{"n"})));
+        paymentDetails.setTransactionId(getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTTRANSACTIONID, new Integer[]{0}, new String[]{"n"})));
+        paymentDetails.setPaymentMethod(getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTALLOWEDMETHOD, new Integer[]{0}, new String[]{"n"})));
+        paymentDetails.setPaymentRequestId(getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTREQUESTID, new Integer[]{0}, new String[]{"n"})));
         response.setPaymentDetails(paymentDetails);
         
         eof = false;
@@ -144,16 +147,16 @@ public class PayPalResponseGeneratorImpl implements PayPalResponseGenerator {
                 PayPalPaymentItemDetails itemDetails = new PayPalPaymentItemDetails();
                 itemDetails.setName(paymentRequestItemName);
                 itemDetails.setDescription(getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTITEMDESCRIPTION, new Integer[]{0, number}, new String[]{"n", "m"})));
-                String paymentRequestItemAmount = getResponseValue(rawResponse, MessageConstants.DETAILSPAYMENTITEMAMOUNT);
+                String paymentRequestItemAmount = getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTITEMAMOUNT, new Integer[]{0, number}, new String[]{"n", "m"}));
                 if (!StringUtils.isEmpty(paymentRequestItemAmount)) {
                     itemDetails.setAmount(new Money(paymentRequestItemAmount, Money.defaultCurrency()));
                 }
                 itemDetails.setItemNumber(getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTITEMNUMBER, new Integer[]{0, number}, new String[]{"n", "m"})));
-                String paymentRequestItemQuantity = getResponseValue(rawResponse, MessageConstants.DETAILSPAYMENTITEMQUANTITY);
+                String paymentRequestItemQuantity = getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTITEMQUANTITY, new Integer[]{0, number}, new String[]{"n", "m"}));
                 if (!StringUtils.isEmpty(paymentRequestItemQuantity)) {
                     itemDetails.setQuantity(Integer.valueOf(paymentRequestItemQuantity));
                 }
-                String paymentRequestItemTax = getResponseValue(rawResponse, MessageConstants.DETAILSPAYMENTITEMTAX);
+                String paymentRequestItemTax = getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTITEMTAX, new Integer[]{0, number}, new String[]{"n", "m"}));
                 if (!StringUtils.isEmpty(paymentRequestItemTax)) {
                     itemDetails.setTax(new Money(paymentRequestItemTax, Money.defaultCurrency()));
                 }
@@ -255,16 +258,20 @@ public class PayPalResponseGeneratorImpl implements PayPalResponseGenerator {
     }
 
     protected String getResponseValue(String resp, String valueName) {
-        int keyBegin = resp.indexOf(valueName);
-        if (keyBegin >= 0) {
-            int tokenBegin = keyBegin + valueName.length() + 1;
-            int tokenEnd = resp.indexOf('&', tokenBegin);
-            if (tokenEnd < 0) {
-                tokenEnd = resp.length();
+        try {
+            int keyBegin = resp.indexOf(valueName);
+            if (keyBegin >= 0) {
+                int tokenBegin = keyBegin + valueName.length() + 1;
+                int tokenEnd = resp.indexOf('&', tokenBegin);
+                if (tokenEnd < 0) {
+                    tokenEnd = resp.length();
+                }
+                return URLDecoder.decode(resp.substring(tokenBegin, tokenEnd), "UTF-8");
             }
-            return resp.substring(tokenBegin, tokenEnd);
+            return null;
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
         }
-        return null;
     }
 
     @Override

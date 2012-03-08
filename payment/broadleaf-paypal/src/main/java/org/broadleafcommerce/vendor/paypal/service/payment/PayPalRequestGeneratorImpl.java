@@ -24,6 +24,7 @@ import org.apache.commons.httpclient.NameValuePair;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalItemRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalPaymentRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalRequest;
+import org.broadleafcommerce.vendor.paypal.service.payment.message.details.PayPalDetailsRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalMethodType;
 
 /**
@@ -40,25 +41,32 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
     protected Map<String, String> additionalConfig;
     
     @Override
-    public List<NameValuePair> buildRequest(PayPalRequest paymentRequest) {
+    public List<NameValuePair> buildRequest(PayPalRequest request) {
         List<NameValuePair> nvps = new ArrayList<NameValuePair>();
         setBaseNvps(nvps);
 
-        if (paymentRequest.getMethodType() == PayPalMethodType.CHECKOUT) {
-            setNvpsForCheckout(nvps, (PayPalPaymentRequest) paymentRequest);
-        } else if (paymentRequest.getMethodType() == PayPalMethodType.PROCESS) {
-            setNvpsForProcess(nvps, (PayPalPaymentRequest) paymentRequest);
-        } else if (paymentRequest.getMethodType() == PayPalMethodType.REFUND) {
+        if (request.getMethodType() == PayPalMethodType.CHECKOUT) {
+            setNvpsForCheckout(nvps, (PayPalPaymentRequest) request);
+        } else if (request.getMethodType() == PayPalMethodType.PROCESS) {
+            setNvpsForProcess(nvps, (PayPalPaymentRequest) request);
+        } else if (request.getMethodType() == PayPalMethodType.REFUND) {
             setNvpsForRefund(nvps);
-        } else if (paymentRequest.getMethodType() == PayPalMethodType.CAPTURE) {
-            setNvpsForCapture(nvps, (PayPalPaymentRequest) paymentRequest);
-        } else if (paymentRequest.getMethodType() == PayPalMethodType.VOID) {
+        } else if (request.getMethodType() == PayPalMethodType.CAPTURE) {
+            setNvpsForCapture(nvps, (PayPalPaymentRequest) request);
+        } else if (request.getMethodType() == PayPalMethodType.VOID) {
             setNvpsForVoid(nvps);
+        } else if (request.getMethodType() == PayPalMethodType.DETAILS) {
+            setNvpsForDetails(nvps, (PayPalDetailsRequest) request);
         } else {
-            throw new IllegalArgumentException("Method type not supported: " + paymentRequest.getMethodType().getFriendlyType());
+            throw new IllegalArgumentException("Method type not supported: " + request.getMethodType().getFriendlyType());
         }
         
         return nvps;
+    }
+
+    protected void setNvpsForDetails(List<NameValuePair> nvps, PayPalDetailsRequest paymentRequest) {
+        nvps.add(new NameValuePair(MessageConstants.TOKEN, paymentRequest.getToken()));
+        nvps.add(new NameValuePair(MessageConstants.METHOD, MessageConstants.PAYMENTDETAILSACTION));
     }
 
     protected void setNvpsForVoid(List<NameValuePair> nvps) {

@@ -17,6 +17,7 @@
 package org.broadleafcommerce.vendor.paypal.service.payment.message.details;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.broadleafcommerce.common.money.Money;
@@ -36,7 +37,7 @@ public class PayPalPaymentDetails implements Serializable {
     protected String transactionId;
     protected String paymentMethod;
     protected String paymentRequestId;
-    protected List<PayPalPaymentItemDetails> itemDetails;
+    protected List<PayPalPaymentItemDetails> itemDetails = new ArrayList<PayPalPaymentItemDetails>();
 
     public Money getAmount() {
         return amount;
