@@ -43,12 +43,11 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
     @Override
     public List<NameValuePair> buildRequest(PayPalRequest request) {
         List<NameValuePair> nvps = new ArrayList<NameValuePair>();
+        setBaseNvps(nvps);
 
         if (request.getMethodType() == PayPalMethodType.CHECKOUT) {
-            setBaseNvps(nvps);
             setNvpsForCheckout(nvps, (PayPalPaymentRequest) request);
         } else if (request.getMethodType() == PayPalMethodType.PROCESS) {
-            setBaseNvps(nvps);
             setNvpsForProcess(nvps, (PayPalPaymentRequest) request);
         } else if (request.getMethodType() == PayPalMethodType.REFUND) {
             setNvpsForRefund(nvps, (PayPalPaymentRequest) request);
@@ -57,7 +56,6 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
         } else if (request.getMethodType() == PayPalMethodType.VOID) {
             setNvpsForVoid(nvps, (PayPalPaymentRequest) request);
         } else if (request.getMethodType() == PayPalMethodType.DETAILS) {
-            setBaseNvps(nvps);
             setNvpsForDetails(nvps, (PayPalDetailsRequest) request);
         } else {
             throw new IllegalArgumentException("Method type not supported: " + request.getMethodType().getFriendlyType());
@@ -100,7 +98,7 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
     }
 
     protected void setNvpsForProcess(List<NameValuePair> nvps, PayPalPaymentRequest paymentRequest) {
-        nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.PAYMENTACTION, new Integer[] {0}, new String[] {"n"}), MessageConstants.SALEACTION));
+        nvps.add(new NameValuePair(MessageConstants.PAYMENTACTION, MessageConstants.SALEACTION));
         nvps.add(new NameValuePair(MessageConstants.TOKEN, paymentRequest.getToken()));
         nvps.add(new NameValuePair(MessageConstants.PAYERID, paymentRequest.getPayerID()));
 
@@ -119,8 +117,10 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
     }
     
     protected void setNvpsForCheckout(List<NameValuePair> nvps, PayPalPaymentRequest paymentRequest) {
-        nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.PAYMENTACTION, new Integer[] {0}, new String[] {"n"}), MessageConstants.SALEACTION));
+        nvps.add(new NameValuePair(MessageConstants.PAYMENTACTION, MessageConstants.SALEACTION));
         nvps.add(new NameValuePair(MessageConstants.INVNUM, paymentRequest.getReferenceNumber()));
+        //do not display shipping address fields on paypal pages
+        nvps.add(new NameValuePair(MessageConstants.NOSHIPPING, "1"));
 
         setCostNvps(nvps, paymentRequest);
 

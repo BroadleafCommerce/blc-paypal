@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-package org.broadleafcommerce.payment.service.module;
+package org.broadleafcommerce.vendor.paypal.service.payment.message;
+
+import java.util.List;
+
+import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalErrorResponse;
 
 /**
  * @author Jeff Fischer
  */
-public class MessageConstants {
+public interface ErrorCheckable {
 
-    public static final String PAYPALMETHODTYPE = "PAYPALMETHODTYPE";
-    
-    public static final String ERRORCODE = "ERRORCODE";
-    public static final String SHORTMESSAGE = "SHORTMESSAGE";
-    public static final String LONGMESSAGE = "LONGMESSAGE";
-    public static final String SEVERITYCODE = "SEVERITYCODE";
-    public static final String REDIRECTURL = "REDIRECTURL";
+    public List<PayPalErrorResponse> getErrorResponses();
+
+    public void setErrorResponses(List<PayPalErrorResponse> errorResponses);
+
 }

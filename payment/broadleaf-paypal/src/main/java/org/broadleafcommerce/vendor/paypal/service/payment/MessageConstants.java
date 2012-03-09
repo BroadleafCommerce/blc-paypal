@@ -22,15 +22,28 @@ import org.omg.CORBA.PUBLIC_MEMBER;
  * @author Jeff Fischer
  */
 public class MessageConstants {
-    
+
+    public static final String PAYPALMETHODTYPE = "PAYPALMETHODTYPE";
+
+    public static final String MODULEERRORCODE = "MODULEERRORCODE";
+    public static final String MODULEERRORSHORTMESSAGE = "MODULEERRORSHORTMESSAGE";
+    public static final String MODULEERRORLONGMESSAGE = "MODULEERRORLONGMESSAGE";
+    public static final String MODULEERRORSEVERITYCODE = "MODULEERRORSEVERITYCODE";
+    public static final String REDIRECTURL = "REDIRECTURL";
+    public static final String EXCHANGERATE = "EXCHANGERATE";
+    public static final String PAYMENTSTATUS = "PAYMENTSTATUS";
+    public static final String PENDINGREASON = "PENDINGREASON";
+    public static final String REASONCODE = "REASONCODE";
+    public static final String HOLDDECISION = "HOLDDECISION";
+
     public static final String ACK = "ACK";
-    
     public static final String SUCCESS = "success";
     public static final String SUCCESSWITHWARNINGS = "successwithwarnings";
     public static final String TOKEN = "TOKEN";
     public static final String CORRELATIONID = "CORRELATIONID";
     public static final String TRANSACTIONID = "TRANSACTIONID";
 
+    public static final String NOSHIPPING = "NOSHIPPING";
     public static final String USER = "USER";
     public static final String PASSWORD = "PWD";
     public static final String SIGNATURE = "SIGNATURE";
@@ -101,6 +114,20 @@ public class MessageConstants {
     public static final String DETAILSPAYMENTERRORLONGMESSAGE = "PAYMENTREQUEST_n_LONGMESSAGE";
     public static final String DETAILSPAYMENTERRORSEVERITYCODE = "PAYMENTREQUEST_n_SEVERITYCODE";
     public static final String DETAILSPAYMENTERRORACK = "PAYMENTREQUEST_n_ACK";
+
+    public static final String PROCESSPAYMENTTRANSACTIONID = "PAYMENTINFO_n_TRANSACTIONID";
+    public static final String PROCESSPAYMENTPAYMENTTYPE = "PAYMENTINFO_n_PAYMENTTYPE";
+    public static final String PROCESSPAYMENTORDERITEM = "PAYMENTINFO_n_ORDERTIME";
+    public static final String PROCESSPAYMENTAMOUNT = "PAYMENTINFO_n_AMT";
+    public static final String PROCESSPAYMENTCURRENCYCODE = "PAYMENTINFO_n_CURRENCYCODE";
+    public static final String PROCESSPAYMENTFEEAMOUNT = "PAYMENTINFO_n_FEEAMT";
+    public static final String PROCESSPAYMENTSETTLEAMOUNT = "PAYMENTINFO_n_SETTLEAMT";
+    public static final String PROCESSPAYMENTTAXAMOUNT = "PAYMENTINFO_n_TAXAMT";
+    public static final String PROCESSPAYMENTEXCHANGERATE = "PAYMENTINFO_n_EXCHANGERATE";
+    public static final String PROCESSPAYMENTPAYMENTSTATUSTYPE = "PAYMENTINFO_n_PAYMENTSTATUS";
+    public static final String PROCESSPAYMENTPENDINGREASONTYPE = "PAYMENTINFO_n_PENDINGREASON";
+    public static final String PROCESSPAYMENTREASONCODETYPE = "PAYMENTINFO_n_REASONCODE";
+    public static final String PROCESSPAYMENTHOLDDECISIONTYPE = "PAYMENTINFO_n_HOLDDECISION";
     
     public static final String COMPLETETYPE = "COMPLETETYPE";
     public static final String CAPTURECOMPLETE = "Complete";

@@ -16,7 +16,6 @@
 
 package org.broadleafcommerce.vendor.paypal.service.payment;
 
-import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalPaymentRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalResponse;
 

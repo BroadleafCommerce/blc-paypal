@@ -23,10 +23,19 @@ import java.io.Serializable;
  */
 public class PayPalErrorResponse implements Serializable {
     
-    private String errorCode;
-    private String shortMessage;
-    private String longMessage;
-    private String severityCode;
+    protected String errorCode;
+    protected String shortMessage;
+    protected String longMessage;
+    protected String severityCode;
+    protected String ack;
+
+    public String getAck() {
+        return ack;
+    }
+
+    public void setAck(String ack) {
+        this.ack = ack;
+    }
 
     public String getErrorCode() {
         return errorCode;
@@ -63,10 +72,11 @@ public class PayPalErrorResponse implements Serializable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof PayPalErrorResponse)) return false;
 
         PayPalErrorResponse that = (PayPalErrorResponse) o;
 
+        if (ack != null ? !ack.equals(that.ack) : that.ack != null) return false;
         if (errorCode != null ? !errorCode.equals(that.errorCode) : that.errorCode != null) return false;
         if (longMessage != null ? !longMessage.equals(that.longMessage) : that.longMessage != null) return false;
         if (severityCode != null ? !severityCode.equals(that.severityCode) : that.severityCode != null) return false;
@@ -81,6 +91,7 @@ public class PayPalErrorResponse implements Serializable {
         result = 31 * result + (shortMessage != null ? shortMessage.hashCode() : 0);
         result = 31 * result + (longMessage != null ? longMessage.hashCode() : 0);
         result = 31 * result + (severityCode != null ? severityCode.hashCode() : 0);
+        result = 31 * result + (ack != null ? ack.hashCode() : 0);
         return result;
     }
 }

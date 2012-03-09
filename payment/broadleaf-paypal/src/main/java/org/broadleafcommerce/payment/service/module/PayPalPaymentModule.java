@@ -26,14 +26,15 @@ import org.broadleafcommerce.core.payment.service.PaymentContext;
 import org.broadleafcommerce.core.payment.service.exception.PaymentException;
 import org.broadleafcommerce.core.payment.service.module.PaymentModule;
 import org.broadleafcommerce.core.payment.service.type.PaymentInfoType;
+import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalPaymentService;
-import org.broadleafcommerce.vendor.paypal.service.payment.message.details.PayPalDetailsRequest;
-import org.broadleafcommerce.vendor.paypal.service.payment.message.details.PayPalDetailsResponse;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalErrorResponse;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalItemRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalPaymentRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalPaymentResponse;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalSummaryRequest;
+import org.broadleafcommerce.vendor.paypal.service.payment.message.details.PayPalDetailsRequest;
+import org.broadleafcommerce.vendor.paypal.service.payment.message.details.PayPalDetailsResponse;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalMethodType;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalTransactionType;
 import org.springframework.util.Assert;
@@ -150,9 +151,9 @@ public class PayPalPaymentModule implements PaymentModule {
         summaryRequest.setTotalShipping(totalledPaymentInfo.getTotalShipping());
         summaryRequest.setTotalTax(totalledPaymentInfo.getTotalTax());
         request.setSummaryRequest(summaryRequest);
-        if(request.getMethodType().equals(PayPalMethodType.PROCESS)){
-            request.setPayerID(paymentContext.getPaymentInfo().getAdditionalFields().get("payerID"));
-            request.setToken(paymentContext.getPaymentInfo().getAdditionalFields().get("token"));
+        if(request.getMethodType() == PayPalMethodType.PROCESS){
+            request.setPayerID(paymentContext.getPaymentInfo().getAdditionalFields().get(org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants.PAYERID));
+            request.setToken(paymentContext.getPaymentInfo().getAdditionalFields().get(org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants.TOKEN));
         }
         PayPalPaymentResponse response;
         try {
@@ -162,6 +163,26 @@ public class PayPalPaymentModule implements PaymentModule {
         }
 
         PaymentResponseItem responseItem = buildBasicResponse(response);
+        if(request.getMethodType() == PayPalMethodType.PROCESS){
+            responseItem.setTransactionId(response.getPaymentInfo().getTransactionId());
+            if (response.getPaymentInfo().getExchangeRate() != null) {
+                responseItem.getAdditionalFields().put(MessageConstants.EXCHANGERATE, response.getPaymentInfo().getExchangeRate().toString());
+            }
+            if (response.getPaymentInfo().getPaymentStatusType() != null) {
+                responseItem.getAdditionalFields().put(MessageConstants.PAYMENTSTATUS, response.getPaymentInfo().getPaymentStatusType().getType());
+            }
+            if (response.getPaymentInfo().getPendingReasonType() != null) {
+                responseItem.getAdditionalFields().put(MessageConstants.PENDINGREASON, response.getPaymentInfo().getPendingReasonType().getType());
+            }
+            if (response.getPaymentInfo().getReasonCodeType() != null) {
+                responseItem.getAdditionalFields().put(MessageConstants.REASONCODE, response.getPaymentInfo().getReasonCodeType().getType());
+            }
+            if (response.getPaymentInfo().getHoldDecisionType() != null) {
+                responseItem.getAdditionalFields().put(MessageConstants.HOLDDECISION, response.getPaymentInfo().getHoldDecisionType().getType());
+            }
+        } else if (request.getMethodType() == PayPalMethodType.CHECKOUT) {
+            responseItem.getAdditionalFields().put(MessageConstants.REDIRECTURL, response.getUserRedirectUrl());
+        }
         responseItem.setAmountPaid(paymentContext.getPaymentInfo().getAmount());
 
         return responseItem;
@@ -173,18 +194,16 @@ public class PayPalPaymentModule implements PaymentModule {
         responseItem.setMiddlewareResponseCode(response.getAck());
         responseItem.setMiddlewareResponseText(response.getAck());
         responseItem.setReferenceNumber(response.getResponseToken());
-        responseItem.setTransactionId(response.getCorrelationId());
         responseItem.setTransactionSuccess(response.isSuccessful());
         responseItem.setAuthorizationCode(response.getAck());
         for (PayPalErrorResponse errorResponse : response.getErrorResponses()) {
             String errorCode = errorResponse.getErrorCode();
-            responseItem.getAdditionalFields().put(MessageConstants.ERRORCODE, errorCode);
-            responseItem.getAdditionalFields().put(MessageConstants.SEVERITYCODE + "_" + errorCode, errorResponse.getSeverityCode());
-            responseItem.getAdditionalFields().put(MessageConstants.LONGMESSAGE + "_" + errorCode, errorResponse.getLongMessage());
-            responseItem.getAdditionalFields().put(MessageConstants.SHORTMESSAGE + "_" + errorCode, errorResponse.getShortMessage());
+            responseItem.getAdditionalFields().put(MessageConstants.MODULEERRORCODE, errorCode);
+            responseItem.getAdditionalFields().put(MessageConstants.MODULEERRORSEVERITYCODE + "_" + errorCode, errorResponse.getSeverityCode());
+            responseItem.getAdditionalFields().put(MessageConstants.MODULEERRORLONGMESSAGE + "_" + errorCode, errorResponse.getLongMessage());
+            responseItem.getAdditionalFields().put(MessageConstants.MODULEERRORSHORTMESSAGE + "_" + errorCode, errorResponse.getShortMessage());
         }
         responseItem.getAdditionalFields().putAll(response.getPassThroughErrors());
-        responseItem.getAdditionalFields().put(MessageConstants.REDIRECTURL, response.getUserRedirectUrl());
 
         return responseItem;
     }
@@ -254,7 +273,7 @@ public class PayPalPaymentModule implements PaymentModule {
 
     @Override
     public PaymentResponseItem balance(PaymentContext paymentContext) throws PaymentException {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        throw new PaymentException("The balance method is not supported by this module");
     }
 
     public PayPalDetailsResponse getExpressCheckoutDetails(PayPalDetailsRequest request) throws PaymentException {

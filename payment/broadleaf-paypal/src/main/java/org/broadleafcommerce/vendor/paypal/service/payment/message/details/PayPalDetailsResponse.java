@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.broadleafcommerce.common.money.Money;
+import org.broadleafcommerce.vendor.paypal.service.payment.message.ErrorCheckable;
+import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalErrorResponse;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalResponse;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalCheckoutStatusType;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalPayerStatusType;
@@ -27,7 +29,7 @@ import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalPayerStatu
 /**
  * @author Jeff Fischer
  */
-public class PayPalDetailsResponse extends PayPalResponse {
+public class PayPalDetailsResponse extends PayPalResponse implements ErrorCheckable {
 
     protected String phoneNumber;
     protected Money payPalAdjustment;
@@ -44,8 +46,8 @@ public class PayPalDetailsResponse extends PayPalResponse {
     protected String payerMiddleName;
     protected String payerSuffix;
     protected List<PayPalPayerAddress> addresses = new ArrayList<PayPalPayerAddress>();
+    protected List<PayPalErrorResponse> errorResponses = new ArrayList<PayPalErrorResponse>();
     protected PayPalPaymentDetails paymentDetails;
-    protected List<PayPalDetailsErrorResponse> errorResponses = new ArrayList<PayPalDetailsErrorResponse>();
 
     public List<PayPalPayerAddress> getAddresses() {
         return addresses;
@@ -85,14 +87,6 @@ public class PayPalDetailsResponse extends PayPalResponse {
 
     public void setEmailAddress(String emailAddress) {
         this.emailAddress = emailAddress;
-    }
-
-    public List<PayPalDetailsErrorResponse> getErrorResponses() {
-        return errorResponses;
-    }
-
-    public void setErrorResponses(List<PayPalDetailsErrorResponse> errorResponses) {
-        this.errorResponses = errorResponses;
     }
 
     public String getNote() {
@@ -183,6 +177,14 @@ public class PayPalDetailsResponse extends PayPalResponse {
         this.paymentDetails = paymentDetails;
     }
 
+    public List<PayPalErrorResponse> getErrorResponses() {
+        return errorResponses;
+    }
+
+    public void setErrorResponses(List<PayPalErrorResponse> errorResponses) {
+        this.errorResponses = errorResponses;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -238,8 +240,8 @@ public class PayPalDetailsResponse extends PayPalResponse {
         result = 31 * result + (payerMiddleName != null ? payerMiddleName.hashCode() : 0);
         result = 31 * result + (payerSuffix != null ? payerSuffix.hashCode() : 0);
         result = 31 * result + (addresses != null ? addresses.hashCode() : 0);
-        result = 31 * result + (paymentDetails != null ? paymentDetails.hashCode() : 0);
         result = 31 * result + (errorResponses != null ? errorResponses.hashCode() : 0);
+        result = 31 * result + (paymentDetails != null ? paymentDetails.hashCode() : 0);
         return result;
     }
 }

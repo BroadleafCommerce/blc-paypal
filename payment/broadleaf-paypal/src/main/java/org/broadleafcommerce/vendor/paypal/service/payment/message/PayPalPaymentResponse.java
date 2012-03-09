@@ -30,26 +30,27 @@ import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalTransactio
  * @author jfischer
  *
  */
-public class PayPalPaymentResponse extends PayPalResponse implements PaymentResponse {
+public class PayPalPaymentResponse extends PayPalResponse implements PaymentResponse, ErrorCheckable {
 		
 	private static final long serialVersionUID = 1L;
 	
-    private boolean isErrorDetected = false;
-    private boolean isSuccessful = true;
-    private String errorText;
-    private PayPalTransactionType transactionType;
-    private PayPalMethodType methodType;
-    private List<PayPalErrorResponse> errorResponses = new ArrayList<PayPalErrorResponse>();
-    private Map<String, String> passThroughErrors = new HashMap<String, String>();
-    private String userRedirectUrl;
-    private String correlationId;
-    private String ack;
-    
+    protected boolean isErrorDetected = false;
+    protected boolean isSuccessful = true;
+    protected String errorText;
+    protected PayPalTransactionType transactionType;
+    protected PayPalMethodType methodType;
+    protected List<PayPalErrorResponse> errorResponses = new ArrayList<PayPalErrorResponse>();
+    protected Map<String, String> passThroughErrors = new HashMap<String, String>();
+    protected String userRedirectUrl;
+    protected String correlationId;
+    protected String ack;
+    protected PayPalPaymentInfo paymentInfo;
+
     public PayPalTransactionType getTransactionType() {
 		return transactionType;
 	}
-	
-	public void setTransactionType(PayPalTransactionType transactionType) {
+
+    public void setTransactionType(PayPalTransactionType transactionType) {
 		this.transactionType = transactionType;
 	}
 	
@@ -134,6 +135,14 @@ public class PayPalPaymentResponse extends PayPalResponse implements PaymentResp
         this.ack = ack;
     }
 
+    public PayPalPaymentInfo getPaymentInfo() {
+        return paymentInfo;
+    }
+
+    public void setPaymentInfo(PayPalPaymentInfo paymentInfo) {
+        this.paymentInfo = paymentInfo;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -153,6 +162,7 @@ public class PayPalPaymentResponse extends PayPalResponse implements PaymentResp
         if (methodType != null ? !methodType.equals(that.methodType) : that.methodType != null) return false;
         if (passThroughErrors != null ? !passThroughErrors.equals(that.passThroughErrors) : that.passThroughErrors != null)
             return false;
+        if (paymentInfo != null ? !paymentInfo.equals(that.paymentInfo) : that.paymentInfo != null) return false;
         if (transactionType != null ? !transactionType.equals(that.transactionType) : that.transactionType != null)
             return false;
         if (userRedirectUrl != null ? !userRedirectUrl.equals(that.userRedirectUrl) : that.userRedirectUrl != null)
@@ -174,6 +184,7 @@ public class PayPalPaymentResponse extends PayPalResponse implements PaymentResp
         result = 31 * result + (userRedirectUrl != null ? userRedirectUrl.hashCode() : 0);
         result = 31 * result + (correlationId != null ? correlationId.hashCode() : 0);
         result = 31 * result + (ack != null ? ack.hashCode() : 0);
+        result = 31 * result + (paymentInfo != null ? paymentInfo.hashCode() : 0);
         return result;
     }
 }
