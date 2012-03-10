@@ -25,6 +25,7 @@ import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalMethodType
  */
 public abstract class PayPalRequest implements Serializable {
 
+    protected PayPalMethodType secondaryMethodType;
     protected PayPalMethodType methodType;
 
     public PayPalMethodType getMethodType() {
@@ -35,6 +36,14 @@ public abstract class PayPalRequest implements Serializable {
         this.methodType = methodType;
     }
 
+    public PayPalMethodType getSecondaryMethodType() {
+        return secondaryMethodType;
+    }
+
+    public void setSecondaryMethodType(PayPalMethodType secondaryMethodType) {
+        this.secondaryMethodType = secondaryMethodType;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -43,12 +52,16 @@ public abstract class PayPalRequest implements Serializable {
         PayPalRequest that = (PayPalRequest) o;
 
         if (methodType != null ? !methodType.equals(that.methodType) : that.methodType != null) return false;
+        if (secondaryMethodType != null ? !secondaryMethodType.equals(that.secondaryMethodType) : that.secondaryMethodType != null)
+            return false;
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        return methodType != null ? methodType.hashCode() : 0;
+        int result = secondaryMethodType != null ? secondaryMethodType.hashCode() : 0;
+        result = 31 * result + (methodType != null ? methodType.hashCode() : 0);
+        return result;
     }
 }

@@ -26,6 +26,7 @@ import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalPayment
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.details.PayPalDetailsRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalMethodType;
+import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalRefundType;
 
 /**
  * @author Jeff Fischer
@@ -46,15 +47,23 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
         setBaseNvps(nvps);
 
         if (request.getMethodType() == PayPalMethodType.CHECKOUT) {
-            setNvpsForCheckout(nvps, (PayPalPaymentRequest) request);
+            setNvpsForCheckoutOrAuth(nvps, (PayPalPaymentRequest) request, MessageConstants.SALEACTION);
+            nvps.add(new NameValuePair(MessageConstants.CURRENCYCODE, ((PayPalPaymentRequest) request).getCurrency()));
+        } else if (request.getMethodType() == PayPalMethodType.AUTHORIZATION) {
+            setNvpsForCheckoutOrAuth(nvps, (PayPalPaymentRequest) request, MessageConstants.AUTHORIZATIONACTION);
+            nvps.add(new NameValuePair(MessageConstants.CURRENCYCODE, ((PayPalPaymentRequest) request).getCurrency()));
         } else if (request.getMethodType() == PayPalMethodType.PROCESS) {
             setNvpsForProcess(nvps, (PayPalPaymentRequest) request);
+            nvps.add(new NameValuePair(MessageConstants.CURRENCYCODE, ((PayPalPaymentRequest) request).getCurrency()));
         } else if (request.getMethodType() == PayPalMethodType.REFUND) {
             setNvpsForRefund(nvps, (PayPalPaymentRequest) request);
+            nvps.add(new NameValuePair(MessageConstants.CURRENCYCODE, ((PayPalPaymentRequest) request).getCurrency()));
         } else if (request.getMethodType() == PayPalMethodType.CAPTURE) {
             setNvpsForCapture(nvps, (PayPalPaymentRequest) request);
+            nvps.add(new NameValuePair(MessageConstants.CURRENCYCODE, ((PayPalPaymentRequest) request).getCurrency()));
         } else if (request.getMethodType() == PayPalMethodType.VOID) {
             setNvpsForVoid(nvps, (PayPalPaymentRequest) request);
+            nvps.add(new NameValuePair(MessageConstants.CURRENCYCODE, ((PayPalPaymentRequest) request).getCurrency()));
         } else if (request.getMethodType() == PayPalMethodType.DETAILS) {
             setNvpsForDetails(nvps, (PayPalDetailsRequest) request);
         } else {
@@ -70,7 +79,7 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
     }
 
     protected void setNvpsForVoid(List<NameValuePair> nvps, PayPalPaymentRequest paymentRequest) {
-        nvps.add(new NameValuePair(MessageConstants.TRANSACTIONID, paymentRequest.getTransactionID()));
+        nvps.add(new NameValuePair(MessageConstants.AUTHORIZATONID, paymentRequest.getTransactionID()));
 
         for (Map.Entry<String, String> entry : getAdditionalConfig().entrySet()) {
             nvps.add(new NameValuePair(entry.getKey(), entry.getValue()));
@@ -79,8 +88,8 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
     }
 
     protected void setNvpsForCapture(List<NameValuePair> nvps, PayPalPaymentRequest paymentRequest) {
-        nvps.add(new NameValuePair(MessageConstants.TRANSACTIONID, paymentRequest.getTransactionID()));
-        nvps.add(new NameValuePair(MessageConstants.GRANDTOTALREQUEST, paymentRequest.getSummaryRequest().getGrandTotal().toString()));
+        nvps.add(new NameValuePair(MessageConstants.AUTHORIZATONID, paymentRequest.getTransactionID()));
+        nvps.add(new NameValuePair(MessageConstants.AMOUNT, paymentRequest.getSummaryRequest().getGrandTotal().toString()));
         nvps.add(new NameValuePair(MessageConstants.COMPLETETYPE, MessageConstants.CAPTURECOMPLETE));
         for (Map.Entry<String, String> entry : getAdditionalConfig().entrySet()) {
             nvps.add(new NameValuePair(entry.getKey(), entry.getValue()));
@@ -90,22 +99,26 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
 
     protected void setNvpsForRefund(List<NameValuePair> nvps, PayPalPaymentRequest paymentRequest) {
         nvps.add(new NameValuePair(MessageConstants.TRANSACTIONID, paymentRequest.getTransactionID()));
-
-        for (Map.Entry<String, String> entry : getAdditionalConfig().entrySet()) {
-            nvps.add(new NameValuePair(entry.getKey(), entry.getValue()));
+        nvps.add(new NameValuePair(MessageConstants.REFUNDTYPE, paymentRequest.getRefundType().getType()));
+        if (paymentRequest.getRefundType() != PayPalRefundType.FULL) {
+            nvps.add(new NameValuePair(MessageConstants.AMOUNT, paymentRequest.getSummaryRequest().getGrandTotal().toString()));
         }
         nvps.add(new NameValuePair(MessageConstants.METHOD, MessageConstants.REFUNDACTION));
     }
 
     protected void setNvpsForProcess(List<NameValuePair> nvps, PayPalPaymentRequest paymentRequest) {
-        nvps.add(new NameValuePair(MessageConstants.PAYMENTACTION, MessageConstants.SALEACTION));
+        if (paymentRequest.getSecondaryMethodType() != null && paymentRequest.getSecondaryMethodType() == PayPalMethodType.AUTHORIZATION) {
+            nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.PAYMENTACTION, new Integer[]{0}, new String[]{"n"}), MessageConstants.AUTHORIZATIONACTION));
+        } else {
+            nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.PAYMENTACTION, new Integer[]{0}, new String[]{"n"}), MessageConstants.SALEACTION));
+        }
         nvps.add(new NameValuePair(MessageConstants.TOKEN, paymentRequest.getToken()));
         nvps.add(new NameValuePair(MessageConstants.PAYERID, paymentRequest.getPayerID()));
 
         for (Map.Entry<String, String> entry : getAdditionalConfig().entrySet()) {
             nvps.add(new NameValuePair(entry.getKey(), entry.getValue()));
         }
-        nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.GRANDTOTALREQUEST, new Integer[] {0}, new String[] {"n"}), paymentRequest.getSummaryRequest().getGrandTotal().toString()));
+        nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.GRANDTOTALREQUEST, new Integer[]{0}, new String[]{"n"}), paymentRequest.getSummaryRequest().getGrandTotal().toString()));
         nvps.add(new NameValuePair(MessageConstants.METHOD, MessageConstants.PROCESSPAYMENTACTION));
     }
     
@@ -116,8 +129,8 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
         nvps.add(new NameValuePair(MessageConstants.VERSION, libVersion));
     }
     
-    protected void setNvpsForCheckout(List<NameValuePair> nvps, PayPalPaymentRequest paymentRequest) {
-        nvps.add(new NameValuePair(MessageConstants.PAYMENTACTION, MessageConstants.SALEACTION));
+    protected void setNvpsForCheckoutOrAuth(List<NameValuePair> nvps, PayPalPaymentRequest paymentRequest, String payPalAction) {
+        nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.PAYMENTACTION, new Integer[]{0}, new String[]{"n"}), payPalAction));
         nvps.add(new NameValuePair(MessageConstants.INVNUM, paymentRequest.getReferenceNumber()));
         //do not display shipping address fields on paypal pages
         nvps.add(new NameValuePair(MessageConstants.NOSHIPPING, "1"));
@@ -145,7 +158,6 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
         nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.SUBTOTALREQUEST, new Integer[] {0}, new String[] {"n"}), paymentRequest.getSummaryRequest().getSubTotal().toString()));
         nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.TAXREQUEST, new Integer[] {0}, new String[] {"n"}), paymentRequest.getSummaryRequest().getTotalTax().toString()));
         nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.SHIPPINGREQUEST, new Integer[] {0}, new String[] {"n"}), paymentRequest.getSummaryRequest().getTotalShipping().toString()));
-        nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.SHIPPINGDISCOUNTREQUEST, new Integer[] {0}, new String[] {"n"}), "-" + paymentRequest.getSummaryRequest().getShippingDiscount().toString()));
         nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.GRANDTOTALREQUEST, new Integer[] {0}, new String[] {"n"}), paymentRequest.getSummaryRequest().getGrandTotal().toString()));
     }
     

@@ -23,31 +23,31 @@ import java.util.Map;
 import org.broadleafcommerce.common.BroadleafEnumerationType;
 
 /**
- * An extendible enumeration of transaction types.
- * 
- * @author jfischer
+ * @author Jeff Fischer
  */
-public class PayPalHoldDecisionType implements Serializable, BroadleafEnumerationType {
+public class PayPalRefundType implements Serializable, BroadleafEnumerationType {
 
     private static final long serialVersionUID = 1L;
 
-    private static final Map<String, PayPalHoldDecisionType> TYPES = new HashMap<String, PayPalHoldDecisionType>();
+    private static final Map<String, PayPalRefundType> TYPES = new HashMap<String, PayPalRefundType>();
 
-    public static final PayPalHoldDecisionType NEWSELLERPAYMENTHOLD  = new PayPalHoldDecisionType("newsellerpaymenthold", "newsellerpaymenthold");
-    public static final PayPalHoldDecisionType PAYMENTHOLD = new PayPalHoldDecisionType("paymenthold", "paymenthold");
+    public static final PayPalRefundType FULL  = new PayPalRefundType("Full", "Full");
+    public static final PayPalRefundType PARTIAL = new PayPalRefundType("Partial", "Partial");
+    public static final PayPalRefundType EXTERNALDISPUTE = new PayPalRefundType("ExternalDispute", "ExternalDispute");
+    public static final PayPalRefundType OTHER = new PayPalRefundType("Other", "Other");
 
-    public static PayPalHoldDecisionType getInstance(final String type) {
+    public static PayPalRefundType getInstance(final String type) {
         return TYPES.get(type);
     }
 
     private String type;
     private String friendlyType;
 
-    public PayPalHoldDecisionType() {
+    public PayPalRefundType() {
         //do nothing
     }
 
-    public PayPalHoldDecisionType(final String type, final String friendlyType) {
+    public PayPalRefundType(final String type, final String friendlyType) {
     	this.friendlyType = friendlyType;
         setType(type);
     }
@@ -83,7 +83,7 @@ public class PayPalHoldDecisionType implements Serializable, BroadleafEnumeratio
             return false;
         if (getClass() != obj.getClass())
             return false;
-        PayPalHoldDecisionType other = (PayPalHoldDecisionType) obj;
+        PayPalRefundType other = (PayPalRefundType) obj;
         if (type == null) {
             if (other.type != null)
                 return false;

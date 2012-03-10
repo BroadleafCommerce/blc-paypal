@@ -33,12 +33,12 @@ public class PayPalReasonCodeType implements Serializable, BroadleafEnumerationT
 
     private static final Map<String, PayPalReasonCodeType> TYPES = new HashMap<String, PayPalReasonCodeType>();
 
-    public static final PayPalReasonCodeType NONE  = new PayPalReasonCodeType("NONE", "none");
-    public static final PayPalReasonCodeType CHARGEBACK = new PayPalReasonCodeType("CHARGEBACK", "chargeback");
-    public static final PayPalReasonCodeType GUARANTEE = new PayPalReasonCodeType("GUARANTEE", "guarantee");
-    public static final PayPalReasonCodeType BUYERCOMPLAINT = new PayPalReasonCodeType("BUYERCOMPLAINT", "buyer-complaint");
-    public static final PayPalReasonCodeType REFUND = new PayPalReasonCodeType("REFUND", "refund");
-    public static final PayPalReasonCodeType OTHER = new PayPalReasonCodeType("OTHER", "other");
+    public static final PayPalReasonCodeType NONE  = new PayPalReasonCodeType("none", "none");
+    public static final PayPalReasonCodeType CHARGEBACK = new PayPalReasonCodeType("chargeback", "chargeback");
+    public static final PayPalReasonCodeType GUARANTEE = new PayPalReasonCodeType("guarantee", "guarantee");
+    public static final PayPalReasonCodeType BUYERCOMPLAINT = new PayPalReasonCodeType("buyer-complaint", "buyer-complaint");
+    public static final PayPalReasonCodeType REFUND = new PayPalReasonCodeType("refund", "refund");
+    public static final PayPalReasonCodeType OTHER = new PayPalReasonCodeType("other", "other");
 
     public static PayPalReasonCodeType getInstance(final String type) {
         return TYPES.get(type);

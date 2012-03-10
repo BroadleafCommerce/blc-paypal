@@ -30,7 +30,6 @@ public class PayPalSummaryRequest implements java.io.Serializable {
 	private Money subTotal;
     private Money totalTax;
     private Money totalShipping;
-    private Money shippingDiscount;
     private Money grandTotal;
 
     public Money getGrandTotal() {
@@ -39,14 +38,6 @@ public class PayPalSummaryRequest implements java.io.Serializable {
 
     public void setGrandTotal(Money grandTotal) {
         this.grandTotal = grandTotal;
-    }
-
-    public Money getShippingDiscount() {
-        return shippingDiscount;
-    }
-
-    public void setShippingDiscount(Money shippingDiscount) {
-        this.shippingDiscount = shippingDiscount;
     }
 
     public Money getSubTotal() {
@@ -76,13 +67,11 @@ public class PayPalSummaryRequest implements java.io.Serializable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof PayPalSummaryRequest)) return false;
 
         PayPalSummaryRequest that = (PayPalSummaryRequest) o;
 
         if (grandTotal != null ? !grandTotal.equals(that.grandTotal) : that.grandTotal != null) return false;
-        if (shippingDiscount != null ? !shippingDiscount.equals(that.shippingDiscount) : that.shippingDiscount != null)
-            return false;
         if (subTotal != null ? !subTotal.equals(that.subTotal) : that.subTotal != null) return false;
         if (totalShipping != null ? !totalShipping.equals(that.totalShipping) : that.totalShipping != null)
             return false;
@@ -96,7 +85,6 @@ public class PayPalSummaryRequest implements java.io.Serializable {
         int result = subTotal != null ? subTotal.hashCode() : 0;
         result = 31 * result + (totalTax != null ? totalTax.hashCode() : 0);
         result = 31 * result + (totalShipping != null ? totalShipping.hashCode() : 0);
-        result = 31 * result + (shippingDiscount != null ? shippingDiscount.hashCode() : 0);
         result = 31 * result + (grandTotal != null ? grandTotal.hashCode() : 0);
         return result;
     }

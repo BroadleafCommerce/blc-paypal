@@ -33,9 +33,9 @@ public class PayPalPaymentType implements Serializable, BroadleafEnumerationType
 
     private static final Map<String, PayPalPaymentType> TYPES = new HashMap<String, PayPalPaymentType>();
 
-    public static final PayPalPaymentType NONE  = new PayPalPaymentType("NONE", "none");
-    public static final PayPalPaymentType ECHECK = new PayPalPaymentType("ECHECK", "echeck");
-    public static final PayPalPaymentType INSTANT = new PayPalPaymentType("INSTANT", "instant");
+    public static final PayPalPaymentType NONE  = new PayPalPaymentType("none", "none");
+    public static final PayPalPaymentType ECHECK = new PayPalPaymentType("echeck", "echeck");
+    public static final PayPalPaymentType INSTANT = new PayPalPaymentType("instant", "instant");
 
     public static PayPalPaymentType getInstance(final String type) {
         return TYPES.get(type);

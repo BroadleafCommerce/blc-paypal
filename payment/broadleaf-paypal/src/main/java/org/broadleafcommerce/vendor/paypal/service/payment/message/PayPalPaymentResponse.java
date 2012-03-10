@@ -45,6 +45,7 @@ public class PayPalPaymentResponse extends PayPalResponse implements PaymentResp
     protected String correlationId;
     protected String ack;
     protected PayPalPaymentInfo paymentInfo;
+    protected PayPalRefundInfo refundInfo;
 
     public PayPalTransactionType getTransactionType() {
 		return transactionType;
@@ -143,6 +144,14 @@ public class PayPalPaymentResponse extends PayPalResponse implements PaymentResp
         this.paymentInfo = paymentInfo;
     }
 
+    public PayPalRefundInfo getRefundInfo() {
+        return refundInfo;
+    }
+
+    public void setRefundInfo(PayPalRefundInfo refundInfo) {
+        this.refundInfo = refundInfo;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -163,6 +172,7 @@ public class PayPalPaymentResponse extends PayPalResponse implements PaymentResp
         if (passThroughErrors != null ? !passThroughErrors.equals(that.passThroughErrors) : that.passThroughErrors != null)
             return false;
         if (paymentInfo != null ? !paymentInfo.equals(that.paymentInfo) : that.paymentInfo != null) return false;
+        if (refundInfo != null ? !refundInfo.equals(that.refundInfo) : that.refundInfo != null) return false;
         if (transactionType != null ? !transactionType.equals(that.transactionType) : that.transactionType != null)
             return false;
         if (userRedirectUrl != null ? !userRedirectUrl.equals(that.userRedirectUrl) : that.userRedirectUrl != null)
@@ -185,6 +195,7 @@ public class PayPalPaymentResponse extends PayPalResponse implements PaymentResp
         result = 31 * result + (correlationId != null ? correlationId.hashCode() : 0);
         result = 31 * result + (ack != null ? ack.hashCode() : 0);
         result = 31 * result + (paymentInfo != null ? paymentInfo.hashCode() : 0);
+        result = 31 * result + (refundInfo != null ? refundInfo.hashCode() : 0);
         return result;
     }
 }

@@ -33,17 +33,17 @@ public class PayPalPendingReasonType implements Serializable, BroadleafEnumerati
 
     private static final Map<String, PayPalPendingReasonType> TYPES = new HashMap<String, PayPalPendingReasonType>();
 
-    public static final PayPalPendingReasonType NONE  = new PayPalPendingReasonType("NONE", "none");
-    public static final PayPalPendingReasonType ADDRESS = new PayPalPendingReasonType("ADDRESS", "address");
-    public static final PayPalPendingReasonType AUTHORIZATION = new PayPalPendingReasonType("AUTHORIZATION", "authorization");
-    public static final PayPalPendingReasonType ECHECK = new PayPalPendingReasonType("ECHECK", "echeck");
-    public static final PayPalPendingReasonType INTL = new PayPalPendingReasonType("INTL", "intl");
-    public static final PayPalPendingReasonType MULTICURRENCY = new PayPalPendingReasonType("MULTICURRENCY", "multi-currency");
-    public static final PayPalPendingReasonType ORDER = new PayPalPendingReasonType("ORDER", "order");
-    public static final PayPalPendingReasonType PAYMENTREVIEW = new PayPalPendingReasonType("PAYMENTREVIEW", "paymentreview");
-    public static final PayPalPendingReasonType UNILATERAL = new PayPalPendingReasonType("UNILATERAL", "unilateral");
-    public static final PayPalPendingReasonType VERIFY = new PayPalPendingReasonType("VERIFY", "verify");
-    public static final PayPalPendingReasonType OTHER = new PayPalPendingReasonType("OTHER", "other");
+    public static final PayPalPendingReasonType NONE  = new PayPalPendingReasonType("none", "none");
+    public static final PayPalPendingReasonType ADDRESS = new PayPalPendingReasonType("address", "address");
+    public static final PayPalPendingReasonType AUTHORIZATION = new PayPalPendingReasonType("authorization", "authorization");
+    public static final PayPalPendingReasonType ECHECK = new PayPalPendingReasonType("echeck", "echeck");
+    public static final PayPalPendingReasonType INTL = new PayPalPendingReasonType("intl", "intl");
+    public static final PayPalPendingReasonType MULTICURRENCY = new PayPalPendingReasonType("multi-currency", "multi-currency");
+    public static final PayPalPendingReasonType ORDER = new PayPalPendingReasonType("order", "order");
+    public static final PayPalPendingReasonType PAYMENTREVIEW = new PayPalPendingReasonType("paymentreview", "paymentreview");
+    public static final PayPalPendingReasonType UNILATERAL = new PayPalPendingReasonType("unilateral", "unilateral");
+    public static final PayPalPendingReasonType VERIFY = new PayPalPendingReasonType("verify", "verify");
+    public static final PayPalPendingReasonType OTHER = new PayPalPendingReasonType("other", "other");
 
     public static PayPalPendingReasonType getInstance(final String type) {
         return TYPES.get(type);

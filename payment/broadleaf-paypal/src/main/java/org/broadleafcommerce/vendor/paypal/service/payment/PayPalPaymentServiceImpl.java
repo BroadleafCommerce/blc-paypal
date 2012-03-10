@@ -73,7 +73,6 @@ public class PayPalPaymentServiceImpl implements PayPalPaymentService {
     }
 
     protected String communicateWithVendor(PayPalRequest paymentRequest) throws IOException {
-        //TODO incorporate different currency type
         HttpClient httpClient = new HttpClient();
         PostMethod postMethod = new PostMethod(getServerUrl());
         List<NameValuePair> nvps = requestGenerator.buildRequest(paymentRequest);

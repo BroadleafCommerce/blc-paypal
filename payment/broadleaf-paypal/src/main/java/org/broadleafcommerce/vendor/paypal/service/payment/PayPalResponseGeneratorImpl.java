@@ -21,6 +21,7 @@ import java.math.BigDecimal;
 import java.net.URLDecoder;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Currency;
 
 import org.apache.commons.lang.StringUtils;
 import org.broadleafcommerce.common.money.Money;
@@ -29,6 +30,7 @@ import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalErrorRe
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalPaymentInfo;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalPaymentRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalPaymentResponse;
+import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalRefundInfo;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalResponse;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.details.PayPalDetailsResponse;
@@ -44,6 +46,8 @@ import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalPaymentSta
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalPaymentType;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalPendingReasonType;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalReasonCodeType;
+import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalRefundPendingReasonType;
+import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalRefundStatusType;
 
 /**
  * @author Jeff Fischer
@@ -51,12 +55,12 @@ import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalReasonCode
 public class PayPalResponseGeneratorImpl implements PayPalResponseGenerator {
 
     protected String userRedirectUrl;
-    protected SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+    protected SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
     @Override
     public PayPalResponse buildResponse(String response, PayPalRequest paymentRequest) {
         PayPalResponse payPalResponse;
-        if (paymentRequest.getMethodType() == PayPalMethodType.CHECKOUT) {
+        if (paymentRequest.getMethodType() == PayPalMethodType.CHECKOUT || paymentRequest.getMethodType() == PayPalMethodType.AUTHORIZATION) {
             payPalResponse = buildCheckoutResponse(response, (PayPalPaymentRequest) paymentRequest);
         } else if (paymentRequest.getMethodType() == PayPalMethodType.DETAILS) {
             payPalResponse = buildDetailsResponse(response);
@@ -64,68 +68,16 @@ public class PayPalResponseGeneratorImpl implements PayPalResponseGenerator {
             payPalResponse = buildCheckoutResponse(response, (PayPalPaymentRequest) paymentRequest);
             addPaymentInfoData(response, (PayPalPaymentResponse) payPalResponse);
         } else {
-            throw new IllegalArgumentException("Method type not supported: " + paymentRequest.getMethodType().getFriendlyType());
+            payPalResponse = buildCheckoutResponse(response, (PayPalPaymentRequest) paymentRequest);
+            addRefundData(response, (PayPalPaymentResponse) payPalResponse);
+            addCapturePaymentInfoData(response, (PayPalPaymentResponse) payPalResponse);
         }
 
         return payPalResponse;
     }
 
-    protected PayPalResponse buildRefundResponse(String rawResponse, PayPalPaymentRequest paymentRequest) {
-        PayPalPaymentResponse response = new PayPalPaymentResponse();
-        response.setTransactionType(paymentRequest.getTransactionType());
-        response.setMethodType(paymentRequest.getMethodType());
-        response.setCorrelationId(getResponseValue(rawResponse, MessageConstants.CORRELATIONID));
-        response.setReferenceNumber(getResponseValue(rawResponse, MessageConstants.INVNUM));
-        String ack = getResponseValue(rawResponse, MessageConstants.ACK);
-        response.setAck(ack);
-        if (ack.toLowerCase().equals(MessageConstants.SUCCESS)) {
-            response.setErrorDetected(false);
-            response.setSuccessful(true);
-        } else if (ack.toLowerCase().equals(MessageConstants.SUCCESSWITHWARNINGS)) {
-            response.setSuccessful(true);
-            response.setErrorDetected(true);
-            response.setResponseToken(getResponseValue(rawResponse, MessageConstants.TOKEN));
-        } else {
-            response.setSuccessful(false);
-            response.setErrorDetected(true);
-        }
-        if (response.isErrorDetected()) {
-            boolean eof = false;
-            int errorNumber = 0;
-            while (!eof) {
-                String errorCode = getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.ERRORCODE, new Integer[]{errorNumber}, new String[]{"n"}));
-                if (errorCode != null) {
-                    PayPalErrorResponse errorResponse = new PayPalErrorResponse();
-                    errorResponse.setErrorCode(errorCode);
-                    errorResponse.setShortMessage(getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.ERRORSHORTMESSAGE, new Integer[]{errorNumber}, new String[]{"n"})));
-                    errorResponse.setLongMessage(getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.ERRORLONGMESSAGE, new Integer[]{errorNumber}, new String[]{"n"})));
-                    errorResponse.setSeverityCode(getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.ERRORSEVERITYCODE, new Integer[]{errorNumber}, new String[]{"n"})));
-                    response.getErrorResponses().add(errorResponse);
-                } else {
-                    eof = true;
-                }
-                errorNumber++;
-            }
-
-            errorNumber = 0;
-            eof = false;
-            while (!eof) {
-                String passThroughErrorName = getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.ERRORPASSTHROUGHNAME, new Integer[]{errorNumber}, new String[]{"n"}));
-                if (passThroughErrorName != null) {
-                    response.getPassThroughErrors().put(passThroughErrorName, getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.ERRORPASSTHROUGHVALUE, new Integer[]{errorNumber}, new String[]{"n"})));
-                } else {
-                    eof = true;
-                }
-                errorNumber++;
-            }
-        }
-
-        return response;
-    }
-
     protected PayPalDetailsResponse buildDetailsResponse(String rawResponse) {
         PayPalDetailsResponse response = new PayPalDetailsResponse();
-        response.setReferenceNumber(getResponseValue(rawResponse, MessageConstants.INVNUM));
         response.setResponseToken(getResponseValue(rawResponse, MessageConstants.TOKEN));
         response.setPhoneNumber(getResponseValue(rawResponse, MessageConstants.PHONENUM));
         String payPalAdjustment = getResponseValue(rawResponse, MessageConstants.PAYPALADJUSTMENT);
@@ -177,26 +129,27 @@ public class PayPalResponseGeneratorImpl implements PayPalResponseGenerator {
         }
 
         PayPalPaymentDetails paymentDetails = new PayPalPaymentDetails();
+        String currencyCode = getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTCURRENCYCODE, new Integer[]{0}, new String[]{"n"}));
+        paymentDetails.setCurrencyCode(currencyCode);
         String paymentRequestAmount = getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTAMOUNT, new Integer[]{0}, new String[]{"n"}));
         if (!StringUtils.isEmpty(paymentRequestAmount)) {
-            paymentDetails.setAmount(new Money(paymentRequestAmount, Money.defaultCurrency()));
+            paymentDetails.setAmount(new Money(paymentRequestAmount, Currency.getInstance(currencyCode)));
         }
-        paymentDetails.setCurrencyCode(getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTCURRENCYCODE, new Integer[]{0}, new String[]{"n"})));
         String paymentRequestItemTotal = getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTITEMTOTAL, new Integer[]{0}, new String[]{"n"}));
         if (!StringUtils.isEmpty(paymentRequestItemTotal)) {
-            paymentDetails.setItemTotal(new Money(paymentRequestItemTotal, Money.defaultCurrency()));
+            paymentDetails.setItemTotal(new Money(paymentRequestItemTotal, Currency.getInstance(currencyCode)));
         }
         String paymentRequestShippingTotal = getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTSHIPPINGTOTAL, new Integer[]{0}, new String[]{"n"}));
         if (!StringUtils.isEmpty(paymentRequestShippingTotal)) {
-            paymentDetails.setShippingTotal(new Money(paymentRequestShippingTotal, Money.defaultCurrency()));
+            paymentDetails.setShippingTotal(new Money(paymentRequestShippingTotal, Currency.getInstance(currencyCode)));
         }
         String paymentRequestShippingDiscount = getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTSHIPPINGDISCOUNT, new Integer[]{0}, new String[]{"n"}));
         if (!StringUtils.isEmpty(paymentRequestShippingDiscount)) {
-            paymentDetails.setShippingDiscount(new Money(paymentRequestShippingDiscount, Money.defaultCurrency()));
+            paymentDetails.setShippingDiscount(new Money(paymentRequestShippingDiscount, Currency.getInstance(currencyCode)));
         }
         String paymentRequestTotalTax = getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTTOTALTAX, new Integer[]{0}, new String[]{"n"}));
         if (!StringUtils.isEmpty(paymentRequestTotalTax)) {
-            paymentDetails.setTotalTax(new Money(paymentRequestTotalTax, Money.defaultCurrency()));
+            paymentDetails.setTotalTax(new Money(paymentRequestTotalTax, Currency.getInstance(currencyCode)));
         }
         paymentDetails.setReferenceNumber(getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTREFERENCENUMBER, new Integer[]{0}, new String[]{"n"})));
         paymentDetails.setTransactionId(getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTTRANSACTIONID, new Integer[]{0}, new String[]{"n"})));
@@ -214,7 +167,7 @@ public class PayPalResponseGeneratorImpl implements PayPalResponseGenerator {
                 itemDetails.setDescription(getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTITEMDESCRIPTION, new Integer[]{0, number}, new String[]{"n", "m"})));
                 String paymentRequestItemAmount = getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTITEMAMOUNT, new Integer[]{0, number}, new String[]{"n", "m"}));
                 if (!StringUtils.isEmpty(paymentRequestItemAmount)) {
-                    itemDetails.setAmount(new Money(paymentRequestItemAmount, Money.defaultCurrency()));
+                    itemDetails.setAmount(new Money(paymentRequestItemAmount, Currency.getInstance(currencyCode)));
                 }
                 itemDetails.setItemNumber(getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTITEMNUMBER, new Integer[]{0, number}, new String[]{"n", "m"})));
                 String paymentRequestItemQuantity = getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTITEMQUANTITY, new Integer[]{0, number}, new String[]{"n", "m"}));
@@ -223,7 +176,7 @@ public class PayPalResponseGeneratorImpl implements PayPalResponseGenerator {
                 }
                 String paymentRequestItemTax = getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTITEMTAX, new Integer[]{0, number}, new String[]{"n", "m"}));
                 if (!StringUtils.isEmpty(paymentRequestItemTax)) {
-                    itemDetails.setTax(new Money(paymentRequestItemTax, Money.defaultCurrency()));
+                    itemDetails.setTax(new Money(paymentRequestItemTax, Currency.getInstance(currencyCode)));
                 }
                 paymentDetails.getItemDetails().add(itemDetails);
             } else {
@@ -232,12 +185,12 @@ public class PayPalResponseGeneratorImpl implements PayPalResponseGenerator {
             number++;
         }
 
-        populateErrors(rawResponse, response);
+        populateDetailErrors(rawResponse, response);
 
         return response;
     }
 
-    protected void populateErrors(String rawResponse, ErrorCheckable response) {
+    protected void populateDetailErrors(String rawResponse, ErrorCheckable response) {
         boolean eof;
         eof = false;
         int errorNumber = 0;
@@ -257,16 +210,102 @@ public class PayPalResponseGeneratorImpl implements PayPalResponseGenerator {
             errorNumber++;
         }
     }
+    
+    protected void addRefundData(String rawResponse, PayPalPaymentResponse response) {
+        PayPalRefundInfo refundInfo = new PayPalRefundInfo();
+        response.setRefundInfo(refundInfo);
+        String currencyCode = getResponseValue(rawResponse, MessageConstants.CURRENCYCODE);
+        refundInfo.setCurrencyCode(currencyCode);
+        refundInfo.setRefundTransactionId(getResponseValue(rawResponse, MessageConstants.REFUNDTRANSACTIONID));
+        String feeRefundAmount = getResponseValue(rawResponse, MessageConstants.FEEREFUNDAMT);
+        if (!StringUtils.isEmpty(feeRefundAmount)) {
+            refundInfo.setFeeRefundAmount(new Money(feeRefundAmount, Currency.getInstance(currencyCode)));
+        }
+        String grossRefundAmount = getResponseValue(rawResponse, MessageConstants.GROSSREFUNDAMT);
+        if (!StringUtils.isEmpty(grossRefundAmount)) {
+            refundInfo.setGrossRefundAmount(new Money(grossRefundAmount, Currency.getInstance(currencyCode)));
+        }
+        String netRefundAmount = getResponseValue(rawResponse, MessageConstants.NETREFUNDAMT);
+        if (!StringUtils.isEmpty(netRefundAmount)) {
+            refundInfo.setNetRefundAmount(new Money(netRefundAmount, Currency.getInstance(currencyCode)));
+        }
+        String totalRefundAmount = getResponseValue(rawResponse, MessageConstants.TOTALREFUNDEDAMT);
+        if (!StringUtils.isEmpty(totalRefundAmount)) {
+            refundInfo.setTotalRefundAmount(new Money(totalRefundAmount, Currency.getInstance(currencyCode)));
+        }
+        refundInfo.setRefundInfo(getResponseValue(rawResponse, MessageConstants.REFUNDINFO));
+        String refundStatus = getResponseValue(rawResponse, MessageConstants.REFUNDSTATUS);
+        if (!StringUtils.isEmpty(refundStatus)) {
+            refundInfo.setRefundStatusType(PayPalRefundStatusType.getInstance(refundStatus));
+        }
+        String pendingReason = getResponseValue(rawResponse, MessageConstants.PENDINGREASON);
+        if (!StringUtils.isEmpty(pendingReason)) {
+            refundInfo.setPendingReasonType(PayPalRefundPendingReasonType.getInstance(pendingReason));
+        }
+    }
+    
+    protected void addCapturePaymentInfoData(String rawResponse, PayPalPaymentResponse response) {
+        PayPalPaymentInfo paymentInfo = new PayPalPaymentInfo();
+        response.setPaymentInfo(paymentInfo);
+        String currencyCode = getResponseValue(rawResponse, MessageConstants.CURRENCYCODE);
+        paymentInfo.setCurrencyCode(currencyCode);
+        paymentInfo.setTransactionId(getResponseValue(rawResponse, MessageConstants.TRANSACTIONID));
+        paymentInfo.setParentTransactionId(getResponseValue(rawResponse, MessageConstants.PARENTTRANSACTIONID));
+        paymentInfo.setReceiptId(getResponseValue(rawResponse, MessageConstants.RECEIPTID));
+
+        String paymentType = getResponseValue(rawResponse, MessageConstants.PAYMENTTYPE);
+        if (!StringUtils.isEmpty(paymentType)) {
+            paymentInfo.setPaymentType(PayPalPaymentType.getInstance(paymentType));
+        }
+        String orderTime = getResponseValue(rawResponse, MessageConstants.ORDERITEM);
+        if (!StringUtils.isEmpty(orderTime)) {
+            try {
+                paymentInfo.setOrderTime(dateFormat.parse(orderTime));
+            } catch (ParseException e) {
+                throw new RuntimeException("Unable to parse the date string (" + orderTime + ")");
+            }
+        }
+        String amount = getResponseValue(rawResponse, MessageConstants.AMOUNT);
+        if (!StringUtils.isEmpty(amount)) {
+            paymentInfo.setTotalAmount(new Money(amount, Currency.getInstance(currencyCode)));
+        }
+        String feeAmount = getResponseValue(rawResponse, MessageConstants.FEEAMOUNT);
+        if (!StringUtils.isEmpty(feeAmount)) {
+            paymentInfo.setFeeAmount(new Money(feeAmount, Currency.getInstance(currencyCode)));
+        }
+        String settleAmount = getResponseValue(rawResponse, MessageConstants.SETTLEAMOUNT);
+        if (!StringUtils.isEmpty(settleAmount)) {
+            paymentInfo.setSettleAmount(new Money(settleAmount, Currency.getInstance(currencyCode)));
+        }
+        String taxAmount = getResponseValue(rawResponse, MessageConstants.TAXAMOUNT);
+        if (!StringUtils.isEmpty(taxAmount)) {
+            paymentInfo.setTaxAmount(new Money(taxAmount, Currency.getInstance(currencyCode)));
+        }
+        String exchangeRate = getResponseValue(rawResponse, MessageConstants.EXCHANGERATE);
+        if (!StringUtils.isEmpty(exchangeRate)) {
+            paymentInfo.setExchangeRate(new BigDecimal(exchangeRate));
+        }
+        String paymentStatusType = getResponseValue(rawResponse, MessageConstants.PAYMENTSTATUSTYPE);
+        if (!StringUtils.isEmpty(paymentStatusType)) {
+            paymentInfo.setPaymentStatusType(PayPalPaymentStatusType.getInstance(paymentStatusType));
+        }
+        String pendingReasonType = getResponseValue(rawResponse, MessageConstants.PENDINGREASONTYPE);
+        if (!StringUtils.isEmpty(pendingReasonType)) {
+            paymentInfo.setPendingReasonType(PayPalPendingReasonType.getInstance(pendingReasonType));
+        }
+    }
 
     protected void addPaymentInfoData(String rawResponse, PayPalPaymentResponse response) {
         PayPalPaymentInfo paymentInfo = new PayPalPaymentInfo();
         response.setPaymentInfo(paymentInfo);
+        String currencyCode = getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.PROCESSPAYMENTCURRENCYCODE, new Integer[]{0}, new String[]{"n"}));
+        paymentInfo.setCurrencyCode(currencyCode);
         paymentInfo.setTransactionId(getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.PROCESSPAYMENTTRANSACTIONID, new Integer[]{0}, new String[]{"n"})));
         String paymentType = getResponseValue(rawResponse, MessageConstants.PROCESSPAYMENTPAYMENTTYPE);
         if (!StringUtils.isEmpty(paymentType)) {
             paymentInfo.setPaymentType(PayPalPaymentType.getInstance(paymentType));
         }
-        String orderTime = getResponseValue(rawResponse, MessageConstants.PROCESSPAYMENTORDERITEM);
+        String orderTime = getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.PROCESSPAYMENTORDERITEM, new Integer[]{0}, new String[]{"n"}));
         if (!StringUtils.isEmpty(orderTime)) {
             try {
                 paymentInfo.setOrderTime(dateFormat.parse(orderTime));
@@ -276,43 +315,42 @@ public class PayPalResponseGeneratorImpl implements PayPalResponseGenerator {
         }
         String amount = getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.PROCESSPAYMENTAMOUNT, new Integer[]{0}, new String[]{"n"}));
         if (!StringUtils.isEmpty(amount)) {
-            paymentInfo.setTotalAmount(new Money(amount, Money.defaultCurrency()));
+            paymentInfo.setTotalAmount(new Money(amount, Currency.getInstance(currencyCode)));
         }
-        paymentInfo.setCurrencyCode(getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.PROCESSPAYMENTCURRENCYCODE, new Integer[]{0}, new String[]{"n"})));
         String feeAmount = getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.PROCESSPAYMENTFEEAMOUNT, new Integer[]{0}, new String[]{"n"}));
         if (!StringUtils.isEmpty(feeAmount)) {
-            paymentInfo.setFeeAmount(new Money(feeAmount, Money.defaultCurrency()));
+            paymentInfo.setFeeAmount(new Money(feeAmount, Currency.getInstance(currencyCode)));
         }
         String settleAmount = getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.PROCESSPAYMENTSETTLEAMOUNT, new Integer[]{0}, new String[]{"n"}));
         if (!StringUtils.isEmpty(settleAmount)) {
-            paymentInfo.setSettleAmount(new Money(settleAmount, Money.defaultCurrency()));
+            paymentInfo.setSettleAmount(new Money(settleAmount, Currency.getInstance(currencyCode)));
         }
         String taxAmount = getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.PROCESSPAYMENTTAXAMOUNT, new Integer[]{0}, new String[]{"n"}));
         if (!StringUtils.isEmpty(taxAmount)) {
-            paymentInfo.setTaxAmount(new Money(taxAmount, Money.defaultCurrency()));
+            paymentInfo.setTaxAmount(new Money(taxAmount, Currency.getInstance(currencyCode)));
         }
         String exchangeRate = getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.PROCESSPAYMENTEXCHANGERATE, new Integer[]{0}, new String[]{"n"}));
         if (!StringUtils.isEmpty(exchangeRate)) {
             paymentInfo.setExchangeRate(new BigDecimal(exchangeRate));
         }
-        String paymentStatusType = getResponseValue(rawResponse, MessageConstants.PROCESSPAYMENTPAYMENTSTATUSTYPE);
+        String paymentStatusType = getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.PROCESSPAYMENTPAYMENTSTATUSTYPE, new Integer[]{0}, new String[]{"n"}));
         if (!StringUtils.isEmpty(paymentStatusType)) {
             paymentInfo.setPaymentStatusType(PayPalPaymentStatusType.getInstance(paymentStatusType));
         }
-        String pendingReasonType = getResponseValue(rawResponse, MessageConstants.PROCESSPAYMENTPENDINGREASONTYPE);
+        String pendingReasonType = getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.PROCESSPAYMENTPENDINGREASONTYPE, new Integer[]{0}, new String[]{"n"}));
         if (!StringUtils.isEmpty(pendingReasonType)) {
             paymentInfo.setPendingReasonType(PayPalPendingReasonType.getInstance(pendingReasonType));
         }
-        String reasonCodeType = getResponseValue(rawResponse, MessageConstants.PROCESSPAYMENTREASONCODETYPE);
+        String reasonCodeType = getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.PROCESSPAYMENTREASONCODETYPE, new Integer[]{0}, new String[]{"n"}));
         if (!StringUtils.isEmpty(reasonCodeType)) {
             paymentInfo.setReasonCodeType(PayPalReasonCodeType.getInstance(reasonCodeType));
         }
-        String holdDecisionType = getResponseValue(rawResponse, MessageConstants.PROCESSPAYMENTHOLDDECISIONTYPE);
+        String holdDecisionType = getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.PROCESSPAYMENTHOLDDECISIONTYPE, new Integer[]{0}, new String[]{"n"}));
         if (!StringUtils.isEmpty(holdDecisionType)) {
             paymentInfo.setHoldDecisionType(PayPalHoldDecisionType.getInstance(holdDecisionType));
         }
 
-        populateErrors(rawResponse, response);
+        populateDetailErrors(rawResponse, response);
     }
 
     protected PayPalPaymentResponse buildCheckoutResponse(String rawResponse, PayPalPaymentRequest paymentRequest) {
@@ -320,7 +358,6 @@ public class PayPalResponseGeneratorImpl implements PayPalResponseGenerator {
         response.setTransactionType(paymentRequest.getTransactionType());
         response.setMethodType(paymentRequest.getMethodType());
         response.setCorrelationId(getResponseValue(rawResponse, MessageConstants.CORRELATIONID));
-        response.setReferenceNumber(getResponseValue(rawResponse, MessageConstants.INVNUM));
         String ack = getResponseValue(rawResponse, MessageConstants.ACK);
         response.setAck(ack);
         if (ack.toLowerCase().equals(MessageConstants.SUCCESS)) {
@@ -336,10 +373,25 @@ public class PayPalResponseGeneratorImpl implements PayPalResponseGenerator {
             response.setErrorDetected(true);
         }
         if (response.isErrorDetected()) {
-            populateErrors(rawResponse, response);
-
-            int errorNumber = 0;
             boolean eof = false;
+            int errorNumber = 0;
+            while (!eof) {
+                String errorCode = getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.ERRORCODE, new Integer[]{errorNumber}, new String[]{"n"}));
+                if (errorCode != null) {
+                    PayPalErrorResponse errorResponse = new PayPalErrorResponse();
+                    errorResponse.setErrorCode(errorCode);
+                    errorResponse.setShortMessage(getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.ERRORSHORTMESSAGE, new Integer[]{errorNumber}, new String[]{"n"})));
+                    errorResponse.setLongMessage(getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.ERRORLONGMESSAGE, new Integer[]{errorNumber}, new String[]{"n"})));
+                    errorResponse.setSeverityCode(getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.ERRORSEVERITYCODE, new Integer[]{errorNumber}, new String[]{"n"})));
+                    response.getErrorResponses().add(errorResponse);
+                } else {
+                    eof = true;
+                }
+                errorNumber++;
+            }
+
+            errorNumber = 0;
+            eof = false;
             while (!eof) {
                 String passThroughErrorName = getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.ERRORPASSTHROUGHNAME, new Integer[]{errorNumber}, new String[]{"n"}));
                 if (passThroughErrorName != null) {

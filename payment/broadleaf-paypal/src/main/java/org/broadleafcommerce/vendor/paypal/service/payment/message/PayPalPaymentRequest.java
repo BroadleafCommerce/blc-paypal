@@ -18,6 +18,7 @@ package org.broadleafcommerce.vendor.paypal.service.payment.message;
 
 import java.util.List;
 
+import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalRefundType;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalTransactionType;
 
 /**
@@ -30,14 +31,14 @@ public class PayPalPaymentRequest extends PayPalRequest {
 	private static final long serialVersionUID = 1L;
 
 	protected String currency;
-    private String payerID;
-    private String token;
+    protected String payerID;
+    protected String token;
 	protected List<PayPalItemRequest> itemRequests = new AutoNumberMemberIdList();
 	protected PayPalTransactionType transactionType;
     protected PayPalSummaryRequest summaryRequest;
     protected String referenceNumber;
-    private String transactionID;
-
+    protected String transactionID;
+    protected PayPalRefundType refundType;
 
 	public PayPalTransactionType getTransactionType() {
 		return transactionType;
@@ -95,6 +96,22 @@ public class PayPalPaymentRequest extends PayPalRequest {
         this.token = token;
     }
 
+    public PayPalRefundType getRefundType() {
+        return refundType;
+    }
+
+    public void setRefundType(PayPalRefundType refundType) {
+        this.refundType = refundType;
+    }
+
+    public String getTransactionID() {
+        return transactionID;
+    }
+
+    public void setTransactionID(String transactionID) {
+        this.transactionID = transactionID;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -109,9 +126,12 @@ public class PayPalPaymentRequest extends PayPalRequest {
         if (payerID != null ? !payerID.equals(request.payerID) : request.payerID != null) return false;
         if (referenceNumber != null ? !referenceNumber.equals(request.referenceNumber) : request.referenceNumber != null)
             return false;
+        if (refundType != null ? !refundType.equals(request.refundType) : request.refundType != null) return false;
         if (summaryRequest != null ? !summaryRequest.equals(request.summaryRequest) : request.summaryRequest != null)
             return false;
         if (token != null ? !token.equals(request.token) : request.token != null) return false;
+        if (transactionID != null ? !transactionID.equals(request.transactionID) : request.transactionID != null)
+            return false;
         if (transactionType != null ? !transactionType.equals(request.transactionType) : request.transactionType != null)
             return false;
 
@@ -128,14 +148,8 @@ public class PayPalPaymentRequest extends PayPalRequest {
         result = 31 * result + (transactionType != null ? transactionType.hashCode() : 0);
         result = 31 * result + (summaryRequest != null ? summaryRequest.hashCode() : 0);
         result = 31 * result + (referenceNumber != null ? referenceNumber.hashCode() : 0);
+        result = 31 * result + (transactionID != null ? transactionID.hashCode() : 0);
+        result = 31 * result + (refundType != null ? refundType.hashCode() : 0);
         return result;
-    }
-
-    public String getTransactionID() {
-        return transactionID;
-    }
-
-    public void setTransactionID(String transactionID) {
-        this.transactionID = transactionID;
     }
 }

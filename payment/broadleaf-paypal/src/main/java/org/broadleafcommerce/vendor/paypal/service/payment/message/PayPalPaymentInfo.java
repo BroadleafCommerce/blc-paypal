@@ -46,6 +46,8 @@ public class PayPalPaymentInfo implements Serializable {
     protected PayPalReasonCodeType reasonCodeType;
     protected PayPalHoldDecisionType holdDecisionType;
     protected String paymentRequestId;
+    protected String parentTransactionId;
+    protected String receiptId;
 
     public String getCurrencyCode() {
         return currencyCode;
@@ -159,6 +161,22 @@ public class PayPalPaymentInfo implements Serializable {
         this.transactionId = transactionId;
     }
 
+    public String getParentTransactionId() {
+        return parentTransactionId;
+    }
+
+    public void setParentTransactionId(String parentTransactionId) {
+        this.parentTransactionId = parentTransactionId;
+    }
+
+    public String getReceiptId() {
+        return receiptId;
+    }
+
+    public void setReceiptId(String receiptId) {
+        this.receiptId = receiptId;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -172,6 +190,8 @@ public class PayPalPaymentInfo implements Serializable {
         if (holdDecisionType != null ? !holdDecisionType.equals(that.holdDecisionType) : that.holdDecisionType != null)
             return false;
         if (orderTime != null ? !orderTime.equals(that.orderTime) : that.orderTime != null) return false;
+        if (parentTransactionId != null ? !parentTransactionId.equals(that.parentTransactionId) : that.parentTransactionId != null)
+            return false;
         if (paymentRequestId != null ? !paymentRequestId.equals(that.paymentRequestId) : that.paymentRequestId != null)
             return false;
         if (paymentStatusType != null ? !paymentStatusType.equals(that.paymentStatusType) : that.paymentStatusType != null)
@@ -181,6 +201,7 @@ public class PayPalPaymentInfo implements Serializable {
             return false;
         if (reasonCodeType != null ? !reasonCodeType.equals(that.reasonCodeType) : that.reasonCodeType != null)
             return false;
+        if (receiptId != null ? !receiptId.equals(that.receiptId) : that.receiptId != null) return false;
         if (settleAmount != null ? !settleAmount.equals(that.settleAmount) : that.settleAmount != null) return false;
         if (taxAmount != null ? !taxAmount.equals(that.taxAmount) : that.taxAmount != null) return false;
         if (totalAmount != null ? !totalAmount.equals(that.totalAmount) : that.totalAmount != null) return false;
@@ -206,6 +227,8 @@ public class PayPalPaymentInfo implements Serializable {
         result = 31 * result + (reasonCodeType != null ? reasonCodeType.hashCode() : 0);
         result = 31 * result + (holdDecisionType != null ? holdDecisionType.hashCode() : 0);
         result = 31 * result + (paymentRequestId != null ? paymentRequestId.hashCode() : 0);
+        result = 31 * result + (parentTransactionId != null ? parentTransactionId.hashCode() : 0);
+        result = 31 * result + (receiptId != null ? receiptId.hashCode() : 0);
         return result;
     }
 }

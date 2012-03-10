@@ -31,10 +31,10 @@ public class PayPalCheckoutStatusType implements Serializable, BroadleafEnumerat
 
     private static final Map<String, PayPalCheckoutStatusType> TYPES = new HashMap<String, PayPalCheckoutStatusType>();
 
-    public static final PayPalCheckoutStatusType PAYMENTACTIONNOTINITIATED  = new PayPalCheckoutStatusType("PAYMENTACTIONNOTINITIATED", "PaymentActionNotInitiated");
-    public static final PayPalCheckoutStatusType PAYMENTACTIONFAILED = new PayPalCheckoutStatusType("PAYMENTACTIONFAILED", "PaymentActionFailed");
-    public static final PayPalCheckoutStatusType PAYMENTACTIONINPROGRESS = new PayPalCheckoutStatusType("PAYMENTACTIONINPROGRESS", "PaymentActionInProgress");
-    public static final PayPalCheckoutStatusType PAYMENTCOMPLETED = new PayPalCheckoutStatusType("PAYMENTCOMPLETED", "PaymentCompleted");
+    public static final PayPalCheckoutStatusType PAYMENTACTIONNOTINITIATED  = new PayPalCheckoutStatusType("PaymentActionNotInitiated", "PaymentActionNotInitiated");
+    public static final PayPalCheckoutStatusType PAYMENTACTIONFAILED = new PayPalCheckoutStatusType("PaymentActionFailed", "PaymentActionFailed");
+    public static final PayPalCheckoutStatusType PAYMENTACTIONINPROGRESS = new PayPalCheckoutStatusType("PaymentActionInProgress", "PaymentActionInProgress");
+    public static final PayPalCheckoutStatusType PAYMENTCOMPLETED = new PayPalCheckoutStatusType("PaymentCompleted", "PaymentCompleted");
 
     public static PayPalCheckoutStatusType getInstance(final String type) {
         return TYPES.get(type);

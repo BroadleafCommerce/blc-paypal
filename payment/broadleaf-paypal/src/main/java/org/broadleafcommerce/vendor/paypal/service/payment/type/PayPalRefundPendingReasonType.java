@@ -27,27 +27,27 @@ import org.broadleafcommerce.common.BroadleafEnumerationType;
  * 
  * @author jfischer
  */
-public class PayPalHoldDecisionType implements Serializable, BroadleafEnumerationType {
+public class PayPalRefundPendingReasonType implements Serializable, BroadleafEnumerationType {
 
     private static final long serialVersionUID = 1L;
 
-    private static final Map<String, PayPalHoldDecisionType> TYPES = new HashMap<String, PayPalHoldDecisionType>();
+    private static final Map<String, PayPalRefundPendingReasonType> TYPES = new HashMap<String, PayPalRefundPendingReasonType>();
 
-    public static final PayPalHoldDecisionType NEWSELLERPAYMENTHOLD  = new PayPalHoldDecisionType("newsellerpaymenthold", "newsellerpaymenthold");
-    public static final PayPalHoldDecisionType PAYMENTHOLD = new PayPalHoldDecisionType("paymenthold", "paymenthold");
+    public static final PayPalRefundPendingReasonType NONE  = new PayPalRefundPendingReasonType("none", "none");
+    public static final PayPalRefundPendingReasonType ECHECK = new PayPalRefundPendingReasonType("echeck", "echeck");
 
-    public static PayPalHoldDecisionType getInstance(final String type) {
+    public static PayPalRefundPendingReasonType getInstance(final String type) {
         return TYPES.get(type);
     }
 
     private String type;
     private String friendlyType;
 
-    public PayPalHoldDecisionType() {
+    public PayPalRefundPendingReasonType() {
         //do nothing
     }
 
-    public PayPalHoldDecisionType(final String type, final String friendlyType) {
+    public PayPalRefundPendingReasonType(final String type, final String friendlyType) {
     	this.friendlyType = friendlyType;
         setType(type);
     }
@@ -83,7 +83,7 @@ public class PayPalHoldDecisionType implements Serializable, BroadleafEnumeratio
             return false;
         if (getClass() != obj.getClass())
             return false;
-        PayPalHoldDecisionType other = (PayPalHoldDecisionType) obj;
+        PayPalRefundPendingReasonType other = (PayPalRefundPendingReasonType) obj;
         if (type == null) {
             if (other.type != null)
                 return false;

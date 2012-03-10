@@ -33,12 +33,13 @@ public class PayPalMethodType implements Serializable, BroadleafEnumerationType 
 
     private static final Map<String, PayPalMethodType> TYPES = new HashMap<String, PayPalMethodType>();
 
-    public static final PayPalMethodType CHECKOUT  = new PayPalMethodType("CHECKOUT", "Checkout");
-    public static final PayPalMethodType DETAILS = new PayPalMethodType("DETAILS", "Details");
-    public static final PayPalMethodType PROCESS = new PayPalMethodType("PROCESS", "Process");
-    public static final PayPalMethodType REFUND = new PayPalMethodType("REFUND", "Refund");
-    public static final PayPalMethodType CAPTURE = new PayPalMethodType("CAPTURE", "Capture");
-    public static final PayPalMethodType VOID = new PayPalMethodType("VOID", "Void");
+    public static final PayPalMethodType CHECKOUT  = new PayPalMethodType("Checkout", "Checkout");
+    public static final PayPalMethodType AUTHORIZATION  = new PayPalMethodType("Authorization", "Authorization");
+    public static final PayPalMethodType DETAILS = new PayPalMethodType("Details", "Details");
+    public static final PayPalMethodType PROCESS = new PayPalMethodType("Process", "Process");
+    public static final PayPalMethodType REFUND = new PayPalMethodType("Refund", "Refund");
+    public static final PayPalMethodType CAPTURE = new PayPalMethodType("Capture", "Capture");
+    public static final PayPalMethodType VOID = new PayPalMethodType("Void", "Void");
 
 
     public static PayPalMethodType getInstance(final String type) {

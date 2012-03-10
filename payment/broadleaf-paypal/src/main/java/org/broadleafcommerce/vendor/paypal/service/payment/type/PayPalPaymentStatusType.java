@@ -33,20 +33,20 @@ public class PayPalPaymentStatusType implements Serializable, BroadleafEnumerati
 
     private static final Map<String, PayPalPaymentStatusType> TYPES = new HashMap<String, PayPalPaymentStatusType>();
 
-    public static final PayPalPaymentStatusType NONE  = new PayPalPaymentStatusType("NONE", "None");
-    public static final PayPalPaymentStatusType CANCELEDREVERSAL = new PayPalPaymentStatusType("CANCELEDREVERSAL", "Canceled-Reversal");
-    public static final PayPalPaymentStatusType COMPLETED = new PayPalPaymentStatusType("COMPLETED", "Completed");
-    public static final PayPalPaymentStatusType DENIED = new PayPalPaymentStatusType("DENIED", "Denied");
-    public static final PayPalPaymentStatusType EXPIRED = new PayPalPaymentStatusType("EXPIRED", "Expired");
-    public static final PayPalPaymentStatusType FAILED = new PayPalPaymentStatusType("FAILED", "Failed");
-    public static final PayPalPaymentStatusType INPROGRESS = new PayPalPaymentStatusType("INPROGRESS", "In-Progress");
-    public static final PayPalPaymentStatusType PARTIALLYREFUNDED = new PayPalPaymentStatusType("PARTIALLYREFUNDED", "Partially-Refunded");
-    public static final PayPalPaymentStatusType PENDING = new PayPalPaymentStatusType("PENDING", "Pending");
-    public static final PayPalPaymentStatusType REFUNDED = new PayPalPaymentStatusType("REFUNDED", "Refunded");
-    public static final PayPalPaymentStatusType REVERSED = new PayPalPaymentStatusType("REVERSED", "Reversed");
-    public static final PayPalPaymentStatusType PROCESSED = new PayPalPaymentStatusType("PROCESSED", "Processed");
-    public static final PayPalPaymentStatusType VOIDED = new PayPalPaymentStatusType("VOIDED", "Voided");
-    public static final PayPalPaymentStatusType COMPLETEDFUNDSHELD = new PayPalPaymentStatusType("COMPLETEDFUNDSHELD", "Completed-Funds-Held");
+    public static final PayPalPaymentStatusType NONE  = new PayPalPaymentStatusType("None", "None");
+    public static final PayPalPaymentStatusType CANCELEDREVERSAL = new PayPalPaymentStatusType("Canceled-Reversal", "Canceled-Reversal");
+    public static final PayPalPaymentStatusType COMPLETED = new PayPalPaymentStatusType("Completed", "Completed");
+    public static final PayPalPaymentStatusType DENIED = new PayPalPaymentStatusType("Denied", "Denied");
+    public static final PayPalPaymentStatusType EXPIRED = new PayPalPaymentStatusType("Expired", "Expired");
+    public static final PayPalPaymentStatusType FAILED = new PayPalPaymentStatusType("Failed", "Failed");
+    public static final PayPalPaymentStatusType INPROGRESS = new PayPalPaymentStatusType("In-Progress", "In-Progress");
+    public static final PayPalPaymentStatusType PARTIALLYREFUNDED = new PayPalPaymentStatusType("Partially-Refunded", "Partially-Refunded");
+    public static final PayPalPaymentStatusType PENDING = new PayPalPaymentStatusType("Pending", "Pending");
+    public static final PayPalPaymentStatusType REFUNDED = new PayPalPaymentStatusType("Refunded", "Refunded");
+    public static final PayPalPaymentStatusType REVERSED = new PayPalPaymentStatusType("Reversed", "Reversed");
+    public static final PayPalPaymentStatusType PROCESSED = new PayPalPaymentStatusType("Processed", "Processed");
+    public static final PayPalPaymentStatusType VOIDED = new PayPalPaymentStatusType("Voided", "Voided");
+    public static final PayPalPaymentStatusType COMPLETEDFUNDSHELD = new PayPalPaymentStatusType("Completed-Funds-Held", "Completed-Funds-Held");
 
     public static PayPalPaymentStatusType getInstance(final String type) {
         return TYPES.get(type);

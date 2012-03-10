@@ -16,14 +16,12 @@
 
 package org.broadleafcommerce.vendor.paypal.service.payment;
 
-import org.omg.CORBA.PUBLIC_MEMBER;
-
 /**
  * @author Jeff Fischer
  */
 public class MessageConstants {
 
-    public static final String PAYPALMETHODTYPE = "PAYPALMETHODTYPE";
+    public static final String REFUNDTYPE = "REFUNDTYPE";
 
     public static final String MODULEERRORCODE = "MODULEERRORCODE";
     public static final String MODULEERRORSHORTMESSAGE = "MODULEERRORSHORTMESSAGE";
@@ -36,13 +34,31 @@ public class MessageConstants {
     public static final String REASONCODE = "REASONCODE";
     public static final String HOLDDECISION = "HOLDDECISION";
 
+    public static final String PENDINGREASONTYPE = "PENDINGREASON";
+    public static final String PAYMENTSTATUSTYPE = "PAYMENTSTATUS";
+    public static final String TAXAMOUNT = "TAXAMT";
+    public static final String SETTLEAMOUNT = "SETTLEAMT";
+    public static final String FEEAMOUNT = "FEEAMT";
+    public static final String ORDERITEM = "ORDERTIME";
+    public static final String PAYMENTTYPE = "PAYMENTTYPE";
+    public static final String REFUNDSTATUS = "REFUNDSTATUS";
+    public static final String REFUNDINFO = "REFUNDINFO";
+    public static final String TOTALREFUNDEDAMT = "TOTALREFUNDEDAMT";
+    public static final String NETREFUNDAMT = "NETREFUNDAMT";
+    public static final String GROSSREFUNDAMT = "GROSSREFUNDAMT";
+    public static final String FEEREFUNDAMT = "FEEREFUNDAMT";
+    public static final String REFUNDTRANSACTIONID = "REFUNDTRANSACTIONID";
+    public static final String AMOUNT = "AMT";
     public static final String ACK = "ACK";
     public static final String SUCCESS = "success";
     public static final String SUCCESSWITHWARNINGS = "successwithwarnings";
     public static final String TOKEN = "TOKEN";
     public static final String CORRELATIONID = "CORRELATIONID";
     public static final String TRANSACTIONID = "TRANSACTIONID";
-
+    public static final String PARENTTRANSACTIONID = "PARENTTRANSACTIONID";
+    public static final String RECEIPTID = "RECEIPTID";
+    public static final String AUTHORIZATONID = "AUTHORIZATIONID";
+    public static final String CURRENCYCODE = "CURRENCYCODE";
     public static final String NOSHIPPING = "NOSHIPPING";
     public static final String USER = "USER";
     public static final String PASSWORD = "PWD";
@@ -60,7 +76,6 @@ public class MessageConstants {
     public static final String SUBTOTALREQUEST = "PAYMENTREQUEST_n_ITEMAMT";
     public static final String TAXREQUEST = "PAYMENTREQUEST_n_TAXAMT";
     public static final String SHIPPINGREQUEST = "PAYMENTREQUEST_n_SHIPPINGAMT";
-    public static final String SHIPPINGDISCOUNTREQUEST = "PAYMENTREQUEST_n_SHIPDISCAMT";
     public static final String GRANDTOTALREQUEST = "PAYMENTREQUEST_n_AMT";
     public static final String ERRORCODE = "L_ERRORCODEn";
     public static final String ERRORSHORTMESSAGE = "L_SHORTMESSAGEn";

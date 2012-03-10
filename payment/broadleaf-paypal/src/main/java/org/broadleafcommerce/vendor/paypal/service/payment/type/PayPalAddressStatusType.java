@@ -31,9 +31,9 @@ public class PayPalAddressStatusType implements Serializable, BroadleafEnumerati
 
     private static final Map<String, PayPalAddressStatusType> TYPES = new HashMap<String, PayPalAddressStatusType>();
 
-    public static final PayPalAddressStatusType NONE  = new PayPalAddressStatusType("NONE", "none");
-    public static final PayPalAddressStatusType CONFIRMED = new PayPalAddressStatusType("CONFIRMED", "Confirmed");
-    public static final PayPalAddressStatusType UNCONFIRMED = new PayPalAddressStatusType("UNCONFIRMED", "Unconfirmed");
+    public static final PayPalAddressStatusType NONE  = new PayPalAddressStatusType("none", "none");
+    public static final PayPalAddressStatusType CONFIRMED = new PayPalAddressStatusType("Confirmed", "Confirmed");
+    public static final PayPalAddressStatusType UNCONFIRMED = new PayPalAddressStatusType("Unconfirmed", "Unconfirmed");
 
     public static PayPalAddressStatusType getInstance(final String type) {
         return TYPES.get(type);

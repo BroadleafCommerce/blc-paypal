@@ -23,31 +23,29 @@ import java.util.Map;
 import org.broadleafcommerce.common.BroadleafEnumerationType;
 
 /**
- * An extendible enumeration of transaction types.
- * 
- * @author jfischer
+ * @author Jeff Fischer
  */
-public class PayPalHoldDecisionType implements Serializable, BroadleafEnumerationType {
+public class PayPalRefundStatusType implements Serializable, BroadleafEnumerationType {
 
     private static final long serialVersionUID = 1L;
 
-    private static final Map<String, PayPalHoldDecisionType> TYPES = new HashMap<String, PayPalHoldDecisionType>();
+    private static final Map<String, PayPalRefundStatusType> TYPES = new HashMap<String, PayPalRefundStatusType>();
 
-    public static final PayPalHoldDecisionType NEWSELLERPAYMENTHOLD  = new PayPalHoldDecisionType("newsellerpaymenthold", "newsellerpaymenthold");
-    public static final PayPalHoldDecisionType PAYMENTHOLD = new PayPalHoldDecisionType("paymenthold", "paymenthold");
+    public static final PayPalRefundStatusType INSTANT  = new PayPalRefundStatusType("instant", "instant");
+    public static final PayPalRefundStatusType DELAYED = new PayPalRefundStatusType("delayed", "delayed");
 
-    public static PayPalHoldDecisionType getInstance(final String type) {
+    public static PayPalRefundStatusType getInstance(final String type) {
         return TYPES.get(type);
     }
 
     private String type;
     private String friendlyType;
 
-    public PayPalHoldDecisionType() {
+    public PayPalRefundStatusType() {
         //do nothing
     }
 
-    public PayPalHoldDecisionType(final String type, final String friendlyType) {
+    public PayPalRefundStatusType(final String type, final String friendlyType) {
     	this.friendlyType = friendlyType;
         setType(type);
     }
@@ -83,7 +81,7 @@ public class PayPalHoldDecisionType implements Serializable, BroadleafEnumeratio
             return false;
         if (getClass() != obj.getClass())
             return false;
-        PayPalHoldDecisionType other = (PayPalHoldDecisionType) obj;
+        PayPalRefundStatusType other = (PayPalRefundStatusType) obj;
         if (type == null) {
             if (other.type != null)
                 return false;
