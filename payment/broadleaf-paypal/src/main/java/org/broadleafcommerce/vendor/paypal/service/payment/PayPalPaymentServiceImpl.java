@@ -25,6 +25,7 @@ import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
+import org.broadleafcommerce.common.vendor.service.monitor.ServiceStatusDetectable;
 import org.broadleafcommerce.common.vendor.service.type.ServiceStatusType;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalResponse;
@@ -34,7 +35,7 @@ import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalRespons
  * @author jfischer
  *
  */
-public class PayPalPaymentServiceImpl implements PayPalPaymentService {
+public class PayPalPaymentServiceImpl implements PayPalPaymentService, ServiceStatusDetectable<PayPalRequest> {
 	
 	private static final Log LOG = LogFactory.getLog(PayPalPaymentServiceImpl.class);
 

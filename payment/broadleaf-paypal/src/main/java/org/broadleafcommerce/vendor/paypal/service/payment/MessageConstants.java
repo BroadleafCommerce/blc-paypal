@@ -22,6 +22,9 @@ package org.broadleafcommerce.vendor.paypal.service.payment;
 public class MessageConstants {
 
     public static final String REFUNDTYPE = "REFUNDTYPE";
+    public static final String SUBTOTAL = "SUBTOTAL";
+    public static final String TOTALSHIPPING = "TOTALSHIPPING";
+    public static final String TOTALTAX = "TOTALTAX";
 
     public static final String MODULEERRORCODE = "MODULEERRORCODE";
     public static final String MODULEERRORSHORTMESSAGE = "MODULEERRORSHORTMESSAGE";

@@ -25,7 +25,7 @@ import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalRespons
 /**
  * @author Jeff Fischer
  */
-public interface PayPalPaymentService extends ServiceStatusDetectable {
+public interface PayPalPaymentService {
 
     public PayPalResponse process(PayPalRequest paymentRequest) throws PaymentException;
 

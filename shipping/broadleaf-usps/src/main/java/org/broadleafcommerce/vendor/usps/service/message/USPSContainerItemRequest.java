@@ -16,6 +16,7 @@
 
 package org.broadleafcommerce.vendor.usps.service.message;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 
@@ -27,7 +28,7 @@ import org.broadleafcommerce.vendor.usps.service.type.USPSFirstClassType;
 import org.broadleafcommerce.vendor.usps.service.type.USPSServiceType;
 import org.broadleafcommerce.vendor.usps.service.type.USPSShipDateOptionType;
 
-public interface USPSContainerItemRequest {
+public interface USPSContainerItemRequest extends Serializable {
 
     public USPSContainerSizeType getContainerSize();
 

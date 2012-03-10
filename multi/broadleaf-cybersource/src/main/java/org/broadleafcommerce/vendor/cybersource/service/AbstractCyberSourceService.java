@@ -39,7 +39,7 @@ import org.broadleafcommerce.vendor.cybersource.service.api.TransactionProcessor
  * @author jfischer
  *
  */
-public abstract class AbstractCyberSourceService implements ServiceStatusDetectable {
+public abstract class AbstractCyberSourceService {
 
 	protected String merchantId;
 	protected String serverUrl;

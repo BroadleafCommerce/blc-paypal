@@ -133,7 +133,7 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
         nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.PAYMENTACTION, new Integer[]{0}, new String[]{"n"}), payPalAction));
         nvps.add(new NameValuePair(MessageConstants.INVNUM, paymentRequest.getReferenceNumber()));
         //do not display shipping address fields on paypal pages
-        nvps.add(new NameValuePair(MessageConstants.NOSHIPPING, "1"));
+        //nvps.add(new NameValuePair(MessageConstants.NOSHIPPING, "1"));
 
         setCostNvps(nvps, paymentRequest);
 

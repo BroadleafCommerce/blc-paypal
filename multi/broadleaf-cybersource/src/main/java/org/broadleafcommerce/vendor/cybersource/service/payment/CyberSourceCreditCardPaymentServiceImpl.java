@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.broadleafcommerce.common.money.Money;
 import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
 import org.broadleafcommerce.common.vendor.service.exception.PaymentHostException;
+import org.broadleafcommerce.common.vendor.service.monitor.ServiceStatusDetectable;
 import org.broadleafcommerce.vendor.cybersource.service.api.BillTo;
 import org.broadleafcommerce.vendor.cybersource.service.api.CCAuthReply;
 import org.broadleafcommerce.vendor.cybersource.service.api.CCAuthReversalReply;
@@ -57,10 +58,11 @@ import org.broadleafcommerce.vendor.cybersource.service.type.CyberSourceServiceT
  * @author jfischer
  *
  */
-public class CyberSourceCreditCardPaymentServiceImpl extends AbstractCyberSourcePaymentService implements CyberSourcePaymentService {
+public class CyberSourceCreditCardPaymentServiceImpl extends AbstractCyberSourcePaymentService implements CyberSourcePaymentService, ServiceStatusDetectable<CyberSourcePaymentRequest> {
 	
 	private static final Log LOG = LogFactory.getLog(CyberSourceCreditCardPaymentServiceImpl.class);
 
+    @Override
 	public CyberSourcePaymentResponse process(CyberSourcePaymentRequest paymentRequest) throws PaymentException {
 		//TODO add validation for the request
 		CyberSourceCardResponse cardResponse = new CyberSourceCardResponse();

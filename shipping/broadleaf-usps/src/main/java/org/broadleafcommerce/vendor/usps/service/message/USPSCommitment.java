@@ -16,11 +16,12 @@
 
 package org.broadleafcommerce.vendor.usps.service.message;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class USPSCommitment {
+public class USPSCommitment implements Serializable {
 
     private Date commitmentDateAndTime;
     private List<USPSLocation> locations = new ArrayList<USPSLocation>();

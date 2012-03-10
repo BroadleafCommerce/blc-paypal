@@ -16,6 +16,7 @@
 
 package org.broadleafcommerce.vendor.cybersource.service.tax;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
@@ -32,6 +33,7 @@ import org.broadleafcommerce.common.money.Money;
 import org.broadleafcommerce.common.vendor.service.cache.ServiceResponseCacheable;
 import org.broadleafcommerce.common.vendor.service.exception.TaxException;
 import org.broadleafcommerce.common.vendor.service.exception.TaxHostException;
+import org.broadleafcommerce.common.vendor.service.monitor.ServiceStatusDetectable;
 import org.broadleafcommerce.vendor.cybersource.service.AbstractCyberSourceService;
 import org.broadleafcommerce.vendor.cybersource.service.api.BillTo;
 import org.broadleafcommerce.vendor.cybersource.service.api.Item;
@@ -54,13 +56,14 @@ import org.broadleafcommerce.vendor.cybersource.service.type.CyberSourceServiceT
  * @author jfischer
  *
  */
-public class CyberSourceTaxServiceImpl extends AbstractCyberSourceService implements CyberSourceTaxService, ServiceResponseCacheable {
+public class CyberSourceTaxServiceImpl extends AbstractCyberSourceService implements CyberSourceTaxService, ServiceResponseCacheable, ServiceStatusDetectable<CyberSourceTaxRequest> {
 	
 	private static final Log LOG = LogFactory.getLog(CyberSourceTaxServiceImpl.class);
 	
 	protected Cache cache = null;
 	protected Boolean isCacheEnabled = false;
 
+    @Override
 	public CyberSourceTaxResponse process(CyberSourceTaxRequest taxRequest) throws TaxException {
 		//TODO add validation for the request
 		if (isCacheEnabled) {

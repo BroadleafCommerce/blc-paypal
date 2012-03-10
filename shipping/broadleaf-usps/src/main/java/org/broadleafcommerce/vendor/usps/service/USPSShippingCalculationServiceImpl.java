@@ -36,7 +36,7 @@ import org.broadleafcommerce.vendor.usps.service.message.USPSResponseBuilder;
 import org.broadleafcommerce.vendor.usps.service.message.USPSShippingPriceRequest;
 import org.broadleafcommerce.vendor.usps.service.message.USPSShippingPriceResponse;
 
-public class USPSShippingCalculationServiceImpl extends AbstractVendorService implements ServiceStatusDetectable, USPSShippingCalculationService {
+public class USPSShippingCalculationServiceImpl extends AbstractVendorService implements ServiceStatusDetectable<USPSShippingPriceRequest>, USPSShippingCalculationService {
 
     private static final Log LOG = LogFactory.getLog(USPSShippingCalculationServiceImpl.class);
 
@@ -55,7 +55,8 @@ public class USPSShippingCalculationServiceImpl extends AbstractVendorService im
     protected USPSRequestBuilder uspsRequestBuilder;
     protected USPSResponseBuilder uspsResponseBuilder;
 
-    public USPSShippingPriceResponse retrieveShippingRates(USPSShippingPriceRequest request) throws ShippingPriceException {
+    @Override
+    public USPSShippingPriceResponse process(USPSShippingPriceRequest request) throws ShippingPriceException {
         uspsRequestValidator.validateRequest(request);
         USPSShippingPriceResponse shippingPriceResponse = new USPSShippingPriceResponse();
         InputStream response = null;

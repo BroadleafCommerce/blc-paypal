@@ -16,13 +16,14 @@
 
 package org.broadleafcommerce.vendor.usps.service.message;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import org.broadleafcommerce.common.money.Money;
 
-public class USPSPostage {
+public class USPSPostage implements Serializable {
 
     private Money rate;
     private Money commercialRate;

@@ -59,7 +59,7 @@ public class USPSShippingServiceTest extends BaseTest {
         itemRequest.setMachineSortable(true);
         request.getContainerItems().add(itemRequest);
 
-        USPSShippingPriceResponse response = shippingCalculationService.retrieveShippingRates(request);
+        USPSShippingPriceResponse response = shippingCalculationService.process(request);
         assert(response.getResponses().peek().getPostage().size() > 0);
 
         USPSShippingPriceRequest request2 = new USPSShippingPriceRequest();
@@ -74,7 +74,7 @@ public class USPSShippingServiceTest extends BaseTest {
         itemRequest2.setZipOrigination("10022");
         request2.getContainerItems().add(itemRequest2);
 
-        USPSShippingPriceResponse response2 = shippingCalculationService.retrieveShippingRates(request2);
+        USPSShippingPriceResponse response2 = shippingCalculationService.process(request2);
         assert(response2.getResponses().peek().getPostage().size() > 0);
 
         //the following are only compatible with the v3 schema - production

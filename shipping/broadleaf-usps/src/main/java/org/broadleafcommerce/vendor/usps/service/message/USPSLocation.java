@@ -16,7 +16,9 @@
 
 package org.broadleafcommerce.vendor.usps.service.message;
 
-public class USPSLocation {
+import java.io.Serializable;
+
+public class USPSLocation implements Serializable {
 
     private String cutoff;
     private String facility;

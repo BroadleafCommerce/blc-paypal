@@ -19,9 +19,9 @@ package org.broadleafcommerce.payment.service.module;
 import org.broadleafcommerce.common.money.Money;
 import org.broadleafcommerce.common.time.SystemTime;
 import org.broadleafcommerce.core.payment.domain.AmountItem;
+import org.broadleafcommerce.core.payment.domain.PaymentInfo;
 import org.broadleafcommerce.core.payment.domain.PaymentResponseItem;
 import org.broadleafcommerce.core.payment.domain.PaymentResponseItemImpl;
-import org.broadleafcommerce.core.payment.domain.TotalledPaymentInfo;
 import org.broadleafcommerce.core.payment.service.PaymentContext;
 import org.broadleafcommerce.core.payment.service.exception.PaymentException;
 import org.broadleafcommerce.core.payment.service.module.PaymentModule;
@@ -163,6 +163,16 @@ public class PayPalPaymentModule implements PaymentModule {
 
     protected PaymentResponseItem commonAuthorizeOrSale(PaymentContext paymentContext, PayPalTransactionType transactionType) throws PaymentException {
         PayPalPaymentRequest request = buildBasicRequest(paymentContext, transactionType);
+
+        Assert.isTrue(paymentContext.getPaymentInfo().getAdditionalFields().containsKey(MessageConstants.SUBTOTAL), "Must specify a SUBTOTAL value on the additionalFields of the PaymentInfo instance.");
+        Assert.isTrue(paymentContext.getPaymentInfo().getAdditionalFields().containsKey(MessageConstants.TOTALSHIPPING), "Must specify a TOTALSHIPPING value on the additionalFields of the PaymentInfo instance.");
+        Assert.isTrue(paymentContext.getPaymentInfo().getAdditionalFields().containsKey(MessageConstants.TOTALTAX), "Must specify a TOTALTAX value on the additionalFields of the PaymentInfo instance.");
+        PaymentInfo paymentInfo = paymentContext.getPaymentInfo();
+        PayPalSummaryRequest summaryRequest = request.getSummaryRequest();
+        summaryRequest.setSubTotal(new Money(paymentInfo.getAdditionalFields().get(MessageConstants.SUBTOTAL), paymentInfo.getAmount().getCurrency().getCurrencyCode()));
+        summaryRequest.setTotalShipping(new Money(paymentInfo.getAdditionalFields().get(MessageConstants.TOTALSHIPPING), paymentInfo.getAmount().getCurrency().getCurrencyCode()));
+        summaryRequest.setTotalTax(new Money(paymentInfo.getAdditionalFields().get(MessageConstants.TOTALTAX), paymentInfo.getAmount().getCurrency().getCurrencyCode()));
+
         String token = paymentContext.getPaymentInfo().getAdditionalFields().get(MessageConstants.TOKEN);
         if (token == null) {
             if (transactionType == PayPalTransactionType.AUTHORIZE) {
@@ -275,13 +285,9 @@ public class PayPalPaymentModule implements PaymentModule {
         Assert.isTrue(paymentContext.getPaymentInfo().getReferenceNumber().length() <= 127, "The reference number for the paypal request cannot be greater than 127 characters");
         request.setReferenceNumber(paymentContext.getPaymentInfo().getReferenceNumber());
 
-        Assert.isTrue(TotalledPaymentInfo.class.isAssignableFrom(paymentContext.getPaymentInfo().getClass()), "When using Broadleaf Commerce PayPal support, all PaymentInfo instances must be instances of TotalledPaymentInfo");
-        TotalledPaymentInfo totalledPaymentInfo = (TotalledPaymentInfo) paymentContext.getPaymentInfo();
+        PaymentInfo paymentInfo = paymentContext.getPaymentInfo();
         PayPalSummaryRequest summaryRequest = new PayPalSummaryRequest();
-        summaryRequest.setGrandTotal(totalledPaymentInfo.getAmount());
-        summaryRequest.setSubTotal(totalledPaymentInfo.getSubTotal());
-        summaryRequest.setTotalShipping(totalledPaymentInfo.getTotalShipping());
-        summaryRequest.setTotalTax(totalledPaymentInfo.getTotalTax());
+        summaryRequest.setGrandTotal(paymentInfo.getAmount());
         request.setSummaryRequest(summaryRequest);
 
         return request;

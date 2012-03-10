@@ -25,8 +25,6 @@ import org.broadleafcommerce.vendor.usps.service.message.USPSShippingPriceRespon
 
 public interface USPSShippingCalculationService {
 
-    public USPSShippingPriceResponse retrieveShippingRates(USPSShippingPriceRequest request) throws ShippingPriceException;
-
     public ServiceStatusType getServiceStatus();
 
     public String getUspsCharSet();
@@ -74,4 +72,6 @@ public interface USPSShippingCalculationService {
     public USPSRequestBuilder getUspsRequestBuilder();
 
     public void setUspsRequestBuilder(USPSRequestBuilder uspsRequestBuilder);
+
+    public USPSShippingPriceResponse process(USPSShippingPriceRequest request) throws ShippingPriceException;
 }

@@ -16,10 +16,11 @@
 
 package org.broadleafcommerce.vendor.usps.service.message;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class USPSShippingPriceRequest {
+public class USPSShippingPriceRequest implements Serializable {
 
     protected List<USPSContainerItemRequest> containerItems = new ArrayList<USPSContainerItemRequest>();
 

@@ -70,7 +70,7 @@ private static final Log LOG = LogFactory.getLog(USPSSingleItemPerPackageShippin
 		List<USPSContainerItemRequest> requestItems = createPackages(fulfillmentGroup);
 		USPSShippingPriceRequest request = new USPSShippingPriceRequest();
 		request.getContainerItems().addAll(requestItems);
-		USPSShippingPriceResponse response = shippingCalculationService.retrieveShippingRates(request);
+		USPSShippingPriceResponse response = shippingCalculationService.process(request);
 		Stack<USPSContainerItemResponse> itemResponses = response.getResponses();
 		
 		USPSServiceResponseType responseType = USPSServiceResponseType.getInstanceByName(fulfillmentGroup.getMethod());

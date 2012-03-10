@@ -16,10 +16,10 @@
 
 package org.broadleafcommerce.vendor.cybersource.service.payment;
 
+import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
 import org.broadleafcommerce.vendor.cybersource.service.CyberSourceService;
 import org.broadleafcommerce.vendor.cybersource.service.payment.message.CyberSourcePaymentRequest;
 import org.broadleafcommerce.vendor.cybersource.service.payment.message.CyberSourcePaymentResponse;
-import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
 
 /**
  * 
@@ -28,6 +28,6 @@ import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
  */
 public interface CyberSourcePaymentService extends CyberSourceService {
 
-	public CyberSourcePaymentResponse process(CyberSourcePaymentRequest paymentRequest) throws PaymentException;
-    
+    public CyberSourcePaymentResponse process(CyberSourcePaymentRequest paymentRequest) throws PaymentException;
+
 }

@@ -16,11 +16,12 @@
 
 package org.broadleafcommerce.vendor.usps.service.message;
 
+import java.io.Serializable;
 import java.util.Map;
 
 import org.broadleafcommerce.vendor.usps.service.type.USPSServiceResponseType;
 
-public interface USPSContainerItemResponse {
+public interface USPSContainerItemResponse extends Serializable {
 
     public String getPackageId();
 
