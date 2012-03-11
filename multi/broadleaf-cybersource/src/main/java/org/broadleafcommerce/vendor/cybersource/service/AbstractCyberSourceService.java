@@ -60,20 +60,16 @@ public abstract class AbstractCyberSourceService {
         return reply;
 	}
 	
-	protected void clearStatus() {
-        synchronized(failureCount) {
-            isUp = true;
-            failureCount = 0;
-        }
+	protected synchronized void clearStatus() {
+        isUp = true;
+        failureCount = 0;
     }
 
-    protected void incrementFailure() {
-        synchronized(failureCount) {
-            if (failureCount >= failureReportingThreshold) {
-                isUp = false;
-            } else {
-                failureCount++;
-            }
+    protected synchronized void incrementFailure() {
+        if (failureCount >= failureReportingThreshold) {
+            isUp = false;
+        } else {
+            failureCount++;
         }
     }
 	
@@ -97,13 +93,11 @@ public abstract class AbstractCyberSourceService {
 		return getClass().getName();
 	}
 
-	public ServiceStatusType getServiceStatus() {
-		synchronized(failureCount) {
-            if (isUp) {
-                return ServiceStatusType.UP;
-            } else {
-                return ServiceStatusType.DOWN;
-            }
+	public synchronized ServiceStatusType getServiceStatus() {
+        if (isUp) {
+            return ServiceStatusType.UP;
+        } else {
+            return ServiceStatusType.DOWN;
         }
 	}
 
