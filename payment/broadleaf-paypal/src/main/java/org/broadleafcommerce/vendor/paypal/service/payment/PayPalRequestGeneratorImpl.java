@@ -21,8 +21,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.httpclient.NameValuePair;
-import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalItemRequest;
-import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalPaymentRequest;
+import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPalItemRequest;
+import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPalPaymentRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.details.PayPalDetailsRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalMethodType;

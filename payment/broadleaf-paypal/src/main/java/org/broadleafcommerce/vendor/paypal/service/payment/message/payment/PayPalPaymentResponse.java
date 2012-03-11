@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.broadleafcommerce.vendor.paypal.service.payment.message;
+package org.broadleafcommerce.vendor.paypal.service.payment.message.payment;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,6 +22,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.broadleafcommerce.common.vendor.service.message.PaymentResponse;
+import org.broadleafcommerce.vendor.paypal.service.payment.message.ErrorCheckable;
+import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalErrorResponse;
+import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalResponse;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalMethodType;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalTransactionType;
 

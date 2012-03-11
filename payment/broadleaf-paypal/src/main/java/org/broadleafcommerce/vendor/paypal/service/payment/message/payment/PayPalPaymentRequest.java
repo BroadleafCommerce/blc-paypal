@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package org.broadleafcommerce.vendor.paypal.service.payment.message;
+package org.broadleafcommerce.vendor.paypal.service.payment.message.payment;
 
 import java.util.List;
 
+import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalRefundType;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalTransactionType;
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.broadleafcommerce.vendor.paypal.service.payment.message;
+package org.broadleafcommerce.vendor.paypal.service.payment.message.payment;
 
 import java.util.ArrayList;
 import java.util.Collection;
