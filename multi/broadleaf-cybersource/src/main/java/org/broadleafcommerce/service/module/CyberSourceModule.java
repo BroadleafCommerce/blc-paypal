@@ -39,7 +39,7 @@ public class CyberSourceModule {
 		billingRequest.setLastName(address.getLastName());
 		billingRequest.setPhoneNumber(address.getPrimaryPhone());
 		billingRequest.setPostalCode(address.getPostalCode());
-		billingRequest.setState(address.getState().getAbbreviation());
+		billingRequest.setState(address.getState()==null?null:address.getState().getAbbreviation());
 		billingRequest.setStreet1(address.getAddressLine1());
 		billingRequest.setStreet2(address.getAddressLine2());
 		
