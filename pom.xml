@@ -69,9 +69,9 @@
         <blc.config.dir>src/main/resources</blc.config.dir>
     </properties>
     <scm>
-        <connection>scm:git@github.com:BroadleafCommerce/BroadleafCommerceThirdPartyIntegrationModules.git</connection>
-        <developerConnection>scm:git@github.com:BroadleafCommerce/BroadleafCommerceThirdPartyIntegrationModules.git</developerConnection>
-        <url>https://github.com/BroadleafCommerce/BroadleafCommerceThirdPartyIntegrationModules</url>
+        <connection>scm:git:git@github.com:BroadleafCommerce/BroadleafCommerce.git</connection>
+        <developerConnection>scm:git:git@github.com:BroadleafCommerce/BroadleafCommerce.git</developerConnection>
+        <url>https://github.com/BroadleafCommerce/BroadleafCommerce</url>
     </scm>
     <build>
         <pluginManagement>
