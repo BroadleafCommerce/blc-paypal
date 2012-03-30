@@ -48,6 +48,7 @@
         </developer>
     </developers>
 	<modules>
+        <module>broadleaf-braintree</module>
         <module>broadleaf-paypal</module>
     </modules>
 </project>
