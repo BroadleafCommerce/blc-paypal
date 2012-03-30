@@ -21,6 +21,8 @@ import java.util.Currency;
 import java.util.Locale;
 
 import org.broadleafcommerce.common.money.Money;
+import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
+import org.broadleafcommerce.common.vendor.service.exception.PaymentHostException;
 import org.broadleafcommerce.test.BaseTest;
 import org.broadleafcommerce.vendor.cybersource.service.CyberSourceServiceManager;
 import org.broadleafcommerce.vendor.cybersource.service.message.CyberSourceBillingRequest;
@@ -91,6 +93,21 @@ public class CyberSourcePaymentServiceTest extends BaseTest {
 
         assert(response.getAuthResponse().getAmount().doubleValue() > 0D);
         assert(response.getReasonCode().intValue() == 100);
+
+        cardRequest.setAccountNumber("12345");
+        CyberSourceCardResponse rejectResponse = (CyberSourceCardResponse) service.process(cardRequest);
+        assert(rejectResponse.isErrorDetected());
+
+        cardRequest.setAccountNumber("4111111111111111");
+        cardRequest.getBillingRequest().setLastName(null);
+        PaymentException hostException = null;
+        try {
+            service.process(cardRequest);
+        } catch (PaymentException e) {
+            hostException = e;
+        }
+        assert(hostException != null && hostException instanceof PaymentHostException);
+        cardRequest.getBillingRequest().setLastName("Doe");
         
         /*
          * capture
