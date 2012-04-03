@@ -15,6 +15,7 @@ import org.broadleafcommerce.vendor.braintree.service.payment.BraintreePaymentRe
 import org.broadleafcommerce.vendor.braintree.service.payment.BraintreePaymentService;
 import org.broadleafcommerce.vendor.braintree.service.payment.MessageConstants;
 import org.broadleafcommerce.vendor.braintree.service.payment.type.BraintreeMethodType;
+import org.broadleafcommerce.vendor.braintree.service.payment.type.BraintreeRefundType;
 import org.springframework.util.Assert;
 
 import java.util.HashMap;
@@ -34,26 +35,8 @@ public class BraintreePaymentModule implements PaymentModule {
     @Override
     public PaymentResponseItem authorize(PaymentContext paymentContext) throws PaymentException {
         //authorize transaction
+        throw new PaymentException("The authorize method is not supported by this vendor.braintree.payment.module");
 
-        BraintreePaymentRequest request = buildBasicRequest(paymentContext, BraintreeMethodType.CONFIRM);
-
-        Assert.isTrue(paymentContext.getPaymentInfo().getAdditionalFields().containsKey(MessageConstants.QUERYSTRING), "Must pass a QUERYSTRING value on the additionalFields of the PaymentInfo instance.");
-        PaymentInfo paymentInfo = paymentContext.getPaymentInfo();
-        Result<Transaction> result;
-        try {
-            result = getBraintreePaymentService().process(request);
-            paymentInfo.getAdditionalFields().remove(MessageConstants.QUERYSTRING);
-        } catch (org.broadleafcommerce.common.vendor.service.exception.PaymentException e) {
-            throw new PaymentException(e);
-        }
-
-        PaymentResponseItem responseItem = buildBasicResponse(result, paymentContext);
-
-        if(responseItem.getTransactionSuccess()){
-            paymentContext.getPaymentInfo().getAdditionalFields().put(MessageConstants.BRAINTREEID, responseItem.getTransactionId());
-
-        }
-        return responseItem;
     }
 
     @Override
@@ -99,8 +82,23 @@ public class BraintreePaymentModule implements PaymentModule {
     @Override
     public PaymentResponseItem authorizeAndDebit(PaymentContext paymentContext) throws PaymentException {
         //submit form to braintree then submit transaction for settlement
-        PaymentResponseItem responseItem = authorize(paymentContext);
+
+        BraintreePaymentRequest request = buildBasicRequest(paymentContext, BraintreeMethodType.CONFIRM);
+
+        Assert.isTrue(paymentContext.getPaymentInfo().getAdditionalFields().containsKey(MessageConstants.QUERYSTRING), "Must pass a QUERYSTRING value on the additionalFields of the PaymentInfo instance.");
+        PaymentInfo paymentInfo = paymentContext.getPaymentInfo();
+        Result<Transaction> result;
+        try {
+            result = getBraintreePaymentService().process(request);
+            paymentInfo.getAdditionalFields().remove(MessageConstants.QUERYSTRING);
+        } catch (org.broadleafcommerce.common.vendor.service.exception.PaymentException e) {
+            throw new PaymentException(e);
+        }
+
+        PaymentResponseItem responseItem = buildBasicResponse(result, paymentContext);
+
         if(responseItem.getTransactionSuccess()) {
+            paymentContext.getPaymentInfo().getAdditionalFields().put(MessageConstants.BRAINTREEID, responseItem.getTransactionId());
             responseItem = debit(paymentContext);
         }
         return responseItem;
@@ -138,6 +136,10 @@ public class BraintreePaymentModule implements PaymentModule {
             request.setQueryString(paymentContext.getPaymentInfo().getAdditionalFields().get(MessageConstants.QUERYSTRING));
         } else {
             request.setTransactionID(paymentContext.getPaymentInfo().getAdditionalFields().get(MessageConstants.BRAINTREEID));
+        }
+
+        if(methodType == BraintreeMethodType.REFUND){
+            request.setRefundType(BraintreeRefundType.FULL);
         }
         return request;
     }

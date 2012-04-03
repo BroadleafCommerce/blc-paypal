@@ -19,6 +19,7 @@ package org.broadleafcommerce.vendor.braintree.service.payment;
 import java.io.Serializable;
 import java.util.List;
 
+import org.broadleafcommerce.common.money.Money;
 import org.broadleafcommerce.vendor.braintree.service.payment.type.BraintreeMethodType;
 import org.broadleafcommerce.vendor.braintree.service.payment.type.BraintreeRefundType;
 
@@ -38,6 +39,7 @@ public class BraintreePaymentRequest implements Serializable {
     protected String referenceNumber;
     protected String transactionID;
     protected BraintreeRefundType refundType;
+    protected Money payAmount;
 
     public BraintreeMethodType getMethodType() {
         return methodType;
@@ -130,4 +132,11 @@ public class BraintreePaymentRequest implements Serializable {
         return result;
     }
 
+    public Money getPayAmount() {
+        return payAmount;
+    }
+
+    public void setPayAmount(Money payAmount) {
+        this.payAmount = payAmount;
+    }
 }

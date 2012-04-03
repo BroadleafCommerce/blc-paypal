@@ -33,8 +33,6 @@ public class BraintreeRefundType implements Serializable, BroadleafEnumerationTy
 
     public static final BraintreeRefundType FULL  = new BraintreeRefundType("Full", "Full");
     public static final BraintreeRefundType PARTIAL = new BraintreeRefundType("Partial", "Partial");
-    public static final BraintreeRefundType EXTERNALDISPUTE = new BraintreeRefundType("ExternalDispute", "ExternalDispute");
-    public static final BraintreeRefundType OTHER = new BraintreeRefundType("Other", "Other");
 
     public static BraintreeRefundType getInstance(final String type) {
         return TYPES.get(type);

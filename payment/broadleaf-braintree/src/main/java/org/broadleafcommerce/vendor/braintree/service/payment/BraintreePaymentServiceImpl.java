@@ -9,6 +9,7 @@ import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
 import org.broadleafcommerce.common.vendor.service.monitor.ServiceStatusDetectable;
 import org.broadleafcommerce.common.vendor.service.type.ServiceStatusType;
 import org.broadleafcommerce.vendor.braintree.service.payment.type.BraintreeMethodType;
+import org.broadleafcommerce.vendor.braintree.service.payment.type.BraintreeRefundType;
 
 import java.io.IOException;
 
@@ -63,13 +64,16 @@ public class BraintreePaymentServiceImpl implements BraintreePaymentService, Ser
         if(methodType == BraintreeMethodType.CONFIRM){
             result = gatewayRequest.buildRequest().transparentRedirect().confirmTransaction(paymentRequest.getQueryString());
         } else if(methodType == BraintreeMethodType.SUBMIT) {
-            //TODO: implement partial submission
             result = gatewayRequest.buildRequest().transaction().submitForSettlement(paymentRequest.getTransactionID());
         } else if(methodType == BraintreeMethodType.VOID) {
             result = gatewayRequest.buildRequest().transaction().voidTransaction(paymentRequest.getTransactionID());
         } else if(methodType == BraintreeMethodType.REFUND) {
-            //TODO: implement partial refund
-            result = gatewayRequest.buildRequest().transaction().refund(paymentRequest.getTransactionID());
+            if(paymentRequest.getRefundType().equals(BraintreeRefundType.PARTIAL)) {
+                result = gatewayRequest.buildRequest().transaction().refund(paymentRequest.getTransactionID(), paymentRequest.getPayAmount().getAmount());
+            } else {
+                result = gatewayRequest.buildRequest().transaction().refund(paymentRequest.getTransactionID());
+            }
+
         } else {
             result = null;
         }

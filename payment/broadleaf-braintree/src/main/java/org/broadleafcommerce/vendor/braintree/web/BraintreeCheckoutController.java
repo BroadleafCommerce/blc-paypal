@@ -68,9 +68,6 @@ public class BraintreeCheckoutController {
     @Resource(name="blCustomerService")
     protected CustomerService customerService;
 
-    @Resource(name="authorizeCompositePaymentService")
-    protected CompositePaymentService authorizeCompositePaymentService;
-
     @Resource(name="debitCompositePaymentService")
     protected CompositePaymentService debitCompositePaymentService;
 
@@ -104,11 +101,7 @@ public class BraintreeCheckoutController {
 
         PaymentResponseItem responseItem = null;
 
-        if(TransactionType.getInstance(transactionType) == TransactionType.AUTHORIZE) {
-            responseItem = braintreeAuthorize(order, payments);
-        } else if(TransactionType.getInstance(transactionType) == TransactionType.AUTHORIZEANDDEBIT){
-            responseItem = braintreeAuthorizeAndDebit(order, payments);
-        }
+        responseItem = braintreeAuthorizeAndDebit(order, payments);
 
         if (responseItem.getTransactionSuccess()) {
 
@@ -131,26 +124,6 @@ public class BraintreeCheckoutController {
         }
 
         return "";
-    }
-
-    public PaymentResponseItem braintreeAuthorize(Order order,
-                                     Map<PaymentInfo, Referenced> payments){
-        //TODO: get an alternate checkout workflow to work for authorize in addition
-        //to the authorizeAndDebit checkout workflow
-        order.setStatus(OrderStatus.IN_PROCESS);
-        //CheckoutResponse checkoutResponse;
-        PaymentResponseItem responseItem = null;
-
-        try {
-            CompositePaymentResponse compositePaymentResponse = authorizeCompositePaymentService.executePayment(order, payments);
-            responseItem = compositePaymentResponse.getPaymentResponse().getResponseItems().get(order.getPaymentInfos().get(0));
-            /*checkoutResponse = authorizeCheckoutService.performCheckout(order, payments);
-            responseItem = checkoutResponse.getPaymentResponse().getResponseItems().get(order.getPaymentInfos().get(0));*/
-        } catch (PaymentException e) {
-            LOG.error("Cannot perform checkout", e);
-        }
-
-        return responseItem;
     }
 
     @RequestMapping(value = "/braintreeAuthorizeAndDebit.htm", method = {RequestMethod.GET})
