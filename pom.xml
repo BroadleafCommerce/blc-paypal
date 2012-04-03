@@ -10,7 +10,7 @@
     <artifactId>broadleaf-third-party-integration</artifactId>
     <packaging>pom</packaging>
     <name>BroadleafCommerce Third Party Integration</name>
-    <version>1.6.0-M1</version>
+    <version>1.6.0-M2-SNAPSHOT</version>
     <description>BroadleafCommerce Third Party Integration Modules</description>
     <url>http://www.broadleafcommerce.org</url>
     <licenses>
