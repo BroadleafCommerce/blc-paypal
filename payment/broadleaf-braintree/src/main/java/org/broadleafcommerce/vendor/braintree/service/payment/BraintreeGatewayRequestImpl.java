@@ -16,6 +16,8 @@ public class BraintreeGatewayRequestImpl implements BraintreeGatewayRequest{
     protected String publicKey;
     protected String privateKey;
     protected String merchantId;
+    protected String redirectUrl;
+    protected String transactionType;
 
     @Override
     public BraintreeGateway buildRequest() {
@@ -55,4 +57,25 @@ public class BraintreeGatewayRequestImpl implements BraintreeGatewayRequest{
     public String getMerchantId() {
         return merchantId;
     }
+
+    @Override
+    public String getRedirectUrl() {
+        return redirectUrl;
+    }
+
+    @Override
+    public void setRedirectUrl(String redirectUrl) {
+        this.redirectUrl = redirectUrl;
+    }
+
+    @Override
+    public String getTransactionType() {
+        return transactionType;
+    }
+
+    @Override
+    public void setTransactionType(String transactionType) {
+        this.transactionType = transactionType;
+    }
+
 }

@@ -1,6 +1,5 @@
 package org.broadleafcommerce.vendor.braintree.web;
 
-import com.braintreegateway.BraintreeGateway;
 import com.braintreegateway.Transaction;
 import com.braintreegateway.TransactionRequest;
 import org.apache.commons.beanutils.BeanComparator;
@@ -11,22 +10,19 @@ import org.broadleafcommerce.core.order.domain.Order;
 import org.broadleafcommerce.core.order.service.CartService;
 import org.broadleafcommerce.core.payment.domain.CreditCardPaymentInfo;
 import org.broadleafcommerce.core.payment.domain.PaymentInfo;
+import org.broadleafcommerce.core.payment.domain.PaymentInfoImpl;
 import org.broadleafcommerce.core.payment.domain.Referenced;
 import org.broadleafcommerce.core.payment.service.PaymentInfoService;
 import org.broadleafcommerce.core.payment.service.SecurePaymentInfoService;
 import org.broadleafcommerce.core.payment.service.type.PaymentInfoType;
-import org.broadleafcommerce.core.payment.service.type.TransactionType;
 import org.broadleafcommerce.core.web.checkout.model.CheckoutForm;
-import org.broadleafcommerce.profile.core.domain.Country;
-import org.broadleafcommerce.profile.core.domain.Customer;
-import org.broadleafcommerce.profile.core.domain.CustomerPhone;
-import org.broadleafcommerce.profile.core.domain.CustomerPhoneImpl;
+import org.broadleafcommerce.profile.core.domain.*;
 import org.broadleafcommerce.profile.core.service.CountryService;
 import org.broadleafcommerce.profile.core.service.CustomerAddressService;
 import org.broadleafcommerce.profile.core.service.CustomerPhoneService;
 import org.broadleafcommerce.profile.core.service.StateService;
 import org.broadleafcommerce.profile.web.core.CustomerState;
-import org.broadleafcommerce.vendor.braintree.service.payment.BraintreeGatewayRequest;
+import org.broadleafcommerce.vendor.braintree.service.payment.BraintreePaymentService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
@@ -68,22 +64,32 @@ public class BraintreeFormController {
     protected PaymentInfoService paymentInfoService;
     @Resource(name="blSecurePaymentInfoService")
     protected SecurePaymentInfoService securePaymentInfoService;
-    //@Resource(name="blCheckoutFormValidator")
-    //protected CheckoutFormValidator checkoutFormValidator;
     
     protected String braintreeFormView;
-    protected BraintreeGatewayRequest gatewayRequest;
-    private String braintreeContactInfoView;
+    protected BraintreePaymentService braintreePaymentService;
+    protected String braintreeContactInfoView;
+    
 
-    // TODO: Refactor to move dependency on gatewayRequest to service layer
     @RequestMapping(value = "/braintreeForm.htm", method = {RequestMethod.GET})
     public String braintreeForm(ModelMap model,
                                 HttpServletRequest request, CheckoutForm checkoutForm) {
-        TransactionType transactionType = TransactionType.AUTHORIZE;
-        BraintreeGateway gateway = gatewayRequest.buildRequest();
         Order order = retrieveCartOrder(request, model);
+        
+        TransactionRequest trParams = new TransactionRequest();
+        trParams = trSetup(trParams, order, checkoutForm);
+        trParams = trBilling(trParams, checkoutForm.getBillingAddress());
+        trParams = trShipping(trParams, checkoutForm.getShippingAddress());
 
-        TransactionRequest trParams = new TransactionRequest().
+        String trData = braintreePaymentService.makeTrData(trParams);
+        String trUrl = braintreePaymentService.makeTrUrl();
+        model.addAttribute("trData", trData);
+        model.addAttribute("trUrl", trUrl);
+        
+        return braintreeFormView;
+    }
+
+    public TransactionRequest trSetup(TransactionRequest trParams, Order order, CheckoutForm checkoutForm) {
+        return  trParams.
                 type(Transaction.Type.SALE).
                 amount(new BigDecimal(order.getTotal().toString())).
                 orderId(order.getOrderNumber()).
@@ -93,40 +99,40 @@ public class BraintreeFormController {
                 lastName(order.getCustomer().getLastName()).
                 phone(checkoutForm.getBillingAddress().getPrimaryPhone()).
                 email(checkoutForm.getEmailAddress()).
-                done().
-                billingAddress().
-                firstName(checkoutForm.getBillingAddress().getFirstName()).
-                lastName(checkoutForm.getBillingAddress().getLastName()).
-                company(checkoutForm.getBillingAddress().getCompanyName()).
-                streetAddress(checkoutForm.getBillingAddress().getAddressLine1()).
-                extendedAddress(checkoutForm.getBillingAddress().getAddressLine2()).
-                locality(checkoutForm.getBillingAddress().getCity()).
-                region(checkoutForm.getBillingAddress().getState().getAbbreviation()).
-                postalCode(checkoutForm.getBillingAddress().getPostalCode()).
-                countryCodeAlpha2(checkoutForm.getBillingAddress().getCountry().getAbbreviation()).
-                done().
-                
-
-                shippingAddress().
-                firstName(checkoutForm.getShippingAddress().getFirstName()).
-                lastName(checkoutForm.getShippingAddress().getLastName()).
-                company(checkoutForm.getShippingAddress().getCompanyName()).
-                streetAddress(checkoutForm.getShippingAddress().getAddressLine1()).
-                extendedAddress(checkoutForm.getShippingAddress().getAddressLine2()).
-                locality(checkoutForm.getShippingAddress().getCity()).
-                region(checkoutForm.getShippingAddress().getState().getAbbreviation()).
-                postalCode(checkoutForm.getShippingAddress().getPostalCode()).
-                countryCodeAlpha2(checkoutForm.getShippingAddress().getCountry().getAbbreviation()).
                 done();
-        
-        String trData = gateway.transparentRedirect().trData(trParams, "http://localhost:8080/broadleafdemo/braintreeCheckout/braintreeProcess.htm?transactionType=" + transactionType.getType());
-
-        String trUrl = gateway.transparentRedirect().url();
-        model.addAttribute("trData", trData);
-        model.addAttribute("trUrl", trUrl);
-        
-        return braintreeFormView;
     }
+
+    public TransactionRequest trShipping(TransactionRequest trParams, Address shippingAddress){
+        return  trParams.
+                shippingAddress().
+                firstName(shippingAddress.getFirstName()).
+                lastName(shippingAddress.getLastName()).
+                company(shippingAddress.getCompanyName()).
+                streetAddress(shippingAddress.getAddressLine1()).
+                extendedAddress(shippingAddress.getAddressLine2()).
+                locality(shippingAddress.getCity()).
+                region(shippingAddress.getState().getAbbreviation()).
+                postalCode(shippingAddress.getPostalCode()).
+                countryCodeAlpha2(shippingAddress.getCountry().getAbbreviation()).
+                done();
+    }
+    
+    public TransactionRequest trBilling(TransactionRequest trParams, Address billingAddress){
+        return  trParams.
+                billingAddress().
+                firstName(billingAddress.getFirstName()).
+                lastName(billingAddress.getLastName()).
+                company(billingAddress.getCompanyName()).
+                streetAddress(billingAddress.getAddressLine1()).
+                extendedAddress(billingAddress.getAddressLine2()).
+                locality(billingAddress.getCity()).
+                region(billingAddress.getState().getAbbreviation()).
+                postalCode(billingAddress.getPostalCode()).
+                countryCodeAlpha2(billingAddress.getCountry().getAbbreviation()).
+                done();
+    }
+    
+    
 
     @SuppressWarnings("unchecked")
     @RequestMapping(value = "/braintreeContactInfo.htm", method = {RequestMethod.GET})
@@ -236,19 +242,19 @@ public class BraintreeFormController {
         return checkoutForm;
     }
 
-    public BraintreeGatewayRequest getGatewayRequest() {
-        return gatewayRequest;
-    }
-
-    public void setGatewayRequest(BraintreeGatewayRequest gatewayRequest) {
-        this.gatewayRequest = gatewayRequest;
-    }
-
     public String getBraintreeContactInfoView() {
         return braintreeContactInfoView;
     }
 
     public void setBraintreeContactInfoView(String braintreeContactInfoView) {
         this.braintreeContactInfoView = braintreeContactInfoView;
+    }
+
+    public BraintreePaymentService getBraintreePaymentService() {
+        return braintreePaymentService;
+    }
+
+    public void setBraintreePaymentService(BraintreePaymentService braintreePaymentService) {
+        this.braintreePaymentService = braintreePaymentService;
     }
 }

@@ -26,6 +26,7 @@ import org.broadleafcommerce.profile.core.service.CountryService;
 import org.broadleafcommerce.profile.core.service.CustomerService;
 import org.broadleafcommerce.profile.core.service.StateService;
 import org.broadleafcommerce.profile.web.core.CustomerState;
+import org.broadleafcommerce.vendor.braintree.service.payment.MessageConstants;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -67,14 +68,6 @@ public class BraintreeCheckoutController {
     @Resource(name="blCustomerService")
     protected CustomerService customerService;
 
-    //this service is backed by the entire payment workflow configured in application context
-    //it is the entry point for engaging the payment workflow
-    @Resource(name="blCompositePaymentService")
-    protected CompositePaymentService compositePaymentService;
-
-    @Resource(name="authorizeAndDebitCompositePaymentService")
-    protected CompositePaymentService authorizeAndDebitCompositePaymentService;
-
     @Resource(name="authorizeCompositePaymentService")
     protected CompositePaymentService authorizeCompositePaymentService;
 
@@ -99,13 +92,12 @@ public class BraintreeCheckoutController {
         Order order = retrieveCartOrder(request, model);
         String queryString = request.getQueryString();
 
-
         Map<PaymentInfo, Referenced> payments = new HashMap<PaymentInfo, Referenced>();
+
         CreditCardPaymentInfo creditCardPaymentInfo = ((CreditCardPaymentInfo) securePaymentInfoService.create(PaymentInfoType.CREDIT_CARD));
         creditCardPaymentInfo.setReferenceNumber(order.getOrderNumber());
 
-
-        order.getPaymentInfos().get(0).getAdditionalFields().put("queryString", queryString);
+        order.getPaymentInfos().get(0).getAdditionalFields().put(MessageConstants.QUERYSTRING, queryString);
         payments.put(order.getPaymentInfos().get(0), creditCardPaymentInfo);
 
         order.setSubmitDate(Calendar.getInstance().getTime());
@@ -113,14 +105,12 @@ public class BraintreeCheckoutController {
         PaymentResponseItem responseItem = null;
 
         if(TransactionType.getInstance(transactionType) == TransactionType.AUTHORIZE) {
-            responseItem = braintreeAuthorize(model, request, payments);
+            responseItem = braintreeAuthorize(order, payments);
         } else if(TransactionType.getInstance(transactionType) == TransactionType.AUTHORIZEANDDEBIT){
-            responseItem = braintreeAuthorizeAndDebit(model, request, payments);
+            responseItem = braintreeAuthorizeAndDebit(order, payments);
         }
 
-        if(responseItem == null) {
-            LOG.error("responseItem cannot be null");
-        } else if (responseItem.getTransactionSuccess()) {
+        if (responseItem.getTransactionSuccess()) {
 
             Customer customer = order.getCustomer();
             if (StringUtils.isEmpty(customer.getFirstName())) {
@@ -133,27 +123,29 @@ public class BraintreeCheckoutController {
                 customer.setEmailAddress(order.getEmailAddress());
             }
             customerService.saveCustomer(customer, false);
-            order.getPaymentInfos().get(0).getAdditionalFields().put("braintreeId", responseItem.getTransactionId());
+            order.getPaymentInfos().get(0).getAdditionalFields().put(MessageConstants.BRAINTREEID, responseItem.getTransactionId());
             model.addAttribute("order", order);
             return "redirect:/orders/viewOrderConfirmation.htm?orderNumber=" + order.getOrderNumber();
         } else {
-            LOG.error(responseItem.getAdditionalFields().get("message"));
+            LOG.error(responseItem.getAdditionalFields().get(MessageConstants.MESSAGE));
         }
 
         return "";
     }
 
-    public PaymentResponseItem braintreeAuthorize(ModelMap model,
-                                     HttpServletRequest request,
+    public PaymentResponseItem braintreeAuthorize(Order order,
                                      Map<PaymentInfo, Referenced> payments){
-
-        Order order = retrieveCartOrder(request, model);
+        //TODO: get an alternate checkout workflow to work for authorize in addition
+        //to the authorizeAndDebit checkout workflow
         order.setStatus(OrderStatus.IN_PROCESS);
+        //CheckoutResponse checkoutResponse;
         PaymentResponseItem responseItem = null;
 
         try {
             CompositePaymentResponse compositePaymentResponse = authorizeCompositePaymentService.executePayment(order, payments);
             responseItem = compositePaymentResponse.getPaymentResponse().getResponseItems().get(order.getPaymentInfos().get(0));
+            /*checkoutResponse = authorizeCheckoutService.performCheckout(order, payments);
+            responseItem = checkoutResponse.getPaymentResponse().getResponseItems().get(order.getPaymentInfos().get(0));*/
         } catch (PaymentException e) {
             LOG.error("Cannot perform checkout", e);
         }
@@ -162,15 +154,13 @@ public class BraintreeCheckoutController {
     }
 
     @RequestMapping(value = "/braintreeAuthorizeAndDebit.htm", method = {RequestMethod.GET})
-    public PaymentResponseItem braintreeAuthorizeAndDebit(ModelMap model,
-                                   HttpServletRequest request,
+    public PaymentResponseItem braintreeAuthorizeAndDebit(Order order,
                                    Map<PaymentInfo, Referenced> payments){
 
-        Order order = retrieveCartOrder(request, model);
         order.setStatus(OrderStatus.SUBMITTED);
-
         CheckoutResponse checkoutResponse;
         PaymentResponseItem responseItem = null;
+
         try {
             checkoutResponse = checkoutService.performCheckout(order, payments);
             responseItem = checkoutResponse.getPaymentResponse().getResponseItems().get(order.getPaymentInfos().get(0));
@@ -195,7 +185,7 @@ public class BraintreeCheckoutController {
             if(responseItem.getTransactionSuccess()) {
                 return "redirect:/orders/viewOrderConfirmation.htm?orderNumber=" + order.getOrderNumber();
             } else {
-                LOG.error(responseItem.getAdditionalFields().get("message"));
+                LOG.error(responseItem.getAdditionalFields().get(MessageConstants.MESSAGE));
             }
         } catch(PaymentException e) {
             LOG.error("Cannot perform capture", e);
@@ -215,7 +205,7 @@ public class BraintreeCheckoutController {
             if(responseItem.getTransactionSuccess()) {
                 return "redirect:/orders/viewOrderConfirmation.htm?orderNumber=" + order.getOrderNumber();
             } else {
-                LOG.error(responseItem.getAdditionalFields().get("message"));
+                LOG.error(responseItem.getAdditionalFields().get(MessageConstants.MESSAGE));
             }
         } catch(PaymentException e) {
             LOG.error("Cannot perform refund", e);
@@ -236,7 +226,7 @@ public class BraintreeCheckoutController {
 
                 return "redirect:/orders/viewOrderConfirmation.htm?orderNumber=" + order.getOrderNumber();
             } else {
-                LOG.error(responseItem.getAdditionalFields().get("message"));
+                LOG.error(responseItem.getAdditionalFields().get(MessageConstants.MESSAGE));
             }
         } catch(PaymentException e) {
             LOG.error("Cannot perform void", e);

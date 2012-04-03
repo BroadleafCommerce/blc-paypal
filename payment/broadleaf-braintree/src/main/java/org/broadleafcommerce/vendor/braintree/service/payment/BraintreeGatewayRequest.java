@@ -19,10 +19,12 @@ package org.broadleafcommerce.vendor.braintree.service.payment;
 
 import com.braintreegateway.BraintreeGateway;
 
+import java.io.Serializable;
+
 /**
  * @author Jeff Fischer
  */
-public interface BraintreeGatewayRequest {
+public interface BraintreeGatewayRequest extends Serializable {
 
     BraintreeGateway buildRequest();
 
@@ -37,5 +39,12 @@ public interface BraintreeGatewayRequest {
     String getMerchantId();
 
     void setMerchantId(String merchantId);
+    
+    String getRedirectUrl();
+    
+    void setRedirectUrl(String redirectUrl);
 
+    String getTransactionType();
+
+    void setTransactionType(String transactionType);
 }
