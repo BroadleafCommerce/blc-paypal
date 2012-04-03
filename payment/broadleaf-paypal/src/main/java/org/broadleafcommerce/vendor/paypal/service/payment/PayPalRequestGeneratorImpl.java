@@ -48,13 +48,13 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
 
         if (request.getMethodType() == PayPalMethodType.CHECKOUT) {
             setNvpsForCheckoutOrAuth(nvps, (PayPalPaymentRequest) request, MessageConstants.SALEACTION);
-            nvps.add(new NameValuePair(MessageConstants.CURRENCYCODE, ((PayPalPaymentRequest) request).getCurrency()));
+            nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTCURRENCYCODE, new Integer[]{0}, new String[]{"n"}), ((PayPalPaymentRequest) request).getCurrency()));
         } else if (request.getMethodType() == PayPalMethodType.AUTHORIZATION) {
             setNvpsForCheckoutOrAuth(nvps, (PayPalPaymentRequest) request, MessageConstants.AUTHORIZATIONACTION);
-            nvps.add(new NameValuePair(MessageConstants.CURRENCYCODE, ((PayPalPaymentRequest) request).getCurrency()));
+            nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTCURRENCYCODE, new Integer[]{0}, new String[]{"n"}), ((PayPalPaymentRequest) request).getCurrency()));
         } else if (request.getMethodType() == PayPalMethodType.PROCESS) {
             setNvpsForProcess(nvps, (PayPalPaymentRequest) request);
-            nvps.add(new NameValuePair(MessageConstants.CURRENCYCODE, ((PayPalPaymentRequest) request).getCurrency()));
+            nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTCURRENCYCODE, new Integer[]{0}, new String[]{"n"}), ((PayPalPaymentRequest) request).getCurrency()));
         } else if (request.getMethodType() == PayPalMethodType.REFUND) {
             setNvpsForRefund(nvps, (PayPalPaymentRequest) request);
             nvps.add(new NameValuePair(MessageConstants.CURRENCYCODE, ((PayPalPaymentRequest) request).getCurrency()));
@@ -63,7 +63,6 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
             nvps.add(new NameValuePair(MessageConstants.CURRENCYCODE, ((PayPalPaymentRequest) request).getCurrency()));
         } else if (request.getMethodType() == PayPalMethodType.VOID) {
             setNvpsForVoid(nvps, (PayPalPaymentRequest) request);
-            nvps.add(new NameValuePair(MessageConstants.CURRENCYCODE, ((PayPalPaymentRequest) request).getCurrency()));
         } else if (request.getMethodType() == PayPalMethodType.DETAILS) {
             setNvpsForDetails(nvps, (PayPalDetailsRequest) request);
         } else {
