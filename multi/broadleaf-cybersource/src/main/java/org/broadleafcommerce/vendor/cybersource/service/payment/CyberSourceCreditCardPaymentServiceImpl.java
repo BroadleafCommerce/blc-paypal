@@ -160,6 +160,9 @@ public class CyberSourceCreditCardPaymentServiceImpl extends AbstractCyberSource
                 authResponse.setReferralResponseNumber(authReply.getReferralResponseNumber());
                 authResponse.setSubResponseCode(authReply.getSubResponseCode());
             }
+            if (authResponse.getAmount() == null) {
+                authResponse.setAmount(Money.ZERO);
+            }
 			
 			((CyberSourceCardResponse) paymentResponse).setAuthResponse(authResponse);
 		}
@@ -173,6 +176,9 @@ public class CyberSourceCreditCardPaymentServiceImpl extends AbstractCyberSource
                 }
                 captureResponse.setReasonCode(captureReply.getReasonCode());
                 captureResponse.setReconciliationID(captureReply.getReconciliationID());
+            }
+            if (captureResponse.getAmount() == null) {
+                captureResponse.setAmount(Money.ZERO);
             }
 			
 			((CyberSourceCardResponse) paymentResponse).setCaptureResponse(captureResponse);
@@ -188,6 +194,9 @@ public class CyberSourceCreditCardPaymentServiceImpl extends AbstractCyberSource
                 creditResponse.setReconciliationID(creditReply.getReconciliationID());
                 creditResponse.setRequestDateTime(creditReply.getRequestDateTime());
             }
+            if (creditResponse.getAmount() == null) {
+                creditResponse.setAmount(Money.ZERO);
+            }
 			
 			((CyberSourceCardResponse) paymentResponse).setCreditResponse(creditResponse);
 		}
@@ -200,6 +209,9 @@ public class CyberSourceCreditCardPaymentServiceImpl extends AbstractCyberSource
                 }
                 voidResponse.setReasonCode(voidReply.getReasonCode());
                 voidResponse.setRequestDateTime(voidReply.getRequestDateTime());
+            }
+            if (voidResponse.getAmount() == null) {
+                voidResponse.setAmount(Money.ZERO);
             }
 			
 			((CyberSourceCardResponse) paymentResponse).setVoidResponse(voidResponse);
@@ -215,6 +227,9 @@ public class CyberSourceCreditCardPaymentServiceImpl extends AbstractCyberSource
                 authReverseResponse.setRequestDateTime(authReverseReply.getRequestDateTime());
                 authReverseResponse.setAuthorizationCode(authReverseReply.getAuthorizationCode());
                 authReverseResponse.setProcessorResponse(authReverseReply.getProcessorResponse());
+            }
+            if (authReverseResponse.getAmount() == null) {
+                authReverseResponse.setAmount(Money.ZERO);
             }
 			
 			((CyberSourceCardResponse) paymentResponse).setAuthReverseResponse(authReverseResponse);
