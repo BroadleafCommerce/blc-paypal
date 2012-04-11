@@ -10,7 +10,7 @@
     <artifactId>broadleaf-third-party-integration</artifactId>
     <packaging>pom</packaging>
     <name>BroadleafCommerce Third Party Integration</name>
-    <version>1.6.0-M2-SNAPSHOT</version>
+    <version>1.7.0-SNAPSHOT</version>
     <description>BroadleafCommerce Third Party Integration Modules</description>
     <url>http://www.broadleafcommerce.org</url>
     <licenses>
@@ -63,7 +63,7 @@
     </repositories>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <blc.version>1.6.0-M2</blc.version>
+        <blc.version>1.7.0-SNAPSHOT</blc.version>
         <blc.config.version>1.6.0</blc.config.version>
         <blc.config.dir>src/main/resources</blc.config.dir>
     </properties>

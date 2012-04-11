@@ -3,7 +3,7 @@
     <parent>
         <artifactId>broadleaf-third-party-integration</artifactId>
         <groupId>org.broadleafcommerce</groupId>
-        <version>1.6.0-M2-SNAPSHOT</version>
+        <version>1.7.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>third-party-integration-tests</artifactId>
@@ -56,26 +56,6 @@
                         <goals>
                             <goal>test-jar</goal>
                         </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <version>1.7</version>
-                <executions>
-                    <execution>
-                        <id>add-source</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>add-source</goal>
-                        </goals>
-                        <configuration>
-                            <sources>
-                                <source>../multi/broadleaf-cybersource/src/main/java</source>
-                                <source>../shipping/broadleaf-usps/src/main/java</source>
-                            </sources>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
