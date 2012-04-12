@@ -114,24 +114,24 @@ public class CyberSourceTaxModuleTest extends BaseTest {
 		order.getFulfillmentGroups().add(fg2);
 		order.setTotal(new Money(50D));
 		
-		assert(order.getTotalTax() == null);
-		order = module.calculateTaxForOrder(order);
-		
-		Boolean fgi1Taxed = false;
-		for (TaxDetail tax : fgi1.getTaxes()) {
-			if (tax.getAmount() != null && tax.getAmount().greaterThan(new Money(0D))) {
-				fgi1Taxed = true;
-			}
-		}
-		
-		Boolean fgi2Taxed = false;
-		for (TaxDetail tax : fgi2.getTaxes()) {
-			if (tax.getAmount() != null && tax.getAmount().greaterThan(new Money(0D))) {
-				fgi2Taxed = true;
-			}
-		}
-		
-		assert(fgi1Taxed && fgi2Taxed);
+        assert(order.getTotalTax() == null);
+        order = module.calculateTaxForOrder(order);
+        
+        Boolean fgi1Taxed = false;
+        for (TaxDetail tax : fgi1.getTaxes()) {
+            if (tax.getAmount() != null && tax.getAmount().greaterThan(new Money(0D))) {
+                fgi1Taxed = true;
+            }
+        }
+        
+        Boolean fgi2Taxed = false;
+        for (TaxDetail tax : fgi2.getTaxes()) {
+            if (tax.getAmount() != null && tax.getAmount().greaterThan(new Money(0D))) {
+                fgi2Taxed = true;
+            }
+        }
+        
+        assert(fgi1Taxed && fgi2Taxed);
 	}
 	
 	private PaymentInfo createPaymentInfo(String line1, String city, final String country, String name, String lastName, String postalCode, final String state) {

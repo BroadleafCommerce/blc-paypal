@@ -126,14 +126,14 @@ public class CyberSourceTaxServiceImpl extends AbstractCyberSourceService implem
 	}
 	
 	public void clearCache() {
-		if (isCacheEnabled) {
-			synchronized(this) {
-				if (cache == null) {
-					cache = CacheManager.getInstance().getCache("CyberSourceTaxRequests");
-				}
-			}
-		}
-		cache.removeAll();
+        if (isCacheEnabled) {
+            synchronized (this) {
+                if (cache == null) {
+                    cache = CacheManager.getInstance().getCache("CyberSourceTaxRequests");
+                }
+            }
+        }
+        cache.removeAll();
 	}
 
 	public Cache getCache() {

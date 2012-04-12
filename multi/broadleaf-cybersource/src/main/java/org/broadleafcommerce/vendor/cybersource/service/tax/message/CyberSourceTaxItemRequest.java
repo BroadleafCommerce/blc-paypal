@@ -606,12 +606,12 @@ public class CyberSourceTaxItemRequest extends CyberSourceItemRequest {
 		this.nonCyberSourceFulfillmentGroupId = nonCyberSourceFulfillmentGroupId;
 	}
 
-	public String getNonCyberSourceItemIdentifier() {
-		return nonCyberSourceItemIdentifier;
-	}
+    public String getNonCyberSourceItemIdentifier() {
+        return nonCyberSourceItemIdentifier;
+    }
 
-	public void setNonCyberSourceItemIdentifier(String nonCyberSourceItemIdentifier) {
-		this.nonCyberSourceItemIdentifier = nonCyberSourceItemIdentifier;
-	}
+    public void setNonCyberSourceItemIdentifier(String nonCyberSourceItemIdentifier) {
+        this.nonCyberSourceItemIdentifier = nonCyberSourceItemIdentifier;
+    }
 	
 }
