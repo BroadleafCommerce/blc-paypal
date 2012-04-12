@@ -16,7 +16,6 @@
 
 package org.broadleafcommerce.vendor.cybersource.service.tax;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
@@ -127,6 +126,13 @@ public class CyberSourceTaxServiceImpl extends AbstractCyberSourceService implem
 	}
 	
 	public void clearCache() {
+		if (isCacheEnabled) {
+			synchronized(this) {
+				if (cache == null) {
+					cache = CacheManager.getInstance().getCache("CyberSourceTaxRequests");
+				}
+			}
+		}
 		cache.removeAll();
 	}
 
