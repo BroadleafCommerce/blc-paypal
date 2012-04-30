@@ -119,6 +119,7 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
         }
         nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.GRANDTOTALREQUEST, new Integer[]{0}, new String[]{"n"}), paymentRequest.getSummaryRequest().getGrandTotal().toString()));
         nvps.add(new NameValuePair(MessageConstants.METHOD, MessageConstants.PROCESSPAYMENTACTION));
+        nvps.add(new NameValuePair(MessageConstants.BN, MessageConstants.BNCODE));
     }
     
     protected void setBaseNvps(List<NameValuePair> nvps) {

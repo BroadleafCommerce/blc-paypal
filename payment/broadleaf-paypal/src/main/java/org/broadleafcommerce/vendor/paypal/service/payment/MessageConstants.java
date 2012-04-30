@@ -158,5 +158,7 @@ public class MessageConstants {
     public static final String REFUNDACTION = "RefundTransaction";
     public static final String CAPTUREACTION = "DoCapture";
     public static final String VOIDACTION = "DoVoid";
+    public static final String BN = "BUTTONSOURCE";
+    public static final String BNCODE = "BroadleafCommerce_Cart_EC";
 
 }
