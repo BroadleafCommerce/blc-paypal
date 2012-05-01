@@ -19,7 +19,7 @@
     <parent>
         <artifactId>payment</artifactId>
         <groupId>org.broadleafcommerce</groupId>
-        <version>1.6.0-M2-SNAPSHOT</version>
+        <version>1.6.0-GA</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>broadleaf-paypal</artifactId>
