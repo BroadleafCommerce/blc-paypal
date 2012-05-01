@@ -92,6 +92,7 @@ public class CyberSourceTaxItemRequest extends CyberSourceItemRequest {
     private java.lang.String zeroCostToCustomerIndicator;
     private Long nonCyberSourceQuantity;
     private Long nonCyberSourceFulfillmentGroupId;
+    private String nonCyberSourceItemIdentifier;
     
 	public java.lang.String getProductCode() {
 		return productCode;
@@ -604,5 +605,13 @@ public class CyberSourceTaxItemRequest extends CyberSourceItemRequest {
 	public void setNonCyberSourceFulfillmentGroupId(Long nonCyberSourceFulfillmentGroupId) {
 		this.nonCyberSourceFulfillmentGroupId = nonCyberSourceFulfillmentGroupId;
 	}
-    
+
+    public String getNonCyberSourceItemIdentifier() {
+        return nonCyberSourceItemIdentifier;
+    }
+
+    public void setNonCyberSourceItemIdentifier(String nonCyberSourceItemIdentifier) {
+        this.nonCyberSourceItemIdentifier = nonCyberSourceItemIdentifier;
+    }
+	
 }
