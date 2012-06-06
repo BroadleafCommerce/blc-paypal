@@ -19,7 +19,9 @@ package org.broadleafcommerce.pricing.service.module;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.broadleafcommerce.common.vendor.service.exception.ShippingPriceException;
 import org.broadleafcommerce.core.catalog.domain.Product;
+import org.broadleafcommerce.core.catalog.domain.Sku;
 import org.broadleafcommerce.core.order.domain.BundleOrderItem;
 import org.broadleafcommerce.core.order.domain.DiscreteOrderItem;
 import org.broadleafcommerce.core.order.domain.FulfillmentGroup;
@@ -28,7 +30,6 @@ import org.broadleafcommerce.core.order.domain.GiftWrapOrderItem;
 import org.broadleafcommerce.core.order.domain.OrderItem;
 import org.broadleafcommerce.core.pricing.service.workflow.type.ShippingServiceType;
 import org.broadleafcommerce.order.service.type.USPSServiceMethod;
-import org.broadleafcommerce.common.vendor.service.exception.ShippingPriceException;
 import org.broadleafcommerce.vendor.usps.service.message.USPSContainerItem;
 import org.broadleafcommerce.vendor.usps.service.message.USPSContainerItemRequest;
 import org.broadleafcommerce.vendor.usps.service.type.USPSContainerShapeType;
@@ -93,23 +94,24 @@ public class USPSSingleItemPerPackageShippingCalculationModule extends USPSShipp
     	}
     	USPSContainerItemRequest itemRequest = new USPSContainerItem();
         itemRequest.setService(serviceType);
+        Sku sku = discreteItem.getSku();
         Product product = discreteItem.getProduct();
-        itemRequest.setContainerSize((USPSContainerSizeType) product.getSize());
-        itemRequest.setContainerShape((USPSContainerShapeType) product.getContainer());
-        itemRequest.setDepth(product.getDepth());
-        itemRequest.setDimensionUnitOfMeasureType(product.getDimension().getDimensionUnitOfMeasure());
+        itemRequest.setContainerSize((USPSContainerSizeType) sku.getDimension().getSize());
+        itemRequest.setContainerShape((USPSContainerShapeType) sku.getDimension().getContainer());
+        itemRequest.setDepth(sku.getDimension().getDepth());
+        itemRequest.setDimensionUnitOfMeasureType(sku.getDimension().getDimensionUnitOfMeasure());
         if (serviceType.equals(USPSServiceType.FIRSTCLASS) && methods.length > 1) {
         	itemRequest.setFirstClassType(USPSFirstClassType.getInstance(methods[1]));
         }
-        itemRequest.setGirth(product.getGirth());
-        itemRequest.setHeight(product.getHeight());
+        itemRequest.setGirth(sku.getDimension().getGirth());
+        itemRequest.setHeight(sku.getDimension().getHeight());
         if (serviceType.equals(USPSServiceType.ALL) || serviceType.equals(USPSServiceType.PARCEL) || serviceType.equals(USPSServiceType.ONLINE) || (serviceType.equals(USPSServiceType.FIRSTCLASS) && (itemRequest.getFirstClassType().equals(USPSFirstClassType.LETTER) || itemRequest.getFirstClassType().equals(USPSFirstClassType.FLAT)))) {
         	itemRequest.setMachineSortable(product.isMachineSortable());
         }
         itemRequest.setPackageId(String.valueOf(counter));
-        itemRequest.setWeight(product.getWeight().getWeight());
-        itemRequest.setWeightUnitOfMeasureType(product.getWeight().getWeightUnitOfMeasure());
-        itemRequest.setWidth(product.getWidth());
+        itemRequest.setWeight(sku.getWeight().getWeight());
+        itemRequest.setWeightUnitOfMeasureType(sku.getWeight().getWeightUnitOfMeasure());
+        itemRequest.setWidth(sku.getDimension().getWidth());
         itemRequest.setZipDestination(fulfillmentGroup.getAddress().getPostalCode());
         itemRequest.setZipOrigination(getOriginationPostalCode());
         
