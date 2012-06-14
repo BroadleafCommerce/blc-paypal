@@ -56,5 +56,4 @@ public interface PayPalRequestGenerator {
     String getUser();
 
     void setUser(String user);
-
 }
