@@ -50,26 +50,4 @@
 	<modules>
         <module>broadleaf-paypal</module>
     </modules>
-    <dependencies>
-        <dependency>
-            <groupId>org.broadleafcommerce</groupId>
-            <artifactId>broadleaf-framework</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.broadleafcommerce</groupId>
-            <artifactId>broadleaf-profile</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.broadleafcommerce</groupId>
-            <artifactId>broadleaf-profile-web</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>javax.servlet.jsp</groupId>
-            <artifactId>jsp-api</artifactId>
-        </dependency>
-    </dependencies>
 </project>
