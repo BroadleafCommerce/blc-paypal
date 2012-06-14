@@ -39,7 +39,7 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
     protected String libVersion;
     protected String returnUrl;
     protected String cancelUrl;
-    protected Boolean usePayPalShippingAddress = false;
+    //protected Boolean usePayPalShippingAddress = false;
     protected Map<String, String> additionalConfig;
     
     @Override
@@ -138,11 +138,11 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
         //0 – PayPal displays the shipping address on the PayPal pages. (This option is not supported out of the box. You will need to override the default PayPalPaymentModule implementation and pass in the FulfillmentGroups to support this feature)
         //1 – PayPal does not display shipping address fields whatsoever.  (Default)
         //2 – If you do not pass the shipping address, PayPal obtains it from the buyer's account profile.
-        if (usePayPalShippingAddress) {
-            nvps.add(new NameValuePair(MessageConstants.NOSHIPPING, "2"));
-        } else {
-            nvps.add(new NameValuePair(MessageConstants.NOSHIPPING, "1"));
-        }
+//        if (usePayPalShippingAddress) {
+//            nvps.add(new NameValuePair(MessageConstants.NOSHIPPING, "2"));
+//        } else {
+//            nvps.add(new NameValuePair(MessageConstants.NOSHIPPING, "1"));
+//        }
 
         setCostNvps(nvps, paymentRequest);
 
@@ -254,13 +254,4 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
         this.user = user;
     }
 
-    @Override
-    public Boolean getUsePayPalShippingAddress() {
-        return usePayPalShippingAddress;
-    }
-
-    @Override
-    public void setUsePayPalShippingAddress(Boolean usePayPalShippingAddress) {
-        this.usePayPalShippingAddress = usePayPalShippingAddress;
-    }
 }
