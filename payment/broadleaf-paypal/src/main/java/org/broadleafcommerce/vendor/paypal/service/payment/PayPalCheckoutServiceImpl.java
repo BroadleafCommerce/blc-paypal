@@ -37,7 +37,7 @@ import org.broadleafcommerce.vendor.paypal.service.payment.message.details.PayPa
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalMethodType;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalRefundType;
 
-//import javax.annotation.Resource;
+import javax.annotation.Resource;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
@@ -50,16 +50,16 @@ import java.util.Map;
  */
 public class PayPalCheckoutServiceImpl implements PayPalCheckoutService {
 
-    //@Resource(name="blCheckoutService")
+    @Resource(name="blCheckoutService")
     protected CheckoutService checkoutService;
 
-    //@Resource(name="blCartService")
+    @Resource(name="blCartService")
     protected CustomerService customerService;
 
-    //@Resource(name="blCompositePaymentService")
+    @Resource(name="blCompositePaymentService")
     protected CompositePaymentService compositePaymentService;
 
-    //@Resource(name="blPayPalModule")
+    @Resource(name="blPayPalModule")
     protected PayPalPaymentModule payPalPaymentModule;
 
     //The SetExpressCheckout API operation initiates an Express Checkout transaction.

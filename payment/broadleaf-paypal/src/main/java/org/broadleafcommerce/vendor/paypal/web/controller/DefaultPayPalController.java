@@ -38,8 +38,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
-//import javax.annotation.Resource;
-//import javax.servlet.http.HttpServletRequest;
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 
 
 /**
@@ -69,13 +69,13 @@ import org.springframework.web.servlet.ModelAndView;
 @Controller
 public class DefaultPayPalController {
 
-    //@Resource(name="blPayPalCheckoutService")
+    @Resource(name="blPayPalCheckoutService")
     protected PayPalCheckoutService payPalCheckoutService;
 
-    //@Resource(name="blCartService")
+    @Resource(name="blCartService")
     protected CartService cartService;
 
-    //@Resource(name="blCustomerState")
+    @Resource(name="blCustomerState")
     protected CustomerState customerState;
 
     @Value("${paypal.order.verify.url}")
@@ -92,8 +92,8 @@ public class DefaultPayPalController {
 
     //Create an anchor or POST to this URL to initiate checkout with PayPal.
     @RequestMapping(value = "/broadleaf-commerce/paypal/checkout", method = {RequestMethod.GET, RequestMethod.POST})
-    public ModelAndView paypalCheckout() throws PaymentException {
-        Customer customer = customerState.getCustomer(null);
+    public ModelAndView paypalCheckout(HttpServletRequest request) throws PaymentException {
+        Customer customer = customerState.getCustomer(request);
         final Order cart = cartService.findCartForCustomer(customer);
         if (cart != null) {
             CompositePaymentResponse compositePaymentResponse = payPalCheckoutService.initiateExpressCheckout(cart);
@@ -114,10 +114,10 @@ public class DefaultPayPalController {
 
     //this is the ${paypal.return.url} configured in your properties file
     @RequestMapping(value="/broadleaf-commerce/paypal/process", method = {RequestMethod.GET})
-    public ModelAndView paypalProcess(
+    public ModelAndView paypalProcess(HttpServletRequest request,
                                       @RequestParam String token,
                                       @RequestParam("PayerID") String payerID) throws CheckoutException, PricingException {
-        Customer customer = customerState.getCustomer(null);
+        Customer customer = customerState.getCustomer(request);
         final Order cart = cartService.findCartForCustomer(customer);
         if (cart != null) {
             //save the payer id and token on the payment info
