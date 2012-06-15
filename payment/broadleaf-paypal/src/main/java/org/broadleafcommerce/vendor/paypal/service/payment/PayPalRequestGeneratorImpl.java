@@ -134,10 +134,6 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
         nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.PAYMENTACTION, new Integer[]{0}, new String[]{"n"}), payPalAction));
         nvps.add(new NameValuePair(MessageConstants.INVNUM, paymentRequest.getReferenceNumber()));
 
-        //Determines if PayPal displays the shipping address fields on the PayPal pages. For digital goods, this field is required, and you must set it to 1. It is one of the following values:
-        //0 – PayPal displays the shipping address on the PayPal pages. (This option is not supported out of the box. You will need to override the default PayPalPaymentModule implementation and pass in the FulfillmentGroups to support this feature)
-        //1 – PayPal does not display shipping address fields whatsoever.  (Default)
-        //2 – If you do not pass the shipping address, PayPal obtains it from the buyer's account profile.
         if (captureShipping) {
             nvps.add(new NameValuePair(MessageConstants.NOSHIPPING, "2"));
         } else {
