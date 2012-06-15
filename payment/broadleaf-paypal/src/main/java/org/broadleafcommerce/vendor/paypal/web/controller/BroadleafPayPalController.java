@@ -32,7 +32,6 @@ import org.broadleafcommerce.profile.web.core.CustomerState;
 import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCheckoutService;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -66,7 +65,6 @@ import javax.servlet.http.HttpServletRequest;
  *  - paypal.order.confirm.useOrderNumber = this is a boolean to use order.getOrderNumber() to pass to the confirmation page, otherwise it uses order.getOrderId()
  *
  */
-@Controller
 public class BroadleafPayPalController {
 
     @Resource(name="blPayPalCheckoutService")
@@ -78,26 +76,21 @@ public class BroadleafPayPalController {
     @Resource(name="blCustomerState")
     protected CustomerState customerState;
 
-    @Value("${paypal.order.verify.url}")
     protected String orderVerificationView;
 
-    @Value("${paypal.order.confirm.url}")
     protected String orderConfirmationView;
 
-    @Value("${paypal.order.confirm.identifier}")
     protected String orderConfirmationIdentifier;
 
-    @Value("${paypal.order.confirm.useOrderNumber}")
-    protected Boolean useOrderNumber = false;
+    protected boolean useOrderNumber = false;
 
     /**
      * The default endpoint to initiate a PayPal Express Checkout.
-     * To use: POST or GET to /broadleaf-commerce/paypal/checkout
+     * To use: Create a controller in your application and extend this class.
      *
      * @param request - The Http request
      * @return ModelAndView
      */
-    @RequestMapping(value = "/broadleaf-commerce/paypal/checkout", method = {RequestMethod.GET, RequestMethod.POST})
     public ModelAndView paypalCheckout(HttpServletRequest request) throws PaymentException {
         Customer customer = customerState.getCustomer(request);
         final Order cart = cartService.findCartForCustomer(customer);
@@ -121,14 +114,13 @@ public class BroadleafPayPalController {
     /**
      * The default endpoint that PayPal redirects to on callback.
      * This is the ${paypal.return.url} configured in your properties file
-     * It is set to /broadleaf-commerce/paypal/process by default.
+     * To use: Create a controller in your application and extend this class.
      *
      * @param request - The Http request
      * @param token - A PayPal variable sent back as a request parameter
      * @param payerID - A PayPal variable sent back as a request parameter
      * @return ModelAndView
      */
-    @RequestMapping(value="/broadleaf-commerce/paypal/process", method = {RequestMethod.GET})
     public ModelAndView paypalProcess(HttpServletRequest request,
                                       @RequestParam String token,
                                       @RequestParam("PayerID") String payerID) throws CheckoutException, PricingException {
@@ -169,4 +161,35 @@ public class BroadleafPayPalController {
         return null;
     }
 
+    public String getOrderVerificationView() {
+        return orderVerificationView;
+    }
+
+    public void setOrderVerificationView(String orderVerificationView) {
+        this.orderVerificationView = orderVerificationView;
+    }
+
+    public String getOrderConfirmationView() {
+        return orderConfirmationView;
+    }
+
+    public void setOrderConfirmationView(String orderConfirmationView) {
+        this.orderConfirmationView = orderConfirmationView;
+    }
+
+    public String getOrderConfirmationIdentifier() {
+        return orderConfirmationIdentifier;
+    }
+
+    public void setOrderConfirmationIdentifier(String orderConfirmationIdentifier) {
+        this.orderConfirmationIdentifier = orderConfirmationIdentifier;
+    }
+
+    public boolean isUseOrderNumber() {
+        return useOrderNumber;
+    }
+
+    public void setUseOrderNumber(boolean useOrderNumber) {
+        this.useOrderNumber = useOrderNumber;
+    }
 }

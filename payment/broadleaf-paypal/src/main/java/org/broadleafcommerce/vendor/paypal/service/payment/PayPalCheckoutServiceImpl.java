@@ -57,7 +57,7 @@ public class PayPalCheckoutServiceImpl implements PayPalCheckoutService {
     @Resource(name="blCheckoutService")
     protected CheckoutService checkoutService;
 
-    @Resource(name="blCartService")
+    @Resource(name="blCustomerService")
     protected CustomerService customerService;
 
     @Resource(name="blCompositePaymentService")

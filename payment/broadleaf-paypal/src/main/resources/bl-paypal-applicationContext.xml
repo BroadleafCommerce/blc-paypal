@@ -7,8 +7,8 @@
            http://www.springframework.org/schema/context
            http://www.springframework.org/schema/context/spring-context-3.1.xsd">
 
-    <context:component-scan base-package="org.broadleafcommerce.vendor.paypal.service"/>
-    <context:property-placeholder/>
+    <context:component-scan base-package="org.broadleafcommerce.profile.web"/>
+    <context:component-scan base-package="org.broadleafcommerce.vendor.paypal"/>
 
     <bean id="blConfiguration" class="org.broadleafcommerce.common.config.RuntimeEnvironmentPropertiesConfigurer">
         <property name="propertyLocations">
@@ -26,6 +26,13 @@
         </property>
         <property name="defaultEnvironment" value="development"/>
         <property name="ignoreUnresolvablePlaceholders" value="true"/>
+    </bean>
+
+    <bean id="blPayPalController" class="org.broadleafcommerce.vendor.paypal.web.controller.BroadleafPayPalController">
+        <property name="orderConfirmationIdentifier" value="${paypal.order.confirm.identifier}"/>
+        <property name="orderConfirmationView" value="${paypal.order.confirm.url}"/>
+        <property name="orderVerificationView" value="${paypal.order.verify.url}"/>
+        <property name="useOrderNumber" value="${paypal.order.confirm.useOrderNumber}"/>
     </bean>
 
     <bean id="blPayPalCheckoutService" class="org.broadleafcommerce.vendor.paypal.service.payment.PayPalCheckoutServiceImpl"/>
