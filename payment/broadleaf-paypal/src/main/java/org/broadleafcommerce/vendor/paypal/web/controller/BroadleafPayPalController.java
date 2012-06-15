@@ -67,7 +67,7 @@ import javax.servlet.http.HttpServletRequest;
  *
  */
 @Controller
-public class DefaultPayPalController {
+public class BroadleafPayPalController {
 
     @Resource(name="blPayPalCheckoutService")
     protected PayPalCheckoutService payPalCheckoutService;
@@ -168,5 +168,4 @@ public class DefaultPayPalController {
 
         return null;
     }
-
 }
