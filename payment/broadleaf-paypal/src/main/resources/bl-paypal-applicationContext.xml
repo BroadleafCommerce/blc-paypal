@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+           http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context-3.1.xsd">
+
+    <context:component-scan base-package="org.broadleafcommerce.vendor.paypal.service"/>
+    <context:property-placeholder/>
+
+    <bean id="blConfiguration" class="org.broadleafcommerce.common.config.RuntimeEnvironmentPropertiesConfigurer">
+        <property name="propertyLocations">
+            <set>
+                <value>classpath:config/bc/paypal/</value>
+            </set>
+        </property>
+        <property name="environments">
+            <set>
+                <value>production</value>
+                <value>staging</value>
+                <value>integration</value>
+                <value>development</value>
+            </set>
+        </property>
+        <property name="defaultEnvironment" value="development"/>
+        <property name="ignoreUnresolvablePlaceholders" value="true"/>
+    </bean>
+
+    <bean id="blPayPalCheckoutService" class="org.broadleafcommerce.vendor.paypal.service.payment.PayPalCheckoutServiceImpl"/>
+
+    <bean id="blPayPalPaymentService" class="org.broadleafcommerce.core.payment.service.PaymentServiceImpl">
+        <property name="paymentModule" ref="blPayPalModule"/>
+    </bean>
+
+    <bean id="blPayPalModule" class="org.broadleafcommerce.payment.service.module.PayPalPaymentModule">
+        <property name="payPalPaymentService" ref="blPayPalVendorOrientedPaymentService"/>
+    </bean>
+
+    <bean id="blPayPalVendorOrientedPaymentService" class="org.broadleafcommerce.vendor.paypal.service.payment.PayPalPaymentServiceImpl">
+        <property name="serverUrl" value="${paypal.api.url}"/>
+        <property name="failureReportingThreshold" value="1"/>
+        <property name="requestGenerator">
+            <bean class="org.broadleafcommerce.vendor.paypal.service.payment.PayPalRequestGeneratorImpl">
+                <property name="libVersion" value="${paypal.version}"/>
+                <property name="password" value="${paypal.password}"/>
+                <property name="user" value="${paypal.user}"/>
+                <property name="signature" value="${paypal.signature}"/>
+                <property name="returnUrl" value="${paypal.return.url}"/>
+                <property name="cancelUrl" value="${paypal.cancel.url}"/>
+                <property name="captureShipping" value="${paypal.capture.shipping}"/>
+                <property name="additionalConfig">
+                    <map>
+                        <entry key="HDRIMG" value="${paypal.additional.HDRIMG}"/>
+                        <entry key="HDRBORDERCOLOR" value="${paypal.additional.HDRBORDERCOLOR}"/>
+                        <entry key="HDRBACKCOLOR" value="${paypal.additional.HDRBACKCOLOR}"/>
+                        <entry key="PAYFLOWCOLOR" value="${paypal.additional.PAYFLOWCOLOR}"/>
+                    </map>
+                </property>
+            </bean>
+        </property>
+        <property name="responseGenerator">
+            <bean class="org.broadleafcommerce.vendor.paypal.service.payment.PayPalResponseGeneratorImpl">
+                <property name="userRedirectUrl" value="${paypal.user.redirect.url}"/>
+            </bean>
+        </property>
+    </bean>
+
+</beans>
