@@ -56,4 +56,8 @@ public interface PayPalRequestGenerator {
     String getUser();
 
     void setUser(String user);
+
+    boolean getCaptureShipping();
+
+    void setCaptureShipping(boolean captureShipping);
 }
