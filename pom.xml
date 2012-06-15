@@ -264,6 +264,14 @@
             </dependency>
             <dependency>
                 <groupId>org.broadleafcommerce</groupId>
+                <artifactId>broadleaf-profile-web</artifactId>
+                <version>${blc.version}</version>
+                <type>jar</type>
+                <scope>compile</scope>
+                <optional>true</optional>
+            </dependency>
+            <dependency>
+                <groupId>org.broadleafcommerce</groupId>
                 <artifactId>broadleaf-third-party-integration-config</artifactId>
                 <version>${blc.config.version}</version>
                 <scope>compile</scope>
