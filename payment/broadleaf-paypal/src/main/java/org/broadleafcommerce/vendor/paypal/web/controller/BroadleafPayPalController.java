@@ -17,6 +17,8 @@
 package org.broadleafcommerce.vendor.paypal.web.controller;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.broadleafcommerce.core.checkout.service.exception.CheckoutException;
 import org.broadleafcommerce.core.checkout.service.workflow.CheckoutResponse;
 import org.broadleafcommerce.core.order.domain.Order;
@@ -67,6 +69,8 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class BroadleafPayPalController {
 
+    private static final Log LOG = LogFactory.getLog(BroadleafPayPalController.class);
+
     @Resource(name="blPayPalCheckoutService")
     protected PayPalCheckoutService payPalCheckoutService;
 
@@ -76,12 +80,16 @@ public class BroadleafPayPalController {
     @Resource(name="blCustomerState")
     protected CustomerState customerState;
 
+    @Value("${paypal.order.verify.url}")
     protected String orderVerificationView;
 
+    @Value("${paypal.order.confirm.url}")
     protected String orderConfirmationView;
 
+    @Value("${paypal.order.confirm.identifier}")
     protected String orderConfirmationIdentifier;
 
+    @Value("${paypal.order.confirm.useOrderNumber}")
     protected boolean useOrderNumber = false;
 
     /**
@@ -103,6 +111,12 @@ public class BroadleafPayPalController {
                     if (responseItem.getTransactionSuccess()) {
                         return new ModelAndView("redirect:" + responseItem.getAdditionalFields().get(MessageConstants.REDIRECTURL));
                     }
+                }
+            }
+
+            if (LOG.isDebugEnabled()) {
+                if (compositePaymentResponse.getPaymentResponse().getResponseItems().size() == 0) {
+                    LOG.debug("Payment Response is empty. Please see BLC_PAYMENT_LOG and BLC_PAYMENT_RESPONSE_ITEM for further details.");
                 }
             }
 

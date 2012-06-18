@@ -20,19 +20,14 @@
             <set>
                 <value>production</value>
                 <value>staging</value>
-                <value>integration</value>
+                <value>integrationQA</value>
+                <value>integrationDev</value>
                 <value>development</value>
+                <value>local</value>
             </set>
         </property>
         <property name="defaultEnvironment" value="development"/>
         <property name="ignoreUnresolvablePlaceholders" value="true"/>
-    </bean>
-
-    <bean id="blPayPalController" class="org.broadleafcommerce.vendor.paypal.web.controller.BroadleafPayPalController">
-        <property name="orderConfirmationIdentifier" value="${paypal.order.confirm.identifier}"/>
-        <property name="orderConfirmationView" value="${paypal.order.confirm.url}"/>
-        <property name="orderVerificationView" value="${paypal.order.verify.url}"/>
-        <property name="useOrderNumber" value="${paypal.order.confirm.useOrderNumber}"/>
     </bean>
 
     <bean id="blPayPalCheckoutService" class="org.broadleafcommerce.vendor.paypal.service.payment.PayPalCheckoutServiceImpl"/>
@@ -72,6 +67,29 @@
                 <property name="userRedirectUrl" value="${paypal.user.redirect.url}"/>
             </bean>
         </property>
+    </bean>
+
+    <!-- This is a default AuthorizeAndDebitWorkflow that includes a PayPal payment activity -->
+    <!-- This assumes a basic configuration and will need to be overriden if there are any custom activities -->
+    <bean id="blAuthorizeAndDebitWorkflow" class="org.broadleafcommerce.core.workflow.SequenceProcessor">
+        <property name="processContextFactory">
+            <bean class="org.broadleafcommerce.core.payment.service.workflow.PaymentProcessContextFactory">
+                <property name="paymentActionType" value="AUTHORIZEANDDEBIT"/>
+            </bean>
+        </property>
+        <property name="activities">
+            <list>
+                <bean class="org.broadleafcommerce.core.payment.service.workflow.PaymentActivity">
+                    <property name="paymentService" ref="blPayPalPaymentService"/>
+                    <property name="userName" value="web"/>
+                </bean>
+                <bean class="org.broadleafcommerce.core.payment.service.workflow.PaymentActivity">
+                    <property name="paymentService" ref="blCreditCardService"/>
+                    <property name="userName" value="web"/>
+                </bean>
+            </list>
+        </property>
+        <property name="defaultErrorHandler" ref="blDefaultErrorHandler"/>
     </bean>
 
 </beans>
