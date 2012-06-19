@@ -16,11 +16,26 @@
 
 package org.broadleafcommerce.pricing.service.module;
 
+import java.util.ArrayList;
+import java.util.Currency;
+import java.util.HashMap;
+import java.util.List;
+
 import org.apache.commons.lang.StringUtils;
-import org.broadleafcommerce.core.order.domain.*;
+import org.broadleafcommerce.common.money.Money;
+import org.broadleafcommerce.core.order.domain.BundleOrderItem;
+import org.broadleafcommerce.core.order.domain.DiscreteOrderItem;
+import org.broadleafcommerce.core.order.domain.FulfillmentGroup;
+import org.broadleafcommerce.core.order.domain.FulfillmentGroupFee;
+import org.broadleafcommerce.core.order.domain.FulfillmentGroupImpl;
+import org.broadleafcommerce.core.order.domain.FulfillmentGroupItem;
+import org.broadleafcommerce.core.order.domain.Order;
+import org.broadleafcommerce.core.order.domain.OrderItem;
+import org.broadleafcommerce.core.order.domain.TaxDetail;
+import org.broadleafcommerce.core.order.domain.TaxDetailImpl;
+import org.broadleafcommerce.core.order.domain.TaxType;
 import org.broadleafcommerce.core.pricing.service.exception.TaxException;
 import org.broadleafcommerce.core.pricing.service.module.TaxModule;
-import org.broadleafcommerce.common.money.Money;
 import org.broadleafcommerce.service.module.CyberSourceModule;
 import org.broadleafcommerce.vendor.cybersource.service.CyberSourceServiceManager;
 import org.broadleafcommerce.vendor.cybersource.service.message.CyberSourceBillingRequest;
@@ -29,11 +44,6 @@ import org.broadleafcommerce.vendor.cybersource.service.tax.message.CyberSourceT
 import org.broadleafcommerce.vendor.cybersource.service.tax.message.CyberSourceTaxItemResponse;
 import org.broadleafcommerce.vendor.cybersource.service.tax.message.CyberSourceTaxRequest;
 import org.broadleafcommerce.vendor.cybersource.service.tax.message.CyberSourceTaxResponse;
-
-import java.util.ArrayList;
-import java.util.Currency;
-import java.util.HashMap;
-import java.util.List;
 
 /**
  * Tax module that utilizes the Broadleaf Commerce API for CyberSource
@@ -72,40 +82,49 @@ public class CyberSourceTaxModule extends CyberSourceModule implements TaxModule
 		return order;
     }
 
-	private void calculateTaxes(Order order, HashMap<Long, CyberSourceTaxItemRequest> requestLibrary, CyberSourceTaxResponse response) {
-		order.setCityTax(new Money(0D));
-		order.setCountyTax(new Money(0D));
-		order.setStateTax(new Money(0D));
-		order.setDistrictTax(new Money(0D));
-		order.setCountryTax(new Money(0D));
-		order.setTotalTax(new Money(0D));
-		
-		for (CyberSourceTaxItemResponse itemResponse : response.getItemResponses()) {
-			CyberSourceTaxItemRequest itemRequest = requestLibrary.get(itemResponse.getId().longValue());
-			
-			order.setCityTax(order.getCityTax().add(itemResponse.getCityTaxAmount().multiply(itemRequest.getNonCyberSourceQuantity())));
-			order.setCountyTax(order.getCountyTax().add(itemResponse.getCountyTaxAmount().multiply(itemRequest.getNonCyberSourceQuantity())));
-			order.setStateTax(order.getStateTax().add(itemResponse.getStateTaxAmount().multiply(itemRequest.getNonCyberSourceQuantity())));
-			order.setDistrictTax(order.getDistrictTax().add(itemResponse.getDistrictTaxAmount().multiply(itemRequest.getNonCyberSourceQuantity())));
-			order.setTotalTax(order.getTotalTax().add(itemResponse.getTotalTaxAmount().multiply(itemRequest.getNonCyberSourceQuantity())));
-			
-			FulfillmentGroupImpl searchParam = new FulfillmentGroupImpl();
-			searchParam.setId(itemRequest.getNonCyberSourceFulfillmentGroupId());
-			FulfillmentGroup myGroup = order.getFulfillmentGroups().get(order.getFulfillmentGroups().indexOf(searchParam));
-			if (myGroup.getCityTax() == null) myGroup.setCityTax(new Money(0D));
-			if (myGroup.getCountyTax() == null) myGroup.setCountyTax(new Money(0D));
-			if (myGroup.getStateTax() == null) myGroup.setStateTax(new Money(0D));
-			if (myGroup.getDistrictTax() == null) myGroup.setDistrictTax(new Money(0D));
-			if (myGroup.getCountryTax() == null) myGroup.setCountryTax(new Money(0D));
-			if (myGroup.getTotalTax() == null) myGroup.setTotalTax(new Money(0D));
-			myGroup.setCityTax(myGroup.getCityTax().add(itemResponse.getCityTaxAmount().multiply(itemRequest.getNonCyberSourceQuantity())));
-			myGroup.setCountyTax(myGroup.getCountyTax().add(itemResponse.getCountyTaxAmount().multiply(itemRequest.getNonCyberSourceQuantity())));
-			myGroup.setStateTax(myGroup.getStateTax().add(itemResponse.getStateTaxAmount().multiply(itemRequest.getNonCyberSourceQuantity())));
-			myGroup.setDistrictTax(myGroup.getDistrictTax().add(itemResponse.getDistrictTaxAmount().multiply(itemRequest.getNonCyberSourceQuantity())));
-			myGroup.setTotalTax(myGroup.getTotalTax().add(itemResponse.getTotalTaxAmount().multiply(itemRequest.getNonCyberSourceQuantity())));
-		}
-	}
+    private void calculateTaxes(Order order, HashMap<Long, CyberSourceTaxItemRequest> requestLibrary, CyberSourceTaxResponse response) {
+        for (CyberSourceTaxItemResponse itemResponse : response.getItemResponses()) {
+            CyberSourceTaxItemRequest itemRequest = requestLibrary.get(itemResponse.getId().longValue());
 
+            FulfillmentGroupImpl searchParam = new FulfillmentGroupImpl();
+            searchParam.setId(itemRequest.getNonCyberSourceFulfillmentGroupId());
+            FulfillmentGroup myGroup = order.getFulfillmentGroups().get(order.getFulfillmentGroups().indexOf(searchParam));
+
+            String searchItemParam = itemRequest.getNonCyberSourceItemIdentifier();
+            Boolean isFeeTax = searchItemParam.contains("Fee") ? true : false;
+            Boolean isItemTax = searchItemParam.contains("Item") ? true : false;
+            int index = Integer.parseInt(searchItemParam.substring(searchItemParam.indexOf(':') + 1));
+            
+            if (isFeeTax || isItemTax) {
+                List<TaxDetail> taxes = new ArrayList<TaxDetail>();
+                taxes.add(new TaxDetailImpl(TaxType.CITY, itemResponse.getCityTaxAmount(), response.getCityRate()));
+                taxes.add(new TaxDetailImpl(TaxType.COUNTY, itemResponse.getCountyTaxAmount(), response.getCountyRate()));
+                taxes.add(new TaxDetailImpl(TaxType.DISTRICT, itemResponse.getDistrictTaxAmount(), response.getDistrictRate()));
+                taxes.add(new TaxDetailImpl(TaxType.STATE, itemResponse.getStateTaxAmount(), response.getStateRate()));
+    
+                if (isFeeTax) { 
+                    myGroup.getFulfillmentGroupFees().get(index).setTaxes(taxes);
+                } else {
+                    myGroup.getFulfillmentGroupItems().get(index).setTaxes(taxes);
+                } 
+            } else {
+                // We are splitting this from the above logic (even though they're very similar) to provision for the 
+                // possibility of having a different type of tax that doesn't apply to an item, such as shipping tax
+                List<TaxDetail> taxes = myGroup.getTaxes();
+                if (taxes == null) { 
+                    taxes = new ArrayList<TaxDetail>();
+                }
+                
+                taxes.add(new TaxDetailImpl(TaxType.CITY, itemResponse.getCityTaxAmount(), response.getCityRate()));
+                taxes.add(new TaxDetailImpl(TaxType.COUNTY, itemResponse.getCountyTaxAmount(), response.getCountyRate()));
+                taxes.add(new TaxDetailImpl(TaxType.DISTRICT, itemResponse.getDistrictTaxAmount(), response.getDistrictRate()));
+                taxes.add(new TaxDetailImpl(TaxType.STATE, itemResponse.getStateTaxAmount(), response.getStateRate()));
+                
+                myGroup.setTaxes(taxes);
+            }
+        }
+    }
+	
 	private CyberSourceTaxRequest createTaxRequest(Order order, HashMap<Long, CyberSourceTaxItemRequest> requestLibrary) throws TaxException {
 		if (order.getPaymentInfos() == null || order.getPaymentInfos().get(0) == null || order.getPaymentInfos().get(0).getAddress() == null) {
 			throw new TaxException("The order must have at least one PaymentInfo instance associated with a completed Address in order to calculate tax.");
@@ -129,10 +148,12 @@ public class CyberSourceTaxModule extends CyberSourceModule implements TaxModule
 				throw new TaxException("CyberSource tax calculation only supported for the United States and Canada.");
 			}
 			for (FulfillmentGroupItem item : fulfillmentGroup.getFulfillmentGroupItems()) {
+				int itemCounter = 0;
 				OrderItem orderItem = item.getOrderItem();
 				if (orderItem.getTaxablePrice().greaterThan(Money.zero(taxRequest.getCurrency()))) {
 					CyberSourceTaxItemRequest itemRequest = new CyberSourceTaxItemRequest();
 					itemRequest.setNonCyberSourceFulfillmentGroupId(fulfillmentGroup.getId());
+					itemRequest.setNonCyberSourceItemIdentifier("Item:" + itemCounter++);
 					if (DiscreteOrderItem.class.isAssignableFrom(orderItem.getClass())) {
 						DiscreteOrderItem discreteItem = (DiscreteOrderItem) orderItem;
 						itemRequest.setProductName(discreteItem.getName());
@@ -153,30 +174,34 @@ public class CyberSourceTaxModule extends CyberSourceModule implements TaxModule
 					requestLibrary.put(itemRequest.getId(), itemRequest);
 				}
 	        }
-			for (FulfillmentGroupFee fulfillmentGroupFee : fulfillmentGroup.getFulfillmentGroupFees()) {
-                if (fulfillmentGroupFee.isTaxable() && fulfillmentGroupFee.getAmount().greaterThan(Money.zero(taxRequest.getCurrency()))) {
-                	CyberSourceTaxItemRequest itemRequest = new CyberSourceTaxItemRequest();
-                	itemRequest.setNonCyberSourceFulfillmentGroupId(fulfillmentGroup.getId());
-                	itemRequest.setProductName(fulfillmentGroupFee.getName()==null?"Fee":fulfillmentGroupFee.getName());
-					itemRequest.setDescription(fulfillmentGroupFee.getReportingCode()==null?"None":fulfillmentGroupFee.getReportingCode());
-					itemRequest.setQuantity(1L);
-					itemRequest.setNonCyberSourceQuantity(1L);
-					itemRequest.setUnitPrice(fulfillmentGroupFee.getAmount());
-					taxRequest.getItemRequests().add(itemRequest);
-					requestLibrary.put(itemRequest.getId(), itemRequest);
+            for (FulfillmentGroupFee fulfillmentGroupFee : fulfillmentGroup.getFulfillmentGroupFees()) {
+                int feeCounter = 0;
+                if (fulfillmentGroupFee.getAmount().greaterThan(Money.zero(taxRequest.getCurrency()))) {
+                    CyberSourceTaxItemRequest itemRequest = new CyberSourceTaxItemRequest();
+                    itemRequest.setNonCyberSourceFulfillmentGroupId(fulfillmentGroup.getId());
+                    itemRequest.setNonCyberSourceItemIdentifier("Fee:" + feeCounter++);
+                    itemRequest.setProductName(fulfillmentGroupFee.getName() == null ? "Fee" : fulfillmentGroupFee.getName());
+                    itemRequest.setDescription(fulfillmentGroupFee.getReportingCode() == null ? "None" : fulfillmentGroupFee.getReportingCode());
+                    itemRequest.setQuantity(1L);
+                    itemRequest.setNonCyberSourceQuantity(1L);
+                    itemRequest.setUnitPrice(fulfillmentGroupFee.getAmount());
+                    taxRequest.getItemRequests().add(itemRequest);
+                    requestLibrary.put(itemRequest.getId(), itemRequest);
                 }
             }
-			if (fulfillmentGroup.isShippingPriceTaxable() && fulfillmentGroup.getShippingPrice().greaterThan(Money.zero(taxRequest.getCurrency()))) {
-				CyberSourceTaxItemRequest itemRequest = new CyberSourceTaxItemRequest();
-            	itemRequest.setNonCyberSourceFulfillmentGroupId(fulfillmentGroup.getId());
-            	itemRequest.setProductName("Shipping Cost");
-				itemRequest.setDescription("Taxable Shipping Cost");
-				itemRequest.setQuantity(1L);
-				itemRequest.setNonCyberSourceQuantity(1L);
-				itemRequest.setUnitPrice(fulfillmentGroup.getShippingPrice());
-				taxRequest.getItemRequests().add(itemRequest);
-				requestLibrary.put(itemRequest.getId(), itemRequest);
-			}
+			
+            if (fulfillmentGroup.getShippingPrice() != null && fulfillmentGroup.getShippingPrice().greaterThan(Money.zero(taxRequest.getCurrency()))) {
+                CyberSourceTaxItemRequest itemRequest = new CyberSourceTaxItemRequest();
+                itemRequest.setNonCyberSourceFulfillmentGroupId(fulfillmentGroup.getId());
+                itemRequest.setNonCyberSourceItemIdentifier("Shipping:0");
+                itemRequest.setProductName("Shipping Cost");
+                itemRequest.setDescription("Taxable Shipping Cost");
+                itemRequest.setQuantity(1L);
+                itemRequest.setNonCyberSourceQuantity(1L);
+                itemRequest.setUnitPrice(fulfillmentGroup.getShippingPrice());
+                taxRequest.getItemRequests().add(itemRequest);
+                requestLibrary.put(itemRequest.getId(), itemRequest);
+            }
         }
 		return taxRequest;
 	}

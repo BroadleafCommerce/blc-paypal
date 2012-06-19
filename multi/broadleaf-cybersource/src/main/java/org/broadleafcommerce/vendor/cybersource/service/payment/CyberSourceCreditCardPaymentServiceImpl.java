@@ -119,93 +119,118 @@ public class CyberSourceCreditCardPaymentServiceImpl extends AbstractCyberSource
 		paymentResponse.setRequestID(reply.getRequestID());
 		paymentResponse.setRequestToken(reply.getRequestToken());
 		if (CyberSourceTransactionType.AUTHORIZE.equals(paymentResponse.getTransactionType()) || CyberSourceTransactionType.AUTHORIZEANDCAPTURE.equals(paymentResponse.getTransactionType())) {
-			CCAuthReply authReply = reply.getCcAuthReply();
 			CyberSourceAuthResponse authResponse = new CyberSourceAuthResponse();
-			if (authReply.getAccountBalance() != null) {
-				authResponse.setAccountBalance(new Money(authReply.getAccountBalance()));
-			}
-			if (authReply.getAmount() != null) {
-				authResponse.setAmount(new Money(authReply.getAmount()));
-			}
-			if (authReply.getApprovedAmount() != null) {
-				authResponse.setApprovedAmount(new Money(authReply.getApprovedAmount()));
-			}
-			authResponse.setApprovedTerms(authReply.getApprovedTerms());
-			authResponse.setAuthenticationXID(authReply.getAuthenticationXID());
-			authResponse.setAuthFactorCode(authReply.getAuthFactorCode());
-			authResponse.setAuthorizationCode(authReply.getAuthorizationCode());
-			authResponse.setAuthorizationXID(authReply.getAuthorizationXID());
-			authResponse.setAuthorizedDateTime(authReply.getAuthorizedDateTime());
-			authResponse.setAuthRecord(authReply.getAuthRecord());
-			authResponse.setAvsCode(authReply.getAvsCode());
-			authResponse.setAvsCodeRaw(authReply.getAvsCodeRaw());
-			authResponse.setBmlAccountNumber(authReply.getBmlAccountNumber());
-			authResponse.setCardCategory(authReply.getCardCategory());
-			authResponse.setCavvResponseCode(authReply.getCavvResponseCode());
-			authResponse.setCavvResponseCodeRaw(authReply.getCavvResponseCodeRaw());
-			authResponse.setCreditLine(authReply.getCreditLine());
-			authResponse.setCvCode(authReply.getCvCode());
-			authResponse.setCvCodeRaw(authReply.getCvCodeRaw());
-			authResponse.setEnhancedDataEnabled(authReply.getEnhancedDataEnabled());
-			authResponse.setForwardCode(authReply.getForwardCode());
-			authResponse.setMerchantAdviceCode(authReply.getMerchantAdviceCode());
-			authResponse.setMerchantAdviceCodeRaw(authReply.getMerchantAdviceCodeRaw());
-			authResponse.setPaymentNetworkTransactionID(authReply.getPaymentNetworkTransactionID());
-			authResponse.setPersonalIDCode(authReply.getPersonalIDCode());
-			authResponse.setProcessorCardType(authReply.getProcessorCardType());
-			authResponse.setProcessorResponse(authReply.getProcessorResponse());
-			authResponse.setReasonCode(authReply.getReasonCode());
-			authResponse.setReconciliationID(authReply.getReconciliationID());
-			authResponse.setReferralResponseNumber(authReply.getReferralResponseNumber());
-			authResponse.setSubResponseCode(authReply.getSubResponseCode());
+            CCAuthReply authReply = reply.getCcAuthReply();
+            if (authReply != null) {
+                if (authReply.getAccountBalance() != null) {
+                    authResponse.setAccountBalance(new Money(authReply.getAccountBalance()));
+                }
+                if (authReply.getAmount() != null) {
+                    authResponse.setAmount(new Money(authReply.getAmount()));
+                }
+                if (authReply.getApprovedAmount() != null) {
+                    authResponse.setApprovedAmount(new Money(authReply.getApprovedAmount()));
+                }
+                authResponse.setApprovedTerms(authReply.getApprovedTerms());
+                authResponse.setAuthenticationXID(authReply.getAuthenticationXID());
+                authResponse.setAuthFactorCode(authReply.getAuthFactorCode());
+                authResponse.setAuthorizationCode(authReply.getAuthorizationCode());
+                authResponse.setAuthorizationXID(authReply.getAuthorizationXID());
+                authResponse.setAuthorizedDateTime(authReply.getAuthorizedDateTime());
+                authResponse.setAuthRecord(authReply.getAuthRecord());
+                authResponse.setAvsCode(authReply.getAvsCode());
+                authResponse.setAvsCodeRaw(authReply.getAvsCodeRaw());
+                authResponse.setBmlAccountNumber(authReply.getBmlAccountNumber());
+                authResponse.setCardCategory(authReply.getCardCategory());
+                authResponse.setCavvResponseCode(authReply.getCavvResponseCode());
+                authResponse.setCavvResponseCodeRaw(authReply.getCavvResponseCodeRaw());
+                authResponse.setCreditLine(authReply.getCreditLine());
+                authResponse.setCvCode(authReply.getCvCode());
+                authResponse.setCvCodeRaw(authReply.getCvCodeRaw());
+                authResponse.setEnhancedDataEnabled(authReply.getEnhancedDataEnabled());
+                authResponse.setForwardCode(authReply.getForwardCode());
+                authResponse.setMerchantAdviceCode(authReply.getMerchantAdviceCode());
+                authResponse.setMerchantAdviceCodeRaw(authReply.getMerchantAdviceCodeRaw());
+                authResponse.setPaymentNetworkTransactionID(authReply.getPaymentNetworkTransactionID());
+                authResponse.setPersonalIDCode(authReply.getPersonalIDCode());
+                authResponse.setProcessorCardType(authReply.getProcessorCardType());
+                authResponse.setProcessorResponse(authReply.getProcessorResponse());
+                authResponse.setReasonCode(authReply.getReasonCode());
+                authResponse.setReconciliationID(authReply.getReconciliationID());
+                authResponse.setReferralResponseNumber(authReply.getReferralResponseNumber());
+                authResponse.setSubResponseCode(authReply.getSubResponseCode());
+            }
+            if (authResponse.getAmount() == null) {
+                authResponse.setAmount(Money.ZERO);
+            }
 			
 			((CyberSourceCardResponse) paymentResponse).setAuthResponse(authResponse);
 		}
 		if (CyberSourceTransactionType.AUTHORIZEANDCAPTURE.equals(paymentResponse.getTransactionType()) || CyberSourceTransactionType.CAPTURE.equals(paymentResponse.getTransactionType())) {
-			CCCaptureReply captureReply = reply.getCcCaptureReply();
-			CyberSourceCaptureResponse captureResponse = new CyberSourceCaptureResponse();
-			if (captureReply.getAmount() != null) {
-				captureResponse.setAmount(new Money(captureReply.getAmount()));
-			}
-			captureResponse.setReasonCode(captureReply.getReasonCode());
-			captureResponse.setRequestDateTime(captureResponse.getRequestDateTime());
-			captureResponse.setReconciliationID(captureReply.getReconciliationID());
+            CyberSourceCaptureResponse captureResponse = new CyberSourceCaptureResponse();
+            captureResponse.setRequestDateTime(captureResponse.getRequestDateTime());
+            CCCaptureReply captureReply = reply.getCcCaptureReply();
+            if (captureReply != null) {
+                if (captureReply.getAmount() != null) {
+                    captureResponse.setAmount(new Money(captureReply.getAmount()));
+                }
+                captureResponse.setReasonCode(captureReply.getReasonCode());
+                captureResponse.setReconciliationID(captureReply.getReconciliationID());
+            }
+            if (captureResponse.getAmount() == null) {
+                captureResponse.setAmount(Money.ZERO);
+            }
 			
 			((CyberSourceCardResponse) paymentResponse).setCaptureResponse(captureResponse);
 		}
 		if (CyberSourceTransactionType.CREDIT.equals(paymentResponse.getTransactionType())) {
+            CyberSourceCreditResponse creditResponse = new CyberSourceCreditResponse();
 			CCCreditReply creditReply = reply.getCcCreditReply();
-			CyberSourceCreditResponse creditResponse = new CyberSourceCreditResponse();
-			if (creditReply.getAmount() != null) {
-				creditResponse.setAmount(new Money(creditReply.getAmount()));
-			}
-			creditResponse.setReasonCode(creditReply.getReasonCode());
-			creditResponse.setReconciliationID(creditReply.getReconciliationID());
-			creditResponse.setRequestDateTime(creditReply.getRequestDateTime());
+			if (creditReply != null) {
+                if (creditReply.getAmount() != null) {
+                    creditResponse.setAmount(new Money(creditReply.getAmount()));
+                }
+                creditResponse.setReasonCode(creditReply.getReasonCode());
+                creditResponse.setReconciliationID(creditReply.getReconciliationID());
+                creditResponse.setRequestDateTime(creditReply.getRequestDateTime());
+            }
+            if (creditResponse.getAmount() == null) {
+                creditResponse.setAmount(Money.ZERO);
+            }
 			
 			((CyberSourceCardResponse) paymentResponse).setCreditResponse(creditResponse);
 		}
 		if (CyberSourceTransactionType.VOIDTRANSACTION.equals(paymentResponse.getTransactionType())) {
+            CyberSourceVoidResponse voidResponse = new CyberSourceVoidResponse();
 			VoidReply voidReply = reply.getVoidReply();
-			CyberSourceVoidResponse voidResponse = new CyberSourceVoidResponse();
-			if (voidReply.getAmount() != null) {
-				voidResponse.setAmount(new Money(voidReply.getAmount()));
-			}
-			voidResponse.setReasonCode(voidReply.getReasonCode());
-			voidResponse.setRequestDateTime(voidReply.getRequestDateTime());
+			if (voidReply != null) {
+                if (voidReply.getAmount() != null) {
+                    voidResponse.setAmount(new Money(voidReply.getAmount()));
+                }
+                voidResponse.setReasonCode(voidReply.getReasonCode());
+                voidResponse.setRequestDateTime(voidReply.getRequestDateTime());
+            }
+            if (voidResponse.getAmount() == null) {
+                voidResponse.setAmount(Money.ZERO);
+            }
 			
 			((CyberSourceCardResponse) paymentResponse).setVoidResponse(voidResponse);
 		}
 		if (CyberSourceTransactionType.REVERSEAUTHORIZE.equals(paymentResponse.getTransactionType())) {
+            CyberSourceAuthReverseResponse authReverseResponse = new CyberSourceAuthReverseResponse();
 			CCAuthReversalReply authReverseReply = reply.getCcAuthReversalReply();
-			CyberSourceAuthReverseResponse authReverseResponse = new CyberSourceAuthReverseResponse();
-			if (authReverseReply.getAmount() != null) {
-				authReverseResponse.setAmount(new Money(authReverseReply.getAmount()));
-			}
-			authReverseResponse.setReasonCode(authReverseReply.getReasonCode());
-			authReverseResponse.setRequestDateTime(authReverseReply.getRequestDateTime());
-			authReverseResponse.setAuthorizationCode(authReverseReply.getAuthorizationCode());
-			authReverseResponse.setProcessorResponse(authReverseReply.getProcessorResponse());
+			if (authReverseReply != null) {
+                if (authReverseReply.getAmount() != null) {
+                    authReverseResponse.setAmount(new Money(authReverseReply.getAmount()));
+                }
+                authReverseResponse.setReasonCode(authReverseReply.getReasonCode());
+                authReverseResponse.setRequestDateTime(authReverseReply.getRequestDateTime());
+                authReverseResponse.setAuthorizationCode(authReverseReply.getAuthorizationCode());
+                authReverseResponse.setProcessorResponse(authReverseReply.getProcessorResponse());
+            }
+            if (authReverseResponse.getAmount() == null) {
+                authReverseResponse.setAmount(Money.ZERO);
+            }
 			
 			((CyberSourceCardResponse) paymentResponse).setAuthReverseResponse(authReverseResponse);
 		}
