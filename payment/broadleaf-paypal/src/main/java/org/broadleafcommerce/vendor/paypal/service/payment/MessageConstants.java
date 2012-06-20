@@ -110,6 +110,7 @@ public class MessageConstants {
     public static final String SHIPTOCOUNTRYCODE = "PAYMENTREQUEST_n_SHIPTOCOUNTRYCODE";
     public static final String SHIPTOPHONENUMBER = "PAYMENTREQUEST_n_SHIPTOPHONENUM";
     public static final String ADDRESSSTATUS = "PAYMENTREQUEST_n_ADDRESSSTATUS";
+    public static final String ADDROVERRIDE = "ADDROVERRIDE";
 
     public static final String DETAILSPAYMENTAMOUNT = "PAYMENTREQUEST_n_AMT";
     public static final String DETAILSPAYMENTCURRENCYCODE = "PAYMENTREQUEST_n_CURRENCYCODE";

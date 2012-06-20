@@ -51,7 +51,10 @@
                 <property name="signature" value="${paypal.signature}"/>
                 <property name="returnUrl" value="${paypal.return.url}"/>
                 <property name="cancelUrl" value="${paypal.cancel.url}"/>
-                <property name="captureShipping" value="${paypal.capture.shipping}"/>
+                <!-- 0 : PayPal displays the shipping address passed in. -->
+                <!-- 1 : PayPal does not display the shipping fields at all. (Default) -->
+                <!-- 2 : PayPal will obtain the shipping address from the buyer's profile.-->
+                <property name="shippingDisplayType" value="${paypal.shipping.display}"/>
                 <property name="additionalConfig">
                     <map>
                         <entry key="HDRIMG" value="${paypal.additional.HDRIMG}"/>

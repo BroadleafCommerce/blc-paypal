@@ -26,8 +26,10 @@ import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPa
 import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPalPaymentRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.details.PayPalDetailsRequest;
+import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPalShippingRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalMethodType;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalRefundType;
+import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalShippingDisplayType;
 
 /**
  * @author Jeff Fischer
@@ -40,7 +42,7 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
     protected String libVersion;
     protected String returnUrl;
     protected String cancelUrl;
-    protected boolean captureShipping;
+    protected PayPalShippingDisplayType shippingDisplayType;
     protected Map<String, String> additionalConfig;
     
     @Override
@@ -137,15 +139,14 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
 
         //Determine if PayPal displays the shipping address fields on the PayPal pages.
         //For digital goods, this field is required and must be set to 1.
-        // 0 - PayPal displays the shipping address passed in. (This is not supported out-of-the-box.
-        //     You will need to override the default PayPalPaymentModule implementation and pass
-        //     in the FulfillmentGroup to support this feature)
+        // 0 - PayPal displays the shipping address passed in.
         // 1 - PayPal does not display the shipping fields at all. (Default)
         // 2 - PayPal will obtain the shipping address from the buyer's profile.
-        if (captureShipping) {
-            nvps.add(new NameValuePair(MessageConstants.NOSHIPPING, "2"));
-        } else {
-            nvps.add(new NameValuePair(MessageConstants.NOSHIPPING, "1"));
+        nvps.add(new NameValuePair(MessageConstants.NOSHIPPING, shippingDisplayType.getType()));
+        if (PayPalShippingDisplayType.PROVIDE_SHIPPING.equals(shippingDisplayType)){
+            // This must be set to 1 in order for PayPal to display the passed in address
+            nvps.add(new NameValuePair(MessageConstants.ADDROVERRIDE, "1"));
+            setShippingNvps(nvps, paymentRequest);
         }
 
         setCostNvps(nvps, paymentRequest);
@@ -172,6 +173,21 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
         nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.TAXREQUEST, new Integer[] {0}, new String[] {"n"}), handleZeroConversionForMoney(paymentRequest.getSummaryRequest().getTotalTax())));
         nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.SHIPPINGREQUEST, new Integer[] {0}, new String[] {"n"}), handleZeroConversionForMoney(paymentRequest.getSummaryRequest().getTotalShipping())));
         nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.GRANDTOTALREQUEST, new Integer[] {0}, new String[] {"n"}), handleZeroConversionForMoney(paymentRequest.getSummaryRequest().getGrandTotal())));
+    }
+
+    protected void setShippingNvps(List<NameValuePair> nvps, PayPalPaymentRequest paymentRequest) {
+        int counter = 0;
+        for (PayPalShippingRequest shippingRequest : paymentRequest.getShippingRequests()) {
+            nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.SHIPTONAME, new Integer[] {counter}, new String[] {"n"}), shippingRequest.getShipToName()));
+            nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.SHIPTOSTREET, new Integer[] {counter}, new String[] {"n"}), shippingRequest.getShipToStreet()));
+            nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.SHIPTOSTREET2, new Integer[] {counter}, new String[] {"n"}), shippingRequest.getShipToStreet2()));
+            nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.SHIPTOCITY, new Integer[] {counter}, new String[] {"n"}), shippingRequest.getShipToCity()));
+            nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.SHIPTOSTATE, new Integer[] {counter}, new String[] {"n"}), shippingRequest.getShipToState()));
+            nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.SHIPTOZIP, new Integer[] {counter}, new String[] {"n"}), shippingRequest.getShipToZip()));
+            nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.SHIPTOCOUNTRYCODE, new Integer[] {counter}, new String[] {"n"}), shippingRequest.getShipToCountryCode()));
+            nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.SHIPTOPHONENUMBER, new Integer[] {counter}, new String[] {"n"}), shippingRequest.getShipToPhoneNum()));
+            counter++;
+        }
     }
 
     //If the value of Money is Zero, we want to send "0" and not "0.000000".
@@ -267,13 +283,18 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
         this.user = user;
     }
 
-    @Override
-    public boolean getCaptureShipping() {
-        return captureShipping;
+    public String getShippingDisplayType() {
+        if (shippingDisplayType != null) {
+            return shippingDisplayType.getType();
+        }
+        return null;
     }
 
-    @Override
-    public void setCaptureShipping(boolean captureShipping) {
-        this.captureShipping = captureShipping;
+    public void setShippingDisplayType(String shippingDisplayType) {
+        PayPalShippingDisplayType displayType = PayPalShippingDisplayType.getInstance(shippingDisplayType);
+        if (displayType == null) {
+            displayType = PayPalShippingDisplayType.NO_DISPLAY;
+        }
+        this.shippingDisplayType = displayType;
     }
 }
