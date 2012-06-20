@@ -24,7 +24,10 @@ public class BraintreePaymentServiceImpl implements BraintreePaymentService, Ser
 
     private static final Log LOG = LogFactory.getLog(BraintreePaymentServiceImpl.class);
 
+    //TODO remove?
     protected String serverUrl;
+    //
+
     protected Integer failureReportingThreshold;
     protected Integer failureCount = 0;
     protected Boolean isUp = true;

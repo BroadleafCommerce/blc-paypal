@@ -18,9 +18,8 @@ import org.broadleafcommerce.core.payment.service.PaymentInfoService;
 import org.broadleafcommerce.core.payment.service.SecurePaymentInfoService;
 import org.broadleafcommerce.core.payment.service.exception.PaymentException;
 import org.broadleafcommerce.core.payment.service.type.PaymentInfoType;
-import org.broadleafcommerce.core.payment.service.type.TransactionType;
 import org.broadleafcommerce.core.payment.service.workflow.CompositePaymentResponse;
-import org.broadleafcommerce.vendor.braintree.module.BraintreePaymentModule;
+import org.broadleafcommerce.payment.service.module.BraintreePaymentModule;
 import org.broadleafcommerce.profile.core.domain.Customer;
 import org.broadleafcommerce.profile.core.service.CountryService;
 import org.broadleafcommerce.profile.core.service.CustomerService;
@@ -191,7 +190,7 @@ public class BraintreeCheckoutController {
         Order order = cartService.findOrderByOrderNumber(orderNumber);
         Map<PaymentInfo, Referenced> payments = new HashMap<PaymentInfo, Referenced>();
         payments.put(order.getPaymentInfos().get(0), order.getPaymentInfos().get(0).createEmptyReferenced());
-        order.setStatus(OrderStatus.VOIDED);
+        //order.setStatus(OrderStatus.VOIDED);
         try{
             CompositePaymentResponse compositePaymentResponse = reverseAuthorizeCompositePaymentService.executePayment(order, payments);
             PaymentResponseItem responseItem = compositePaymentResponse.getPaymentResponse().getPaymentResponseItem(order.getPaymentInfos().get(0));

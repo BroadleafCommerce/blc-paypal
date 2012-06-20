@@ -18,11 +18,12 @@ public class BraintreeGatewayRequestImpl implements BraintreeGatewayRequest{
     protected String merchantId;
     protected String redirectUrl;
     protected String transactionType;
+    protected Environment environment;
 
     @Override
     public BraintreeGateway buildRequest() {
         return new BraintreeGateway(
-                Environment.SANDBOX,
+                environment,
                 merchantId,
                 publicKey,
                 privateKey);
@@ -78,4 +79,13 @@ public class BraintreeGatewayRequestImpl implements BraintreeGatewayRequest{
         this.transactionType = transactionType;
     }
 
+    @Override
+    public Environment getEnvironment() {
+        return environment;
+    }
+
+    @Override
+    public void setEnvironment(String environment) {
+        this.environment = Environment.valueOf(environment);
+    }
 }

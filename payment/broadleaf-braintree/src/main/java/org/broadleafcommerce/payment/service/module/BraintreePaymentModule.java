@@ -1,4 +1,4 @@
-package org.broadleafcommerce.vendor.braintree.module;
+package org.broadleafcommerce.payment.service.module;
 
 import com.braintreegateway.Result;
 import com.braintreegateway.Transaction;
@@ -35,7 +35,7 @@ public class BraintreePaymentModule implements PaymentModule {
     @Override
     public PaymentResponseItem authorize(PaymentContext paymentContext) throws PaymentException {
         //authorize transaction
-        throw new PaymentException("The authorize method is not supported by this vendor.braintree.payment.module");
+        throw new PaymentException("The authorize method is not supported by this org.broadleafcommerce.payment.service.module.BraintreePaymentModule");
 
     }
 
@@ -196,12 +196,12 @@ public class BraintreePaymentModule implements PaymentModule {
 
     @Override
     public PaymentResponseItem balance(PaymentContext paymentContext) throws PaymentException {
-        throw new PaymentException("The balance method is not supported by this vendor.braintree.payment.module");
+        throw new PaymentException("The balance method is not supported by this org.broadleafcommerce.payment.service.module.BraintreePaymentModule");
     }
 
     @Override
     public Boolean isValidCandidate(PaymentInfoType paymentType) {
-        return paymentType == PaymentInfoType.CREDIT_CARD;  //To change body of implemented methods use File | Settings | File Templates.
+        return paymentType == PaymentInfoType.CREDIT_CARD;
     }
 
     public BraintreePaymentService getBraintreePaymentService() {

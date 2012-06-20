@@ -18,6 +18,7 @@ package org.broadleafcommerce.vendor.braintree.service.payment;
 
 
 import com.braintreegateway.BraintreeGateway;
+import com.braintreegateway.Environment;
 
 import java.io.Serializable;
 
@@ -47,4 +48,8 @@ public interface BraintreeGatewayRequest extends Serializable {
     String getTransactionType();
 
     void setTransactionType(String transactionType);
+
+    Environment getEnvironment();
+
+    void setEnvironment(String environment);
 }
