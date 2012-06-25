@@ -80,8 +80,8 @@ public class BraintreeGatewayRequestImpl implements BraintreeGatewayRequest{
     }
 
     @Override
-    public Environment getEnvironment() {
-        return environment;
+    public String getEnvironment() {
+        return environment.name();
     }
 
     @Override

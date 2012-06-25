@@ -4,6 +4,7 @@ import com.braintreegateway.Result;
 import com.braintreegateway.Transaction;
 import org.broadleafcommerce.common.money.Money;
 import org.broadleafcommerce.common.time.SystemTime;
+import org.broadleafcommerce.core.order.domain.FulfillmentGroup;
 import org.broadleafcommerce.core.payment.domain.PaymentInfo;
 import org.broadleafcommerce.core.payment.domain.PaymentResponseItem;
 import org.broadleafcommerce.core.payment.domain.PaymentResponseItemImpl;
@@ -11,6 +12,10 @@ import org.broadleafcommerce.core.payment.service.PaymentContext;
 import org.broadleafcommerce.core.payment.service.exception.PaymentException;
 import org.broadleafcommerce.core.payment.service.module.PaymentModule;
 import org.broadleafcommerce.core.payment.service.type.PaymentInfoType;
+import org.broadleafcommerce.profile.core.domain.Address;
+import org.broadleafcommerce.profile.core.domain.AddressImpl;
+import org.broadleafcommerce.profile.core.service.CountryService;
+import org.broadleafcommerce.profile.core.service.StateService;
 import org.broadleafcommerce.vendor.braintree.service.payment.BraintreePaymentRequest;
 import org.broadleafcommerce.vendor.braintree.service.payment.BraintreePaymentService;
 import org.broadleafcommerce.vendor.braintree.service.payment.MessageConstants;
@@ -31,6 +36,10 @@ import java.util.Map;
 public class BraintreePaymentModule implements PaymentModule {
 
     private BraintreePaymentService braintreePaymentService;
+
+    private StateService stateService;
+
+    private CountryService countryService;
 
     @Override
     public PaymentResponseItem authorize(PaymentContext paymentContext) throws PaymentException {
@@ -161,10 +170,11 @@ public class BraintreePaymentModule implements PaymentModule {
 
         responseItem.setAdditionalFields(map);
 
+
         return responseItem;
     }
 
-    private void setTargetResponse(Result<Transaction> result, PaymentContext paymentContext, PaymentResponseItem responseItem, Map<String, String> map) {
+    public void setTargetResponse(Result<Transaction> result, PaymentContext paymentContext, PaymentResponseItem responseItem, Map<String, String> map) {
         responseItem.setAmountPaid(new Money(result.getTarget().getAmount()));
         responseItem.setTransactionId(result.getTarget().getId());
         responseItem.setAuthorizationCode(result.getTarget().getProcessorAuthorizationCode());
@@ -172,14 +182,63 @@ public class BraintreePaymentModule implements PaymentModule {
         responseItem.setProcessorResponseText(result.getTarget().getProcessorResponseText());
         responseItem.setAvsCode(result.getTarget().getAvsStreetAddressResponseCode());
         responseItem.setCvvCode(result.getTarget().getCvvResponseCode());
-        responseItem.setPaymentInfoReferenceNumber(result.getTarget().getCreditCard().getMaskedNumber());
         map.put(MessageConstants.CARDTYPE, result.getTarget().getCreditCard().getCardType());
         map.put(MessageConstants.EXPIRATIONMONTH, result.getTarget().getCreditCard().getExpirationMonth());
         map.put(MessageConstants.EXPIRATIONYEAR, result.getTarget().getCreditCard().getExpirationYear());
-        paymentContext.getPaymentInfo().setReferenceNumber(result.getTarget().getCreditCard().getMaskedNumber());
+        map.put(MessageConstants.LASTFOUR, result.getTarget().getCreditCard().getLast4());
+
+        setBillingInfo(result.getTarget(), paymentContext);
+        setShippingInfo(result.getTarget(), paymentContext);
     }
 
-    private void setTransactionResponse(Result<Transaction> result, PaymentContext paymentContext, PaymentResponseItem responseItem, Map<String, String> map) {
+    public void setBillingInfo(Transaction result, PaymentContext paymentContext) {
+        if (result.getBillingAddress() != null) {
+            Address billingAddress = new AddressImpl();
+            billingAddress.setFirstName(result.getBillingAddress().getFirstName());
+            billingAddress.setLastName(result.getBillingAddress().getLastName());
+            billingAddress.setCompanyName(result.getBillingAddress().getCompany());
+            billingAddress.setAddressLine1(result.getBillingAddress().getStreetAddress());
+            billingAddress.setAddressLine2(result.getBillingAddress().getExtendedAddress());
+            billingAddress.setCity(result.getBillingAddress().getLocality());
+            if (result.getBillingAddress().getRegion() != null && stateService.findStateByAbbreviation(result.getBillingAddress().getRegion()) != null ) {
+                billingAddress.setState(stateService.findStateByAbbreviation(result.getBillingAddress().getRegion()));
+            }
+            billingAddress.setCountry(countryService.findCountryByAbbreviation(result.getBillingAddress().getCountryCodeAlpha2()));
+            billingAddress.setPostalCode(result.getBillingAddress().getPostalCode());
+            paymentContext.getPaymentInfo().setAddress(billingAddress);
+        }
+
+
+    }
+
+    public void setShippingInfo(Transaction result, PaymentContext paymentContext) {
+        if (result.getShippingAddress() != null && paymentContext.getPaymentInfo().getOrder().getFulfillmentGroups().size() == 1) {
+            // If you pass the shipping address to Braintree, there has to be an existing fulfillment group on the order.
+            // This must be done because of pricing considerations.
+            // The fulfillment group must be constructed when adding to the cart or sometime before calling the gateway. This depends on UX.
+            // This default implementation assumes one fulfillment group per order because braintree only supports a single shipping address.
+            // Override this method if necessary.
+            FulfillmentGroup fulfillmentGroup = paymentContext.getPaymentInfo().getOrder().getFulfillmentGroups().get(0);
+            if (fulfillmentGroup != null) {
+                Address shippingAddress = new AddressImpl();
+                shippingAddress.setFirstName(result.getShippingAddress().getFirstName());
+                shippingAddress.setLastName(result.getShippingAddress().getLastName());
+                shippingAddress.setCompanyName(result.getShippingAddress().getCompany());
+                shippingAddress.setAddressLine1(result.getShippingAddress().getStreetAddress());
+                shippingAddress.setAddressLine2(result.getShippingAddress().getExtendedAddress());
+                shippingAddress.setCity(result.getShippingAddress().getLocality());
+                if (result.getShippingAddress().getRegion() != null && stateService.findStateByAbbreviation(result.getShippingAddress().getRegion()) != null ) {
+                    shippingAddress.setState(stateService.findStateByAbbreviation(result.getShippingAddress().getRegion()));
+                }
+                shippingAddress.setCountry(countryService.findCountryByAbbreviation(result.getShippingAddress().getCountryCodeAlpha2()));
+                shippingAddress.setPostalCode(result.getShippingAddress().getPostalCode());
+                fulfillmentGroup.setAddress(shippingAddress);
+            }
+
+        }
+    }
+
+    public void setTransactionResponse(Result<Transaction> result, PaymentContext paymentContext, PaymentResponseItem responseItem, Map<String, String> map) {
         responseItem.setAmountPaid(new Money(result.getTransaction().getAmount()));
         responseItem.setTransactionId(result.getTransaction().getId());
         responseItem.setAuthorizationCode(result.getTransaction().getProcessorAuthorizationCode());
@@ -187,11 +246,13 @@ public class BraintreePaymentModule implements PaymentModule {
         responseItem.setProcessorResponseText(result.getTransaction().getProcessorResponseText());
         responseItem.setAvsCode(result.getTransaction().getAvsStreetAddressResponseCode());
         responseItem.setCvvCode(result.getTransaction().getCvvResponseCode());
-        responseItem.setPaymentInfoReferenceNumber(result.getTransaction().getCreditCard().getMaskedNumber());
         map.put(MessageConstants.CARDTYPE, result.getTransaction().getCreditCard().getCardType());
         map.put(MessageConstants.EXPIRATIONMONTH, result.getTransaction().getCreditCard().getExpirationMonth());
         map.put(MessageConstants.EXPIRATIONYEAR, result.getTransaction().getCreditCard().getExpirationYear());
-        paymentContext.getPaymentInfo().setReferenceNumber(result.getTransaction().getCreditCard().getMaskedNumber());
+        map.put(MessageConstants.LASTFOUR, result.getTransaction().getCreditCard().getLast4());
+
+        setBillingInfo(result.getTransaction(), paymentContext);
+        setShippingInfo(result.getTransaction(), paymentContext);
     }
 
     @Override
@@ -210,5 +271,21 @@ public class BraintreePaymentModule implements PaymentModule {
 
     public void setBraintreePaymentService(BraintreePaymentService braintreePaymentService) {
         this.braintreePaymentService = braintreePaymentService;
+    }
+
+    public StateService getStateService() {
+        return stateService;
+    }
+
+    public void setStateService(StateService stateService) {
+        this.stateService = stateService;
+    }
+
+    public CountryService getCountryService() {
+        return countryService;
+    }
+
+    public void setCountryService(CountryService countryService) {
+        this.countryService = countryService;
     }
 }

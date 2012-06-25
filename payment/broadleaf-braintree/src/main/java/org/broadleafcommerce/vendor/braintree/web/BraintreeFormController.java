@@ -45,8 +45,6 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 
-@Controller("braintreeFormController")
-@RequestMapping("/braintreeForm")
 public class BraintreeFormController {
 
     @Resource(name="blCustomerState")

@@ -49,7 +49,7 @@ public interface BraintreeGatewayRequest extends Serializable {
 
     void setTransactionType(String transactionType);
 
-    Environment getEnvironment();
+    String getEnvironment();
 
     void setEnvironment(String environment);
 }

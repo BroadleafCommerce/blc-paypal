@@ -30,12 +30,15 @@
         <property name="ignoreUnresolvablePlaceholders" value="true"/>
     </bean>
 
-    <bean id="blBraintreePaymentService" class="org.broadleafcommerce.core.payment.service.PaymentServiceImpl">
+    <!-- Override the default Broadleaf Credit Card Service with Braintree -->
+    <bean id="blCreditCardService" class="org.broadleafcommerce.core.payment.service.PaymentServiceImpl">
         <property name="paymentModule" ref="blBraintreeModule"/>
     </bean>
 
     <bean id="blBraintreeModule" class="org.broadleafcommerce.payment.service.module.BraintreePaymentModule">
         <property name="braintreePaymentService" ref="blBraintreeVendorOrientedPaymentService"/>
+        <property name="stateService" ref="blStateService"/>
+        <property name="countryService" ref="blCountryService"/>
     </bean>
 
     <bean id="blBraintreeVendorOrientedPaymentService" class="org.broadleafcommerce.vendor.braintree.service.payment.BraintreePaymentServiceImpl">

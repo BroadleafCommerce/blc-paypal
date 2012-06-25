@@ -84,7 +84,7 @@ public class BraintreePaymentServiceImpl implements BraintreePaymentService, Ser
     }
     
     public String makeTrData(TransactionRequest trParams){
-        String returnUrl = gatewayRequest.getRedirectUrl() + "" + gatewayRequest.getTransactionType();
+        String returnUrl = gatewayRequest.getRedirectUrl();
         return gatewayRequest.buildRequest().transparentRedirect().trData(trParams, returnUrl);
     }
     

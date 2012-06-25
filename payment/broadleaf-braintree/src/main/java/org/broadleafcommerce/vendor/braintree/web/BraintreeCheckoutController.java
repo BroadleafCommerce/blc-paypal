@@ -44,8 +44,6 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 
-@Controller("braintreeCheckoutController")
-@RequestMapping("/braintreeCheckout")
 public class BraintreeCheckoutController {
 
     private static final Log LOG = LogFactory.getLog(BraintreeCheckoutController.class);

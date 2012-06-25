@@ -13,6 +13,7 @@ public class MessageConstants {
     public static final String CARDTYPE = "CARDTYPE";
     public static final String EXPIRATIONMONTH = "EXPIRATIONMONTH";
     public static final String EXPIRATIONYEAR = "EXPIRATIONYEAR";
+    public static final String LASTFOUR = "LASTFOUR";
     public static final String MESSAGE = "MESSAGE";
 
 
