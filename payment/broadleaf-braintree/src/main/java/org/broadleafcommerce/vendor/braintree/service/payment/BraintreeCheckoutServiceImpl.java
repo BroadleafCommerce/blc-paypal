@@ -62,6 +62,17 @@ public class BraintreeCheckoutServiceImpl implements BraintreeCheckoutService {
     @Resource(name="blCustomerService")
     protected CustomerService customerService;
 
+    /**
+     * Completes a checkout transaction by confirming the callback query string of a Transparent Redirect.
+     *
+     * This call executes a complete checkout by calling checkoutService.performCheckout().
+     * Make sure the payments and fulfillment groups are fully set up before invoking.
+     *
+     * @param id - a request parameter on the Braintree callback, used as a unique identifier for the PaymentInfo
+     * @param queryString - the query string that Braintree sends back on callback
+     * @param order - The order
+     * @return CheckoutResponse - the response from Braintree
+     */
     public CheckoutResponse completeAuthorizeAndDebitCheckout(String id, String queryString, Order order) throws CheckoutException {
         Map<PaymentInfo, Referenced> payments = new HashMap<PaymentInfo, Referenced>();
         CreditCardPaymentInfo creditCardPaymentInfo = ((CreditCardPaymentInfo) securePaymentInfoService.create(PaymentInfoType.CREDIT_CARD));
@@ -113,15 +124,71 @@ public class BraintreeCheckoutServiceImpl implements BraintreeCheckoutService {
         return checkoutResponse;
     }
 
+    /**
+     * Use this method to generate the Transparent Redirect Form parameters needed to perform an Authorization and Debit transaction.
+     *
+     * @param trParams - Braintree Parameters
+     * @param order - The order
+     * @return TransactionRequest - Braintree transaction request
+     */
     public TransactionRequest constructAuthorizeAndDebitFields(TransactionRequest trParams, Order order) {
         //BroadleafPaymentModule automatically calls DEBIT and submits the transaction for settlement, therefore we have to say submit for settlement = false in trData
         trParams = constructProtectedFields(trParams, order, false);
-
-       // you can override this and call constructShippingFields to pass as well.
-
         return trParams;
     }
 
+    /**
+     * Use this method to generate the Transparent Redirect Form parameters needed to perform an Authorization and Debit transaction from a saved payment token
+     * This requires that the Braintree merchant has subscribed to the "Vault" feature
+     *
+     * @param trParams - Braintree Parameters
+     * @param order - The order
+     * @param paymentMethodToken - The payment token that is saved in Braintree's Vault
+     * @return TransactionRequest - Braintree transaction request
+     */
+    public TransactionRequest constructAuthorizeAndDebitFieldsFromToken(TransactionRequest trParams, Order order, String paymentMethodToken){
+        trParams = constructProtectedFields(trParams, order, false);
+        //TODO verify paymentMethodToken to saved CustomerPayments for the Customer on the Order
+        trParams = trParams.paymentMethodToken(paymentMethodToken);
+        return trParams;
+    }
+
+    /**
+     * Use this method to generate the Transparent Redirect Form parameters needed to save a customer to the "Vault"
+     * This requires that the Braintree merchant has subscribed to the "Vault" feature
+     *
+     * This can also be accomplished through non protected fields:
+     * <input type="text" name="customer[first_name]" />
+     * <input type="text" name="customer[email]" />
+     * <input type="text" name="customer[credit_card][cardholder_name]" />
+     * <input type="text" name="customer[credit_card][billing_address][street_address]" />
+     * <input type="text" name="customer[credit_card][billing_address][postal_code]" />
+     * see: https://www.braintreepayments.com/docs/java/customers/tr_fields
+     *
+     * @param trParams - Braintree Parameters
+     * @param order - The order
+     * @return TransactionRequest - Braintree transaction request
+     */
+    public TransactionRequest constructSaveVaultCustomerFields(TransactionRequest trParams, Order order) {
+        return trParams.
+                customer().
+                id(order.getCustomer().getId().toString()).
+                firstName(order.getCustomer().getFirstName()).
+                lastName(order.getCustomer().getLastName()).
+                email(order.getCustomer().getEmailAddress()).done().
+                options().storeInVaultOnSuccess(true).done();
+
+    }
+
+    /**
+     * Use this method to generate the mandatory "trData" fields that are needed to perform a Transparent Redirect
+     * see: https://www.braintreepayments.com/docs/java/transactions/tr_fields
+     *
+     * @param trParams - Braintree Parameters
+     * @param order - The order
+     * @param submitForSettlement - a flag indicating whether or not to automatically submit the transaction for settlement.
+     * @return TransactionRequest - Braintree transaction request
+     */
     public TransactionRequest constructProtectedFields(TransactionRequest trParams, Order order, boolean submitForSettlement) {
         return  trParams.
                 type(Transaction.Type.SALE).
@@ -131,6 +198,18 @@ public class BraintreeCheckoutServiceImpl implements BraintreeCheckoutService {
                 submitForSettlement(submitForSettlement).done();
     }
 
+    /**
+     * Use this method to generate the "trData" fields for the shipping address.
+     *
+     * This can also be accomplished through non protected fields:
+     * <input type="text" name="transaction[shipping][first_name]" />
+     * <input type="text" name="transaction[shipping][last_name]" />
+     * see: https://www.braintreepayments.com/docs/java/transactions/tr_fields
+     *
+     * @param trParams - Braintree Parameters
+     * @param shippingAddress - shipping address
+     * @return TransactionRequest - Braintree transaction request
+     */
     public TransactionRequest constructShippingFields(TransactionRequest trParams, Address shippingAddress){
         String stateAbbr = "";
         if (shippingAddress.getState() != null) {
@@ -151,6 +230,18 @@ public class BraintreeCheckoutServiceImpl implements BraintreeCheckoutService {
                 done();
     }
 
+    /**
+     * Use this method to generate the "trData" fields for the billing address.
+     *
+     * This can also be accomplished through non protected fields:
+     * <input type="text" name="transaction[billing][first_name]" />
+     * <input type="text" name="transaction[billing][last_name]" />
+     * see: https://www.braintreepayments.com/docs/java/transactions/tr_fields
+     *
+     * @param trParams - Braintree Parameters
+     * @param billingAddress - billing address
+     * @return TransactionRequest - Braintree transaction request
+     */
     public TransactionRequest constructBillingFields(TransactionRequest trParams, Address billingAddress){
         String stateAbbr = "";
         if (billingAddress.getState() != null) {

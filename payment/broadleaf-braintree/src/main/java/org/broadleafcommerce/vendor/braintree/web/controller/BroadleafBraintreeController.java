@@ -94,10 +94,11 @@ public class BroadleafBraintreeController extends BroadleafAbstractController {
 
 
     /**
-     * The endpoint to dynamically build a Transparent Redirect Braintree Form to perform an Authorization and Capture transaction.
+     * Use this endpoint to dynamically generate a Transparent Redirect Braintree Form to perform an Authorization and Capture transaction.
      * To use: Create a controller in your application and extend this class to provide an @RequestMapping value
-     * By default, braintreeCheckoutService.constructAuthorizeAndDebitFields() does NOT pass in any shipping information.
-     * You can override that method to construct the shipping address from the fulfillment groups in your implementation if you wish.
+     * By default, braintreeCheckoutService.constructAuthorizeAndDebitFields() does NOT construct the shipping and billing information in the trData parameter.
+     * You can override that method to construct the shipping address from the fulfillment groups in your implementation if you wish or
+     * directly pass that information in the Transparent Redirect. This is entirely up to how your UX is defined.
      *
      * @param model - The Spring MVC model
      * @param request - The Http request

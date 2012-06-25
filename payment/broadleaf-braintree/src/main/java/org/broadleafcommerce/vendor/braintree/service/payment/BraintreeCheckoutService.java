@@ -34,7 +34,11 @@ public interface BraintreeCheckoutService {
 
     public TransactionRequest constructAuthorizeAndDebitFields(TransactionRequest trParams, Order order);
 
+    public TransactionRequest constructAuthorizeAndDebitFieldsFromToken(TransactionRequest trParams, Order order, String paymentMethodToken);
+
     public TransactionRequest constructProtectedFields(TransactionRequest trParams, Order order, boolean submitForSettlement);
+
+    public TransactionRequest constructSaveVaultCustomerFields(TransactionRequest trParams, Order order);
 
     public TransactionRequest constructShippingFields(TransactionRequest trParams, Address shippingAddress);
 
