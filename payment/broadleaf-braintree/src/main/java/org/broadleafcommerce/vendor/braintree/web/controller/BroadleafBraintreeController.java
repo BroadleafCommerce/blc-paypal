@@ -127,7 +127,7 @@ public class BroadleafBraintreeController extends BroadleafAbstractController {
      * @param id - A Braintree identifier on the query string
      * @param model - The Spring MVC model
      * @param request - The Http request
-     * @return ModelAndView
+     * @return String
      */
     public String processBraintreeAuthorizeAndDebit(Model model, @RequestParam String id, HttpServletRequest request) throws CheckoutException, PricingException {
         Order order = cartService.findCartForCustomer(CustomerState.getCustomer());

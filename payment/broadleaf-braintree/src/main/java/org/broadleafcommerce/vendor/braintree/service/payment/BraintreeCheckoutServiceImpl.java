@@ -100,6 +100,8 @@ public class BraintreeCheckoutServiceImpl implements BraintreeCheckoutService {
         creditCardPaymentInfo.setReferenceNumber(id);
         payments.put(braintreePaymentInfo, creditCardPaymentInfo);
 
+
+
         order.setStatus(OrderStatus.SUBMITTED);
         order.setSubmitDate(Calendar.getInstance().getTime());
 
@@ -183,6 +185,10 @@ public class BraintreeCheckoutServiceImpl implements BraintreeCheckoutService {
     /**
      * Use this method to generate the mandatory "trData" fields that are needed to perform a Transparent Redirect
      * see: https://www.braintreepayments.com/docs/java/transactions/tr_fields
+     *
+     * Note: Braintree handles multi-currency on an individual merchant basis
+     * Each merchant account can only process for a single currency. So setting which merchant account to use will also determine which currency the transaction is processed with.
+     * To support multi-currency: overload this method to includes the merchant_id that handles the orders currency
      *
      * @param trParams - Braintree Parameters
      * @param order - The order
