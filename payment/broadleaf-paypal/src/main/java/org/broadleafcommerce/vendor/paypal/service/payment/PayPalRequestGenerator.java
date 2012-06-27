@@ -21,6 +21,7 @@ import java.util.Map;
 
 import org.apache.commons.httpclient.NameValuePair;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalRequest;
+import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalShippingDisplayType;
 
 /**
  * @author Jeff Fischer
@@ -56,4 +57,9 @@ public interface PayPalRequestGenerator {
     String getUser();
 
     void setUser(String user);
+
+    String getShippingDisplayType();
+
+    void setShippingDisplayType(String shippingDisplayType);
+
 }

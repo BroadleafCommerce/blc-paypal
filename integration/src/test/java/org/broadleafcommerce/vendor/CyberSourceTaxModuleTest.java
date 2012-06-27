@@ -20,6 +20,7 @@ import java.util.ArrayList;
 
 import javax.annotation.Resource;
 
+import org.broadleafcommerce.common.money.Money;
 import org.broadleafcommerce.core.catalog.domain.Sku;
 import org.broadleafcommerce.core.catalog.domain.SkuImpl;
 import org.broadleafcommerce.core.order.domain.DiscreteOrderItem;
@@ -30,9 +31,9 @@ import org.broadleafcommerce.core.order.domain.FulfillmentGroupItem;
 import org.broadleafcommerce.core.order.domain.FulfillmentGroupItemImpl;
 import org.broadleafcommerce.core.order.domain.Order;
 import org.broadleafcommerce.core.order.domain.OrderImpl;
+import org.broadleafcommerce.core.order.domain.TaxDetail;
 import org.broadleafcommerce.core.payment.domain.PaymentInfo;
 import org.broadleafcommerce.core.payment.domain.PaymentInfoImpl;
-import org.broadleafcommerce.common.money.Money;
 import org.broadleafcommerce.pricing.service.module.CyberSourceTaxModule;
 import org.broadleafcommerce.profile.core.domain.Address;
 import org.broadleafcommerce.profile.core.domain.AddressImpl;
@@ -55,6 +56,7 @@ public class CyberSourceTaxModuleTest extends BaseTest {
 	@Test(groups = { "testSuccessfulCyberSourceTaxModule" })
     @Rollback(false)
     public void testSuccessfulCyberSourceTaxModule() throws Exception {
+        System.out.println("testSuccessfulCyberSourceTax using merchant id: " + serviceManager.getMerchantId());
 		if (serviceManager.getMerchantId().equals("?")) {
             return;
         }
@@ -112,10 +114,24 @@ public class CyberSourceTaxModuleTest extends BaseTest {
 		order.getFulfillmentGroups().add(fg2);
 		order.setTotal(new Money(50D));
 		
-		assert(order.getTotalTax() == null);
-		order = module.calculateTaxForOrder(order);
-		assert(order.getTotalTax() != null && order.getTotalTax().greaterThan(new Money(0D)));
-		assert(order.getFulfillmentGroups().get(0).getTotalTax().add(order.getFulfillmentGroups().get(1).getTotalTax()).equals(order.getTotalTax()));
+        assert(order.getTotalTax() == null);
+        order = module.calculateTaxForOrder(order);
+        
+        Boolean fgi1Taxed = false;
+        for (TaxDetail tax : fgi1.getTaxes()) {
+            if (tax.getAmount() != null && tax.getAmount().greaterThan(new Money(0D))) {
+                fgi1Taxed = true;
+            }
+        }
+        
+        Boolean fgi2Taxed = false;
+        for (TaxDetail tax : fgi2.getTaxes()) {
+            if (tax.getAmount() != null && tax.getAmount().greaterThan(new Money(0D))) {
+                fgi2Taxed = true;
+            }
+        }
+        
+        assert(fgi1Taxed && fgi2Taxed);
 	}
 	
 	private PaymentInfo createPaymentInfo(String line1, String city, final String country, String name, String lastName, String postalCode, final String state) {

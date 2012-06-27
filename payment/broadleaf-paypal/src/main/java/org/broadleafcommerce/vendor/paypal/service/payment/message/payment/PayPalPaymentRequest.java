@@ -16,6 +16,7 @@
 
 package org.broadleafcommerce.vendor.paypal.service.payment.message.payment;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalRequest;
@@ -35,6 +36,7 @@ public class PayPalPaymentRequest extends PayPalRequest {
     protected String payerID;
     protected String token;
 	protected List<PayPalItemRequest> itemRequests = new AutoNumberMemberIdList();
+    protected List<PayPalShippingRequest> shippingRequests = new ArrayList<PayPalShippingRequest>();
 	protected PayPalTransactionType transactionType;
     protected PayPalSummaryRequest summaryRequest;
     protected String referenceNumber;
@@ -113,6 +115,14 @@ public class PayPalPaymentRequest extends PayPalRequest {
         this.transactionID = transactionID;
     }
 
+    public List<PayPalShippingRequest> getShippingRequests() {
+        return shippingRequests;
+    }
+
+    public void setShippingRequests(List<PayPalShippingRequest> shippingRequests) {
+        this.shippingRequests = shippingRequests;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -123,6 +133,8 @@ public class PayPalPaymentRequest extends PayPalRequest {
 
         if (currency != null ? !currency.equals(request.currency) : request.currency != null) return false;
         if (itemRequests != null ? !itemRequests.equals(request.itemRequests) : request.itemRequests != null)
+            return false;
+        if (shippingRequests != null ? !shippingRequests.equals(request.shippingRequests) : request.shippingRequests != null)
             return false;
         if (payerID != null ? !payerID.equals(request.payerID) : request.payerID != null) return false;
         if (referenceNumber != null ? !referenceNumber.equals(request.referenceNumber) : request.referenceNumber != null)
@@ -146,6 +158,7 @@ public class PayPalPaymentRequest extends PayPalRequest {
         result = 31 * result + (payerID != null ? payerID.hashCode() : 0);
         result = 31 * result + (token != null ? token.hashCode() : 0);
         result = 31 * result + (itemRequests != null ? itemRequests.hashCode() : 0);
+        result = 31 * result + (shippingRequests != null ? shippingRequests.hashCode() : 0);
         result = 31 * result + (transactionType != null ? transactionType.hashCode() : 0);
         result = 31 * result + (summaryRequest != null ? summaryRequest.hashCode() : 0);
         result = 31 * result + (referenceNumber != null ? referenceNumber.hashCode() : 0);

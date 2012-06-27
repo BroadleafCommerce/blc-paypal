@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+           http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context-3.1.xsd">
+
+    <context:component-scan base-package="org.broadleafcommerce.profile.web"/>
+    <context:component-scan base-package="org.broadleafcommerce.vendor.paypal"/>
+
+    <bean id="blConfiguration" class="org.broadleafcommerce.common.config.RuntimeEnvironmentPropertiesConfigurer">
+        <property name="propertyLocations">
+            <set>
+                <value>classpath:config/bc/paypal/</value>
+            </set>
+        </property>
+        <property name="environments">
+            <set>
+                <value>production</value>
+                <value>staging</value>
+                <value>integrationQA</value>
+                <value>integrationDev</value>
+                <value>development</value>
+                <value>local</value>
+            </set>
+        </property>
+        <property name="defaultEnvironment" value="development"/>
+        <property name="ignoreUnresolvablePlaceholders" value="true"/>
+    </bean>
+
+    <bean id="blPayPalCheckoutService" class="org.broadleafcommerce.vendor.paypal.service.payment.PayPalCheckoutServiceImpl"/>
+
+    <bean id="blPayPalPaymentService" class="org.broadleafcommerce.core.payment.service.PaymentServiceImpl">
+        <property name="paymentModule" ref="blPayPalModule"/>
+    </bean>
+
+    <bean id="blPayPalModule" class="org.broadleafcommerce.payment.service.module.PayPalPaymentModule">
+        <property name="payPalPaymentService" ref="blPayPalVendorOrientedPaymentService"/>
+    </bean>
+
+    <bean id="blPayPalVendorOrientedPaymentService" class="org.broadleafcommerce.vendor.paypal.service.payment.PayPalPaymentServiceImpl">
+        <property name="serverUrl" value="${paypal.api.url}"/>
+        <property name="failureReportingThreshold" value="1"/>
+        <property name="requestGenerator">
+            <bean class="org.broadleafcommerce.vendor.paypal.service.payment.PayPalRequestGeneratorImpl">
+                <property name="libVersion" value="${paypal.version}"/>
+                <property name="password" value="${paypal.password}"/>
+                <property name="user" value="${paypal.user}"/>
+                <property name="signature" value="${paypal.signature}"/>
+                <property name="returnUrl" value="${paypal.return.url}"/>
+                <property name="cancelUrl" value="${paypal.cancel.url}"/>
+                <!-- 0 : PayPal displays the shipping address passed in. -->
+                <!-- 1 : PayPal does not display the shipping fields at all. (Default) -->
+                <!-- 2 : PayPal will obtain the shipping address from the buyer's profile.-->
+                <property name="shippingDisplayType" value="${paypal.shipping.display}"/>
+                <property name="additionalConfig">
+                    <map>
+                        <entry key="HDRIMG" value="${paypal.additional.HDRIMG}"/>
+                        <entry key="HDRBORDERCOLOR" value="${paypal.additional.HDRBORDERCOLOR}"/>
+                        <entry key="HDRBACKCOLOR" value="${paypal.additional.HDRBACKCOLOR}"/>
+                        <entry key="PAYFLOWCOLOR" value="${paypal.additional.PAYFLOWCOLOR}"/>
+                    </map>
+                </property>
+            </bean>
+        </property>
+        <property name="responseGenerator">
+            <bean class="org.broadleafcommerce.vendor.paypal.service.payment.PayPalResponseGeneratorImpl">
+                <property name="userRedirectUrl" value="${paypal.user.redirect.url}"/>
+            </bean>
+        </property>
+    </bean>
+
+    <!-- This is a default AuthorizeAndDebitWorkflow that includes a PayPal payment activity -->
+    <!-- This assumes a basic configuration and will need to be overriden if there are any custom activities -->
+    <bean id="blAuthorizeAndDebitWorkflow" class="org.broadleafcommerce.core.workflow.SequenceProcessor">
+        <property name="processContextFactory">
+            <bean class="org.broadleafcommerce.core.payment.service.workflow.PaymentProcessContextFactory">
+                <property name="paymentActionType" value="AUTHORIZEANDDEBIT"/>
+            </bean>
+        </property>
+        <property name="activities">
+            <list>
+                <bean class="org.broadleafcommerce.core.payment.service.workflow.PaymentActivity">
+                    <property name="paymentService" ref="blPayPalPaymentService"/>
+                    <property name="userName" value="web"/>
+                </bean>
+                <bean class="org.broadleafcommerce.core.payment.service.workflow.PaymentActivity">
+                    <property name="paymentService" ref="blCreditCardService"/>
+                    <property name="userName" value="web"/>
+                </bean>
+            </list>
+        </property>
+        <property name="defaultErrorHandler" ref="blDefaultErrorHandler"/>
+    </bean>
+
+</beans>

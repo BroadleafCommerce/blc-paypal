@@ -18,6 +18,7 @@ package org.broadleafcommerce.payment.service.module;
 
 import org.broadleafcommerce.common.money.Money;
 import org.broadleafcommerce.common.time.SystemTime;
+import org.broadleafcommerce.core.order.domain.FulfillmentGroup;
 import org.broadleafcommerce.core.payment.domain.AmountItem;
 import org.broadleafcommerce.core.payment.domain.PaymentInfo;
 import org.broadleafcommerce.core.payment.domain.PaymentResponseItem;
@@ -29,10 +30,7 @@ import org.broadleafcommerce.core.payment.service.type.PaymentInfoType;
 import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalPaymentService;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalErrorResponse;
-import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPalItemRequest;
-import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPalPaymentRequest;
-import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPalPaymentResponse;
-import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPalSummaryRequest;
+import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.*;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.details.PayPalDetailsRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.details.PayPalDetailsResponse;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalMethodType;
@@ -200,6 +198,26 @@ public class PayPalPaymentModule implements PaymentModule {
             itemRequest.setSystemId(amountItem.getSystemId());
             request.getItemRequests().add(itemRequest);
         }
+
+        for (FulfillmentGroup fulfillmentGroup : paymentContext.getPaymentInfo().getOrder().getFulfillmentGroups()) {
+            if (fulfillmentGroup.getAddress() != null) {
+                PayPalShippingRequest shippingRequest = new PayPalShippingRequest();
+                shippingRequest.setShipToName(fulfillmentGroup.getAddress().getFirstName() + " " + fulfillmentGroup.getAddress().getLastName());
+                shippingRequest.setShipToStreet(fulfillmentGroup.getAddress().getAddressLine1());
+                shippingRequest.setShipToStreet2(fulfillmentGroup.getAddress().getAddressLine2());
+                shippingRequest.setShipToCity(fulfillmentGroup.getAddress().getCity());
+                if (fulfillmentGroup.getAddress().getState() != null) {
+                    shippingRequest.setShipToState(fulfillmentGroup.getAddress().getState().getAbbreviation());
+                }
+                shippingRequest.setShipToZip(fulfillmentGroup.getAddress().getPostalCode());
+                if (fulfillmentGroup.getAddress().getCountry() != null) {
+                    shippingRequest.setShipToCountryCode(fulfillmentGroup.getAddress().getCountry().getAbbreviation());
+                }
+                shippingRequest.setShipToPhoneNum(fulfillmentGroup.getAddress().getPrimaryPhone());
+                request.getShippingRequests().add(shippingRequest);
+            }
+        }
+
         PayPalPaymentResponse response;
         try {
             response = (PayPalPaymentResponse) payPalPaymentService.process(request);
