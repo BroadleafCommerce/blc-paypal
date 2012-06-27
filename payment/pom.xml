@@ -47,8 +47,9 @@
             <timezone>-6</timezone>
         </developer>
     </developers>
-	<modules>
-    <module>broadleaf-paypal</module>
-    <module>broadleaf-authorizenet</module>
-  </modules>
+    <modules>
+        <module>broadleaf-paypal</module>
+        <module>broadleaf-braintree</module>
+        <module>broadleaf-authorizenet</module>
+    </modules>
 </project>

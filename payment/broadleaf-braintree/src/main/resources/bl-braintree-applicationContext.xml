@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+           http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context-3.1.xsd">
+
+    <context:component-scan base-package="org.broadleafcommerce.profile.web"/>
+    <context:component-scan base-package="org.broadleafcommerce.vendor.braintree"/>
+
+    <bean id="blConfiguration" class="org.broadleafcommerce.common.config.RuntimeEnvironmentPropertiesConfigurer">
+        <property name="propertyLocations">
+            <set>
+                <value>classpath:config/bc/braintree/</value>
+            </set>
+        </property>
+        <property name="environments">
+            <set>
+                <value>production</value>
+                <value>staging</value>
+                <value>integrationQA</value>
+                <value>integrationDev</value>
+                <value>development</value>
+                <value>local</value>
+            </set>
+        </property>
+        <property name="defaultEnvironment" value="development"/>
+        <property name="ignoreUnresolvablePlaceholders" value="true"/>
+    </bean>
+
+    <!-- Override the default Broadleaf Credit Card Service with Braintree -->
+    <bean id="blCreditCardService" class="org.broadleafcommerce.core.payment.service.PaymentServiceImpl">
+        <property name="paymentModule" ref="blBraintreeModule"/>
+    </bean>
+
+    <bean id="blBraintreeModule" class="org.broadleafcommerce.payment.service.module.BraintreePaymentModule">
+        <property name="braintreePaymentService" ref="blBraintreeVendorOrientedPaymentService"/>
+        <property name="stateService" ref="blStateService"/>
+        <property name="countryService" ref="blCountryService"/>
+    </bean>
+
+    <bean id="blBraintreeVendorOrientedPaymentService" class="org.broadleafcommerce.vendor.braintree.service.payment.BraintreePaymentServiceImpl">
+        <property name="failureReportingThreshold" value="1"/>
+        <property name="gatewayRequest">
+            <bean class="org.broadleafcommerce.vendor.braintree.service.payment.BraintreeGatewayRequestImpl">
+                <property name="publicKey" value="${braintree.publicKey}"/>
+                <property name="privateKey" value="${braintree.privateKey}"/>
+                <property name="merchantId" value="${braintree.merchantId}"/>
+                <property name="redirectUrl" value="${braintree.redirectUrl}"/>
+                <property name="environment" value="${braintree.environment}"/>
+            </bean>
+        </property>
+    </bean>
+
+</beans>
