@@ -63,7 +63,7 @@
     </repositories>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <blc.version>1.7.0-SNAPSHOT</blc.version>
+        <blc.version>2.0.0-SNAPSHOT</blc.version>
         <blc.config.version>1.6.0</blc.config.version>
         <blc.config.dir>src/main/resources</blc.config.dir>
     </properties>
