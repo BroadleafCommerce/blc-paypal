@@ -92,6 +92,12 @@ public class BroadleafBraintreeController extends BroadleafAbstractController {
     @Value("${braintree.confirm.view}")
     protected String braintreeConfirmView;
 
+    @Value("${braintree.order.confirm.identifier}")
+    protected String orderConfirmationIdentifier;
+
+    @Value("${braintree.order.confirm.useOrderNumber}")
+    protected boolean useOrderNumber = false;
+
 
     /**
      * Use this endpoint to dynamically generate a Transparent Redirect Braintree Form to perform an Authorization and Capture transaction.
@@ -158,7 +164,11 @@ public class BroadleafBraintreeController extends BroadleafAbstractController {
                 CheckoutResponse checkoutResponse = braintreeCheckoutService.completeAuthorizeAndDebitCheckout(id, queryString, order);
                 PaymentResponseItem paymentResponseItem = checkoutResponse.getPaymentResponse().getResponseItems().get(braintreePaymentInfo);
                 if (paymentResponseItem.getTransactionSuccess()){
-                    return ajaxRender(braintreeConfirmView, request, model);
+                    String orderIdentifier = checkoutResponse.getOrder().getId().toString();
+                    if (useOrderNumber) {
+                        orderIdentifier = checkoutResponse.getOrder().getOrderNumber();
+                    }
+                    return ajaxRender(braintreeConfirmView + "?" + orderConfirmationIdentifier + "=" + orderIdentifier, request, model);
                 }
 
             } else {
