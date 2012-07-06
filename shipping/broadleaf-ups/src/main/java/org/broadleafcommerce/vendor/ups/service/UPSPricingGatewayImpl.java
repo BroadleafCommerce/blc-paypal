@@ -16,6 +16,11 @@
 
 package org.broadleafcommerce.vendor.ups.service;
 
+import com.ups.wsdl.xoltws.rate.v1.RatePortType;
+import com.ups.wsdl.xoltws.rate.v1.RateService;
+import com.ups.xmlschema.xoltws.rate.v1.RateRequest;
+import com.ups.xmlschema.xoltws.upss.v1.UPSSecurity;
+
 /**
  * This class is responsible for actually calling the UPS web services.
  * <p/>
@@ -23,4 +28,5 @@ package org.broadleafcommerce.vendor.ups.service;
  * Date: 7/6/12
  */
 public class UPSPricingGatewayImpl implements UPSPricingGateway {
+
 }
