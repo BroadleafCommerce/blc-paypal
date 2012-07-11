@@ -16,6 +16,15 @@
 
 package org.broadleafcommerce.vendor.authorizenet.service.payment;
 
+import net.authorize.sim.Fingerprint;
+import org.broadleafcommerce.core.checkout.service.exception.CheckoutException;
+import org.broadleafcommerce.core.checkout.service.workflow.CheckoutResponse;
+import org.broadleafcommerce.core.order.domain.Order;
+
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
+import java.util.Map;
+
 /**
  * Created with IntelliJ IDEA.
  * User: elbertbautista
@@ -23,4 +32,11 @@ package org.broadleafcommerce.vendor.authorizenet.service.payment;
  * Time: 11:42 AM
  */
 public interface AuthorizeNetCheckoutService {
+
+    public Order findCartForCustomer(Map<String, String[]> responseMap) throws NoSuchAlgorithmException, UnsupportedEncodingException;
+
+    public CheckoutResponse completeAuthorizeAndDebitCheckout(Order order, Map<String, String[]> responseMap) throws CheckoutException;
+
+    public Map<String, String> constructAuthorizeAndDebitFields(Order order) throws NoSuchAlgorithmException, UnsupportedEncodingException;
+
 }
