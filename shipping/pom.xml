@@ -50,7 +50,5 @@
 	<modules>
         <module>broadleaf-usps</module>
         <module>broadleaf-usps-schemas</module>
-        <module>broadleaf-ups-schemas</module>
-        <module>broadleaf-ups</module>
     </modules>
 </project>
