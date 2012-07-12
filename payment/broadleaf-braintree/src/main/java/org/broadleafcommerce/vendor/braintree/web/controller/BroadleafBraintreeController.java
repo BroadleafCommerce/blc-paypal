@@ -25,7 +25,7 @@ import org.broadleafcommerce.common.web.controller.BroadleafAbstractController;
 import org.broadleafcommerce.core.checkout.service.exception.CheckoutException;
 import org.broadleafcommerce.core.checkout.service.workflow.CheckoutResponse;
 import org.broadleafcommerce.core.order.domain.Order;
-import org.broadleafcommerce.core.order.service.CartService;
+import org.broadleafcommerce.core.order.service.OrderService;
 import org.broadleafcommerce.core.order.service.type.OrderStatus;
 import org.broadleafcommerce.core.payment.domain.CreditCardPaymentInfo;
 import org.broadleafcommerce.core.payment.domain.PaymentInfo;
@@ -68,8 +68,8 @@ public class BroadleafBraintreeController extends BroadleafAbstractController {
 
     private static final Log LOG = LogFactory.getLog(BroadleafBraintreeController.class);
 
-    @Resource(name="blCartService")
-    protected CartService cartService;
+    @Resource(name="blOrderService")
+    protected OrderService cartService;
 
     @Resource(name="blSecurePaymentInfoService")
     protected SecurePaymentInfoService securePaymentInfoService;
