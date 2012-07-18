@@ -90,6 +90,9 @@ public class PayPalCheckoutServiceImpl implements PayPalCheckoutService {
      * Make sure the payments and fulfillment groups are fully set up before invoking.
      * see: https://www.x.com/developers/paypal/documentation-tools/api/doexpresscheckoutpayment-api-operation-nvp
      *
+     * Note: this method must be passed in an order already initialized for checkout
+     * i.e. the order status set to SUBMITTED, the order number set, and the date submitted set.
+     *
      * @param order   - The order
      * @param token   - A PayPal parameter sent back after invoking SetExpressCheckout
      * @param payerId - A PayPal parameter sent back after invoking SetExpressCheckout
@@ -109,9 +112,6 @@ public class PayPalCheckoutServiceImpl implements PayPalCheckoutService {
                 break;
             }
         }
-
-        order.setStatus(OrderStatus.SUBMITTED);
-        order.setSubmitDate(Calendar.getInstance().getTime());
 
         CheckoutResponse checkoutResponse = checkoutService.performCheckout(order, payments);
 

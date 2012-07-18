@@ -29,18 +29,18 @@ import org.broadleafcommerce.core.payment.service.exception.PaymentException;
 import org.broadleafcommerce.core.payment.service.type.PaymentInfoType;
 import org.broadleafcommerce.core.payment.service.workflow.CompositePaymentResponse;
 import org.broadleafcommerce.core.pricing.service.exception.PricingException;
-import org.broadleafcommerce.profile.core.domain.Customer;
-import org.broadleafcommerce.profile.web.core.CustomerState;
+import org.broadleafcommerce.core.web.controller.checkout.BroadleafCheckoutController;
+import org.broadleafcommerce.core.web.order.CartState;
 import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCheckoutService;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 
 /**
@@ -60,37 +60,19 @@ import javax.servlet.http.HttpServletRequest;
  *  - Forward to a verification screen or order confirmation screen upon redirect from PayPal
  *
  * This controller depends on the following properties being set:
- *  - paypal.return.url = this must be set to "/broadleaf-commerce/paypal/process" in order to use this Default Controller. This is already set by default. PayPal redirects the user back to here once the customer has completed everything on PayPal's side.
+ *  - paypal.return.url = PayPal redirects the user back to here once the customer has completed everything on PayPal's side.
  *  - paypal.order.verify.url = set this property in order to redirect to a Verification Page first before completing checkout
  *  - paypal.order.confirm.url = set this to the location of the confirmation page
  *  - paypal.order.confirm.identifier = this is the request parameter variable that you can pass to the confirmation page so it can look up your order.
  *  - paypal.order.confirm.useOrderNumber = this is a boolean to use order.getOrderNumber() to pass to the confirmation page, otherwise it uses order.getOrderId()
  *
  */
-public class BroadleafPayPalController {
+public class BroadleafPayPalController extends BroadleafCheckoutController {
 
     private static final Log LOG = LogFactory.getLog(BroadleafPayPalController.class);
 
     @Resource(name="blPayPalCheckoutService")
     protected PayPalCheckoutService payPalCheckoutService;
-
-    @Resource(name="blOrderService")
-    protected OrderService cartService;
-
-    @Resource(name="blCustomerState")
-    protected CustomerState customerState;
-
-    @Value("${paypal.order.verify.url}")
-    protected String orderVerificationView;
-
-    @Value("${paypal.order.confirm.url}")
-    protected String orderConfirmationView;
-
-    @Value("${paypal.order.confirm.identifier}")
-    protected String orderConfirmationIdentifier;
-
-    @Value("${paypal.order.confirm.useOrderNumber}")
-    protected boolean useOrderNumber = false;
 
     /**
      * The default endpoint to initiate a PayPal Express Checkout.
@@ -99,9 +81,8 @@ public class BroadleafPayPalController {
      * @param request - The Http request
      * @return ModelAndView
      */
-    public ModelAndView paypalCheckout(HttpServletRequest request) throws PaymentException {
-        Customer customer = customerState.getCustomer(request);
-        final Order cart = cartService.findCartForCustomer(customer);
+    public String paypalCheckout(HttpServletRequest request) throws PaymentException {
+        Order cart = CartState.getCart();
         if (cart != null) {
             CompositePaymentResponse compositePaymentResponse = payPalCheckoutService.initiateExpressCheckout(cart);
 
@@ -109,7 +90,7 @@ public class BroadleafPayPalController {
                 if (PaymentInfoType.PAYPAL.equals(paymentInfo.getType())) {
                     PaymentResponseItem responseItem = compositePaymentResponse.getPaymentResponse().getResponseItems().get(paymentInfo);
                     if (responseItem.getTransactionSuccess()) {
-                        return new ModelAndView("redirect:" + responseItem.getAdditionalFields().get(MessageConstants.REDIRECTURL));
+                        return "redirect:" + responseItem.getAdditionalFields().get(MessageConstants.REDIRECTURL);
                     }
                 }
             }
@@ -122,7 +103,7 @@ public class BroadleafPayPalController {
 
         }
 
-        return null;
+        return getCartPageRedirect();
     }
 
     /**
@@ -130,16 +111,18 @@ public class BroadleafPayPalController {
      * This is the ${paypal.return.url} configured in your properties file
      * To use: Create a controller in your application and extend this class.
      *
+     * Note: assumes there is already a Payment Info of Type PAYPAL on the order.
+     * This should have already been created before redirecting to PayPal (i.e. initiateExpressCheckout())
+     *
      * @param request - The Http request
      * @param token - A PayPal variable sent back as a request parameter
      * @param payerID - A PayPal variable sent back as a request parameter
      * @return ModelAndView
      */
-    public ModelAndView paypalProcess(HttpServletRequest request,
+    public String paypalProcess(HttpServletRequest request, HttpServletResponse response, Model model,
                                       @RequestParam String token,
                                       @RequestParam("PayerID") String payerID) throws CheckoutException, PricingException {
-        Customer customer = customerState.getCustomer(request);
-        final Order cart = cartService.findCartForCustomer(customer);
+        Order cart = CartState.getCart();
         if (cart != null) {
             //save the payer id and token on the payment info
             PaymentInfo payPalPaymentInfo = null;
@@ -154,56 +137,25 @@ public class BroadleafPayPalController {
             }
 
             if (payPalPaymentInfo != null) {
-                cartService.save(cart, false);
+                orderService.save(cart, false);
 
-                if (StringUtils.isEmpty(orderVerificationView) || "?".equals(orderVerificationView)) {
-                    CheckoutResponse checkoutResponse = payPalCheckoutService.completeExpressCheckout(token, payerID, cart);
-                    PaymentResponseItem responseItem = checkoutResponse.getPaymentResponse().getResponseItems().get(payPalPaymentInfo);
-                    if (responseItem.getTransactionSuccess()) {
-                        String orderIdentifier = checkoutResponse.getOrder().getId().toString();
-                        if (useOrderNumber) {
-                            orderIdentifier = checkoutResponse.getOrder().getOrderNumber();
-                        }
-                        return new ModelAndView("redirect:" + orderConfirmationView + "?" + orderConfirmationIdentifier + "=" + orderIdentifier);
-                    }
-                } else {
-                    return new ModelAndView("redirect:" + orderVerificationView);
+                initializeOrderForCheckout(cart);
+
+                CheckoutResponse checkoutResponse = payPalCheckoutService.completeExpressCheckout(token, payerID, cart);
+                PaymentResponseItem responseItem = checkoutResponse.getPaymentResponse().getResponseItems().get(payPalPaymentInfo);
+                if (!responseItem.getTransactionSuccess()) {
+                    processFailedOrderCheckout(cart);
+                    checkout(request, response, model);
+                    model.addAttribute("paymentException", true);
+                    return getCheckoutView();
                 }
+
+                return getConfirmationView(checkoutResponse.getOrder().getOrderNumber());
+
             }
         }
 
-        return null;
+        return getCartPageRedirect();
     }
 
-    public String getOrderVerificationView() {
-        return orderVerificationView;
-    }
-
-    public void setOrderVerificationView(String orderVerificationView) {
-        this.orderVerificationView = orderVerificationView;
-    }
-
-    public String getOrderConfirmationView() {
-        return orderConfirmationView;
-    }
-
-    public void setOrderConfirmationView(String orderConfirmationView) {
-        this.orderConfirmationView = orderConfirmationView;
-    }
-
-    public String getOrderConfirmationIdentifier() {
-        return orderConfirmationIdentifier;
-    }
-
-    public void setOrderConfirmationIdentifier(String orderConfirmationIdentifier) {
-        this.orderConfirmationIdentifier = orderConfirmationIdentifier;
-    }
-
-    public boolean isUseOrderNumber() {
-        return useOrderNumber;
-    }
-
-    public void setUseOrderNumber(boolean useOrderNumber) {
-        this.useOrderNumber = useOrderNumber;
-    }
 }

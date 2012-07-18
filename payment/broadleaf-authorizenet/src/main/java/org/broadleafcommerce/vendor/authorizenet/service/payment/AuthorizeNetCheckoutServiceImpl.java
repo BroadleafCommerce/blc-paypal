@@ -29,7 +29,7 @@ import org.broadleafcommerce.core.checkout.service.workflow.CheckoutResponse;
 import org.broadleafcommerce.core.checkout.service.workflow.CheckoutSeed;
 import org.broadleafcommerce.core.order.domain.FulfillmentGroup;
 import org.broadleafcommerce.core.order.domain.Order;
-import org.broadleafcommerce.core.order.service.CartService;
+import org.broadleafcommerce.core.order.service.OrderService;
 import org.broadleafcommerce.core.order.service.type.OrderStatus;
 import org.broadleafcommerce.core.payment.domain.CreditCardPaymentInfo;
 import org.broadleafcommerce.core.payment.domain.PaymentInfo;
@@ -38,7 +38,10 @@ import org.broadleafcommerce.core.payment.domain.Referenced;
 import org.broadleafcommerce.core.payment.service.PaymentInfoService;
 import org.broadleafcommerce.core.payment.service.SecurePaymentInfoService;
 import org.broadleafcommerce.core.payment.service.type.PaymentInfoType;
-import org.broadleafcommerce.profile.core.domain.*;
+import org.broadleafcommerce.profile.core.domain.Address;
+import org.broadleafcommerce.profile.core.domain.Country;
+import org.broadleafcommerce.profile.core.domain.Customer;
+import org.broadleafcommerce.profile.core.domain.State;
 import org.broadleafcommerce.profile.core.service.CountryService;
 import org.broadleafcommerce.profile.core.service.CustomerService;
 import org.broadleafcommerce.profile.core.service.StateService;
@@ -80,8 +83,8 @@ public class AuthorizeNetCheckoutServiceImpl implements AuthorizeNetCheckoutServ
     @Resource(name="blCustomerService")
     protected CustomerService customerService;
 
-    @Resource(name="blCartService")
-    protected CartService cartService;
+    @Resource(name="blOrderService")
+    protected OrderService orderService;
 
     @Resource(name="blStateService")
     protected StateService stateService;
@@ -132,7 +135,7 @@ public class AuthorizeNetCheckoutServiceImpl implements AuthorizeNetCheckoutServ
             }
 
             if (tps.equalsIgnoreCase(formTps)) {
-                Order order = cartService.findOrderById(orderId);
+                Order order = orderService.findOrderById(orderId);
                 if (order != null && order.getCustomer().getId().equals(customerId)){
                     return order;
                 }
@@ -151,7 +154,7 @@ public class AuthorizeNetCheckoutServiceImpl implements AuthorizeNetCheckoutServ
 
             //NOTE: assumes only one payment info of type credit card on the order.
             //Start by removing any payment info of type credit card already on the order.
-            cartService.removePaymentsFromOrder(order, PaymentInfoType.CREDIT_CARD);
+            orderService.removePaymentsFromOrder(order, PaymentInfoType.CREDIT_CARD);
 
             PaymentInfo authorizeNetPaymentInfo = paymentInfoService.create();
             authorizeNetPaymentInfo.setOrder(order);
@@ -191,9 +194,6 @@ public class AuthorizeNetCheckoutServiceImpl implements AuthorizeNetCheckoutServ
 
             creditCardPaymentInfo.setReferenceNumber(authorizeNetPaymentInfo.getReferenceNumber());
             payments.put(authorizeNetPaymentInfo, creditCardPaymentInfo);
-
-            order.setStatus(OrderStatus.SUBMITTED);
-            order.setSubmitDate(Calendar.getInstance().getTime());
 
             CheckoutResponse checkoutResponse = checkoutService.performCheckout(order, payments);
 

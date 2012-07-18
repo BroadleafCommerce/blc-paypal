@@ -16,27 +16,21 @@
 
 package org.broadleafcommerce.vendor.authorizenet.web.controller;
 
-import net.authorize.ResponseField;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.broadleafcommerce.common.web.controller.BroadleafAbstractController;
 import org.broadleafcommerce.core.checkout.service.exception.CheckoutException;
 import org.broadleafcommerce.core.checkout.service.workflow.CheckoutResponse;
 import org.broadleafcommerce.core.order.domain.Order;
-import org.broadleafcommerce.core.order.service.CartService;
 import org.broadleafcommerce.core.payment.domain.PaymentInfo;
 import org.broadleafcommerce.core.payment.domain.PaymentResponseItem;
-import org.broadleafcommerce.core.payment.service.exception.PaymentException;
 import org.broadleafcommerce.core.payment.service.type.PaymentInfoType;
 import org.broadleafcommerce.core.pricing.service.exception.PricingException;
-import org.broadleafcommerce.profile.web.core.CustomerState;
+import org.broadleafcommerce.core.web.controller.checkout.BroadleafCheckoutController;
+import org.broadleafcommerce.core.web.order.CartState;
 import org.broadleafcommerce.vendor.authorizenet.service.payment.AuthorizeNetCheckoutService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.ModelAndView;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -52,18 +46,12 @@ import java.util.Set;
  * Date: 6/27/12
  * Time: 11:54 AM
  */
-public class BroadleafAuthorizeNetController extends BroadleafAbstractController {
+public class BroadleafAuthorizeNetController extends BroadleafCheckoutController {
 
     private static final Log LOG = LogFactory.getLog(BroadleafAuthorizeNetController.class);
 
-    @Resource(name="blCartService")
-    protected CartService cartService;
-
     @Resource(name="blAuthorizeNetCheckoutService")
     protected AuthorizeNetCheckoutService authorizeNetCheckoutService;
-
-    @Value("${authorizenet.form.view}")
-    protected String authorizeNetFormView;
 
     @Value("${authorizenet.error.url}")
     protected String authorizeNetErrorUrl;
@@ -71,29 +59,34 @@ public class BroadleafAuthorizeNetController extends BroadleafAbstractController
     @Value("${authorizenet.confirm.url}")
     protected String authorizeNetConfirmUrl;
 
-    @Value("${authorizenet.order.confirm.identifier}")
-    protected String orderConfirmationIdentifier;
-
-    @Value("${authorizenet.order.confirm.useOrderNumber}")
-    protected boolean useOrderNumber = false;
-
-    public String constructAuthorizeAndDebitAuthorizeNetForm(Model model, HttpServletRequest request) throws PaymentException, NoSuchAlgorithmException, UnsupportedEncodingException {
-        Order order = cartService.findCartForCustomer(CustomerState.getCustomer());
+    @Override
+    public String checkout(HttpServletRequest request, HttpServletResponse response, Model model) {
+        Order order = CartState.getCart();
         if (order != null) {
-            Map<String, String> formFields = authorizeNetCheckoutService.constructAuthorizeAndDebitFields(order);
-            for (String key :formFields.keySet()) {
-                model.addAttribute(key, formFields.get(key));
+            try {
+                Map<String, String> formFields = authorizeNetCheckoutService.constructAuthorizeAndDebitFields(order);
+                for (String key :formFields.keySet()) {
+                    model.addAttribute(key, formFields.get(key));
+                }
+            } catch (NoSuchAlgorithmException e) {
+                LOG.error("Error Creating Authorize.net Checkout Form " + e);
+            } catch (UnsupportedEncodingException e) {
+                LOG.error("Error Creating Authorize.net Checkout Form " + e);
             }
         }
 
-        return ajaxRender(authorizeNetFormView,request, model);
+        return super.checkout(request, response, model);
     }
 
-    public @ResponseBody String processAuthorizeNetAuthorizeAndDebit(HttpServletRequest request, HttpServletResponse response) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+    public @ResponseBody String processAuthorizeNetAuthorizeAndDebit(HttpServletRequest request, HttpServletResponse response, Model model) throws NoSuchAlgorithmException, UnsupportedEncodingException, PricingException {
         Order order = authorizeNetCheckoutService.findCartForCustomer(request.getParameterMap());
         if (order != null) {
             try {
+
+                initializeOrderForCheckout(order);
+
                 CheckoutResponse checkoutResponse = authorizeNetCheckoutService.completeAuthorizeAndDebitCheckout(order, request.getParameterMap());
+
                 PaymentInfo authorizeNetPaymentInfo = null;
                 for (PaymentInfo paymentInfo : checkoutResponse.getPaymentResponse().getResponseItems().keySet()){
                     if (paymentInfo.getType() == PaymentInfoType.CREDIT_CARD){
@@ -103,18 +96,13 @@ public class BroadleafAuthorizeNetController extends BroadleafAbstractController
 
                 PaymentResponseItem paymentResponseItem = checkoutResponse.getPaymentResponse().getResponseItems().get(authorizeNetPaymentInfo);
                 if (paymentResponseItem.getTransactionSuccess()){
-                    String orderIdentifier = checkoutResponse.getOrder().getId().toString();
-                    if (useOrderNumber) {
-                        orderIdentifier = checkoutResponse.getOrder().getOrderNumber();
-                    }
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug("Transaction success for order " + orderIdentifier);
+                        LOG.debug("Transaction success for order " + checkoutResponse.getOrder().getOrderNumber());
                         LOG.debug("Response for Authorize.net to relay to client: ");
-                        LOG.debug(buildRelayResponse(authorizeNetConfirmUrl + "?" + orderConfirmationIdentifier + "=" + orderIdentifier));
+                        LOG.debug(buildRelayResponse(authorizeNetConfirmUrl + "/" + checkoutResponse.getOrder().getOrderNumber()));
                     }
-                    return buildRelayResponse(authorizeNetConfirmUrl + "?" + orderConfirmationIdentifier + "=" + orderIdentifier);
+                    return buildRelayResponse(authorizeNetConfirmUrl + "/" + checkoutResponse.getOrder().getOrderNumber());
                 }
-
             } catch (CheckoutException e) {
                 if (LOG.isErrorEnabled()) {
                     LOG.error("Checkout Exception occurred processing Authorize.net relay response (params: [" + requestParamToString(request) + "])" + e);
@@ -126,6 +114,7 @@ public class BroadleafAuthorizeNetController extends BroadleafAbstractController
             }
         }
 
+        processFailedOrderCheckout(order);
         return buildRelayResponse(authorizeNetErrorUrl);
     }
 
@@ -137,14 +126,12 @@ public class BroadleafAuthorizeNetController extends BroadleafAbstractController
         response.append("</head>");
         response.append("<body>");
         response.append("<script type=\"text/javascript\">");
-        //response.append("<!--");
         response.append("var referrer = document.referrer;");
         response.append("if (referrer.substr(0,7)==\"http://\") referrer = referrer.substr(7);");
         response.append("if (referrer.substr(0,8)==\"https://\") referrer = referrer.substr(8);");
         response.append("if(referrer && referrer.indexOf(document.location.hostname) != 0) {");
         response.append("document.location = \"" + receiptUrl +"\";");
         response.append("}");
-        //response.append("//-->");
         response.append("</script>");
         response.append("<noscript>");
         response.append("<meta http-equiv=\"refresh\" content=\"0;url=" + receiptUrl + "\">");

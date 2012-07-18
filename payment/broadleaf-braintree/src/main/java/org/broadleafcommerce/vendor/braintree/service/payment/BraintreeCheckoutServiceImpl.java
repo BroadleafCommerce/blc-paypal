@@ -23,7 +23,6 @@ import org.broadleafcommerce.core.checkout.service.CheckoutService;
 import org.broadleafcommerce.core.checkout.service.exception.CheckoutException;
 import org.broadleafcommerce.core.checkout.service.workflow.CheckoutResponse;
 import org.broadleafcommerce.core.order.domain.Order;
-import org.broadleafcommerce.core.order.service.type.OrderStatus;
 import org.broadleafcommerce.core.payment.domain.CreditCardPaymentInfo;
 import org.broadleafcommerce.core.payment.domain.PaymentInfo;
 import org.broadleafcommerce.core.payment.domain.PaymentResponseItem;
@@ -37,7 +36,6 @@ import org.broadleafcommerce.profile.core.service.CustomerService;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -99,11 +97,6 @@ public class BraintreeCheckoutServiceImpl implements BraintreeCheckoutService {
 
         creditCardPaymentInfo.setReferenceNumber(id);
         payments.put(braintreePaymentInfo, creditCardPaymentInfo);
-
-
-
-        order.setStatus(OrderStatus.SUBMITTED);
-        order.setSubmitDate(Calendar.getInstance().getTime());
 
         CheckoutResponse checkoutResponse = checkoutService.performCheckout(order, payments);
 

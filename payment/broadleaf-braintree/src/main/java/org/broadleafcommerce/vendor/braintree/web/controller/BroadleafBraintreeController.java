@@ -16,47 +16,28 @@
 
 package org.broadleafcommerce.vendor.braintree.web.controller;
 
-import com.braintreegateway.Transaction;
 import com.braintreegateway.TransactionRequest;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.broadleafcommerce.common.web.controller.BroadleafAbstractController;
 import org.broadleafcommerce.core.checkout.service.exception.CheckoutException;
 import org.broadleafcommerce.core.checkout.service.workflow.CheckoutResponse;
 import org.broadleafcommerce.core.order.domain.Order;
-import org.broadleafcommerce.core.order.service.OrderService;
-import org.broadleafcommerce.core.order.service.type.OrderStatus;
-import org.broadleafcommerce.core.payment.domain.CreditCardPaymentInfo;
 import org.broadleafcommerce.core.payment.domain.PaymentInfo;
 import org.broadleafcommerce.core.payment.domain.PaymentResponseItem;
-import org.broadleafcommerce.core.payment.domain.Referenced;
 import org.broadleafcommerce.core.payment.service.PaymentInfoService;
-import org.broadleafcommerce.core.payment.service.SecurePaymentInfoService;
-import org.broadleafcommerce.core.payment.service.exception.PaymentException;
 import org.broadleafcommerce.core.payment.service.type.PaymentInfoType;
 import org.broadleafcommerce.core.pricing.service.exception.PricingException;
-import org.broadleafcommerce.core.web.checkout.model.CheckoutForm;
-import org.broadleafcommerce.profile.core.domain.Address;
-import org.broadleafcommerce.profile.core.domain.Customer;
-import org.broadleafcommerce.profile.web.core.CustomerState;
+import org.broadleafcommerce.core.web.controller.checkout.BroadleafCheckoutController;
+import org.broadleafcommerce.core.web.order.CartState;
 import org.broadleafcommerce.vendor.braintree.service.payment.BraintreeCheckoutService;
 import org.broadleafcommerce.vendor.braintree.service.payment.BraintreePaymentService;
 import org.broadleafcommerce.vendor.braintree.service.payment.MessageConstants;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.ui.Model;
-import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.ModelAndView;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import java.math.BigDecimal;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Map;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Created with IntelliJ IDEA.
@@ -64,15 +45,9 @@ import java.util.Map;
  * Date: 6/21/12
  * Time: 2:39 PM
  */
-public class BroadleafBraintreeController extends BroadleafAbstractController {
+public class BroadleafBraintreeController extends BroadleafCheckoutController {
 
     private static final Log LOG = LogFactory.getLog(BroadleafBraintreeController.class);
-
-    @Resource(name="blOrderService")
-    protected OrderService cartService;
-
-    @Resource(name="blSecurePaymentInfoService")
-    protected SecurePaymentInfoService securePaymentInfoService;
 
     @Resource(name="blBraintreeVendorOrientedPaymentService")
     protected BraintreePaymentService braintreePaymentService;
@@ -83,23 +58,14 @@ public class BroadleafBraintreeController extends BroadleafAbstractController {
     @Resource(name="blPaymentInfoService")
     protected PaymentInfoService paymentInfoService;
 
-    @Value("${braintree.form.view}")
-    protected String braintreeFormView;
-
-    @Value("${braintree.verify.view}")
-    protected String braintreeVerifyView;
-
-    @Value("${braintree.confirm.view}")
-    protected String braintreeConfirmView;
-
-    @Value("${braintree.order.confirm.identifier}")
-    protected String orderConfirmationIdentifier;
-
-    @Value("${braintree.order.confirm.useOrderNumber}")
-    protected boolean useOrderNumber = false;
-
 
     /**
+     * Construct AuthorizeAndDebit Braintree Form
+     *
+     * This method overrides the BroadleafCheckoutController checkout() method
+     * and provides the attributes "trData" and "trURL" on the request.
+     * It returns super.checkout();
+     *
      * Use this endpoint to dynamically generate a Transparent Redirect Braintree Form to perform an Authorization and Capture transaction.
      * To use: Create a controller in your application and extend this class to provide an @RequestMapping value
      * By default, braintreeCheckoutService.constructAuthorizeAndDebitFields() does NOT construct the shipping and billing information in the trData parameter.
@@ -108,10 +74,11 @@ public class BroadleafBraintreeController extends BroadleafAbstractController {
      *
      * @param model - The Spring MVC model
      * @param request - The Http request
-     * @return String - /some/path/to/braintreeFormView (if it is an AJAX request, it will return /some/path/to/ajax/braintreeFormView)
+     * @return String - the checkout view
      */
-    public String constructAuthorizeAndDebitBraintreeForm(Model model, HttpServletRequest request) throws PaymentException {
-        Order order = cartService.findCartForCustomer(CustomerState.getCustomer());
+    @Override
+    public String checkout(HttpServletRequest request, HttpServletResponse response, Model model) {
+        Order order = CartState.getCart();
         if (order != null) {
             TransactionRequest trParams = new TransactionRequest();
             trParams = braintreeCheckoutService.constructAuthorizeAndDebitFields(trParams, order);
@@ -121,7 +88,7 @@ public class BroadleafBraintreeController extends BroadleafAbstractController {
             model.addAttribute("trUrl", trUrl);
         }
 
-        return ajaxRender(braintreeFormView,request, model);
+        return super.checkout(request, response, model);
     }
 
     /**
@@ -135,8 +102,10 @@ public class BroadleafBraintreeController extends BroadleafAbstractController {
      * @param request - The Http request
      * @return String
      */
-    public String processBraintreeAuthorizeAndDebit(Model model, @RequestParam String id, HttpServletRequest request) throws CheckoutException, PricingException {
-        Order order = cartService.findCartForCustomer(CustomerState.getCustomer());
+    public String processBraintreeAuthorizeAndDebit(Model model, @RequestParam String id,
+            HttpServletRequest request, HttpServletResponse response) throws CheckoutException, PricingException {
+
+        Order order = CartState.getCart();
         if (order != null) {
             String queryString = request.getQueryString();
             PaymentInfo braintreePaymentInfo = null;
@@ -159,25 +128,26 @@ public class BroadleafBraintreeController extends BroadleafAbstractController {
                 order.getPaymentInfos().add(braintreePaymentInfo);
             }
 
-            cartService.save(order, false);
-            if (StringUtils.isEmpty(braintreeVerifyView) || "?".equals(braintreeVerifyView)) {
-                CheckoutResponse checkoutResponse = braintreeCheckoutService.completeAuthorizeAndDebitCheckout(id, queryString, order);
-                PaymentResponseItem paymentResponseItem = checkoutResponse.getPaymentResponse().getResponseItems().get(braintreePaymentInfo);
-                if (paymentResponseItem.getTransactionSuccess()){
-                    String orderIdentifier = checkoutResponse.getOrder().getId().toString();
-                    if (useOrderNumber) {
-                        orderIdentifier = checkoutResponse.getOrder().getOrderNumber();
-                    }
-                    return ajaxRender(braintreeConfirmView + "?" + orderConfirmationIdentifier + "=" + orderIdentifier, request, model);
-                }
+            orderService.save(order, false);
 
-            } else {
-                return "redirect:" + braintreeVerifyView;
+            initializeOrderForCheckout(order);
+
+            CheckoutResponse checkoutResponse = braintreeCheckoutService.completeAuthorizeAndDebitCheckout(id, queryString, order);
+            PaymentResponseItem paymentResponseItem = checkoutResponse.getPaymentResponse().getResponseItems().get(braintreePaymentInfo);
+            if (!paymentResponseItem.getTransactionSuccess()){
+                processFailedOrderCheckout(order);
+                checkout(request, response, model);
+                model.addAttribute("paymentException", true);
+                return getCheckoutView();
             }
+
+            return getConfirmationView(checkoutResponse.getOrder().getOrderNumber());
 
         }
 
-        return null;
+        return getCartPageRedirect();
     }
+
+
 
 }
