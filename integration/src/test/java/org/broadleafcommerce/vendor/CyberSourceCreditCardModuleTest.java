@@ -90,7 +90,7 @@ public class CyberSourceCreditCardModuleTest extends BaseTest {
 		Order order = new OrderImpl();
 		order.setEmailAddress("null@cybersource.com");
 		paymentInfo.setOrder(order);
-		Referenced referenced = createCreditCardPaymentInfo("4111111111111111", 12, 2020, null);
+		Referenced referenced = createCreditCardPaymentInfo("Name on card", "4111111111111111", 12, 2020, null);
 		PaymentContext context = new PaymentContextImpl(amount, amount, paymentInfo, referenced, "test");
 		
 		PaymentResponseItem responseItem = module.authorize(context);
@@ -145,7 +145,7 @@ public class CyberSourceCreditCardModuleTest extends BaseTest {
 		
 	}
 	
-	private Referenced createCreditCardPaymentInfo(final String pan, final Integer month, final Integer year, final String cvv) {
+	private Referenced createCreditCardPaymentInfo(final String nameOnCard, final String pan, final Integer month, final Integer year, final String cvv) {
 		CreditCardPaymentInfo ccInfo = new CreditCardPaymentInfo() {
 
 			public String getCvvCode() {
@@ -180,7 +180,15 @@ public class CyberSourceCreditCardModuleTest extends BaseTest {
 				//do nothing
 			}
 
-			public void setId(Long id) {
+            public String getNameOnCard() {
+                return nameOnCard;
+            }
+
+            public void setNameOnCard(String nameOnCard) {
+                //do nothing
+            }
+
+            public void setId(Long id) {
 				//do nothing
 			}
 

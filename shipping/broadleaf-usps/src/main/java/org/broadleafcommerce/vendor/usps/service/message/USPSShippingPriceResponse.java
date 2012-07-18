@@ -18,9 +18,9 @@ package org.broadleafcommerce.vendor.usps.service.message;
 
 import java.util.Stack;
 
-import org.broadleafcommerce.common.vendor.service.message.ShippingPriceResponse;
+import org.broadleafcommerce.common.vendor.service.message.FulfillmentPriceExceptionResponse;
 
-public class USPSShippingPriceResponse implements ShippingPriceResponse {
+public class USPSShippingPriceResponse implements FulfillmentPriceExceptionResponse {
 
     protected Stack<USPSContainerItemResponse> responses = new Stack<USPSContainerItemResponse>();
     protected boolean isErrorDetected = false;

@@ -16,7 +16,7 @@
 
 package org.broadleafcommerce.vendor.usps.service;
 
-import org.broadleafcommerce.common.vendor.service.exception.ShippingPriceException;
+import org.broadleafcommerce.common.vendor.service.exception.FulfillmentPriceException;
 import org.broadleafcommerce.common.vendor.service.type.ServiceStatusType;
 import org.broadleafcommerce.vendor.usps.service.message.USPSRequestBuilder;
 import org.broadleafcommerce.vendor.usps.service.message.USPSRequestValidator;
@@ -73,5 +73,5 @@ public interface USPSShippingCalculationService {
 
     public void setUspsRequestBuilder(USPSRequestBuilder uspsRequestBuilder);
 
-    public USPSShippingPriceResponse process(USPSShippingPriceRequest request) throws ShippingPriceException;
+    public USPSShippingPriceResponse process(USPSShippingPriceRequest request) throws FulfillmentPriceException;
 }

@@ -17,7 +17,7 @@
 package org.broadleafcommerce.vendor.usps.service.message;
 
 import org.broadleafcommerce.common.util.WeightUnitOfMeasureType;
-import org.broadleafcommerce.common.vendor.service.exception.ShippingPriceException;
+import org.broadleafcommerce.common.vendor.service.exception.FulfillmentPriceException;
 import org.broadleafcommerce.vendor.usps.service.type.USPSShippingPriceErrorCode;
 
 public class USPSRequestValidator {
@@ -28,7 +28,7 @@ public class USPSRequestValidator {
         this.versionedValidator = versionedValidator;
     }
 
-    public void validateRequest(USPSShippingPriceRequest request) throws ShippingPriceException {
+    public void validateRequest(USPSShippingPriceRequest request) throws FulfillmentPriceException {
         validatePackageQuantity(request);
         for (USPSContainerItemRequest itemRequest : request.getContainerItems()) {
             validateService(itemRequest);
@@ -44,38 +44,38 @@ public class USPSRequestValidator {
         }
     }
 
-    protected void validateOther(USPSContainerItemRequest itemRequest) throws ShippingPriceException {
+    protected void validateOther(USPSContainerItemRequest itemRequest) throws FulfillmentPriceException {
         if (itemRequest.getPackageId() == null) {
             throw buildException(USPSShippingPriceErrorCode.PACKAGEIDNOTSPECIFIED.getType(), USPSShippingPriceErrorCode.PACKAGEIDNOTSPECIFIED.getMessage());
         }
         versionedValidator.validateOther(itemRequest);
     }
 
-    protected void validateShipDate(USPSContainerItemRequest itemRequest) throws ShippingPriceException {
+    protected void validateShipDate(USPSContainerItemRequest itemRequest) throws FulfillmentPriceException {
         versionedValidator.validateShipDate(itemRequest);
     }
 
-    protected void validateGirth(USPSContainerItemRequest itemRequest) throws ShippingPriceException {
+    protected void validateGirth(USPSContainerItemRequest itemRequest) throws FulfillmentPriceException {
         versionedValidator.validateGirth(itemRequest);
     }
 
-    protected void validateDimensions(USPSContainerItemRequest itemRequest) throws ShippingPriceException {
+    protected void validateDimensions(USPSContainerItemRequest itemRequest) throws FulfillmentPriceException {
         versionedValidator.validateDimensions(itemRequest);
     }
 
-    protected void validateMachinable(USPSContainerItemRequest itemRequest) throws ShippingPriceException {
+    protected void validateMachinable(USPSContainerItemRequest itemRequest) throws FulfillmentPriceException {
         versionedValidator.validateMachinable(itemRequest);
     }
 
-    protected void validateSize(USPSContainerItemRequest itemRequest) throws ShippingPriceException {
+    protected void validateSize(USPSContainerItemRequest itemRequest) throws FulfillmentPriceException {
         versionedValidator.validateSize(itemRequest);
     }
 
-    protected void validateContainer(USPSContainerItemRequest itemRequest) throws ShippingPriceException {
+    protected void validateContainer(USPSContainerItemRequest itemRequest) throws FulfillmentPriceException {
         versionedValidator.validateContainer(itemRequest);
     }
 
-    protected void validateZip(USPSContainerItemRequest itemRequest) throws ShippingPriceException {
+    protected void validateZip(USPSContainerItemRequest itemRequest) throws FulfillmentPriceException {
         if (itemRequest.getZipDestination() == null || itemRequest.getZipOrigination() == null) {
             throw buildException(USPSShippingPriceErrorCode.ZIPNOTSPECIFIED.getType(), USPSShippingPriceErrorCode.ZIPNOTSPECIFIED.getMessage());
         }
@@ -84,14 +84,14 @@ public class USPSRequestValidator {
         }
     }
 
-    protected void validateService(USPSContainerItemRequest itemRequest) throws ShippingPriceException {
+    protected void validateService(USPSContainerItemRequest itemRequest) throws FulfillmentPriceException {
         if (itemRequest.getService() == null) {
             throw USPSRequestValidator.buildException(USPSShippingPriceErrorCode.SERVICENOTSPECIFIED.getType(), USPSShippingPriceErrorCode.SERVICENOTSPECIFIED.getMessage());
         }
         versionedValidator.validateService(itemRequest);
     }
 
-    protected void validateWeight(USPSContainerItemRequest itemRequest) throws ShippingPriceException {
+    protected void validateWeight(USPSContainerItemRequest itemRequest) throws FulfillmentPriceException {
         if (itemRequest.getWeight() == null) {
             throw buildException(USPSShippingPriceErrorCode.WEIGHTNOTSPECIFIED.getType(), USPSShippingPriceErrorCode.WEIGHTNOTSPECIFIED.getMessage());
         }
@@ -104,19 +104,19 @@ public class USPSRequestValidator {
         versionedValidator.validateWeight(itemRequest);
     }
 
-    protected void validatePackageQuantity(USPSShippingPriceRequest request) throws ShippingPriceException {
+    protected void validatePackageQuantity(USPSShippingPriceRequest request) throws FulfillmentPriceException {
         if (request.getContainerItems().size() > 25) {
             throw buildException(USPSShippingPriceErrorCode.TOOMANYCONTAINERITEMS.getType(), USPSShippingPriceErrorCode.TOOMANYCONTAINERITEMS.getMessage());
         }
     }
 
-    public static ShippingPriceException buildException(String errorCode, String errorText) {
+    public static FulfillmentPriceException buildException(String errorCode, String errorText) {
         USPSShippingPriceResponse response = new USPSShippingPriceResponse();
         response.setErrorDetected(true);
         response.setErrorCode(errorCode);
         response.setErrorText(errorText);
-        ShippingPriceException e = new ShippingPriceException();
-        e.setShippingPriceResponse(response);
+        FulfillmentPriceException e = new FulfillmentPriceException();
+        e.setFulfillmentPriceExceptionResponse(response);
 
         return e;
     }

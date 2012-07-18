@@ -19,7 +19,7 @@ package org.broadleafcommerce.vendor.usps.service.message.v2;
 import java.math.BigDecimal;
 
 import org.broadleafcommerce.common.util.UnitOfMeasureUtil;
-import org.broadleafcommerce.common.vendor.service.exception.ShippingPriceException;
+import org.broadleafcommerce.common.vendor.service.exception.FulfillmentPriceException;
 import org.broadleafcommerce.vendor.usps.service.message.USPSContainerItemRequest;
 import org.broadleafcommerce.vendor.usps.service.message.USPSVersionedRequestValidator;
 import org.broadleafcommerce.vendor.usps.service.type.USPSServiceType;
@@ -27,14 +27,14 @@ import org.broadleafcommerce.vendor.usps.service.type.USPSShippingPriceErrorCode
 
 public class USPSRequestValidator implements USPSVersionedRequestValidator {
 
-	public void validateService(USPSContainerItemRequest itemRequest) throws ShippingPriceException {
+	public void validateService(USPSContainerItemRequest itemRequest) throws FulfillmentPriceException {
 		// validate the type is compatible with the v2 schema
 		if (!itemRequest.getService().equals(USPSServiceType.ALL) && !itemRequest.getService().equals(USPSServiceType.FIRSTCLASS) && !itemRequest.getService().equals(USPSServiceType.PRIORITY) && !itemRequest.getService().equals(USPSServiceType.EXPRESS) && !itemRequest.getService().equals(USPSServiceType.BPM) && !itemRequest.getService().equals(USPSServiceType.PARCEL) && !itemRequest.getService().equals(USPSServiceType.MEDIA) && !itemRequest.getService().equals(USPSServiceType.LIBRARY)) {
 			throw org.broadleafcommerce.vendor.usps.service.message.USPSRequestValidator.buildException(USPSShippingPriceErrorCode.SERVICENOTSUPPORTED.getType(), USPSShippingPriceErrorCode.SERVICENOTSUPPORTED.getMessage());
 		}
 	}
 
-	public void validateWeight(USPSContainerItemRequest itemRequest) throws ShippingPriceException {
+	public void validateWeight(USPSContainerItemRequest itemRequest) throws FulfillmentPriceException {
 		USPSServiceType service = itemRequest.getService();
 		if (service.equals(USPSServiceType.FIRSTCLASS)) {
 			// 13 ounces for first class
@@ -53,37 +53,37 @@ public class USPSRequestValidator implements USPSVersionedRequestValidator {
 		}
 	}
 
-	public void validateSize(USPSContainerItemRequest itemRequest) throws ShippingPriceException {
+	public void validateSize(USPSContainerItemRequest itemRequest) throws FulfillmentPriceException {
 		if (itemRequest.getContainerSize() == null) {
 			throw org.broadleafcommerce.vendor.usps.service.message.USPSRequestValidator.buildException(USPSShippingPriceErrorCode.SIZENOTSPECIFIED.getType(), USPSShippingPriceErrorCode.SIZENOTSPECIFIED.getMessage());
 		}
 	}
 
-	public void validateContainer(USPSContainerItemRequest itemRequest) throws ShippingPriceException {
+	public void validateContainer(USPSContainerItemRequest itemRequest) throws FulfillmentPriceException {
 		if ((itemRequest.getService().equals(USPSServiceType.EXPRESS) || itemRequest.getService().equals(USPSServiceType.PRIORITY)) && itemRequest.getContainerShape() == null) {
 			throw org.broadleafcommerce.vendor.usps.service.message.USPSRequestValidator.buildException(USPSShippingPriceErrorCode.SHAPENOTSPECIFIED.getType(), USPSShippingPriceErrorCode.SHAPENOTSPECIFIED.getMessage());
 		}
 	}
 
-	public void validateMachinable(USPSContainerItemRequest itemRequest) throws ShippingPriceException {
+	public void validateMachinable(USPSContainerItemRequest itemRequest) throws FulfillmentPriceException {
 		if ((itemRequest.getService().equals(USPSServiceType.ALL) || itemRequest.getService().equals(USPSServiceType.ONLINE) || itemRequest.getService().equals(USPSServiceType.PARCEL)) && itemRequest.isMachineSortable() == null) {
 			throw org.broadleafcommerce.vendor.usps.service.message.USPSRequestValidator.buildException(USPSShippingPriceErrorCode.MACHINABLESPECIFIED.getType(), USPSShippingPriceErrorCode.MACHINABLESPECIFIED.getMessage());
 		}
 	}
 
-	public void validateDimensions(USPSContainerItemRequest itemRequest) throws ShippingPriceException {
+	public void validateDimensions(USPSContainerItemRequest itemRequest) throws FulfillmentPriceException {
 		// do nothing
 	}
 
-	public void validateGirth(USPSContainerItemRequest itemRequest) throws ShippingPriceException {
+	public void validateGirth(USPSContainerItemRequest itemRequest) throws FulfillmentPriceException {
 		// do nothing
 	}
 
-	public void validateShipDate(USPSContainerItemRequest itemRequest) throws ShippingPriceException {
+	public void validateShipDate(USPSContainerItemRequest itemRequest) throws FulfillmentPriceException {
 		// do nothing
 	}
 
-	public void validateOther(USPSContainerItemRequest itemRequest) throws ShippingPriceException {
+	public void validateOther(USPSContainerItemRequest itemRequest) throws FulfillmentPriceException {
 		// do nothing
 	}
 

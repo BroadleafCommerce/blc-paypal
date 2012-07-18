@@ -16,26 +16,26 @@
 
 package org.broadleafcommerce.vendor.usps.service.message;
 
-import org.broadleafcommerce.common.vendor.service.exception.ShippingPriceException;
+import org.broadleafcommerce.common.vendor.service.exception.FulfillmentPriceException;
 
 public interface USPSVersionedRequestValidator {
 
-    public void validateWeight(USPSContainerItemRequest itemRequest) throws ShippingPriceException;
+    public void validateWeight(USPSContainerItemRequest itemRequest) throws FulfillmentPriceException;
 
-    public void validateService(USPSContainerItemRequest itemRequest) throws ShippingPriceException;
+    public void validateService(USPSContainerItemRequest itemRequest) throws FulfillmentPriceException;
 
-    public void validateContainer(USPSContainerItemRequest itemRequest) throws ShippingPriceException;
+    public void validateContainer(USPSContainerItemRequest itemRequest) throws FulfillmentPriceException;
 
-    public void validateSize(USPSContainerItemRequest itemRequest) throws ShippingPriceException;
+    public void validateSize(USPSContainerItemRequest itemRequest) throws FulfillmentPriceException;
 
-    public void validateMachinable(USPSContainerItemRequest itemRequest) throws ShippingPriceException;
+    public void validateMachinable(USPSContainerItemRequest itemRequest) throws FulfillmentPriceException;
 
-    public void validateDimensions(USPSContainerItemRequest itemRequest) throws ShippingPriceException;
+    public void validateDimensions(USPSContainerItemRequest itemRequest) throws FulfillmentPriceException;
 
-    public void validateGirth(USPSContainerItemRequest itemRequest) throws ShippingPriceException;
+    public void validateGirth(USPSContainerItemRequest itemRequest) throws FulfillmentPriceException;
 
-    public void validateShipDate(USPSContainerItemRequest itemRequest) throws ShippingPriceException;
+    public void validateShipDate(USPSContainerItemRequest itemRequest) throws FulfillmentPriceException;
 
-    public void validateOther(USPSContainerItemRequest itemRequest) throws ShippingPriceException;
+    public void validateOther(USPSContainerItemRequest itemRequest) throws FulfillmentPriceException;
 
 }

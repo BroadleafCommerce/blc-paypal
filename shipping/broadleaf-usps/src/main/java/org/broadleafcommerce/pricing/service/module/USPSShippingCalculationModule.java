@@ -23,10 +23,10 @@ import javax.annotation.Resource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.broadleafcommerce.common.vendor.service.exception.FulfillmentPriceException;
 import org.broadleafcommerce.core.order.domain.FulfillmentGroup;
 import org.broadleafcommerce.core.pricing.service.module.ShippingModule;
 import org.broadleafcommerce.common.money.Money;
-import org.broadleafcommerce.common.vendor.service.exception.ShippingPriceException;
 import org.broadleafcommerce.vendor.usps.service.USPSShippingCalculationService;
 import org.broadleafcommerce.vendor.usps.service.message.USPSContainerItemRequest;
 import org.broadleafcommerce.vendor.usps.service.message.USPSContainerItemResponse;
@@ -55,7 +55,7 @@ private static final Log LOG = LogFactory.getLog(USPSSingleItemPerPackageShippin
     @Resource
     protected USPSShippingCalculationService shippingCalculationService;
     
-    public FulfillmentGroup calculateShippingForFulfillmentGroup(FulfillmentGroup fulfillmentGroup) throws ShippingPriceException {
+    public FulfillmentGroup calculateShippingForFulfillmentGroup(FulfillmentGroup fulfillmentGroup) throws FulfillmentPriceException {
     	if (!isValidModuleForService(fulfillmentGroup.getService()) && !isDefaultModule()) {
     		LOG.info("fulfillment group (" + fulfillmentGroup.getId() + ") with a service type of (" + fulfillmentGroup.getService() + ") is not valid for this module service type (" + getServiceName() + ")");
     		return fulfillmentGroup;
@@ -75,13 +75,13 @@ private static final Log LOG = LogFactory.getLog(USPSSingleItemPerPackageShippin
 		
 		USPSServiceResponseType responseType = USPSServiceResponseType.getInstanceByName(fulfillmentGroup.getMethod());
 		if (responseType == null) {
-			throw new ShippingPriceException("No USPSServiceResponseType found for the shipping method (" + fulfillmentGroup.getMethod() + ") and service type (" + getServiceName() + ")");
+			throw new FulfillmentPriceException("No USPSServiceResponseType found for the shipping method (" + fulfillmentGroup.getMethod() + ") and service type (" + getServiceName() + ")");
 		}
 		Money shippingPrice = new Money(0D);
 		for(USPSContainerItemResponse itemResponse : itemResponses) {
 			USPSPostage postage = deducePostage(responseType, requestItems, itemResponse);
 			if (postage == null) {
-				throw new ShippingPriceException("No postage found in the USPS response for the USPSServiceResponseType (" + responseType.getDescription() + ")");
+				throw new FulfillmentPriceException("No postage found in the USPS response for the USPSServiceResponseType (" + responseType.getDescription() + ")");
 			}
 			shippingPrice = shippingPrice.add(postage.getRate());
 		}
@@ -129,7 +129,7 @@ private static final Log LOG = LogFactory.getLog(USPSSingleItemPerPackageShippin
         this.name = name;
     }
     
-    protected abstract List<USPSContainerItemRequest> createPackages(FulfillmentGroup fulfillmentGroup) throws ShippingPriceException;
+    protected abstract List<USPSContainerItemRequest> createPackages(FulfillmentGroup fulfillmentGroup) throws FulfillmentPriceException;
 
 	public Boolean isValidModuleForService(String serviceName) {
 		return getServiceName().equals(serviceName);

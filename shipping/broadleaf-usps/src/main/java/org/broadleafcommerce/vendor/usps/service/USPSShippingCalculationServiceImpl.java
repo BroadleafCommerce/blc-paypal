@@ -26,8 +26,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.xmlbeans.XmlTokenSource;
 import org.broadleafcommerce.common.vendor.service.AbstractVendorService;
-import org.broadleafcommerce.common.vendor.service.exception.ShippingPriceException;
-import org.broadleafcommerce.common.vendor.service.exception.ShippingPriceHostException;
+import org.broadleafcommerce.common.vendor.service.exception.FulfillmentPriceException;
+import org.broadleafcommerce.common.vendor.service.exception.FulfillmentPriceHostException;
 import org.broadleafcommerce.common.vendor.service.monitor.ServiceStatusDetectable;
 import org.broadleafcommerce.common.vendor.service.type.ServiceStatusType;
 import org.broadleafcommerce.vendor.usps.service.message.USPSRequestBuilder;
@@ -56,7 +56,7 @@ public class USPSShippingCalculationServiceImpl extends AbstractVendorService im
     protected USPSResponseBuilder uspsResponseBuilder;
 
     @Override
-    public USPSShippingPriceResponse process(USPSShippingPriceRequest request) throws ShippingPriceException {
+    public USPSShippingPriceResponse process(USPSShippingPriceRequest request) throws FulfillmentPriceException {
         uspsRequestValidator.validateRequest(request);
         USPSShippingPriceResponse shippingPriceResponse = new USPSShippingPriceResponse();
         InputStream response = null;
@@ -65,7 +65,7 @@ public class USPSShippingCalculationServiceImpl extends AbstractVendorService im
             shippingPriceResponse = uspsResponseBuilder.buildResponse(response, request);
         } catch (Exception e) {
             incrementFailure();
-            throw new ShippingPriceException(e);
+            throw new FulfillmentPriceException(e);
         } finally {
             if (response != null) {
                 try {
@@ -77,8 +77,8 @@ public class USPSShippingCalculationServiceImpl extends AbstractVendorService im
         }
         clearStatus();
         if (shippingPriceResponse.isErrorDetected()) {
-            ShippingPriceHostException e = new ShippingPriceHostException();
-            e.setShippingPriceResponse(shippingPriceResponse);
+            FulfillmentPriceHostException e = new FulfillmentPriceHostException();
+            e.setFulfillmentPriceExceptionResponse(shippingPriceResponse);
             throw e;
         }
         return shippingPriceResponse;

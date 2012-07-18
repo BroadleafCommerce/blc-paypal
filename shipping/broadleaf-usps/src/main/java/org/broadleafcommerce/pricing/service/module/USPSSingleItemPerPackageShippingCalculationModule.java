@@ -19,7 +19,7 @@ package org.broadleafcommerce.pricing.service.module;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.broadleafcommerce.common.vendor.service.exception.ShippingPriceException;
+import org.broadleafcommerce.common.vendor.service.exception.FulfillmentPriceException;
 import org.broadleafcommerce.core.catalog.domain.Product;
 import org.broadleafcommerce.core.catalog.domain.Sku;
 import org.broadleafcommerce.core.order.domain.BundleOrderItem;
@@ -50,7 +50,7 @@ import org.broadleafcommerce.vendor.usps.service.type.USPSServiceType;
 public class USPSSingleItemPerPackageShippingCalculationModule extends USPSShippingCalculationModule {
 
 	@Override
-	protected List<USPSContainerItemRequest> createPackages(FulfillmentGroup fulfillmentGroup) throws ShippingPriceException {
+	protected List<USPSContainerItemRequest> createPackages(FulfillmentGroup fulfillmentGroup) throws FulfillmentPriceException {
     	List<USPSContainerItemRequest> itemRequests = new ArrayList<USPSContainerItemRequest>();
     	for (FulfillmentGroupItem fgItem : fulfillmentGroup.getFulfillmentGroupItems()) {
     		List<DiscreteOrderItem> discreteItems = new ArrayList<DiscreteOrderItem>();
@@ -60,7 +60,7 @@ public class USPSSingleItemPerPackageShippingCalculationModule extends USPSShipp
     		} else if (GiftWrapOrderItem.class.isAssignableFrom(orderItem.getClass())) {
     			List<OrderItem> wrappedItems = ((GiftWrapOrderItem) orderItem).getWrappedItems();
     			if (!fulfillmentGroup.getOrder().getOrderItems().containsAll(wrappedItems)){
-    				throw new ShippingPriceException("To price shipping correctly, the items contained in the GiftWrapOrderItem must also individually appear in the order, not just in the wrappedItems collection of GiftWrapOrderItem.");
+    				throw new FulfillmentPriceException("To price shipping correctly, the items contained in the GiftWrapOrderItem must also individually appear in the order, not just in the wrappedItems collection of GiftWrapOrderItem.");
     			}
     			continue;
     		} else if (DiscreteOrderItem.class.isAssignableFrom(orderItem.getClass())) {
@@ -81,16 +81,16 @@ public class USPSSingleItemPerPackageShippingCalculationModule extends USPSShipp
 		return ShippingServiceType.USPS.getType();
 	}
 
-	protected USPSContainerItemRequest createRequest(FulfillmentGroup fulfillmentGroup, DiscreteOrderItem discreteItem, int counter) throws ShippingPriceException {
+	protected USPSContainerItemRequest createRequest(FulfillmentGroup fulfillmentGroup, DiscreteOrderItem discreteItem, int counter) throws FulfillmentPriceException {
     	String method = fulfillmentGroup.getMethod();
     	String[] methods = method.split("_");
 		USPSServiceMethod uspsMethod = USPSServiceMethod.getInstance(methods[0]);
     	if (uspsMethod == null) {
-    		throw new ShippingPriceException("Unable to find a USPSShippingMethod for the method found on the fulfillment group: (" + fulfillmentGroup.getMethod() + ")");
+    		throw new FulfillmentPriceException("Unable to find a USPSShippingMethod for the method found on the fulfillment group: (" + fulfillmentGroup.getMethod() + ")");
     	}
     	USPSServiceType serviceType = USPSServiceType.getInstanceByServiceMethod(uspsMethod);
     	if (serviceType == null) {
-    		throw new ShippingPriceException("Unable to establish a USPSServiceType for the USPSServiceMethod: (" + uspsMethod.getType() + ")");
+    		throw new FulfillmentPriceException("Unable to establish a USPSServiceType for the USPSServiceMethod: (" + uspsMethod.getType() + ")");
     	}
     	USPSContainerItemRequest itemRequest = new USPSContainerItem();
         itemRequest.setService(serviceType);
