@@ -208,7 +208,7 @@ public class BraintreePaymentModule implements PaymentModule {
     }
 
     public void setBillingInfo(Transaction result, PaymentContext paymentContext) {
-        if (result.getBillingAddress() != null) {
+        if (result.getBillingAddress() != null && !isBraintreeAddressEmpty(result.getBillingAddress())) {
             Address billingAddress = new AddressImpl();
             billingAddress.setFirstName(result.getBillingAddress().getFirstName());
             billingAddress.setLastName(result.getBillingAddress().getLastName());
@@ -228,7 +228,9 @@ public class BraintreePaymentModule implements PaymentModule {
     }
 
     public void setShippingInfo(Transaction result, PaymentContext paymentContext) {
-        if (result.getShippingAddress() != null && paymentContext.getPaymentInfo().getOrder().getFulfillmentGroups().size() == 1) {
+        if (result.getShippingAddress() != null &&
+                !isBraintreeAddressEmpty(result.getShippingAddress()) &&
+                paymentContext.getPaymentInfo().getOrder().getFulfillmentGroups().size() == 1) {
             // If you pass the shipping address to Braintree, there has to be an existing fulfillment group on the order.
             // This must be done because of pricing considerations.
             // The fulfillment group must be constructed when adding to the cart or sometime before calling the gateway. This depends on UX.
@@ -279,6 +281,29 @@ public class BraintreePaymentModule implements PaymentModule {
     @Override
     public Boolean isValidCandidate(PaymentInfoType paymentType) {
         return paymentType == PaymentInfoType.CREDIT_CARD;
+    }
+
+    private boolean isBraintreeAddressEmpty(com.braintreegateway.Address braintreeAddress) {
+        if (braintreeAddress.getCompany() == null &&
+                braintreeAddress.getCountryCodeAlpha2() == null &&
+                braintreeAddress.getCountryCodeAlpha3() == null &&
+                braintreeAddress.getCountryCodeAlpha3() == null &&
+                braintreeAddress.getCountryCodeNumeric() == null &&
+                braintreeAddress.getCountryName() == null &&
+                braintreeAddress.getCreatedAt() == null &&
+                braintreeAddress.getCustomerId() == null &&
+                braintreeAddress.getExtendedAddress() == null &&
+                braintreeAddress.getFirstName() == null &&
+                braintreeAddress.getId() == null &&
+                braintreeAddress.getLastName() == null &&
+                braintreeAddress.getLocality() == null &&
+                braintreeAddress.getPostalCode() == null &&
+                braintreeAddress.getRegion() == null &&
+                braintreeAddress.getStreetAddress() == null &&
+                braintreeAddress.getUpdatedAt() == null) {
+            return true;
+        }
+        return false;
     }
 
     public BraintreePaymentService getBraintreePaymentService() {
