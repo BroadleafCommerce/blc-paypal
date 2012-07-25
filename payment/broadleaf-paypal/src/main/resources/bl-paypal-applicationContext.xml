@@ -7,28 +7,10 @@
            http://www.springframework.org/schema/context
            http://www.springframework.org/schema/context/spring-context-3.1.xsd">
 
+    <context:component-scan base-package="org.broadleafcommerce.common.web"/>
+    <context:component-scan base-package="org.broadleafcommerce.core.web"/>
     <context:component-scan base-package="org.broadleafcommerce.profile.web"/>
     <context:component-scan base-package="org.broadleafcommerce.vendor.paypal"/>
-
-    <bean id="blConfiguration" class="org.broadleafcommerce.common.config.RuntimeEnvironmentPropertiesConfigurer">
-        <property name="propertyLocations">
-            <set>
-                <value>classpath:config/bc/paypal/</value>
-            </set>
-        </property>
-        <property name="environments">
-            <set>
-                <value>production</value>
-                <value>staging</value>
-                <value>integrationqa</value>
-                <value>integrationdev</value>
-                <value>development</value>
-                <value>local</value>
-            </set>
-        </property>
-        <property name="defaultEnvironment" value="development"/>
-        <property name="ignoreUnresolvablePlaceholders" value="true"/>
-    </bean>
 
     <bean id="blPayPalCheckoutService" class="org.broadleafcommerce.vendor.paypal.service.payment.PayPalCheckoutServiceImpl"/>
 
