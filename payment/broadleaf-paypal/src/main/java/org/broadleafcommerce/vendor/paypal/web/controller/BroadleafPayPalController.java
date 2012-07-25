@@ -127,7 +127,7 @@ public class BroadleafPayPalController extends BroadleafCheckoutController {
             //save the payer id and token on the payment info
             PaymentInfo payPalPaymentInfo = null;
             for (PaymentInfo paymentInfo : cart.getPaymentInfos()) {
-                if (paymentInfo.getType() == PaymentInfoType.PAYPAL) {
+                if (PaymentInfoType.PAYPAL.equals(paymentInfo.getType())) {
                     //There should only be one payment info of type paypal in the order
                     payPalPaymentInfo = paymentInfo;
                     paymentInfo.getAdditionalFields().put(MessageConstants.PAYERID, payerID);

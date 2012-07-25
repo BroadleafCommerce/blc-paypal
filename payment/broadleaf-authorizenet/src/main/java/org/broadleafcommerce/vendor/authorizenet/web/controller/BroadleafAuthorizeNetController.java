@@ -89,7 +89,7 @@ public class BroadleafAuthorizeNetController extends BroadleafCheckoutController
 
                 PaymentInfo authorizeNetPaymentInfo = null;
                 for (PaymentInfo paymentInfo : checkoutResponse.getPaymentResponse().getResponseItems().keySet()){
-                    if (paymentInfo.getType() == PaymentInfoType.CREDIT_CARD){
+                    if (PaymentInfoType.CREDIT_CARD.equals(paymentInfo.getType())){
                         authorizeNetPaymentInfo = paymentInfo;
                     }
                 }

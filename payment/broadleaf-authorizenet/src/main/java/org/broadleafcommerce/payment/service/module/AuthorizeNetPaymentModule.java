@@ -108,7 +108,7 @@ public class AuthorizeNetPaymentModule implements PaymentModule {
 
     @Override
     public Boolean isValidCandidate(PaymentInfoType paymentType) {
-        return paymentType == PaymentInfoType.CREDIT_CARD;
+        return PaymentInfoType.CREDIT_CARD.equals(paymentType);
     }
 
     public AuthorizeNetPaymentService getAuthorizeNetPaymentService() {

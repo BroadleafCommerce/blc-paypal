@@ -50,24 +50,24 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
         List<NameValuePair> nvps = new ArrayList<NameValuePair>();
         setBaseNvps(nvps);
 
-        if (request.getMethodType() == PayPalMethodType.CHECKOUT) {
+        if (PayPalMethodType.CHECKOUT.equals(request.getMethodType())) {
             setNvpsForCheckoutOrAuth(nvps, (PayPalPaymentRequest) request, MessageConstants.SALEACTION);
             nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTCURRENCYCODE, new Integer[]{0}, new String[]{"n"}), ((PayPalPaymentRequest) request).getCurrency()));
-        } else if (request.getMethodType() == PayPalMethodType.AUTHORIZATION) {
+        } else if (PayPalMethodType.AUTHORIZATION.equals(request.getMethodType())) {
             setNvpsForCheckoutOrAuth(nvps, (PayPalPaymentRequest) request, MessageConstants.AUTHORIZATIONACTION);
             nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTCURRENCYCODE, new Integer[]{0}, new String[]{"n"}), ((PayPalPaymentRequest) request).getCurrency()));
-        } else if (request.getMethodType() == PayPalMethodType.PROCESS) {
+        } else if (PayPalMethodType.PROCESS.equals(request.getMethodType())) {
             setNvpsForProcess(nvps, (PayPalPaymentRequest) request);
             nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTCURRENCYCODE, new Integer[]{0}, new String[]{"n"}), ((PayPalPaymentRequest) request).getCurrency()));
-        } else if (request.getMethodType() == PayPalMethodType.REFUND) {
+        } else if (PayPalMethodType.REFUND.equals(request.getMethodType())) {
             setNvpsForRefund(nvps, (PayPalPaymentRequest) request);
             nvps.add(new NameValuePair(MessageConstants.CURRENCYCODE, ((PayPalPaymentRequest) request).getCurrency()));
-        } else if (request.getMethodType() == PayPalMethodType.CAPTURE) {
+        } else if (PayPalMethodType.CAPTURE.equals(request.getMethodType())) {
             setNvpsForCapture(nvps, (PayPalPaymentRequest) request);
             nvps.add(new NameValuePair(MessageConstants.CURRENCYCODE, ((PayPalPaymentRequest) request).getCurrency()));
-        } else if (request.getMethodType() == PayPalMethodType.VOID) {
+        } else if (PayPalMethodType.VOID.equals(request.getMethodType())) {
             setNvpsForVoid(nvps, (PayPalPaymentRequest) request);
-        } else if (request.getMethodType() == PayPalMethodType.DETAILS) {
+        } else if (PayPalMethodType.DETAILS.equals(request.getMethodType())) {
             setNvpsForDetails(nvps, (PayPalDetailsRequest) request);
         } else {
             throw new IllegalArgumentException("Method type not supported: " + request.getMethodType().getFriendlyType());
@@ -110,7 +110,7 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
     }
 
     protected void setNvpsForProcess(List<NameValuePair> nvps, PayPalPaymentRequest paymentRequest) {
-        if (paymentRequest.getSecondaryMethodType() != null && paymentRequest.getSecondaryMethodType() == PayPalMethodType.AUTHORIZATION) {
+        if (paymentRequest.getSecondaryMethodType() != null && PayPalMethodType.AUTHORIZATION.equals(paymentRequest.getSecondaryMethodType())) {
             nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.PAYMENTACTION, new Integer[]{0}, new String[]{"n"}), MessageConstants.AUTHORIZATIONACTION));
         } else {
             nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.PAYMENTACTION, new Integer[]{0}, new String[]{"n"}), MessageConstants.SALEACTION));

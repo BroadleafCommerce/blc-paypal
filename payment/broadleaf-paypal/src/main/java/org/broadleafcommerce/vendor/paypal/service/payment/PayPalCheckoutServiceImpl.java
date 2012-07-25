@@ -103,7 +103,7 @@ public class PayPalCheckoutServiceImpl implements PayPalCheckoutService {
         PaymentInfo payPalPaymentInfo = null;
         Map<PaymentInfo, Referenced> payments = new HashMap<PaymentInfo, Referenced>();
         for (PaymentInfo paymentInfo : order.getPaymentInfos()) {
-            if (paymentInfo.getType() == PaymentInfoType.PAYPAL) {
+            if (PaymentInfoType.PAYPAL.equals(paymentInfo.getType())) {
                 //There should only be one payment info of type paypal in the order
                 paymentInfo.getAdditionalFields().put(MessageConstants.PAYERID, payerId);
                 paymentInfo.getAdditionalFields().put(MessageConstants.TOKEN, token);
@@ -165,7 +165,7 @@ public class PayPalCheckoutServiceImpl implements PayPalCheckoutService {
     public CompositePaymentResponse refundTransaction(String transactionId, Order order) throws PaymentException {
         Map<PaymentInfo, Referenced> payments = new HashMap<PaymentInfo, Referenced>();
         for (PaymentInfo paymentInfo : order.getPaymentInfos()) {
-            if (paymentInfo.getType() == PaymentInfoType.PAYPAL) {
+            if (PaymentInfoType.PAYPAL.equals(paymentInfo.getType())) {
                 //There should only be one payment info of type paypal in the order
                 paymentInfo.getAdditionalFields().put(MessageConstants.TRANSACTIONID, transactionId);
                 paymentInfo.getAdditionalFields().put(MessageConstants.REFUNDTYPE, PayPalRefundType.FULL.getType());

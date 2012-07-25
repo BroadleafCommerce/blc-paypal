@@ -60,11 +60,11 @@ public class PayPalResponseGeneratorImpl implements PayPalResponseGenerator {
     @Override
     public PayPalResponse buildResponse(String response, PayPalRequest paymentRequest) {
         PayPalResponse payPalResponse;
-        if (paymentRequest.getMethodType() == PayPalMethodType.CHECKOUT || paymentRequest.getMethodType() == PayPalMethodType.AUTHORIZATION) {
+        if (PayPalMethodType.CHECKOUT.equals(paymentRequest.getMethodType()) || PayPalMethodType.AUTHORIZATION.equals(paymentRequest.getMethodType())) {
             payPalResponse = buildCheckoutResponse(response, (PayPalPaymentRequest) paymentRequest);
-        } else if (paymentRequest.getMethodType() == PayPalMethodType.DETAILS) {
+        } else if (PayPalMethodType.DETAILS.equals(paymentRequest.getMethodType())) {
             payPalResponse = buildDetailsResponse(response);
-        } else if (paymentRequest.getMethodType() == PayPalMethodType.PROCESS) {
+        } else if (PayPalMethodType.PROCESS.equals(paymentRequest.getMethodType())) {
             payPalResponse = buildCheckoutResponse(response, (PayPalPaymentRequest) paymentRequest);
             addPaymentInfoData(response, (PayPalPaymentResponse) payPalResponse);
         } else {

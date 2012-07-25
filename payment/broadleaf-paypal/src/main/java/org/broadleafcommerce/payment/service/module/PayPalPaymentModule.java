@@ -156,7 +156,7 @@ public class PayPalPaymentModule implements PaymentModule {
 
     @Override
     public Boolean isValidCandidate(PaymentInfoType paymentType) {
-        return paymentType == PaymentInfoType.PAYPAL;
+        return PaymentInfoType.PAYPAL.equals(paymentType);
     }
 
     protected PaymentResponseItem commonAuthorizeOrSale(PaymentContext paymentContext, PayPalTransactionType transactionType) throws PaymentException {
@@ -173,14 +173,14 @@ public class PayPalPaymentModule implements PaymentModule {
 
         String token = paymentContext.getPaymentInfo().getAdditionalFields().get(MessageConstants.TOKEN);
         if (token == null) {
-            if (transactionType == PayPalTransactionType.AUTHORIZE) {
+            if (PayPalTransactionType.AUTHORIZE.equals(transactionType)) {
                 request.setMethodType(PayPalMethodType.AUTHORIZATION);
             } else {
                 request.setMethodType(PayPalMethodType.CHECKOUT);
             }
         } else {
             request.setMethodType(PayPalMethodType.PROCESS);
-            if (transactionType == PayPalTransactionType.AUTHORIZE) {
+            if (PayPalTransactionType.AUTHORIZE.equals(transactionType)) {
                 request.setSecondaryMethodType(PayPalMethodType.AUTHORIZATION);
             } else {
                 request.setSecondaryMethodType(PayPalMethodType.CHECKOUT);
@@ -226,9 +226,9 @@ public class PayPalPaymentModule implements PaymentModule {
         }
 
         PaymentResponseItem responseItem = buildBasicResponse(response);
-        if(request.getMethodType() == PayPalMethodType.PROCESS){
+        if(PayPalMethodType.PROCESS.equals(request.getMethodType())){
             setDecisionInformation(response, responseItem);
-        } else if (request.getMethodType() == PayPalMethodType.CHECKOUT || request.getMethodType() == PayPalMethodType.AUTHORIZATION) {
+        } else if (PayPalMethodType.CHECKOUT.equals(request.getMethodType()) || PayPalMethodType.AUTHORIZATION.equals(request.getMethodType())) {
             responseItem.getAdditionalFields().put(MessageConstants.REDIRECTURL, response.getUserRedirectUrl());
         }
         responseItem.setAmountPaid(paymentContext.getPaymentInfo().getAmount());
