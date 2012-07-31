@@ -30,7 +30,6 @@ import org.broadleafcommerce.core.checkout.service.workflow.CheckoutSeed;
 import org.broadleafcommerce.core.order.domain.FulfillmentGroup;
 import org.broadleafcommerce.core.order.domain.Order;
 import org.broadleafcommerce.core.order.service.OrderService;
-import org.broadleafcommerce.core.order.service.type.OrderStatus;
 import org.broadleafcommerce.core.payment.domain.CreditCardPaymentInfo;
 import org.broadleafcommerce.core.payment.domain.PaymentInfo;
 import org.broadleafcommerce.core.payment.domain.PaymentResponseItem;
@@ -38,10 +37,7 @@ import org.broadleafcommerce.core.payment.domain.Referenced;
 import org.broadleafcommerce.core.payment.service.PaymentInfoService;
 import org.broadleafcommerce.core.payment.service.SecurePaymentInfoService;
 import org.broadleafcommerce.core.payment.service.type.PaymentInfoType;
-import org.broadleafcommerce.profile.core.domain.Address;
-import org.broadleafcommerce.profile.core.domain.Country;
-import org.broadleafcommerce.profile.core.domain.Customer;
-import org.broadleafcommerce.profile.core.domain.State;
+import org.broadleafcommerce.profile.core.domain.*;
 import org.broadleafcommerce.profile.core.service.CountryService;
 import org.broadleafcommerce.profile.core.service.CustomerService;
 import org.broadleafcommerce.profile.core.service.StateService;
@@ -53,7 +49,6 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -163,24 +158,35 @@ public class AuthorizeNetCheckoutServiceImpl implements AuthorizeNetCheckoutServ
             authorizeNetPaymentInfo.setReferenceNumber(result.getResponseMap().get(ResponseField.INVOICE_NUMBER.getFieldName()));
             authorizeNetPaymentInfo.getAdditionalFields().put(ResponseField.RESPONSE_CODE.getFieldName(), result.getResponseCode().getCode() + "");
 
-            //TODO save addresses to the order
-//            Address billingAddress = new AddressImpl();
-//            Address shippingAddress = new AddressImpl();
-//            for (ResponseField field : ResponseField.values()) {
-//                if (isBillingAddressField(field)) {
-//                    populateAddress(result.getResponseMap(), field, billingAddress);
-//                } else if (isShippingAddressField(field)){
-//                    populateAddress(result.getResponseMap(), field, shippingAddress);
-//                } else if (result.getResponseMap().get(field.getFieldName()) != null){
-//                    authorizeNetPaymentInfo.getAdditionalFields().put(field.getFieldName(), result.getResponseMap().get(field.getFieldName()));
-//                }
-//            }
-//
-//            //set billing address on the payment info
-//            authorizeNetPaymentInfo.setAddress(billingAddress);
-//            //set shipping info on the fulfillment group
-//            populateShippingAddressOnOrder(order, shippingAddress);
-//            //finally add the authorizenet payment info to the order
+            Address billingAddress = new AddressImpl();
+            Address shippingAddress = new AddressImpl();
+            boolean billingPopulated = false;
+            boolean shippingPopulated = false;
+            for (ResponseField field : ResponseField.values()) {
+                if (isBillingAddressField(field) && !StringUtils.isEmpty(result.getResponseMap().get(field.getFieldName()))) {
+                    populateBillingAddress(result.getResponseMap(), field, billingAddress);
+                    billingPopulated = true;
+                }
+
+                if (isShippingAddressField(field) && !StringUtils.isEmpty(result.getResponseMap().get(field.getFieldName()))) {
+                    populateShippingAddress(result.getResponseMap(), field, shippingAddress);
+                    shippingPopulated = true;
+                }
+
+                if (!isBillingAddressField(field) && !isShippingAddressField(field) && !StringUtils.isEmpty(result.getResponseMap().get(field.getFieldName()))){
+                    authorizeNetPaymentInfo.getAdditionalFields().put(field.getFieldName(), result.getResponseMap().get(field.getFieldName()));
+                }
+            }
+
+            //set billing address on the payment info
+            if (billingPopulated) {
+                authorizeNetPaymentInfo.setAddress(billingAddress);
+            }
+            //set shipping info on the fulfillment group
+            if (shippingPopulated) {
+                populateShippingAddressOnOrder(order, shippingAddress);
+            }
+            //finally add the authorizenet payment info to the order
             order.getPaymentInfos().add(authorizeNetPaymentInfo);
 
             if (LOG.isDebugEnabled()){
@@ -251,7 +257,7 @@ public class AuthorizeNetCheckoutServiceImpl implements AuthorizeNetCheckoutServ
         return null;
     }
 
-    public String createTamperProofSeal(Long customerId, Long orderId) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+    protected String createTamperProofSeal(Long customerId, Long orderId) throws NoSuchAlgorithmException, UnsupportedEncodingException {
         MessageDigest md5 = MessageDigest.getInstance("MD5");
         String tamperProofSeal = customerId.toString() + orderId.toString() + apiLoginId + transactionKey;
         md5.digest(tamperProofSeal.getBytes("UTF-8"));
@@ -262,7 +268,7 @@ public class AuthorizeNetCheckoutServiceImpl implements AuthorizeNetCheckoutServ
         return tamperProofSeal;
     }
 
-    public boolean isBillingAddressField(ResponseField field) {
+    protected boolean isBillingAddressField(ResponseField field) {
         if (ResponseField.FIRST_NAME.equals(field) || ResponseField.LAST_NAME.equals(field) ||
                 ResponseField.COMPANY.equals(field) ||
                 ResponseField.ADDRESS.equals(field) ||
@@ -275,7 +281,7 @@ public class AuthorizeNetCheckoutServiceImpl implements AuthorizeNetCheckoutServ
         return false;
     }
 
-    public boolean isShippingAddressField(ResponseField field) {
+    protected boolean isShippingAddressField(ResponseField field) {
         if (ResponseField.SHIP_TO_FIRST_NAME.equals(field) || ResponseField.SHIP_TO_LAST_NAME.equals(field) ||
                 ResponseField.SHIP_TO_COMPANY.equals(field) ||
                 ResponseField.SHIP_TO_ADDRESS.equals(field) ||
@@ -288,41 +294,59 @@ public class AuthorizeNetCheckoutServiceImpl implements AuthorizeNetCheckoutServ
         return false;
     }
 
-    public void populateAddress(Map<String, String> responseMap, ResponseField field, Address address) {
+    protected void populateBillingAddress(Map<String, String> responseMap, ResponseField field, Address address) {
         String value = responseMap.get(field.getFieldName());
 
-        if (value != null) {
+        if (!StringUtils.isEmpty(value) && address != null) {
             switch (field) {
-                case SHIP_TO_FIRST_NAME:
                 case FIRST_NAME: address.setFirstName(value); break;
-                case SHIP_TO_LAST_NAME:
                 case LAST_NAME: address.setLastName(value); break;
-                case SHIP_TO_COMPANY:
                 case COMPANY: address.setCompanyName(value); break;
-                case SHIP_TO_ADDRESS:
                 case ADDRESS: address.setAddressLine1(value); break;
-                case SHIP_TO_CITY:
                 case CITY: address.setCity(value); break;
-                case SHIP_TO_STATE:
                 case STATE:
                     State state = stateService.findStateByAbbreviation(value);
                     if (state != null) {
                         address.setState(state);
                     }
                     break;
-                case SHIP_TO_COUNTRY:
                 case COUNTRY:
                     Country country = countryService.findCountryByAbbreviation(value);
                     address.setCountry(country);
                     break;
-                case SHIP_TO_ZIP_CODE:
                 case ZIP_CODE: address.setPostalCode(value); break;
                 default: break;
             }
         }
     }
 
-    public void populateShippingAddressOnOrder(Order order, Address shippingAddress) {
+    protected void populateShippingAddress(Map<String, String> responseMap, ResponseField field, Address address) {
+        String value = responseMap.get(field.getFieldName());
+
+        if (!StringUtils.isEmpty(value) && address != null) {
+            switch (field) {
+                case SHIP_TO_FIRST_NAME: address.setFirstName(value); break;
+                case SHIP_TO_LAST_NAME: address.setLastName(value); break;
+                case SHIP_TO_COMPANY: address.setCompanyName(value); break;
+                case SHIP_TO_ADDRESS: address.setAddressLine1(value); break;
+                case SHIP_TO_CITY: address.setCity(value); break;
+                case SHIP_TO_STATE:
+                    State state = stateService.findStateByAbbreviation(value);
+                    if (state != null) {
+                        address.setState(state);
+                    }
+                    break;
+                case SHIP_TO_COUNTRY:
+                    Country country = countryService.findCountryByAbbreviation(value);
+                    address.setCountry(country);
+                    break;
+                case SHIP_TO_ZIP_CODE: address.setPostalCode(value); break;
+                default: break;
+            }
+        }
+    }
+
+    protected void populateShippingAddressOnOrder(Order order, Address shippingAddress) {
         if (order.getFulfillmentGroups() != null && order.getFulfillmentGroups().size()==1) {
             FulfillmentGroup fg = order.getFulfillmentGroups().get(0);
             fg.setAddress(shippingAddress);
