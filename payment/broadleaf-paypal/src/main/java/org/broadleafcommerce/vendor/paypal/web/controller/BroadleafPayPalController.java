@@ -21,6 +21,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.broadleafcommerce.core.checkout.service.exception.CheckoutException;
 import org.broadleafcommerce.core.checkout.service.workflow.CheckoutResponse;
+import org.broadleafcommerce.core.order.domain.NullOrderImpl;
 import org.broadleafcommerce.core.order.domain.Order;
 import org.broadleafcommerce.core.order.service.OrderService;
 import org.broadleafcommerce.core.payment.domain.PaymentInfo;
@@ -83,7 +84,7 @@ public class BroadleafPayPalController extends BroadleafCheckoutController {
      */
     public String paypalCheckout(HttpServletRequest request) throws PaymentException {
         Order cart = CartState.getCart();
-        if (cart != null) {
+        if (!(cart instanceof NullOrderImpl)) {
             CompositePaymentResponse compositePaymentResponse = payPalCheckoutService.initiateExpressCheckout(cart);
 
             for (PaymentInfo paymentInfo : compositePaymentResponse.getPaymentResponse().getResponseItems().keySet()) {
@@ -123,7 +124,7 @@ public class BroadleafPayPalController extends BroadleafCheckoutController {
                                       @RequestParam String token,
                                       @RequestParam("PayerID") String payerID) throws CheckoutException, PricingException {
         Order cart = CartState.getCart();
-        if (cart != null) {
+        if (!(cart instanceof NullOrderImpl)) {
             //save the payer id and token on the payment info
             PaymentInfo payPalPaymentInfo = null;
             for (PaymentInfo paymentInfo : cart.getPaymentInfos()) {

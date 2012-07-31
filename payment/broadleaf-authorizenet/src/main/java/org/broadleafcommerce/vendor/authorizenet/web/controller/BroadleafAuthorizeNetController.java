@@ -20,6 +20,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.broadleafcommerce.core.checkout.service.exception.CheckoutException;
 import org.broadleafcommerce.core.checkout.service.workflow.CheckoutResponse;
+import org.broadleafcommerce.core.order.domain.NullOrderImpl;
 import org.broadleafcommerce.core.order.domain.Order;
 import org.broadleafcommerce.core.payment.domain.PaymentInfo;
 import org.broadleafcommerce.core.payment.domain.PaymentResponseItem;
@@ -62,7 +63,7 @@ public class BroadleafAuthorizeNetController extends BroadleafCheckoutController
     @Override
     public String checkout(HttpServletRequest request, HttpServletResponse response, Model model) {
         Order order = CartState.getCart();
-        if (order != null) {
+        if (!(order instanceof NullOrderImpl)) {
             try {
                 Map<String, String> formFields = authorizeNetCheckoutService.constructAuthorizeAndDebitFields(order);
                 for (String key :formFields.keySet()) {
@@ -80,7 +81,7 @@ public class BroadleafAuthorizeNetController extends BroadleafCheckoutController
 
     public @ResponseBody String processAuthorizeNetAuthorizeAndDebit(HttpServletRequest request, HttpServletResponse response, Model model) throws NoSuchAlgorithmException, UnsupportedEncodingException, PricingException {
         Order order = authorizeNetCheckoutService.findCartForCustomer(request.getParameterMap());
-        if (order != null) {
+        if (!(order instanceof NullOrderImpl)) {
             try {
 
                 initializeOrderForCheckout(order);
