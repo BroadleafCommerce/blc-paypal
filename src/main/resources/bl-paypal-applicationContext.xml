@@ -12,6 +12,8 @@
     <context:component-scan base-package="org.broadleafcommerce.profile.web"/>
     <context:component-scan base-package="org.broadleafcommerce.vendor.paypal"/>
 
+    <!-- In order to use the pre-configured properties files, you should override this bean yourself in your own applicationContext.xml -->
+    <!--
     <bean id="blConfiguration" class="org.broadleafcommerce.common.config.RuntimeEnvironmentPropertiesConfigurer">
         <property name="propertyLocations">
             <set>
@@ -19,6 +21,7 @@
             </set>
         </property>
     </bean>
+    -->
 
     <bean id="blPayPalCheckoutService" class="org.broadleafcommerce.vendor.paypal.service.payment.PayPalCheckoutServiceImpl"/>
 
