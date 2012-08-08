@@ -12,6 +12,14 @@
     <context:component-scan base-package="org.broadleafcommerce.profile.web"/>
     <context:component-scan base-package="org.broadleafcommerce.vendor.paypal"/>
 
+    <bean id="blConfiguration" class="org.broadleafcommerce.common.config.RuntimeEnvironmentPropertiesConfigurer">
+        <property name="propertyLocations">
+            <set>
+                <value>classpath:config/bc/paypal/</value>
+            </set>
+        </property>
+    </bean>
+
     <bean id="blPayPalCheckoutService" class="org.broadleafcommerce.vendor.paypal.service.payment.PayPalCheckoutServiceImpl"/>
 
     <bean id="blPayPalPaymentService" class="org.broadleafcommerce.core.payment.service.PaymentServiceImpl">
