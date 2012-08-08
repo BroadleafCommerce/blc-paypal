@@ -249,6 +249,14 @@
     <dependencies>
         <dependency>
             <groupId>org.broadleafcommerce</groupId>
+            <artifactId>broadleaf-third-party-integration-config</artifactId>
+            <version>default</version>
+            <scope>compile</scope>
+            <type>jar</type>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.broadleafcommerce</groupId>
             <artifactId>broadleaf-framework</artifactId>
             <version>${blc.version}</version>
             <scope>compile</scope>
