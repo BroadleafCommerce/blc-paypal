@@ -16,14 +16,12 @@
 
 package org.broadleafcommerce.vendor.paypal.web.controller;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.broadleafcommerce.core.checkout.service.exception.CheckoutException;
 import org.broadleafcommerce.core.checkout.service.workflow.CheckoutResponse;
 import org.broadleafcommerce.core.order.domain.NullOrderImpl;
 import org.broadleafcommerce.core.order.domain.Order;
-import org.broadleafcommerce.core.order.service.OrderService;
 import org.broadleafcommerce.core.payment.domain.PaymentInfo;
 import org.broadleafcommerce.core.payment.domain.PaymentResponseItem;
 import org.broadleafcommerce.core.payment.service.exception.PaymentException;
@@ -34,10 +32,8 @@ import org.broadleafcommerce.core.web.controller.checkout.BroadleafCheckoutContr
 import org.broadleafcommerce.core.web.order.CartState;
 import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCheckoutService;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.ModelAndView;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;

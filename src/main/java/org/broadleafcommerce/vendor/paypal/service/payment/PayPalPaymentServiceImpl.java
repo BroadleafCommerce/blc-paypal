@@ -16,9 +16,6 @@
 
 package org.broadleafcommerce.vendor.paypal.service.payment;
 
-import java.io.IOException;
-import java.util.List;
-
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.methods.PostMethod;
@@ -29,6 +26,9 @@ import org.broadleafcommerce.common.vendor.service.monitor.ServiceStatusDetectab
 import org.broadleafcommerce.common.vendor.service.type.ServiceStatusType;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalResponse;
+
+import java.io.IOException;
+import java.util.List;
 
 /**
  * 

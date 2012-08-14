@@ -16,11 +16,11 @@
 
 package org.broadleafcommerce.vendor.paypal.service.payment.type;
 
+import org.broadleafcommerce.common.BroadleafEnumerationType;
+
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.broadleafcommerce.common.BroadleafEnumerationType;
 
 /**
  * An extendible enumeration of transaction types.

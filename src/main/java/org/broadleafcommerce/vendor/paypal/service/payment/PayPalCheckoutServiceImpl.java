@@ -21,7 +21,6 @@ import org.broadleafcommerce.core.checkout.service.CheckoutService;
 import org.broadleafcommerce.core.checkout.service.exception.CheckoutException;
 import org.broadleafcommerce.core.checkout.service.workflow.CheckoutResponse;
 import org.broadleafcommerce.core.order.domain.Order;
-import org.broadleafcommerce.core.order.service.type.OrderStatus;
 import org.broadleafcommerce.core.payment.domain.PaymentInfo;
 import org.broadleafcommerce.core.payment.domain.PaymentResponseItem;
 import org.broadleafcommerce.core.payment.domain.Referenced;
@@ -38,7 +37,6 @@ import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalMethodType
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalRefundType;
 
 import javax.annotation.Resource;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 

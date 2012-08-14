@@ -17,7 +17,6 @@
 package org.broadleafcommerce.vendor.paypal.service.payment;
 
 import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
-import org.broadleafcommerce.common.vendor.service.monitor.ServiceStatusDetectable;
 import org.broadleafcommerce.common.vendor.service.type.ServiceStatusType;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalResponse;

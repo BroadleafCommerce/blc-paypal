@@ -16,38 +16,28 @@
 
 package org.broadleafcommerce.vendor.paypal.service.payment;
 
-import java.io.UnsupportedEncodingException;
-import java.math.BigDecimal;
-import java.net.URLDecoder;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Currency;
-
 import org.apache.commons.lang.StringUtils;
 import org.broadleafcommerce.common.money.Money;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.ErrorCheckable;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalErrorResponse;
-import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPalPaymentInfo;
-import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPalPaymentRequest;
-import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPalPaymentResponse;
-import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPalRefundInfo;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalResponse;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.details.PayPalDetailsResponse;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.details.PayPalPayerAddress;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.details.PayPalPaymentDetails;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.details.PayPalPaymentItemDetails;
-import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalAddressStatusType;
-import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalCheckoutStatusType;
-import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalHoldDecisionType;
-import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalMethodType;
-import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalPayerStatusType;
-import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalPaymentStatusType;
-import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalPaymentType;
-import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalPendingReasonType;
-import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalReasonCodeType;
-import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalRefundPendingReasonType;
-import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalRefundStatusType;
+import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPalPaymentInfo;
+import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPalPaymentRequest;
+import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPalPaymentResponse;
+import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPalRefundInfo;
+import org.broadleafcommerce.vendor.paypal.service.payment.type.*;
+
+import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
+import java.net.URLDecoder;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Currency;
 
 /**
  * @author Jeff Fischer

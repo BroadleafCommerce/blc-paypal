@@ -16,20 +16,20 @@
 
 package org.broadleafcommerce.vendor.paypal.service.payment;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.commons.httpclient.NameValuePair;
 import org.broadleafcommerce.common.money.Money;
-import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPalItemRequest;
-import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPalPaymentRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.details.PayPalDetailsRequest;
+import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPalItemRequest;
+import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPalPaymentRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPalShippingRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalMethodType;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalRefundType;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalShippingDisplayType;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Jeff Fischer
