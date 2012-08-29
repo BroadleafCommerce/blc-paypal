@@ -142,7 +142,7 @@ public class BroadleafPayPalController extends BroadleafCheckoutController {
                 PaymentResponseItem responseItem = checkoutResponse.getPaymentResponse().getResponseItems().get(payPalPaymentInfo);
                 if (!responseItem.getTransactionSuccess()) {
                     processFailedOrderCheckout(cart);
-                    checkout(request, response, model);
+                    populateModelWithShippingReferenceData(request, model);
                     model.addAttribute("paymentException", true);
                     return getCheckoutView();
                 }
