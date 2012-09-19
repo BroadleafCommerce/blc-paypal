@@ -99,6 +99,23 @@ public class PayPalCheckoutServiceImpl implements PayPalCheckoutService {
     @Override
     public CheckoutResponse completeExpressCheckout(String token, String payerId, Order order) throws CheckoutException {
         PaymentInfo payPalPaymentInfo = null;
+
+        PayPalDetailsRequest detailsRequest = new PayPalDetailsRequest();
+        detailsRequest.setMethodType(PayPalMethodType.DETAILS);
+        detailsRequest.setToken(token);
+
+        try {
+            PayPalDetailsResponse response = payPalPaymentModule.getExpressCheckoutDetails(detailsRequest);
+            if (response != null && response.getPaymentDetails() != null) {
+                if (!order.getTotal().getAmount().equals(response.getPaymentDetails().getAmount().getAmount())) {
+                    throw new CheckoutException("The Order Total does not match the total from PayPal", null);
+                }
+            }
+        } catch (PaymentException e) {
+            throw new CheckoutException("Unable to retrieve Express Checkout Details", e, null);
+        }
+
+
         Map<PaymentInfo, Referenced> payments = new HashMap<PaymentInfo, Referenced>();
         for (PaymentInfo paymentInfo : order.getPaymentInfos()) {
             if (PaymentInfoType.PAYPAL.equals(paymentInfo.getType())) {
