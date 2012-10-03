@@ -30,7 +30,7 @@
     <version>2.0.0-SNAPSHOT</version>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <blc.version>2.0.0-SNAPSHOT</blc.version>
+        <blc.version>2.0.0-GA</blc.version>
     </properties>
     <scm>
         <connection>scm:git:git@github.com:BroadleafCommerce/blc-paypal.git</connection>
