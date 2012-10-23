@@ -16,6 +16,7 @@
 
 package org.broadleafcommerce.payment.service.module;
 
+import org.broadleafcommerce.common.currency.util.BroadleafCurrencyUtils;
 import org.broadleafcommerce.common.money.Money;
 import org.broadleafcommerce.common.time.SystemTime;
 import org.broadleafcommerce.core.order.domain.FulfillmentGroup;
@@ -32,7 +33,11 @@ import org.broadleafcommerce.vendor.paypal.service.payment.PayPalPaymentService;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalErrorResponse;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.details.PayPalDetailsRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.details.PayPalDetailsResponse;
-import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.*;
+import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPalItemRequest;
+import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPalPaymentRequest;
+import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPalPaymentResponse;
+import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPalShippingRequest;
+import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPalSummaryRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalMethodType;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalRefundType;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalTransactionType;
@@ -194,7 +199,7 @@ public class PayPalPaymentModule implements PaymentModule {
             itemRequest.setDescription(amountItem.getDescription());
             itemRequest.setShortDescription(amountItem.getShortDescription());
             itemRequest.setQuantity(amountItem.getQuantity());
-            itemRequest.setUnitPrice(new Money(amountItem.getUnitPrice()));
+            itemRequest.setUnitPrice(BroadleafCurrencyUtils.getMoney(amountItem.getUnitPrice(),paymentContext.getPaymentInfo().getOrder().getCurrency()));
             itemRequest.setSystemId(amountItem.getSystemId());
             request.getItemRequests().add(itemRequest);
         }
