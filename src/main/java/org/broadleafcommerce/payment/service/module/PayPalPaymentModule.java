@@ -78,7 +78,7 @@ public class PayPalPaymentModule implements PaymentModule {
         PaymentResponseItem responseItem = buildBasicResponse(response);
         setDecisionInformation(response, responseItem);
         responseItem.setAmountPaid(paymentContext.getPaymentInfo().getAmount());
-
+        responseItem.setCurrency(paymentContext.getPaymentInfo().getOrder().getCurrency());
         return responseItem;
     }
 
@@ -102,7 +102,7 @@ public class PayPalPaymentModule implements PaymentModule {
         PaymentResponseItem responseItem = buildBasicResponse(response);
         setDecisionInformation(response, responseItem);
         responseItem.setAmountPaid(paymentContext.getPaymentInfo().getAmount());
-
+        responseItem.setCurrency(paymentContext.getPaymentInfo().getOrder().getCurrency());
         return responseItem;
     }
 
@@ -134,7 +134,7 @@ public class PayPalPaymentModule implements PaymentModule {
         setDecisionInformation(response, responseItem);
         setRefundInformation(response, responseItem);
         responseItem.setAmountPaid(paymentContext.getPaymentInfo().getAmount());
-
+        responseItem.setCurrency(paymentContext.getPaymentInfo().getOrder().getCurrency());
         return responseItem;
     }
 
@@ -237,7 +237,7 @@ public class PayPalPaymentModule implements PaymentModule {
             responseItem.getAdditionalFields().put(MessageConstants.REDIRECTURL, response.getUserRedirectUrl());
         }
         responseItem.setAmountPaid(paymentContext.getPaymentInfo().getAmount());
-
+        responseItem.setCurrency(paymentContext.getPaymentInfo().getOrder().getCurrency());
         return responseItem;
     }
 

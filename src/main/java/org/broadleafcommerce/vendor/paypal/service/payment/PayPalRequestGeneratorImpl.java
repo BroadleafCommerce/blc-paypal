@@ -17,6 +17,7 @@
 package org.broadleafcommerce.vendor.paypal.service.payment;
 
 import org.apache.commons.httpclient.NameValuePair;
+import org.apache.log4j.Logger;
 import org.broadleafcommerce.common.money.Money;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.details.PayPalDetailsRequest;
@@ -44,7 +45,7 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
     protected String cancelUrl;
     protected PayPalShippingDisplayType shippingDisplayType;
     protected Map<String, String> additionalConfig;
-    
+    protected Logger logger=Logger.getLogger(PayPalRequestGeneratorImpl.class);
     @Override
     public List<NameValuePair> buildRequest(PayPalRequest request) {
         List<NameValuePair> nvps = new ArrayList<NameValuePair>();
@@ -240,6 +241,9 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
 
     @Override
     public void setLibVersion(String libVersion) {
+         if(libVersion!=null && !libVersion.matches(".*\\d.*")) {
+           logger.error("Paypal API Version ("+libVersion+") seems incorrect, please supply a valid version");
+          }
         this.libVersion = libVersion;
     }
 
@@ -283,6 +287,7 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
         this.user = user;
     }
 
+    @Override
     public String getShippingDisplayType() {
         if (shippingDisplayType != null) {
             return shippingDisplayType.getType();
@@ -290,6 +295,7 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
         return null;
     }
 
+    @Override
     public void setShippingDisplayType(String shippingDisplayType) {
         PayPalShippingDisplayType displayType = PayPalShippingDisplayType.getInstance(shippingDisplayType);
         if (displayType == null) {
