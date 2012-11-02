@@ -45,7 +45,8 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
     protected String cancelUrl;
     protected PayPalShippingDisplayType shippingDisplayType;
     protected Map<String, String> additionalConfig;
-    protected Logger logger=Logger.getLogger(PayPalRequestGeneratorImpl.class);
+    protected Logger logger = Logger.getLogger(PayPalRequestGeneratorImpl.class);
+    
     @Override
     public List<NameValuePair> buildRequest(PayPalRequest request) {
         List<NameValuePair> nvps = new ArrayList<NameValuePair>();
@@ -241,9 +242,9 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
 
     @Override
     public void setLibVersion(String libVersion) {
-         if(libVersion!=null && !libVersion.matches(".*\\d.*")) {
-           logger.error("Paypal API Version ("+libVersion+") seems incorrect, please supply a valid version");
-          }
+        if (libVersion != null && !libVersion.matches(".*\\d.*")) {
+            logger.error("Paypal API Version (" + libVersion + ") seems incorrect, please supply a valid version");
+        }
         this.libVersion = libVersion;
     }
 
