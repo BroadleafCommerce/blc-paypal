@@ -25,9 +25,9 @@ import org.broadleafcommerce.common.money.Money;
  */
 public class PayPalSummaryRequest implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private Money subTotal;
+    private Money subTotal;
     private Money totalTax;
     private Money totalShipping;
     private Money grandTotal;

@@ -34,9 +34,9 @@ import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalTransactio
  *
  */
 public class PayPalPaymentResponse extends PayPalResponse implements PaymentResponse, ErrorCheckable {
-		
-	private static final long serialVersionUID = 1L;
-	
+        
+    private static final long serialVersionUID = 1L;
+    
     protected boolean isErrorDetected = false;
     protected boolean isSuccessful = true;
     protected String errorText;
@@ -51,36 +51,36 @@ public class PayPalPaymentResponse extends PayPalResponse implements PaymentResp
     protected PayPalRefundInfo refundInfo;
 
     public PayPalTransactionType getTransactionType() {
-		return transactionType;
-	}
+        return transactionType;
+    }
 
     public void setTransactionType(PayPalTransactionType transactionType) {
-		this.transactionType = transactionType;
-	}
-	
-	public String getErrorCode() {
-		throw new RuntimeException("ErrorCode not supported");
-	}
+        this.transactionType = transactionType;
+    }
+    
+    public String getErrorCode() {
+        throw new RuntimeException("ErrorCode not supported");
+    }
 
-	public String getErrorText() {
-		return errorText;
-	}
+    public String getErrorText() {
+        return errorText;
+    }
 
-	public boolean isErrorDetected() {
-		return isErrorDetected;
-	}
+    public boolean isErrorDetected() {
+        return isErrorDetected;
+    }
 
-	public void setErrorCode(String errorCode) {
-		throw new RuntimeException("ErrorCode not supported");
-	}
+    public void setErrorCode(String errorCode) {
+        throw new RuntimeException("ErrorCode not supported");
+    }
 
-	public void setErrorDetected(boolean isErrorDetected) {
-		this.isErrorDetected = isErrorDetected;
-	}
+    public void setErrorDetected(boolean isErrorDetected) {
+        this.isErrorDetected = isErrorDetected;
+    }
 
-	public void setErrorText(String errorText) {
-		this.errorText = errorText;
-	}
+    public void setErrorText(String errorText) {
+        this.errorText = errorText;
+    }
 
     public List<PayPalErrorResponse> getErrorResponses() {
         return errorResponses;

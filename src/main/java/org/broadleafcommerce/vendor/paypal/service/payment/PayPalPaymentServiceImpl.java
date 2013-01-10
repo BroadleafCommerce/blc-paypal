@@ -36,8 +36,8 @@ import java.util.List;
  *
  */
 public class PayPalPaymentServiceImpl implements PayPalPaymentService, ServiceStatusDetectable<PayPalRequest> {
-	
-	private static final Log LOG = LogFactory.getLog(PayPalPaymentServiceImpl.class);
+    
+    private static final Log LOG = LogFactory.getLog(PayPalPaymentServiceImpl.class);
 
     protected String serverUrl;
     protected Integer failureReportingThreshold;
