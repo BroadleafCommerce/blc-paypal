@@ -60,7 +60,7 @@ public class PayPalPaymentStatusType implements Serializable, BroadleafEnumerati
     }
 
     public PayPalPaymentStatusType(final String type, final String friendlyType) {
-    	this.friendlyType = friendlyType;
+        this.friendlyType = friendlyType;
         setType(type);
     }
 
@@ -69,10 +69,10 @@ public class PayPalPaymentStatusType implements Serializable, BroadleafEnumerati
     }
 
     public String getFriendlyType() {
-		return friendlyType;
-	}
+        return friendlyType;
+    }
 
-	private void setType(final String type) {
+    private void setType(final String type) {
         this.type = type;
         if (!TYPES.containsKey(type)) {
             TYPES.put(type, this);
