@@ -30,42 +30,42 @@ import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalTransactio
  */
 public class PayPalPaymentRequest extends PayPalRequest {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	protected String currency;
+    protected String currency;
     protected String payerID;
     protected String token;
-	protected List<PayPalItemRequest> itemRequests = new AutoNumberMemberIdList();
+    protected List<PayPalItemRequest> itemRequests = new AutoNumberMemberIdList();
     protected List<PayPalShippingRequest> shippingRequests = new ArrayList<PayPalShippingRequest>();
-	protected PayPalTransactionType transactionType;
+    protected PayPalTransactionType transactionType;
     protected PayPalSummaryRequest summaryRequest;
     protected String referenceNumber;
     protected String transactionID;
     protected PayPalRefundType refundType;
 
-	public PayPalTransactionType getTransactionType() {
-		return transactionType;
-	}
-	
-	public void setTransactionType(PayPalTransactionType transactionType) {
-		this.transactionType = transactionType;
-	}
-	
-	public String getCurrency() {
-		return currency;
-	}
-	
-	public void setCurrency(String currency) {
-		this.currency = currency;
-	}
-	
-	public List<PayPalItemRequest> getItemRequests() {
-		return itemRequests;
-	}
-	
-	public void setItemRequests(List<PayPalItemRequest> itemRequests) {
-		this.itemRequests = itemRequests;
-	}
+    public PayPalTransactionType getTransactionType() {
+        return transactionType;
+    }
+    
+    public void setTransactionType(PayPalTransactionType transactionType) {
+        this.transactionType = transactionType;
+    }
+    
+    public String getCurrency() {
+        return currency;
+    }
+    
+    public void setCurrency(String currency) {
+        this.currency = currency;
+    }
+    
+    public List<PayPalItemRequest> getItemRequests() {
+        return itemRequests;
+    }
+    
+    public void setItemRequests(List<PayPalItemRequest> itemRequests) {
+        this.itemRequests = itemRequests;
+    }
 
     public PayPalSummaryRequest getSummaryRequest() {
         return summaryRequest;

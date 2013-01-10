@@ -25,58 +25,58 @@ import org.broadleafcommerce.common.money.Money;
  */
 public class PayPalItemRequest implements java.io.Serializable {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private Long id;
+    private Long id;
     private String systemId;
-	private String shortDescription;
-	private String description;
-	private Money unitPrice;
-	private Long quantity;
-	
-	public String getShortDescription() {
-		return shortDescription;
-	}
-	
-	public void setShortDescription(String shortDescription) {
-		this.shortDescription = shortDescription;
-	}
-	
-	public String getDescription() {
-		return description;
-	}
-	
-	public void setDescription(String description) {
-		this.description = description;
-	}
-	
-	public Money getUnitPrice() {
-		return unitPrice;
-	}
-	
-	public void setUnitPrice(Money unitPrice) {
-		this.unitPrice = unitPrice;
-	}
-	
-	public Long getQuantity() {
-		return quantity;
-	}
-	
-	public void setQuantity(Long quantity) {
-		this.quantity = quantity;
-	}
+    private String shortDescription;
+    private String description;
+    private Money unitPrice;
+    private Long quantity;
+    
+    public String getShortDescription() {
+        return shortDescription;
+    }
+    
+    public void setShortDescription(String shortDescription) {
+        this.shortDescription = shortDescription;
+    }
+    
+    public String getDescription() {
+        return description;
+    }
+    
+    public void setDescription(String description) {
+        this.description = description;
+    }
+    
+    public Money getUnitPrice() {
+        return unitPrice;
+    }
+    
+    public void setUnitPrice(Money unitPrice) {
+        this.unitPrice = unitPrice;
+    }
+    
+    public Long getQuantity() {
+        return quantity;
+    }
+    
+    public void setQuantity(Long quantity) {
+        this.quantity = quantity;
+    }
 
-	public Long getId() {
-		return id;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	protected void setId(Long id) {
-		/*
-		 * This value should only be controlled by the
-		 * Broadleaf internal CyberSource implementation code
-		 */
-		this.id = id;
-	}
+    protected void setId(Long id) {
+        /*
+         * This value should only be controlled by the
+         * Broadleaf internal CyberSource implementation code
+         */
+        this.id = id;
+    }
 
     public String getSystemId() {
         return systemId;
