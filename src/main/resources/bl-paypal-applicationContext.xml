@@ -42,6 +42,7 @@
                 <property name="password" value="${paypal.password}"/>
                 <property name="user" value="${paypal.user}"/>
                 <property name="signature" value="${paypal.signature}"/>
+                <property name="useRelativeUrls" value="${paypal.useRelativeUrls}"/>
                 <property name="returnUrl" value="${paypal.return.url}"/>
                 <property name="cancelUrl" value="${paypal.cancel.url}"/>
                 <!-- 0 : PayPal displays the shipping address passed in. -->
