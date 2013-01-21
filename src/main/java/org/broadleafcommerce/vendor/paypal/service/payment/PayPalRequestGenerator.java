@@ -33,6 +33,10 @@ public interface PayPalRequestGenerator {
 
     void setAdditionalConfig(Map<String, String> additionalConfig);
 
+    Boolean getUseRelativeUrls();
+
+    void setUseRelativeUrls(Boolean useRelativeUrls);
+
     String getCancelUrl();
 
     void setCancelUrl(String cancelUrl);
