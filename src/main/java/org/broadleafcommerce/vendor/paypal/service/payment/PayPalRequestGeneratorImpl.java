@@ -17,6 +17,8 @@
 package org.broadleafcommerce.vendor.paypal.service.payment;
 
 import org.apache.commons.httpclient.NameValuePair;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 import org.broadleafcommerce.common.money.Money;
 import org.broadleafcommerce.common.web.BroadleafRequestContext;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalRequest;
@@ -48,6 +50,7 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
     protected String cancelUrl;
     protected PayPalShippingDisplayType shippingDisplayType;
     protected Map<String, String> additionalConfig;
+    protected Logger logger = Logger.getLogger(PayPalRequestGeneratorImpl.class);
     
     @Override
     public List<NameValuePair> buildRequest(PayPalRequest request) {
@@ -166,9 +169,9 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
     protected void setCostNvps(List<NameValuePair> nvps, PayPalPaymentRequest paymentRequest) {
         int counter = 0;
         for (PayPalItemRequest itemRequest : paymentRequest.getItemRequests()) {
-            nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.NAMEREQUEST, new Integer[] {0, counter}, new String[] {"n", "m"}), itemRequest.getShortDescription()));
+            nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.NAMEREQUEST, new Integer[] {0, counter}, new String[] {"n", "m"}), StringUtils.abbreviate(itemRequest.getShortDescription(), 120)));
             nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.NUMBERREQUEST, new Integer[] {0, counter}, new String[] {"n", "m"}), itemRequest.getSystemId()));
-            nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.DESCRIPTIONREQUEST, new Integer[] {0, counter}, new String[] {"n", "m"}), itemRequest.getDescription()));
+            nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.DESCRIPTIONREQUEST, new Integer[] {0, counter}, new String[] {"n", "m"}), StringUtils.abbreviate(itemRequest.getDescription(), 120)));
             nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.AMOUNTREQUEST, new Integer[] {0, counter}, new String[] {"n", "m"}), handleZeroConversionForMoney(itemRequest.getUnitPrice())));
             nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.QUANTITYREQUEST, new Integer[] {0, counter}, new String[] {"n", "m"}), String.valueOf(itemRequest.getQuantity())));
             counter++;
@@ -257,6 +260,9 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
 
     @Override
     public void setLibVersion(String libVersion) {
+        if (libVersion != null && !libVersion.matches(".*\\d.*")) {
+            logger.error("Paypal API Version (" + libVersion + ") seems incorrect, please supply a valid version");
+        }
         this.libVersion = libVersion;
     }
 
@@ -300,6 +306,7 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
         this.user = user;
     }
 
+    @Override
     public String getShippingDisplayType() {
         if (shippingDisplayType != null) {
             return shippingDisplayType.getType();
@@ -307,6 +314,7 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
         return null;
     }
 
+    @Override
     public void setShippingDisplayType(String shippingDisplayType) {
         PayPalShippingDisplayType displayType = PayPalShippingDisplayType.getInstance(shippingDisplayType);
         if (displayType == null) {
