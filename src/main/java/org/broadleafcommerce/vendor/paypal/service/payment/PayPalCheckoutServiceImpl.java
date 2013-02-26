@@ -142,16 +142,14 @@ public class PayPalCheckoutServiceImpl implements PayPalCheckoutService {
         if (responseItem.getTransactionSuccess()) {
             //If customer is anon, use paypal information.
             Customer customer = order.getCustomer();
-            if(customer.isAnonymous()) {
-            	if (StringUtils.isEmpty(customer.getFirstName())) {
-                    customer.setFirstName(response.getPayerFirstName());
-                }
-                if (StringUtils.isEmpty(customer.getLastName())) {
-                    customer.setLastName(response.getPayerLastName());
-                }
-                if (StringUtils.isEmpty(customer.getEmailAddress())) {
-                    customer.setEmailAddress(response.getEmailAddress());
-                }
+            if (StringUtils.isEmpty(customer.getFirstName()) && response.getPayerFirstName() != null) {
+                customer.setFirstName(response.getPayerFirstName());
+            }
+            if (StringUtils.isEmpty(customer.getLastName()) && response.getPayerLastName() != null) {
+                customer.setLastName(response.getPayerLastName());
+            }
+            if (StringUtils.isEmpty(customer.getEmailAddress()) && response.getEmailAddress() != null) {
+                customer.setEmailAddress(response.getEmailAddress());
             }
             customerService.saveCustomer(customer, false);
         }
