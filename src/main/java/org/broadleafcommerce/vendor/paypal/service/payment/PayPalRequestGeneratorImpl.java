@@ -17,7 +17,7 @@
 package org.broadleafcommerce.vendor.paypal.service.payment;
 
 import org.apache.commons.httpclient.NameValuePair;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.broadleafcommerce.common.money.Money;
 import org.broadleafcommerce.common.web.BroadleafRequestContext;
