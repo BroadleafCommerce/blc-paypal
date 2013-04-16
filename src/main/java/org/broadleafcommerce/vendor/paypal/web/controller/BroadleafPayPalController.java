@@ -136,12 +136,9 @@ public class BroadleafPayPalController extends BroadleafCheckoutController {
             if (payPalPaymentInfo != null) {
                 orderService.save(cart, false);
 
-                initializeOrderForCheckout(cart);
-
                 CheckoutResponse checkoutResponse = payPalCheckoutService.completeExpressCheckout(token, payerID, cart);
                 PaymentResponseItem responseItem = checkoutResponse.getPaymentResponse().getResponseItems().get(payPalPaymentInfo);
                 if (!responseItem.getTransactionSuccess()) {
-                    processFailedOrderCheckout(cart);
                     populateModelWithShippingReferenceData(request, model);
                     model.addAttribute("paymentException", true);
                     return getCheckoutView();

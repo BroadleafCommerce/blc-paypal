@@ -107,13 +107,13 @@ public class PayPalCheckoutServiceImpl implements PayPalCheckoutService {
     @Override
     public CheckoutResponse completeExpressCheckout(String token, String payerId, Order order) throws CheckoutException {
         PaymentInfo payPalPaymentInfo = null;
-
+        PayPalDetailsResponse response = null;
         PayPalDetailsRequest detailsRequest = new PayPalDetailsRequest();
         detailsRequest.setMethodType(PayPalMethodType.DETAILS);
         detailsRequest.setToken(token);
 
         try {
-            PayPalDetailsResponse response = payPalPaymentModule.getExpressCheckoutDetails(detailsRequest);
+            response = payPalPaymentModule.getExpressCheckoutDetails(detailsRequest);
             if (response != null && response.getPaymentDetails() != null) {
                 if (!order.getTotal().getAmount().equals(response.getPaymentDetails().getAmount().getAmount())) {
                     throw new CheckoutException("The Order Total does not match the total from PayPal", null);
@@ -140,16 +140,16 @@ public class PayPalCheckoutServiceImpl implements PayPalCheckoutService {
 
         PaymentResponseItem responseItem = checkoutResponse.getPaymentResponse().getResponseItems().get(payPalPaymentInfo);
         if (responseItem.getTransactionSuccess()) {
-            //Fill out a few customer values for anonymous customers
+            //If customer is anon, use paypal information.
             Customer customer = order.getCustomer();
-            if (StringUtils.isEmpty(customer.getFirstName())) {
-                customer.setFirstName(responseItem.getCustomer().getFirstName());
+            if (StringUtils.isEmpty(customer.getFirstName()) && response.getPayerFirstName() != null) {
+                customer.setFirstName(response.getPayerFirstName());
             }
-            if (StringUtils.isEmpty(customer.getLastName())) {
-                customer.setLastName(responseItem.getCustomer().getLastName());
+            if (StringUtils.isEmpty(customer.getLastName()) && response.getPayerLastName() != null) {
+                customer.setLastName(response.getPayerLastName());
             }
-            if (StringUtils.isEmpty(customer.getEmailAddress())) {
-                customer.setEmailAddress(responseItem.getCustomer().getEmailAddress());
+            if (StringUtils.isEmpty(customer.getEmailAddress()) && response.getEmailAddress() != null) {
+                customer.setEmailAddress(response.getEmailAddress());
             }
             customerService.saveCustomer(customer, false);
         }

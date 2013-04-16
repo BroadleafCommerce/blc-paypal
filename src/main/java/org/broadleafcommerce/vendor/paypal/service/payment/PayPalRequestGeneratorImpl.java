@@ -17,8 +17,10 @@
 package org.broadleafcommerce.vendor.paypal.service.payment;
 
 import org.apache.commons.httpclient.NameValuePair;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.broadleafcommerce.common.money.Money;
+import org.broadleafcommerce.common.web.BroadleafRequestContext;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.details.PayPalDetailsRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPalItemRequest;
@@ -32,6 +34,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * @author Jeff Fischer
  */
@@ -41,6 +45,7 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
     protected String password;
     protected String signature;
     protected String libVersion;
+    protected Boolean useRelativeUrls;
     protected String returnUrl;
     protected String cancelUrl;
     protected PayPalShippingDisplayType shippingDisplayType;
@@ -164,9 +169,9 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
     protected void setCostNvps(List<NameValuePair> nvps, PayPalPaymentRequest paymentRequest) {
         int counter = 0;
         for (PayPalItemRequest itemRequest : paymentRequest.getItemRequests()) {
-            nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.NAMEREQUEST, new Integer[] {0, counter}, new String[] {"n", "m"}), itemRequest.getShortDescription()));
+            nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.NAMEREQUEST, new Integer[] {0, counter}, new String[] {"n", "m"}), StringUtils.abbreviate(itemRequest.getShortDescription(), 120)));
             nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.NUMBERREQUEST, new Integer[] {0, counter}, new String[] {"n", "m"}), itemRequest.getSystemId()));
-            nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.DESCRIPTIONREQUEST, new Integer[] {0, counter}, new String[] {"n", "m"}), itemRequest.getDescription()));
+            nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.DESCRIPTIONREQUEST, new Integer[] {0, counter}, new String[] {"n", "m"}), StringUtils.abbreviate(itemRequest.getDescription(), 120)));
             nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.AMOUNTREQUEST, new Integer[] {0, counter}, new String[] {"n", "m"}), handleZeroConversionForMoney(itemRequest.getUnitPrice())));
             nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.QUANTITYREQUEST, new Integer[] {0, counter}, new String[] {"n", "m"}), String.valueOf(itemRequest.getQuantity())));
             counter++;
@@ -214,6 +219,19 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
         }
         return property;
     }
+    
+    protected String getRequestedServerPrefix() {
+        HttpServletRequest request = BroadleafRequestContext.getBroadleafRequestContext().getRequest();
+        String scheme = request.getScheme();
+        StringBuilder serverPrefix = new StringBuilder(scheme);
+        serverPrefix.append("://");
+        serverPrefix.append(request.getServerName());
+        if ((scheme.equalsIgnoreCase("http") && request.getServerPort() != 80) || (scheme.equalsIgnoreCase("https") && request.getServerPort() != 443)) {
+        	serverPrefix.append(":");
+        	serverPrefix.append(request.getServerPort());
+        }
+        return serverPrefix.toString();
+    }
 
     @Override
     public Map<String, String> getAdditionalConfig() {
@@ -227,7 +245,7 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
 
     @Override
     public String getCancelUrl() {
-        return cancelUrl;
+        return Boolean.TRUE.equals(useRelativeUrls) ? getRequestedServerPrefix() + cancelUrl : cancelUrl;
     }
 
     @Override
@@ -260,7 +278,7 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
 
     @Override
     public String getReturnUrl() {
-        return returnUrl;
+        return Boolean.TRUE.equals(useRelativeUrls) ? getRequestedServerPrefix() + returnUrl : returnUrl;
     }
 
     @Override
@@ -304,4 +322,14 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
         }
         this.shippingDisplayType = displayType;
     }
+
+	@Override
+	public Boolean getUseRelativeUrls() {
+		return useRelativeUrls;
+	}
+
+	@Override
+	public void setUseRelativeUrls(Boolean useRelativeUrls) {
+		this.useRelativeUrls = useRelativeUrls;
+	}
 }
