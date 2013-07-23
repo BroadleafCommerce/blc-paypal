@@ -23,10 +23,9 @@ import org.broadleafcommerce.core.order.domain.FulfillmentGroup;
 import org.broadleafcommerce.core.payment.domain.AmountItem;
 import org.broadleafcommerce.core.payment.domain.PaymentInfo;
 import org.broadleafcommerce.core.payment.domain.PaymentResponseItem;
-import org.broadleafcommerce.core.payment.domain.PaymentResponseItemImpl;
 import org.broadleafcommerce.core.payment.service.PaymentContext;
 import org.broadleafcommerce.core.payment.service.exception.PaymentException;
-import org.broadleafcommerce.core.payment.service.module.PaymentModule;
+import org.broadleafcommerce.core.payment.service.module.AbstractModule;
 import org.broadleafcommerce.core.payment.service.type.PaymentInfoType;
 import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalPaymentService;
@@ -48,105 +47,9 @@ import org.springframework.util.Assert;
  * @author jfischer
  *
  */
-public class PayPalPaymentModule implements PaymentModule {
+public class PayPalPaymentModule extends AbstractModule {
 
     protected PayPalPaymentService payPalPaymentService;
-
-    @Override
-    public PaymentResponseItem authorize(PaymentContext paymentContext) throws PaymentException {
-        //authorize from SetExpressCheckout "Authorization"
-        return commonAuthorizeOrSale(paymentContext, PayPalTransactionType.AUTHORIZE);
-    }
-
-    @Override
-    public PaymentResponseItem reverseAuthorize(PaymentContext paymentContext) throws PaymentException {
-        //void authorization from DoVoid
-        PayPalPaymentRequest request = buildBasicRequest(paymentContext, PayPalTransactionType.REVERSEAUTHORIZE);
-        request.setMethodType(PayPalMethodType.VOID);
-        request.setCurrency(paymentContext.getPaymentInfo().getAmount().getCurrency().getCurrencyCode());
-
-        Assert.isTrue(paymentContext.getPaymentInfo().getAdditionalFields().get(MessageConstants.TRANSACTIONID) != null, "The TRANSACTIONID value must be defined as an additional field in the PaymentInfo instance passed in.");
-        request.setTransactionID(paymentContext.getPaymentInfo().getAdditionalFields().get(MessageConstants.TRANSACTIONID));
-
-        PayPalPaymentResponse response;
-        try {
-            response = (PayPalPaymentResponse) payPalPaymentService.process(request);
-        } catch (org.broadleafcommerce.common.vendor.service.exception.PaymentException e) {
-            throw new PaymentException(e);
-        }
-
-        PaymentResponseItem responseItem = buildBasicResponse(response);
-        setDecisionInformation(response, responseItem);
-        responseItem.setAmountPaid(paymentContext.getPaymentInfo().getAmount());
-        responseItem.setCurrency(paymentContext.getPaymentInfo().getOrder().getCurrency());
-        return responseItem;
-    }
-
-    @Override
-    public PaymentResponseItem debit(PaymentContext paymentContext) throws PaymentException {
-        //PayPal Capture
-        PayPalPaymentRequest request = buildBasicRequest(paymentContext, PayPalTransactionType.CAPTURE);
-        request.setMethodType(PayPalMethodType.CAPTURE);
-        request.setCurrency(paymentContext.getPaymentInfo().getAmount().getCurrency().getCurrencyCode());
-
-        Assert.isTrue(paymentContext.getPaymentInfo().getAdditionalFields().get(MessageConstants.TRANSACTIONID) != null, "The TRANSACTIONID value must be defined as an additional field in the PaymentInfo instance passed in.");
-        request.setTransactionID(paymentContext.getPaymentInfo().getAdditionalFields().get(MessageConstants.TRANSACTIONID));
-
-        PayPalPaymentResponse response;
-        try {
-            response = (PayPalPaymentResponse) payPalPaymentService.process(request);
-        } catch (org.broadleafcommerce.common.vendor.service.exception.PaymentException e) {
-            throw new PaymentException(e);
-        }
-
-        PaymentResponseItem responseItem = buildBasicResponse(response);
-        setDecisionInformation(response, responseItem);
-        responseItem.setAmountPaid(paymentContext.getPaymentInfo().getAmount());
-        responseItem.setCurrency(paymentContext.getPaymentInfo().getOrder().getCurrency());
-        return responseItem;
-    }
-
-    @Override
-    public PaymentResponseItem authorizeAndDebit(PaymentContext paymentContext) throws PaymentException {
-        return commonAuthorizeOrSale(paymentContext, PayPalTransactionType.AUTHORIZEANDCAPTURE);
-    }
-
-    @Override
-    public PaymentResponseItem credit(PaymentContext paymentContext) throws PaymentException {
-        //PayPal Refund
-        PayPalPaymentRequest request = buildBasicRequest(paymentContext, PayPalTransactionType.CREDIT);
-        request.setMethodType(PayPalMethodType.REFUND);
-        request.setCurrency(paymentContext.getPaymentInfo().getAmount().getCurrency().getCurrencyCode());
-
-        Assert.isTrue(paymentContext.getPaymentInfo().getAdditionalFields().get(MessageConstants.REFUNDTYPE) != null, "The REFUNDTYPE value must be defined as an additional field in the PaymentInfo instance passed in.");
-        request.setRefundType(PayPalRefundType.getInstance(paymentContext.getPaymentInfo().getAdditionalFields().get(MessageConstants.REFUNDTYPE)));
-        Assert.isTrue(paymentContext.getPaymentInfo().getAdditionalFields().get(MessageConstants.TRANSACTIONID) != null, "The TRANSACTIONID value must be defined as an additional field in the PaymentInfo instance passed in.");
-        request.setTransactionID(paymentContext.getPaymentInfo().getAdditionalFields().get(MessageConstants.TRANSACTIONID));
-
-        PayPalPaymentResponse response;
-        try {
-            response = (PayPalPaymentResponse) payPalPaymentService.process(request);
-        } catch (org.broadleafcommerce.common.vendor.service.exception.PaymentException e) {
-            throw new PaymentException(e);
-        }
-
-        PaymentResponseItem responseItem = buildBasicResponse(response);
-        setDecisionInformation(response, responseItem);
-        setRefundInformation(response, responseItem);
-        responseItem.setAmountPaid(paymentContext.getPaymentInfo().getAmount());
-        responseItem.setCurrency(paymentContext.getPaymentInfo().getOrder().getCurrency());
-        return responseItem;
-    }
-
-    @Override
-    public PaymentResponseItem voidPayment(PaymentContext paymentContext) throws PaymentException {
-        throw new PaymentException("The void method is not supported by this module");
-    }
-
-    @Override
-    public PaymentResponseItem balance(PaymentContext paymentContext) throws PaymentException {
-        throw new PaymentException("The balance method is not supported by this module");
-    }
 
     public PayPalDetailsResponse getExpressCheckoutDetails(PayPalDetailsRequest request) throws PaymentException {
         PayPalDetailsResponse response;
@@ -164,7 +67,108 @@ public class PayPalPaymentModule implements PaymentModule {
         return PaymentInfoType.PAYPAL.equals(paymentType);
     }
 
-    protected PaymentResponseItem commonAuthorizeOrSale(PaymentContext paymentContext, PayPalTransactionType transactionType) throws PaymentException {
+    @Override
+    public PaymentResponseItem processReverseAuthorize(PaymentContext paymentContext, Money amountToReverseAuthorize, PaymentResponseItem responseItem) throws PaymentException {
+        //void authorization from DoVoid
+        PayPalPaymentRequest request = buildBasicRequest(paymentContext, PayPalTransactionType.REVERSEAUTHORIZE);
+        request.setMethodType(PayPalMethodType.VOID);
+        request.setCurrency(paymentContext.getPaymentInfo().getAmount().getCurrency().getCurrencyCode());
+
+        Assert.isTrue(paymentContext.getPaymentInfo().getAdditionalFields().get(MessageConstants.TRANSACTIONID) != null, "The TRANSACTIONID value must be defined as an additional field in the PaymentInfo instance passed in.");
+        request.setTransactionID(paymentContext.getPaymentInfo().getAdditionalFields().get(MessageConstants.TRANSACTIONID));
+
+        PayPalPaymentResponse response;
+        try {
+            response = (PayPalPaymentResponse) payPalPaymentService.process(request);
+        } catch (org.broadleafcommerce.common.vendor.service.exception.PaymentException e) {
+            throw new PaymentException(e);
+        }
+
+        buildBasicResponse(response, responseItem);
+        setDecisionInformation(response, responseItem);
+        responseItem.setTransactionAmount(paymentContext.getPaymentInfo().getAmount());
+        responseItem.setCurrency(paymentContext.getPaymentInfo().getOrder().getCurrency());
+        return responseItem;
+    }
+
+    @Override
+    public PaymentResponseItem processAuthorize(PaymentContext paymentContext, Money amountToAuthorize, PaymentResponseItem responseItem) throws PaymentException {
+        //authorize from SetExpressCheckout "Authorization"
+        return commonAuthorizeOrSale(paymentContext, PayPalTransactionType.AUTHORIZE, responseItem);
+    }
+
+    @Override
+    public PaymentResponseItem processDebit(PaymentContext paymentContext, Money amountToDebit, PaymentResponseItem responseItem) throws PaymentException {
+        //PayPal Capture
+        PayPalPaymentRequest request = buildBasicRequest(paymentContext, PayPalTransactionType.CAPTURE);
+        request.setMethodType(PayPalMethodType.CAPTURE);
+        request.setCurrency(paymentContext.getPaymentInfo().getAmount().getCurrency().getCurrencyCode());
+
+        Assert.isTrue(paymentContext.getPaymentInfo().getAdditionalFields().get(MessageConstants.TRANSACTIONID) != null, "The TRANSACTIONID value must be defined as an additional field in the PaymentInfo instance passed in.");
+        request.setTransactionID(paymentContext.getPaymentInfo().getAdditionalFields().get(MessageConstants.TRANSACTIONID));
+
+        PayPalPaymentResponse response;
+        try {
+            response = (PayPalPaymentResponse) payPalPaymentService.process(request);
+        } catch (org.broadleafcommerce.common.vendor.service.exception.PaymentException e) {
+            throw new PaymentException(e);
+        }
+
+        buildBasicResponse(response, responseItem);
+        setDecisionInformation(response, responseItem);
+        responseItem.setTransactionAmount(paymentContext.getPaymentInfo().getAmount());
+        responseItem.setCurrency(paymentContext.getPaymentInfo().getOrder().getCurrency());
+        return responseItem;
+    }
+
+    @Override
+    public PaymentResponseItem processAuthorizeAndDebit(PaymentContext paymentContext, Money amountToDebit, PaymentResponseItem responseItem) throws PaymentException {
+        return commonAuthorizeOrSale(paymentContext, PayPalTransactionType.AUTHORIZEANDCAPTURE, responseItem);
+    }
+
+    @Override
+    public PaymentResponseItem processCredit(PaymentContext paymentContext, Money amountToCredit, PaymentResponseItem responseItem) throws PaymentException {
+        //PayPal Refund
+        PayPalPaymentRequest request = buildBasicRequest(paymentContext, PayPalTransactionType.CREDIT);
+        request.setMethodType(PayPalMethodType.REFUND);
+        request.setCurrency(paymentContext.getPaymentInfo().getAmount().getCurrency().getCurrencyCode());
+
+        Assert.isTrue(paymentContext.getPaymentInfo().getAdditionalFields().get(MessageConstants.REFUNDTYPE) != null, "The REFUNDTYPE value must be defined as an additional field in the PaymentInfo instance passed in.");
+        request.setRefundType(PayPalRefundType.getInstance(paymentContext.getPaymentInfo().getAdditionalFields().get(MessageConstants.REFUNDTYPE)));
+        Assert.isTrue(paymentContext.getPaymentInfo().getAdditionalFields().get(MessageConstants.TRANSACTIONID) != null, "The TRANSACTIONID value must be defined as an additional field in the PaymentInfo instance passed in.");
+        request.setTransactionID(paymentContext.getPaymentInfo().getAdditionalFields().get(MessageConstants.TRANSACTIONID));
+
+        PayPalPaymentResponse response;
+        try {
+            response = (PayPalPaymentResponse) payPalPaymentService.process(request);
+        } catch (org.broadleafcommerce.common.vendor.service.exception.PaymentException e) {
+            throw new PaymentException(e);
+        }
+
+        buildBasicResponse(response, responseItem);
+        setDecisionInformation(response, responseItem);
+        setRefundInformation(response, responseItem);
+        responseItem.setTransactionAmount(paymentContext.getPaymentInfo().getAmount());
+        responseItem.setCurrency(paymentContext.getPaymentInfo().getOrder().getCurrency());
+        return responseItem;
+    }
+
+    @Override
+    public PaymentResponseItem processVoidPayment(PaymentContext paymentContext, Money amountToVoid, PaymentResponseItem responseItem) throws PaymentException {
+        throw new PaymentException("The void method is not supported by this module");
+    }
+
+    @Override
+    public PaymentResponseItem processBalance(PaymentContext paymentContext, PaymentResponseItem responseItem) throws PaymentException {
+        throw new PaymentException("The balance method is not supported by this module");
+    }
+
+    @Override
+    public PaymentResponseItem processPartialPayment(PaymentContext paymentContext, Money amountToDebit, PaymentResponseItem responseItem) throws PaymentException {
+        throw new PaymentException("The partial payment method is not supported by this module"); 
+    }
+
+    protected PaymentResponseItem commonAuthorizeOrSale(PaymentContext paymentContext, PayPalTransactionType transactionType, PaymentResponseItem responseItem) throws PaymentException {
         PayPalPaymentRequest request = buildBasicRequest(paymentContext, transactionType);
 
         Assert.isTrue(paymentContext.getPaymentInfo().getAdditionalFields().containsKey(MessageConstants.SUBTOTAL), "Must specify a SUBTOTAL value on the additionalFields of the PaymentInfo instance.");
@@ -230,13 +234,13 @@ public class PayPalPaymentModule implements PaymentModule {
             throw new PaymentException(e);
         }
 
-        PaymentResponseItem responseItem = buildBasicResponse(response);
+        buildBasicResponse(response, responseItem);
         if(PayPalMethodType.PROCESS.equals(request.getMethodType())){
             setDecisionInformation(response, responseItem);
         } else if (PayPalMethodType.CHECKOUT.equals(request.getMethodType()) || PayPalMethodType.AUTHORIZATION.equals(request.getMethodType())) {
             responseItem.getAdditionalFields().put(MessageConstants.REDIRECTURL, response.getUserRedirectUrl());
         }
-        responseItem.setAmountPaid(paymentContext.getPaymentInfo().getAmount());
+        responseItem.setTransactionAmount(paymentContext.getPaymentInfo().getAmount());
         responseItem.setCurrency(paymentContext.getPaymentInfo().getOrder().getCurrency());
         return responseItem;
     }
@@ -316,30 +320,29 @@ public class PayPalPaymentModule implements PaymentModule {
         return request;
     }
 
-    protected PaymentResponseItem buildBasicResponse(PayPalPaymentResponse response) {
-        PaymentResponseItem responseItem = new PaymentResponseItemImpl();
-        responseItem.setTransactionTimestamp(SystemTime.asDate());
-        responseItem.setReferenceNumber(response.getResponseToken());
-        responseItem.setTransactionSuccess(response.isSuccessful());
-        responseItem.setAuthorizationCode(response.getAck());
-        responseItem.setMiddlewareResponseCode(response.getAck());
-        responseItem.setMiddlewareResponseText(response.getAck());
+    protected PaymentResponseItem buildBasicResponse(PayPalPaymentResponse response, PaymentResponseItem baseResponseItem) {
+        baseResponseItem.setTransactionTimestamp(SystemTime.asDate());
+        baseResponseItem.setReferenceNumber(response.getResponseToken());
+        baseResponseItem.setTransactionSuccess(response.isSuccessful());
+        baseResponseItem.setAuthorizationCode(response.getAck());
+        baseResponseItem.setMiddlewareResponseCode(response.getAck());
+        baseResponseItem.setMiddlewareResponseText(response.getAck());
         int counter = 0;
         for (PayPalErrorResponse errorResponse : response.getErrorResponses()) {
             String errorCode = errorResponse.getErrorCode();
             if (counter == 0) {
-                responseItem.setMiddlewareResponseCode(errorCode);
-                responseItem.setMiddlewareResponseText(errorResponse.getLongMessage());
+                baseResponseItem.setMiddlewareResponseCode(errorCode);
+                baseResponseItem.setMiddlewareResponseText(errorResponse.getLongMessage());
             }
             counter++;
-            responseItem.getAdditionalFields().put(MessageConstants.MODULEERRORCODE, errorCode);
-            responseItem.getAdditionalFields().put(MessageConstants.MODULEERRORSEVERITYCODE + "_" + errorCode, errorResponse.getSeverityCode());
-            responseItem.getAdditionalFields().put(MessageConstants.MODULEERRORLONGMESSAGE + "_" + errorCode, errorResponse.getLongMessage());
-            responseItem.getAdditionalFields().put(MessageConstants.MODULEERRORSHORTMESSAGE + "_" + errorCode, errorResponse.getShortMessage());
+            baseResponseItem.getAdditionalFields().put(MessageConstants.MODULEERRORCODE, errorCode);
+            baseResponseItem.getAdditionalFields().put(MessageConstants.MODULEERRORSEVERITYCODE + "_" + errorCode, errorResponse.getSeverityCode());
+            baseResponseItem.getAdditionalFields().put(MessageConstants.MODULEERRORLONGMESSAGE + "_" + errorCode, errorResponse.getLongMessage());
+            baseResponseItem.getAdditionalFields().put(MessageConstants.MODULEERRORSHORTMESSAGE + "_" + errorCode, errorResponse.getShortMessage());
         }
-        responseItem.getAdditionalFields().putAll(response.getPassThroughErrors());
+        baseResponseItem.getAdditionalFields().putAll(response.getPassThroughErrors());
 
-        return responseItem;
+        return baseResponseItem;
     }
 
     public PayPalPaymentService getPayPalPaymentService() {
@@ -349,4 +352,5 @@ public class PayPalPaymentModule implements PaymentModule {
     public void setPayPalPaymentService(PayPalPaymentService payPalPaymentService) {
         this.payPalPaymentService = payPalPaymentService;
     }
+
 }
