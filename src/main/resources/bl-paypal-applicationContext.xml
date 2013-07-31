@@ -76,12 +76,8 @@
         </property>
         <property name="activities">
             <list>
-                <bean class="org.broadleafcommerce.core.payment.service.workflow.PaymentActivity">
+                <bean p:order="100" class="org.broadleafcommerce.core.payment.service.workflow.PaymentActivity">
                     <property name="paymentService" ref="blPayPalPaymentService"/>
-                    <property name="userName" value="web"/>
-                </bean>
-                <bean class="org.broadleafcommerce.core.payment.service.workflow.PaymentActivity">
-                    <property name="paymentService" ref="blCreditCardService"/>
                     <property name="userName" value="web"/>
                 </bean>
             </list>
