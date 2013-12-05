@@ -18,6 +18,7 @@ package org.broadleafcommerce.vendor.paypal.service.payment;
 
 import org.apache.commons.lang.StringUtils;
 import org.broadleafcommerce.common.money.Money;
+import org.broadleafcommerce.payment.service.gateway.PayPalExpressConfigurationService;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.ErrorCheckable;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalErrorResponse;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalRequest;
@@ -31,7 +32,9 @@ import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPa
 import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPalPaymentResponse;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPalRefundInfo;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.*;
+import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URLDecoder;
@@ -42,14 +45,18 @@ import java.util.Currency;
 /**
  * @author Jeff Fischer
  */
+@Service("blPayPalExpressResponseGenerator")
 public class PayPalResponseGeneratorImpl implements PayPalResponseGenerator {
 
-    protected String userRedirectUrl;
+    @Resource(name = "blPayPalExpressConfigurationService")
+    protected PayPalExpressConfigurationService configurationService;
+
     protected SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
     @Override
     public PayPalResponse buildResponse(String response, PayPalRequest paymentRequest) {
         PayPalResponse payPalResponse;
+
         if (PayPalMethodType.CHECKOUT.equals(paymentRequest.getMethodType()) || PayPalMethodType.AUTHORIZATION.equals(paymentRequest.getMethodType())) {
             payPalResponse = buildCheckoutResponse(response, (PayPalPaymentRequest) paymentRequest);
         } else if (PayPalMethodType.DETAILS.equals(paymentRequest.getMethodType())) {
@@ -68,6 +75,8 @@ public class PayPalResponseGeneratorImpl implements PayPalResponseGenerator {
 
     protected PayPalDetailsResponse buildDetailsResponse(String rawResponse) {
         PayPalDetailsResponse response = new PayPalDetailsResponse();
+        response.setRawResponse(rawResponse);
+
         response.setResponseToken(getResponseValue(rawResponse, MessageConstants.TOKEN));
         response.setPhoneNumber(getResponseValue(rawResponse, MessageConstants.PHONENUM));
         String payPalAdjustment = getResponseValue(rawResponse, MessageConstants.PAYPALADJUSTMENT);
@@ -345,6 +354,8 @@ public class PayPalResponseGeneratorImpl implements PayPalResponseGenerator {
 
     protected PayPalPaymentResponse buildCheckoutResponse(String rawResponse, PayPalPaymentRequest paymentRequest) {
         PayPalPaymentResponse response = new PayPalPaymentResponse();
+        response.setRawResponse(rawResponse);
+
         response.setTransactionType(paymentRequest.getTransactionType());
         response.setMethodType(paymentRequest.getMethodType());
         response.setCorrelationId(getResponseValue(rawResponse, MessageConstants.CORRELATIONID));
@@ -430,11 +441,7 @@ public class PayPalResponseGeneratorImpl implements PayPalResponseGenerator {
 
     @Override
     public String getUserRedirectUrl() {
-        return userRedirectUrl;
+        return configurationService.getUserRedirectUrl();
     }
 
-    @Override
-    public void setUserRedirectUrl(String userRedirectUrl) {
-        this.userRedirectUrl = userRedirectUrl;
-    }
 }

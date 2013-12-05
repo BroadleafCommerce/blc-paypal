@@ -25,6 +25,7 @@ public abstract class PayPalResponse implements Serializable {
     
     protected String referenceNumber;
     protected String responseToken;
+    protected String rawResponse;
 
     public String getReferenceNumber() {
         return referenceNumber;
@@ -40,6 +41,14 @@ public abstract class PayPalResponse implements Serializable {
 
     public void setResponseToken(String responseToken) {
         this.responseToken = responseToken;
+    }
+
+    public String getRawResponse() {
+        return rawResponse;
+    }
+
+    public void setRawResponse(String rawResponse) {
+        this.rawResponse = rawResponse;
     }
 
     @Override

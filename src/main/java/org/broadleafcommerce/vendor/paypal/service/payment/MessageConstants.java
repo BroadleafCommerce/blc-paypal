@@ -26,6 +26,10 @@ public class MessageConstants {
     public static final String TOTALSHIPPING = "TOTALSHIPPING";
     public static final String TOTALTAX = "TOTALTAX";
 
+    public static final String TOTALTYPE = "TOTALTYPE";
+    public static final String TOTAL = "Total";
+    public static final String ESTIMATEDTOTAL = "EstimatedTotal";
+
     public static final String MODULEERRORCODE = "MODULEERRORCODE";
     public static final String MODULEERRORSHORTMESSAGE = "MODULEERRORSHORTMESSAGE";
     public static final String MODULEERRORLONGMESSAGE = "MODULEERRORLONGMESSAGE";

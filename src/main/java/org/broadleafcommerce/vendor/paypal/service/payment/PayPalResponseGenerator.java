@@ -28,5 +28,4 @@ public interface PayPalResponseGenerator {
 
     String getUserRedirectUrl();
 
-    void setUserRedirectUrl(String userRedirectUrl);
 }
