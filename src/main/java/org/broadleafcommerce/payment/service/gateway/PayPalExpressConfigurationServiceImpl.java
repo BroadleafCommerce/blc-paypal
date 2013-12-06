@@ -129,7 +129,7 @@ public class PayPalExpressConfigurationServiceImpl implements PayPalExpressConfi
     }
 
     @Override
-    public Boolean completeCheckoutOnCallback() {
+    public boolean completeCheckoutOnCallback() {
         Boolean complete = false;
         if ("true".equalsIgnoreCase(completeCheckoutOnCallback)){
             complete = true;
@@ -138,62 +138,67 @@ public class PayPalExpressConfigurationServiceImpl implements PayPalExpressConfi
     }
 
     @Override
-    public Boolean handlesAuthorize() {
+    public boolean handlesAuthorize() {
         return true;
     }
 
     @Override
-    public Boolean handlesCapture() {
+    public boolean handlesCapture() {
         return true;
     }
 
     @Override
-    public Boolean handlesAuthorizeAndCapture() {
+    public boolean handlesAuthorizeAndCapture() {
         return true;
     }
 
     @Override
-    public Boolean handlesReverseAuthorize() {
+    public boolean handlesReverseAuthorize() {
         return true;
     }
 
     @Override
-    public Boolean handlesVoid() {
+    public boolean handlesVoid() {
         return true;
     }
 
     @Override
-    public Boolean handlesRefund() {
+    public boolean handlesRefund() {
         return true;
     }
 
     @Override
-    public Boolean handlesPartialCapture() {
+    public boolean handlesPartialCapture() {
         return false;
     }
 
     @Override
-    public Boolean handlesMultipleShipment() {
+    public boolean handlesMultipleShipment() {
         return false;
     }
 
     @Override
-    public Boolean handlesTransactionConfirmation() {
+    public boolean handlesTransactionConfirmation() {
         return true;
     }
 
     @Override
-    public Boolean handlesRecurringPayment() {
+    public boolean handlesRecurringPayment() {
         return false;
     }
 
     @Override
-    public Boolean handlesSavedCustomerPayment() {
+    public boolean handlesSavedCustomerPayment() {
         return false;
     }
 
     @Override
-    public Integer getFailureReportingThreshold() {
+    public int getFailureReportingThreshold() {
         return 1;
+    }
+
+    @Override
+    public boolean handlesMultiplePayments() {
+        return false;
     }
 }

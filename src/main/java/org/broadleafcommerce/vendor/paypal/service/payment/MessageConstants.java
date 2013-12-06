@@ -166,4 +166,7 @@ public class MessageConstants {
     public static final String BN = "BUTTONSOURCE";
     public static final String BNCODE = "BroadleafCommerce_Cart_EC";
 
+    public static final String HTTP_PAYERID = "PayerID";
+    public static final String HTTP_TOKEN = "token";
+
 }
