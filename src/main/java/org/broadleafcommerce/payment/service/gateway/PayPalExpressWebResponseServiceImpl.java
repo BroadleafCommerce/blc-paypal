@@ -16,9 +16,13 @@
 
 package org.broadleafcommerce.payment.service.gateway;
 
+import org.broadleafcommerce.common.payment.PaymentType;
+import org.broadleafcommerce.common.payment.dto.PaymentRequestDTO;
 import org.broadleafcommerce.common.payment.dto.PaymentResponseDTO;
+import org.broadleafcommerce.common.payment.service.PaymentGatewayReportingService;
 import org.broadleafcommerce.common.payment.service.PaymentGatewayWebResponsePrintService;
 import org.broadleafcommerce.common.payment.service.PaymentGatewayWebResponseService;
+import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
 import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
 import org.springframework.stereotype.Service;
 
@@ -34,13 +38,25 @@ public class PayPalExpressWebResponseServiceImpl implements PaymentGatewayWebRes
     @Resource(name = "blPaymentGatewayWebResponsePrintService")
     protected PaymentGatewayWebResponsePrintService webResponsePrintService;
 
+    @Resource(name = "blPayPalExpressReportingService")
+    protected PaymentGatewayReportingService reportingService;
+
     @Override
     public PaymentResponseDTO translateWebResponse(HttpServletRequest request) {
-        PaymentResponseDTO responseDTO = new PaymentResponseDTO();
-        responseDTO.setRawResponse(webResponsePrintService.printRequest(request));
-        responseDTO.getResponseMap().put(MessageConstants.HTTP_PAYERID, request.getParameter(MessageConstants.HTTP_PAYERID));
-        responseDTO.getResponseMap().put(MessageConstants.HTTP_TOKEN, request.getParameter(MessageConstants.HTTP_TOKEN));
-        return responseDTO;
+        PaymentResponseDTO responseDTO = new PaymentResponseDTO(PaymentType.THIRD_PARTY_ACCOUNT)
+            .rawResponse(webResponsePrintService.printRequest(request))
+            .responseMap(MessageConstants.HTTP_PAYERID, request.getParameter(MessageConstants.HTTP_PAYERID))
+            .responseMap(MessageConstants.HTTP_TOKEN, request.getParameter(MessageConstants.HTTP_TOKEN));
+
+        PaymentRequestDTO requestDTO = new PaymentRequestDTO()
+                .additionalField(MessageConstants.TOKEN, responseDTO.getResponseMap().get(MessageConstants.HTTP_TOKEN));
+        try {
+            return reportingService.findDetailsByTransaction(requestDTO);
+        } catch (PaymentException e) {
+            //Unable to get details
+        }
+
+        return new PaymentResponseDTO(PaymentType.THIRD_PARTY_ACCOUNT).successful(false);
     }
 
 }

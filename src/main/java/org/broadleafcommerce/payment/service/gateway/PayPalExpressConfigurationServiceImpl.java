@@ -16,7 +16,9 @@
 
 package org.broadleafcommerce.payment.service.gateway;
 
+import org.broadleafcommerce.common.payment.PaymentGatewayType;
 import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
+import org.broadleafcommerce.vendor.paypal.service.payment.PayPalExpressPaymentGatewayType;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalShippingDisplayType;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -200,5 +202,10 @@ public class PayPalExpressConfigurationServiceImpl implements PayPalExpressConfi
     @Override
     public boolean handlesMultiplePayments() {
         return false;
+    }
+
+    @Override
+    public PaymentGatewayType getGatewayType() {
+        return PayPalExpressPaymentGatewayType.PAYPAL_EXPRESS;
     }
 }

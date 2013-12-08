@@ -60,6 +60,7 @@ public class MessageConstants {
     public static final String SUCCESS = "success";
     public static final String SUCCESSWITHWARNINGS = "successwithwarnings";
     public static final String TOKEN = "TOKEN";
+    public static final String CUSTOM = "CUSTOM";
     public static final String CORRELATIONID = "CORRELATIONID";
     public static final String TRANSACTIONID = "TRANSACTIONID";
     public static final String PARENTTRANSACTIONID = "PARENTTRANSACTIONID";
@@ -122,7 +123,7 @@ public class MessageConstants {
     public static final String DETAILSPAYMENTSHIPPINGTOTAL = "PAYMENTREQUEST_n_SHIPPINGAMT";
     public static final String DETAILSPAYMENTSHIPPINGDISCOUNT = "PAYMENTREQUEST_n_SHIPDISCAMT";
     public static final String DETAILSPAYMENTTOTALTAX = "PAYMENTREQUEST_n_TAXAMT";
-    public static final String DETAILSPAYMENTREFERENCENUMBER = "PAYMENTREQUEST_n_INVNUM";
+    public static final String DETAILSPAYMENTINVNUM = "PAYMENTREQUEST_n_INVNUM";
     public static final String DETAILSPAYMENTTRANSACTIONID = "PAYMENTREQUEST_n_TRANSACTIONID";
     public static final String DETAILSPAYMENTALLOWEDMETHOD = "PAYMENTREQUEST_n_ALLOWEDPAYMENTMETHOD";
     public static final String DETAILSPAYMENTREQUESTID = "PAYMENTREQUEST_n_PAYMENTREQUESTID";

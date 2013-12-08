@@ -22,6 +22,7 @@ import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.broadleafcommerce.common.money.Money;
+import org.broadleafcommerce.common.payment.PaymentType;
 import org.broadleafcommerce.common.payment.dto.LineItemDTO;
 import org.broadleafcommerce.common.payment.dto.PaymentRequestDTO;
 import org.broadleafcommerce.common.payment.dto.PaymentResponseDTO;
@@ -32,6 +33,8 @@ import org.broadleafcommerce.vendor.paypal.service.payment.PayPalRequestGenerato
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalResponseGenerator;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalResponse;
+import org.broadleafcommerce.vendor.paypal.service.payment.message.details.PayPalDetailsResponse;
+import org.broadleafcommerce.vendor.paypal.service.payment.message.details.PayPalPayerAddress;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPalItemRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPalPaymentRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPalPaymentResponse;
@@ -92,7 +95,7 @@ public abstract class AbstractPayPalExpressService extends AbstractExternalPayme
 
         PayPalPaymentRequest request = new PayPalPaymentRequest();
         request.setTransactionType(transactionType);
-        request.setReferenceNumber(requestDTO.getOrderId());
+        request.setOrderId(requestDTO.getOrderId());
         request.setCurrency(requestDTO.getOrderCurrencyCode());
 
         PayPalSummaryRequest summaryRequest = new PayPalSummaryRequest();
@@ -143,103 +146,166 @@ public abstract class AbstractPayPalExpressService extends AbstractExternalPayme
             request.getItemRequests().add(itemRequest);
         }
 
-        PayPalShippingRequest shippingRequest = new PayPalShippingRequest();
-        shippingRequest.setShipToName(requestDTO.getShipToFirstName() + " " + requestDTO.getShipToLastName());
-        shippingRequest.setShipToStreet(requestDTO.getShipToAddressLine1());
-        shippingRequest.setShipToStreet2(requestDTO.getShipToAddressLine2());
-        shippingRequest.setShipToCity(requestDTO.getShipToCityLocality());
-        shippingRequest.setShipToState(requestDTO.getShipToStateRegion());
-        shippingRequest.setShipToZip(requestDTO.getShipToPostalCode());
-        shippingRequest.setShipToCountryCode(requestDTO.getShipToCountryCode());
-        shippingRequest.setShipToPhoneNum(requestDTO.getShipToPhone());
-        request.getShippingRequests().add(shippingRequest);
+        if (requestDTO.shipToPopulated()) {
+            PayPalShippingRequest shippingRequest = new PayPalShippingRequest();
+            shippingRequest.setShipToName(requestDTO.getShipTo().getAddressFirstName() + " " +
+                    requestDTO.getShipTo().getAddressLastName());
+            shippingRequest.setShipToStreet(requestDTO.getShipTo().getAddressLine1());
+            shippingRequest.setShipToStreet2(requestDTO.getShipTo().getAddressLine2());
+            shippingRequest.setShipToCity(requestDTO.getShipTo().getAddressCityLocality());
+            shippingRequest.setShipToState(requestDTO.getShipTo().getAddressStateRegion());
+            shippingRequest.setShipToZip(requestDTO.getShipTo().getAddressPostalCode());
+            shippingRequest.setShipToCountryCode(requestDTO.getShipTo().getAddressCountryCode());
+            shippingRequest.setShipToPhoneNum(requestDTO.getShipTo().getAddressPhone());
+            request.getShippingRequests().add(shippingRequest);
+        }
 
-        PaymentResponseDTO responseDTO = new PaymentResponseDTO();
-        PayPalPaymentResponse response;
+        PayPalPaymentResponse response = (PayPalPaymentResponse) process(request);
+        PaymentResponseDTO responseDTO = new PaymentResponseDTO(PaymentType.THIRD_PARTY_ACCOUNT);
 
-        response = (PayPalPaymentResponse) process(request);
-        setRawResponse(response, responseDTO);
-        responseDTO.setSuccessful(response.isSuccessful());
+        setCommonPaymentResponse(response, responseDTO);
+        responseDTO.successful(response.isSuccessful());
         if(PayPalMethodType.PROCESS.equals(request.getMethodType())){
             setDecisionInformation(response, responseDTO);
         } else if (PayPalMethodType.CHECKOUT.equals(request.getMethodType()) || PayPalMethodType.AUTHORIZATION.equals(request.getMethodType())) {
-            responseDTO.getResponseMap().put(MessageConstants.REDIRECTURL, response.getUserRedirectUrl());
+            responseDTO.responseMap(MessageConstants.REDIRECTURL, response.getUserRedirectUrl());
         }
 
         return responseDTO;
     }
 
-    protected void setRawResponse(PayPalResponse response, PaymentResponseDTO responseDTO) {
+    protected void setCommonPaymentResponse(PayPalPaymentResponse response, PaymentResponseDTO responseDTO) {
+
         try {
-            responseDTO.setRawResponse(URLDecoder.decode(response.getRawResponse(), "UTF-8"));
+            responseDTO.rawResponse(URLDecoder.decode(response.getRawResponse(), "UTF-8"));
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
+
+        responseDTO.responseMap(MessageConstants.TOKEN, response.getResponseToken());
+        responseDTO.responseMap(MessageConstants.CORRELATIONID, response.getCorrelationId());
+    }
+
+    protected void setCommonDetailsResponse(PayPalDetailsResponse response, PaymentResponseDTO responseDTO) {
+
+        try {
+            responseDTO.rawResponse(URLDecoder.decode(response.getRawResponse(), "UTF-8"));
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+
+        if (response.getAddresses() != null && !response.getAddresses().isEmpty()) {
+            PayPalPayerAddress payerAddress = response.getAddresses().get(0);
+            responseDTO.shipTo()
+                    .addressFirstName(payerAddress.getName())
+                    .addressLine1(payerAddress.getStreet())
+                    .addressLine2(payerAddress.getStreet2())
+                    .addressCityLocality(payerAddress.getCity())
+                    .addressStateRegion(payerAddress.getState())
+                    .addressPostalCode(payerAddress.getZip())
+                    .addressCountryCode(payerAddress.getCountryCode())
+                    .addressPhone(payerAddress.getPhoneNumber())
+                    .done();
+
+            if (payerAddress.getAddressStatus()!= null) {
+                    responseDTO.getShipTo().additionalFields(MessageConstants.ADDRESSSTATUS, payerAddress.getAddressStatus().getType());
+            }
+        }
+
+        if (response.getPaymentDetails()!= null) {
+            responseDTO.amount(response.getPaymentDetails().getAmount())
+                    .orderId(response.getPaymentDetails().getOrderId())
+                    .responseMap(MessageConstants.DETAILSPAYMENTALLOWEDMETHOD, response.getPaymentDetails().getPaymentMethod())
+                    .responseMap(MessageConstants.DETAILSPAYMENTREQUESTID, response.getPaymentDetails().getPaymentRequestId())
+                    .responseMap(MessageConstants.DETAILSPAYMENTTRANSACTIONID, response.getPaymentDetails().getTransactionId())
+                    .responseMap(MessageConstants.DETAILSPAYMENTITEMTOTAL, response.getPaymentDetails().getItemTotal())
+                    .responseMap(MessageConstants.DETAILSPAYMENTSHIPPINGDISCOUNT, response.getPaymentDetails().getShippingDiscount())
+                    .responseMap(MessageConstants.DETAILSPAYMENTSHIPPINGTOTAL,response.getPaymentDetails().getShippingTotal())
+                    .responseMap(MessageConstants.DETAILSPAYMENTTOTALTAX, response.getPaymentDetails().getTotalTax());
+        }
+
+        if (response.getCheckoutStatusType()!=null) {
+            responseDTO.responseMap(MessageConstants.CHECKOUTSTATUS, response.getCheckoutStatusType().getType());
+        }
+
+        responseDTO.customer()
+            .firstName(response.getPayerFirstName())
+            .lastName(response.getPayerLastName())
+            .companyName(response.getBusiness())
+            .phone(response.getPhoneNumber())
+            .email(response.getEmailAddress())
+            .done()
+        .responseMap(MessageConstants.TOKEN, response.getResponseToken())
+        .responseMap(MessageConstants.PAYERID, response.getPayerId())
+        .responseMap(MessageConstants.NOTE, response.getNote())
+        .responseMap(MessageConstants.PAYPALADJUSTMENT, response.getPayPalAdjustment())
+        .responseMap(MessageConstants.PAYERSTATUS, response.getPayerStatus());
+
     }
 
     protected void setDecisionInformation(PayPalPaymentResponse response, PaymentResponseDTO responseDTO) {
-        responseDTO.getResponseMap().put(MessageConstants.TRANSACTIONID, response.getPaymentInfo().getTransactionId());
+        responseDTO.responseMap(MessageConstants.TRANSACTIONID, response.getPaymentInfo().getTransactionId());
 
         if (response.getPaymentInfo().getTotalAmount() != null) {
-            responseDTO.setAmount(response.getPaymentInfo().getTotalAmount());
+            responseDTO.amount(response.getPaymentInfo().getTotalAmount());
         }
 
         if (response.getPaymentInfo().getParentTransactionId() != null) {
-            responseDTO.getResponseMap().put(MessageConstants.PARENTTRANSACTIONID, response.getPaymentInfo().getParentTransactionId());
+            responseDTO.responseMap(MessageConstants.PARENTTRANSACTIONID, response.getPaymentInfo().getParentTransactionId());
         }
         if (response.getPaymentInfo().getReceiptId() != null) {
-            responseDTO.getResponseMap().put(MessageConstants.RECEIPTID, response.getPaymentInfo().getReceiptId());
+            responseDTO.responseMap(MessageConstants.RECEIPTID, response.getPaymentInfo().getReceiptId());
         }
         if (response.getPaymentInfo().getExchangeRate() != null) {
-            responseDTO.getResponseMap().put(MessageConstants.EXCHANGERATE, response.getPaymentInfo().getExchangeRate().toString());
+            responseDTO.responseMap(MessageConstants.EXCHANGERATE, response.getPaymentInfo().getExchangeRate().toString());
         }
         if (response.getPaymentInfo().getPaymentStatusType() != null) {
-            responseDTO.getResponseMap().put(MessageConstants.PAYMENTSTATUS, response.getPaymentInfo().getPaymentStatusType().getType());
+            responseDTO.responseMap(MessageConstants.PAYMENTSTATUS, response.getPaymentInfo().getPaymentStatusType().getType());
         }
         if (response.getPaymentInfo().getPendingReasonType() != null) {
-            responseDTO.getResponseMap().put(MessageConstants.PENDINGREASON, response.getPaymentInfo().getPendingReasonType().getType());
+            responseDTO.responseMap(MessageConstants.PENDINGREASON, response.getPaymentInfo().getPendingReasonType().getType());
         }
         if (response.getPaymentInfo().getReasonCodeType() != null) {
-            responseDTO.getResponseMap().put(MessageConstants.REASONCODE, response.getPaymentInfo().getReasonCodeType().getType());
+            responseDTO.responseMap(MessageConstants.REASONCODE, response.getPaymentInfo().getReasonCodeType().getType());
         }
         if (response.getPaymentInfo().getHoldDecisionType() != null) {
-            responseDTO.getResponseMap().put(MessageConstants.HOLDDECISION, response.getPaymentInfo().getHoldDecisionType().getType());
+            responseDTO.responseMap(MessageConstants.HOLDDECISION, response.getPaymentInfo().getHoldDecisionType().getType());
         }
         if (response.getPaymentInfo().getFeeAmount() != null) {
-            responseDTO.getResponseMap().put(MessageConstants.FEEAMOUNT, response.getPaymentInfo().getFeeAmount().toString());
+            responseDTO.responseMap(MessageConstants.FEEAMOUNT, response.getPaymentInfo().getFeeAmount().toString());
         }
         if (response.getPaymentInfo().getSettleAmount() != null) {
-            responseDTO.getResponseMap().put(MessageConstants.SETTLEAMOUNT, response.getPaymentInfo().getSettleAmount().toString());
+            responseDTO.responseMap(MessageConstants.SETTLEAMOUNT, response.getPaymentInfo().getSettleAmount().toString());
         }
         if (response.getPaymentInfo().getTaxAmount() != null) {
-            responseDTO.getResponseMap().put(MessageConstants.TAXAMOUNT, response.getPaymentInfo().getTaxAmount().toString());
+            responseDTO.responseMap(MessageConstants.TAXAMOUNT, response.getPaymentInfo().getTaxAmount().toString());
         }
     }
 
     protected void setRefundInformation(PayPalPaymentResponse response, PaymentResponseDTO responseDTO) {
         if (response.getRefundInfo().getRefundTransactionId() != null) {
-            responseDTO.getResponseMap().put(MessageConstants.REFUNDTRANSACTIONID, response.getRefundInfo().getRefundTransactionId());
+            responseDTO.responseMap(MessageConstants.REFUNDTRANSACTIONID, response.getRefundInfo().getRefundTransactionId());
         }
         if (response.getRefundInfo().getFeeRefundAmount() != null) {
-            responseDTO.getResponseMap().put(MessageConstants.FEEREFUNDAMT, response.getRefundInfo().getFeeRefundAmount().toString());
+            responseDTO.responseMap(MessageConstants.FEEREFUNDAMT, response.getRefundInfo().getFeeRefundAmount().toString());
         }
         if (response.getRefundInfo().getGrossRefundAmount() != null) {
-            responseDTO.getResponseMap().put(MessageConstants.GROSSREFUNDAMT, response.getRefundInfo().getGrossRefundAmount().toString());
+            responseDTO.responseMap(MessageConstants.GROSSREFUNDAMT, response.getRefundInfo().getGrossRefundAmount().toString());
         }
         if (response.getRefundInfo().getNetRefundAmount() != null) {
-            responseDTO.getResponseMap().put(MessageConstants.NETREFUNDAMT, response.getRefundInfo().getNetRefundAmount().toString());
+            responseDTO.responseMap(MessageConstants.NETREFUNDAMT, response.getRefundInfo().getNetRefundAmount().toString());
         }
         if (response.getRefundInfo().getTotalRefundAmount() != null) {
-            responseDTO.getResponseMap().put(MessageConstants.TOTALREFUNDEDAMT, response.getRefundInfo().getTotalRefundAmount().toString());
+            responseDTO.responseMap(MessageConstants.TOTALREFUNDEDAMT, response.getRefundInfo().getTotalRefundAmount().toString());
         }
         if (response.getRefundInfo().getRefundInfo() != null) {
-            responseDTO.getResponseMap().put(MessageConstants.REFUNDINFO, response.getRefundInfo().getRefundInfo());
+            responseDTO.responseMap(MessageConstants.REFUNDINFO, response.getRefundInfo().getRefundInfo());
         }
         if (response.getRefundInfo().getRefundStatusType() != null) {
-            responseDTO.getResponseMap().put(MessageConstants.REFUNDSTATUS, response.getRefundInfo().getRefundStatusType().getType());
+            responseDTO.responseMap(MessageConstants.REFUNDSTATUS, response.getRefundInfo().getRefundStatusType().getType());
         }
         if (response.getRefundInfo().getPendingReasonType() != null) {
-            responseDTO.getResponseMap().put(MessageConstants.PENDINGREASON, response.getRefundInfo().getPendingReasonType().getType());
+            responseDTO.responseMap(MessageConstants.PENDINGREASON, response.getRefundInfo().getPendingReasonType().getType());
         }
     }
 

@@ -16,29 +16,29 @@
 
 package org.broadleafcommerce.vendor.paypal.service.payment.message.payment;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.broadleafcommerce.common.vendor.service.message.PaymentResponse;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.ErrorCheckable;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalErrorResponse;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalResponse;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalMethodType;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalTransactionType;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
  * 
  * @author jfischer
  *
  */
-public class PayPalPaymentResponse extends PayPalResponse implements PaymentResponse, ErrorCheckable {
+public class PayPalPaymentResponse extends PayPalResponse implements ErrorCheckable {
         
     private static final long serialVersionUID = 1L;
     
     protected boolean isErrorDetected = false;
     protected boolean isSuccessful = true;
+    protected String orderId;
     protected String errorText;
     protected PayPalTransactionType transactionType;
     protected PayPalMethodType methodType;
@@ -49,6 +49,14 @@ public class PayPalPaymentResponse extends PayPalResponse implements PaymentResp
     protected String ack;
     protected PayPalPaymentInfo paymentInfo;
     protected PayPalRefundInfo refundInfo;
+
+    public String getOrderId() {
+        return orderId;
+    }
+
+    public void setOrderId(String orderId) {
+        this.orderId = orderId;
+    }
 
     public PayPalTransactionType getTransactionType() {
         return transactionType;
@@ -176,6 +184,7 @@ public class PayPalPaymentResponse extends PayPalResponse implements PaymentResp
             return false;
         if (paymentInfo != null ? !paymentInfo.equals(that.paymentInfo) : that.paymentInfo != null) return false;
         if (refundInfo != null ? !refundInfo.equals(that.refundInfo) : that.refundInfo != null) return false;
+        if (orderId != null ? !orderId.equals(that.orderId) : that.orderId != null) return false;
         if (transactionType != null ? !transactionType.equals(that.transactionType) : that.transactionType != null)
             return false;
         if (userRedirectUrl != null ? !userRedirectUrl.equals(that.userRedirectUrl) : that.userRedirectUrl != null)
@@ -199,6 +208,7 @@ public class PayPalPaymentResponse extends PayPalResponse implements PaymentResp
         result = 31 * result + (ack != null ? ack.hashCode() : 0);
         result = 31 * result + (paymentInfo != null ? paymentInfo.hashCode() : 0);
         result = 31 * result + (refundInfo != null ? refundInfo.hashCode() : 0);
+        result = 31 * result + (orderId != null ? orderId.hashCode() : 0);
         return result;
     }
 }

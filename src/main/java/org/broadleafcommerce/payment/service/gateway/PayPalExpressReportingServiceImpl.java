@@ -16,6 +16,7 @@
 
 package org.broadleafcommerce.payment.service.gateway;
 
+import org.broadleafcommerce.common.payment.PaymentType;
 import org.broadleafcommerce.common.payment.dto.PaymentRequestDTO;
 import org.broadleafcommerce.common.payment.dto.PaymentResponseDTO;
 import org.broadleafcommerce.common.payment.service.PaymentGatewayReportingService;
@@ -41,11 +42,9 @@ public class PayPalExpressReportingServiceImpl extends AbstractPayPalExpressServ
         detailsRequest.setMethodType(PayPalMethodType.DETAILS);
         detailsRequest.setToken((String)paymentRequestDTO.getAdditionalFields().get(MessageConstants.TOKEN));
 
-        PaymentResponseDTO responseDTO = new PaymentResponseDTO();
-        PayPalDetailsResponse response;
-
-        response = (PayPalDetailsResponse) process(detailsRequest);
-        setRawResponse(response, responseDTO);
+        PayPalDetailsResponse response = (PayPalDetailsResponse) process(detailsRequest);
+        PaymentResponseDTO responseDTO = new PaymentResponseDTO(PaymentType.THIRD_PARTY_ACCOUNT);
+        setCommonDetailsResponse(response, responseDTO);
         return responseDTO;
     }
 

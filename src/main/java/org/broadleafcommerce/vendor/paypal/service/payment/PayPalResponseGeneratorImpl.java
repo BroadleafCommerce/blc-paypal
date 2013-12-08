@@ -150,7 +150,7 @@ public class PayPalResponseGeneratorImpl implements PayPalResponseGenerator {
         if (!StringUtils.isEmpty(paymentRequestTotalTax)) {
             paymentDetails.setTotalTax(new Money(paymentRequestTotalTax, Currency.getInstance(currencyCode)));
         }
-        paymentDetails.setReferenceNumber(getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTREFERENCENUMBER, new Integer[]{0}, new String[]{"n"})));
+        paymentDetails.setOrderId(getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTINVNUM, new Integer[]{0}, new String[]{"n"})));
         paymentDetails.setTransactionId(getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTTRANSACTIONID, new Integer[]{0}, new String[]{"n"})));
         paymentDetails.setPaymentMethod(getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTALLOWEDMETHOD, new Integer[]{0}, new String[]{"n"})));
         paymentDetails.setPaymentRequestId(getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTREQUESTID, new Integer[]{0}, new String[]{"n"})));
