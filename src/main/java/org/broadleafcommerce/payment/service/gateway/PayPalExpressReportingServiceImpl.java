@@ -35,6 +35,11 @@ import org.springframework.util.Assert;
 public class PayPalExpressReportingServiceImpl extends AbstractPayPalExpressService implements PaymentGatewayReportingService {
 
     @Override
+    public String getServiceName() {
+        return getClass().getName();
+    }
+
+    @Override
     public PaymentResponseDTO findDetailsByTransaction(PaymentRequestDTO paymentRequestDTO) throws PaymentException {
         Assert.isTrue(paymentRequestDTO.getAdditionalFields().containsKey(MessageConstants.TOKEN), "The RequestDTO must contain a TOKEN");
 
@@ -48,8 +53,4 @@ public class PayPalExpressReportingServiceImpl extends AbstractPayPalExpressServ
         return responseDTO;
     }
 
-    @Override
-    public String getServiceName() {
-        return getClass().getName();
-    }
 }

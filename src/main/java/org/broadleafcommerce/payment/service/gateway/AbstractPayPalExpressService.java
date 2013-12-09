@@ -22,6 +22,7 @@ import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.broadleafcommerce.common.money.Money;
+import org.broadleafcommerce.common.payment.PaymentTransactionType;
 import org.broadleafcommerce.common.payment.PaymentType;
 import org.broadleafcommerce.common.payment.dto.LineItemDTO;
 import org.broadleafcommerce.common.payment.dto.PaymentRequestDTO;
@@ -45,7 +46,6 @@ import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalTransactio
 import org.springframework.util.Assert;
 
 import javax.annotation.Resource;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.List;
@@ -165,6 +165,13 @@ public abstract class AbstractPayPalExpressService extends AbstractExternalPayme
 
         setCommonPaymentResponse(response, responseDTO);
         responseDTO.successful(response.isSuccessful());
+
+        if (PayPalTransactionType.AUTHORIZE.equals(transactionType)) {
+            responseDTO.paymentTransactionType(PaymentTransactionType.AUTHORIZE);
+        } else if (PayPalTransactionType.AUTHORIZEANDCAPTURE.equals(transactionType)) {
+            responseDTO.paymentTransactionType(PaymentTransactionType.AUTHORIZE_AND_CAPTURE);
+        }
+
         if(PayPalMethodType.PROCESS.equals(request.getMethodType())){
             setDecisionInformation(response, responseDTO);
         } else if (PayPalMethodType.CHECKOUT.equals(request.getMethodType()) || PayPalMethodType.AUTHORIZATION.equals(request.getMethodType())) {

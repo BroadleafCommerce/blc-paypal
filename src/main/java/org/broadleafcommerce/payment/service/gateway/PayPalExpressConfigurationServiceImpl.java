@@ -62,6 +62,10 @@ public class PayPalExpressConfigurationServiceImpl implements PayPalExpressConfi
     @Value("${gateway.paypal.expressCheckout.completeCheckoutOnCallback}")
     protected String completeCheckoutOnCallback;
 
+    protected int failureReportingThreshold = 1;
+
+    protected boolean performAuthorizeAndCapture = true;
+
     @Override
     public String getServerUrl() {
         return serverUrl;
@@ -180,11 +184,6 @@ public class PayPalExpressConfigurationServiceImpl implements PayPalExpressConfi
     }
 
     @Override
-    public boolean handlesTransactionConfirmation() {
-        return true;
-    }
-
-    @Override
     public boolean handlesRecurringPayment() {
         return false;
     }
@@ -195,8 +194,23 @@ public class PayPalExpressConfigurationServiceImpl implements PayPalExpressConfi
     }
 
     @Override
+    public boolean isPerformAuthorizeAndCapture() {
+        return performAuthorizeAndCapture;
+    }
+
+    @Override
+    public void setPerformAuthorizeAndCapture(boolean performAuthorizeAndCapture) {
+        this.performAuthorizeAndCapture = performAuthorizeAndCapture;
+    }
+
+    @Override
     public int getFailureReportingThreshold() {
-        return 1;
+        return failureReportingThreshold;
+    }
+
+    @Override
+    public void setFailureReportingThreshold(int failureReportingThreshold) {
+        this.failureReportingThreshold = failureReportingThreshold;
     }
 
     @Override

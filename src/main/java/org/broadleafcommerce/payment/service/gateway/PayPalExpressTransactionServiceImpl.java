@@ -16,6 +16,7 @@
 
 package org.broadleafcommerce.payment.service.gateway;
 
+import org.broadleafcommerce.common.payment.PaymentTransactionType;
 import org.broadleafcommerce.common.payment.PaymentType;
 import org.broadleafcommerce.common.payment.dto.PaymentRequestDTO;
 import org.broadleafcommerce.common.payment.dto.PaymentResponseDTO;
@@ -35,6 +36,11 @@ import org.springframework.util.Assert;
  */
 @Service("blPayPalExpressTransactionService")
 public class PayPalExpressTransactionServiceImpl extends AbstractPayPalExpressService implements PaymentGatewayTransactionService {
+
+    @Override
+    public String getServiceName() {
+        return getClass().getName();
+    }
 
     @Override
     public PaymentResponseDTO authorize(PaymentRequestDTO paymentRequestDTO) throws PaymentException  {
@@ -60,6 +66,7 @@ public class PayPalExpressTransactionServiceImpl extends AbstractPayPalExpressSe
         response = (PayPalPaymentResponse) process(request);
         setCommonPaymentResponse(response, responseDTO);
         responseDTO.successful(response.isSuccessful());
+        responseDTO.paymentTransactionType(PaymentTransactionType.CAPTURE);
         setDecisionInformation(response, responseDTO);
 
         return responseDTO;
@@ -89,6 +96,7 @@ public class PayPalExpressTransactionServiceImpl extends AbstractPayPalExpressSe
         response = (PayPalPaymentResponse) process(request);
         setCommonPaymentResponse(response, responseDTO);
         responseDTO.successful(response.isSuccessful());
+        responseDTO.paymentTransactionType(PaymentTransactionType.REVERSE_AUTH);
         setDecisionInformation(response, responseDTO);
 
         return responseDTO;
@@ -110,6 +118,7 @@ public class PayPalExpressTransactionServiceImpl extends AbstractPayPalExpressSe
         response = (PayPalPaymentResponse) process(request);
         setCommonPaymentResponse(response, responseDTO);
         responseDTO.successful(response.isSuccessful());
+        responseDTO.paymentTransactionType(PaymentTransactionType.REFUND);
         setDecisionInformation(response, responseDTO);
         setRefundInformation(response, responseDTO);
 
@@ -128,14 +137,10 @@ public class PayPalExpressTransactionServiceImpl extends AbstractPayPalExpressSe
         PaymentResponseDTO responseDTO = new PaymentResponseDTO(PaymentType.THIRD_PARTY_ACCOUNT);
         setCommonPaymentResponse(response, responseDTO);
         responseDTO.successful(response.isSuccessful());
+        responseDTO.paymentTransactionType(PaymentTransactionType.VOID);
         setDecisionInformation(response, responseDTO);
 
         return responseDTO;
     }
 
-
-    @Override
-    public String getServiceName() {
-        return getClass().getName();
-    }
 }

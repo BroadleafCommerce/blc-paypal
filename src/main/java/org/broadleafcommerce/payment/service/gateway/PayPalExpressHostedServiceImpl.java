@@ -30,6 +30,11 @@ import org.springframework.stereotype.Service;
 public class PayPalExpressHostedServiceImpl extends AbstractPayPalExpressService implements PaymentGatewayHostedService {
 
     @Override
+    public String getServiceName() {
+        return getClass().getName();
+    }
+
+    @Override
     public PaymentResponseDTO requestHostedEndpoint(PaymentRequestDTO paymentRequestDTO) throws PaymentException {
         PayPalTransactionType transactionType = PayPalTransactionType.AUTHORIZE;
         if (PayPalTransactionType.AUTHORIZEANDCAPTURE.getType().equals(paymentRequestDTO.getTransactionType())) {
@@ -40,8 +45,4 @@ public class PayPalExpressHostedServiceImpl extends AbstractPayPalExpressService
 
     }
 
-    @Override
-    public String getServiceName() {
-        return getClass().getName();
-    }
 }

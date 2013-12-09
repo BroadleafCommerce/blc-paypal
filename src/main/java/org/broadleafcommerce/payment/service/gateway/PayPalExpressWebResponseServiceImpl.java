@@ -16,6 +16,7 @@
 
 package org.broadleafcommerce.payment.service.gateway;
 
+import org.broadleafcommerce.common.payment.PaymentTransactionType;
 import org.broadleafcommerce.common.payment.dto.PaymentRequestDTO;
 import org.broadleafcommerce.common.payment.dto.PaymentResponseDTO;
 import org.broadleafcommerce.common.payment.service.PaymentGatewayReportingService;
@@ -40,15 +41,26 @@ public class PayPalExpressWebResponseServiceImpl implements PaymentGatewayWebRes
     @Resource(name = "blPayPalExpressReportingService")
     protected PaymentGatewayReportingService reportingService;
 
+    @Resource(name = "blPayPalExpressConfigurationService")
+    protected PayPalExpressConfigurationService configurationService;
+
     @Override
     public PaymentResponseDTO translateWebResponse(HttpServletRequest request) throws PaymentException {
         PaymentRequestDTO requestDTO = new PaymentRequestDTO()
                 .additionalField(MessageConstants.TOKEN, request.getParameter(MessageConstants.HTTP_TOKEN));
         PaymentResponseDTO responseDTO = reportingService.findDetailsByTransaction(requestDTO);
+
+        PaymentTransactionType type = PaymentTransactionType.AUTHORIZE_AND_CAPTURE;
+        if (!configurationService.isPerformAuthorizeAndCapture()) {
+            type = PaymentTransactionType.AUTHORIZE;
+        }
+
         responseDTO.responseMap(MessageConstants.HTTP_PAYERID, request.getParameter(MessageConstants.HTTP_PAYERID))
                 .responseMap(MessageConstants.HTTP_TOKEN, request.getParameter(MessageConstants.HTTP_TOKEN))
                 .responseMap(MessageConstants.HTTP_REQUEST, webResponsePrintService.printRequest(request))
-                .confirmed(false);
+                .confirmed(false)
+                .paymentTransactionType(type);
+
         return responseDTO;
     }
 
