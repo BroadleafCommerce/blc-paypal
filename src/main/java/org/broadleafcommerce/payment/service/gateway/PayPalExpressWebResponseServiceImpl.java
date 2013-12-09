@@ -16,7 +16,6 @@
 
 package org.broadleafcommerce.payment.service.gateway;
 
-import org.broadleafcommerce.common.payment.PaymentType;
 import org.broadleafcommerce.common.payment.dto.PaymentRequestDTO;
 import org.broadleafcommerce.common.payment.dto.PaymentResponseDTO;
 import org.broadleafcommerce.common.payment.service.PaymentGatewayReportingService;
@@ -42,21 +41,15 @@ public class PayPalExpressWebResponseServiceImpl implements PaymentGatewayWebRes
     protected PaymentGatewayReportingService reportingService;
 
     @Override
-    public PaymentResponseDTO translateWebResponse(HttpServletRequest request) {
-        PaymentResponseDTO responseDTO = new PaymentResponseDTO(PaymentType.THIRD_PARTY_ACCOUNT)
-            .rawResponse(webResponsePrintService.printRequest(request))
-            .responseMap(MessageConstants.HTTP_PAYERID, request.getParameter(MessageConstants.HTTP_PAYERID))
-            .responseMap(MessageConstants.HTTP_TOKEN, request.getParameter(MessageConstants.HTTP_TOKEN));
-
+    public PaymentResponseDTO translateWebResponse(HttpServletRequest request) throws PaymentException {
         PaymentRequestDTO requestDTO = new PaymentRequestDTO()
-                .additionalField(MessageConstants.TOKEN, responseDTO.getResponseMap().get(MessageConstants.HTTP_TOKEN));
-        try {
-            return reportingService.findDetailsByTransaction(requestDTO);
-        } catch (PaymentException e) {
-            //Unable to get details
-        }
-
-        return new PaymentResponseDTO(PaymentType.THIRD_PARTY_ACCOUNT).successful(false);
+                .additionalField(MessageConstants.TOKEN, request.getParameter(MessageConstants.HTTP_TOKEN));
+        PaymentResponseDTO responseDTO = reportingService.findDetailsByTransaction(requestDTO);
+        responseDTO.responseMap(MessageConstants.HTTP_PAYERID, request.getParameter(MessageConstants.HTTP_PAYERID))
+                .responseMap(MessageConstants.HTTP_TOKEN, request.getParameter(MessageConstants.HTTP_TOKEN))
+                .responseMap(MessageConstants.HTTP_REQUEST, webResponsePrintService.printRequest(request))
+                .confirmed(false);
+        return responseDTO;
     }
 
 }

@@ -169,5 +169,6 @@ public class MessageConstants {
 
     public static final String HTTP_PAYERID = "PayerID";
     public static final String HTTP_TOKEN = "token";
+    public static final String HTTP_REQUEST = "HTTP_REQUEST";
 
 }
