@@ -26,15 +26,15 @@ You will need to declare the following Spring beans in your application context:
             <property name="password" value="${paypal.password}"/>
             <property name="user" value="${paypal.user}"/>
             <property name="signature" value="${paypal.signature}"/>
-            <property name="returnUrl" value="http://localhost:8080/mycompany/paypal/process"/>
-            <property name="cancelUrl" value="http://localhost:8080/mycompany/cart"/>
+            <property name="returnUrl" value="${paypal.return.url}"/>
+            <property name="cancelUrl" value="${paypal.cancel.url}"/>
             <property name="shippingDisplayType" value="${paypal.shipping.display}"/>
             <property name="additionalConfig">
                 <map>
-                    <entry key="HDRIMG" value="http://localhost:8080/mycompany/images/logo.png"/>
-                    <entry key="HDRBORDERCOLOR" value="333333"/>
-                    <entry key="HDRBACKCOLOR" value="669933"/>
-                    <entry key="PAYFLOWCOLOR" value="B58253"/>
+                        <entry key="HDRIMG" value="${paypal.additional.HDRIMG}"/>
+                        <entry key="HDRBORDERCOLOR" value="${paypal.additional.HDRBORDERCOLOR}"/>
+                        <entry key="HDRBACKCOLOR" value="${paypal.additional.HDRBACKCOLOR}"/>
+                        <entry key="PAYFLOWCOLOR" value="${paypal.additional.PAYFLOWCOLOR}"/>
                 </map>
             </property>
         </bean>
@@ -104,11 +104,11 @@ See the code examples below for more details.
 ## Manually Configuring the Presentation Layer
 
 It is up to you to choose the presentation layer approach that best fits your needs, but regardless of the approach, 
-you will be required at some point to compile the [[PaymentInfo | https://github.com/BroadleafCommerce/BroadleafCommerce/blob/master/core/broadleaf-framework/src/main/java/org/broadleafcommerce/core/payment/domain/PaymentInfo.java]] information 
+you will be required at some point to compile the [[PaymentInfo | https://github.com/BroadleafCommerce/BroadleafCommerce/blob/master/core/broadleaf-framework/src/main/java/org/broadleafcommerce/core/payment/domain/PaymentInfo.java ]] information 
 to the order before calling performCheckout on the CheckoutService. 
 Most Broadleaf Commerce users will choose Spring MVC and will likely implement their own CheckoutController. 
 
-In this example, we will show you how a Spring MVC Controller might be structured to handle calling the PayPal Module. Begin by adding the PayPal Checkout button to your shopping cart page following the guidelines outlined here: [[Express Checkout User Interface Requirements | https://cms.paypal.com/us/cgi-bin/?cmd=_render-content&content_ID=developer/e_howto_api_ECUIRequirements]] (In the example below, the PayPal button links to "/paypal/checkout").
+In this example, we will show you how a Spring MVC Controller might be structured to handle calling the PayPal Module. Begin by adding the PayPal Checkout button to your shopping cart page following the guidelines outlined here: [[Express Checkout User Interface Requirements | https://cms.paypal.com/us/cgi-bin/?cmd=_render-content&content_ID=developer/e_howto_api_ECUIRequirements ]] (In the example below, the PayPal button links to "/paypal/checkout").
 If your implementation does not require that much customization, consider extending the `BroadleafPayPalController`.
 > Note: This example does not use the PayPalCheckoutService in order to demonstrate another way of executing the workflow. 
 
