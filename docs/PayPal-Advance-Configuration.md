@@ -26,15 +26,15 @@ You will need to declare the following Spring beans in your application context:
             <property name="password" value="${paypal.password}"/>
             <property name="user" value="${paypal.user}"/>
             <property name="signature" value="${paypal.signature}"/>
-            <property name="returnUrl" value="http://localhost:8080/mycompany/paypal/process"/>
-            <property name="cancelUrl" value="http://localhost:8080/mycompany/cart"/>
+            <property name="returnUrl" value="${paypal.return.url}"/>
+            <property name="cancelUrl" value="${paypal.cancel.url}"/>
             <property name="shippingDisplayType" value="${paypal.shipping.display}"/>
             <property name="additionalConfig">
                 <map>
-                    <entry key="HDRIMG" value="http://localhost:8080/mycompany/images/logo.png"/>
-                    <entry key="HDRBORDERCOLOR" value="333333"/>
-                    <entry key="HDRBACKCOLOR" value="669933"/>
-                    <entry key="PAYFLOWCOLOR" value="B58253"/>
+                        <entry key="HDRIMG" value="${paypal.additional.HDRIMG}"/>
+                        <entry key="HDRBORDERCOLOR" value="${paypal.additional.HDRBORDERCOLOR}"/>
+                        <entry key="HDRBACKCOLOR" value="${paypal.additional.HDRBACKCOLOR}"/>
+                        <entry key="PAYFLOWCOLOR" value="${paypal.additional.PAYFLOWCOLOR}"/>
                 </map>
             </property>
         </bean>
