@@ -23,11 +23,16 @@ import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalTransactionType;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
+
 /**
  * @author Elbert Bautista (elbertbautista)
  */
 @Service("blPayPalExpressHostedService")
 public class PayPalExpressHostedServiceImpl extends AbstractPayPalExpressService implements PaymentGatewayHostedService {
+
+    @Resource(name = "blPayPalExpressConfigurationService")
+    protected PayPalExpressConfigurationService configurationService;
 
     @Override
     public String getServiceName() {
@@ -36,9 +41,10 @@ public class PayPalExpressHostedServiceImpl extends AbstractPayPalExpressService
 
     @Override
     public PaymentResponseDTO requestHostedEndpoint(PaymentRequestDTO paymentRequestDTO) throws PaymentException {
-        PayPalTransactionType transactionType = PayPalTransactionType.AUTHORIZE;
-        if (PayPalTransactionType.AUTHORIZEANDCAPTURE.getType().equals(paymentRequestDTO.getTransactionType())) {
-            transactionType = PayPalTransactionType.AUTHORIZEANDCAPTURE;
+
+        PayPalTransactionType transactionType = PayPalTransactionType.AUTHORIZEANDCAPTURE;
+        if (!configurationService.isPerformAuthorizeAndCapture()) {
+            transactionType = PayPalTransactionType.AUTHORIZE;
         }
 
         return commonAuthorizeOrSale(paymentRequestDTO, transactionType, null, null);

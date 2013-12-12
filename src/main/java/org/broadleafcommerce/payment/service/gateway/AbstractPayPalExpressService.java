@@ -89,6 +89,8 @@ public abstract class AbstractPayPalExpressService extends AbstractExternalPayme
 
     protected PayPalPaymentRequest buildBasicRequest(PaymentRequestDTO requestDTO, PayPalTransactionType transactionType) {
         Assert.isTrue(requestDTO.getOrderId() != null, "The Order ID for the paypal request cannot be null");
+        Assert.isTrue(requestDTO.getTransactionTotal() != null, "The Transaction Total for the paypal request cannot be null");
+
         if (requestDTO.getOrderId() != null) {
             Assert.isTrue(requestDTO.getOrderId().length() <= 127, "The reference number for the paypal request cannot be greater than 127 characters");
         }
@@ -99,7 +101,7 @@ public abstract class AbstractPayPalExpressService extends AbstractExternalPayme
         request.setCurrency(requestDTO.getOrderCurrencyCode());
 
         PayPalSummaryRequest summaryRequest = new PayPalSummaryRequest();
-        summaryRequest.setGrandTotal(new Money(requestDTO.getOrderTotal(), requestDTO.getOrderCurrencyCode()));
+        summaryRequest.setGrandTotal(new Money(requestDTO.getTransactionTotal(), requestDTO.getOrderCurrencyCode()));
         request.setSummaryRequest(summaryRequest);
 
         return request;
