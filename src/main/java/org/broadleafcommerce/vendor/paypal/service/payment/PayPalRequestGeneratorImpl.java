@@ -148,6 +148,9 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
         //PAYMENTREQUEST_0_INVNUM is the Order ID
         nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTINVNUM, new Integer[]{0}, new String[]{"n"}), paymentRequest.getOrderId()));
 
+        //PAYMENTREQUEST_0_CUSTOM is the boolean of whether or not to Complete Checkout on Callback
+        nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTCUSTOM, new Integer[]{0}, new String[]{"n"}), Boolean.toString(paymentRequest.isCompleteCheckoutOnCallback())));
+
         //Determine if PayPal displays the shipping address fields on the PayPal pages.
         //For digital goods, this field is required and must be set to 1.
         // 0 - PayPal displays the shipping address passed in.

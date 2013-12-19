@@ -35,7 +35,7 @@ import java.util.Map;
  * <p>A Thymeleaf processor that will generate a Redirect Link given a passed in PaymentRequestDTO.</p>
  *
  * <pre><code>
- * <a blc:paypal_express_link="${dto}">
+ * <a blc:paypal_express_link="${dto}" complete_checkout="${false}">
  *  <img src="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif" align="left" style="margin-right:7px;"/>
  * </a>
  * </code></pre>
@@ -63,8 +63,17 @@ public class PayPalExpressCheckoutLinkProcessor extends AbstractAttributeModifie
     @Override
     protected Map<String, String> getModifiedAttributeValues(Arguments arguments, Element element, String attributeName) {
         Map<String, String> attrs = new HashMap<String, String>();
+
         PaymentRequestDTO requestDTO = (PaymentRequestDTO) StandardExpressionProcessor.processExpression(arguments, element.getAttributeValue(attributeName));
         String url = "";
+
+        if ( element.getAttributeValue("complete_checkout") != null) {
+            Boolean completeCheckout = (Boolean) StandardExpressionProcessor.processExpression(arguments,
+                element.getAttributeValue("complete_checkout"));
+            element.removeAttribute("complete_checkout");
+            requestDTO.completeCheckoutOnCallback(completeCheckout);
+        }
+
         try {
             PaymentResponseDTO responseDTO = paymentGatewayHostedService.requestHostedEndpoint(requestDTO);
             url = responseDTO.getResponseMap().get(MessageConstants.REDIRECTURL).toString();

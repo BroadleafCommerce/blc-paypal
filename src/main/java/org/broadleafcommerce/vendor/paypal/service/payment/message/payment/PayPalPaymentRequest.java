@@ -42,6 +42,7 @@ public class PayPalPaymentRequest extends PayPalRequest {
     protected PayPalSummaryRequest summaryRequest;
     protected String transactionID;
     protected PayPalRefundType refundType;
+    protected boolean completeCheckoutOnCallback = true;
 
     public String getOrderId() {
         return orderId;
@@ -121,6 +122,14 @@ public class PayPalPaymentRequest extends PayPalRequest {
 
     public void setShippingRequests(List<PayPalShippingRequest> shippingRequests) {
         this.shippingRequests = shippingRequests;
+    }
+
+    public boolean isCompleteCheckoutOnCallback() {
+        return completeCheckoutOnCallback;
+    }
+
+    public void setCompleteCheckoutOnCallback(boolean completeCheckoutOnCallback) {
+        this.completeCheckoutOnCallback = completeCheckoutOnCallback;
     }
 
     @Override

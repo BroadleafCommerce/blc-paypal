@@ -38,6 +38,7 @@ public class PayPalPaymentDetails implements Serializable {
     protected String paymentMethod;
     protected String paymentRequestId;
     protected List<PayPalPaymentItemDetails> itemDetails = new ArrayList<PayPalPaymentItemDetails>();
+    protected boolean completeCheckoutOnCallback = true;
 
     public Money getAmount() {
         return amount;
@@ -125,6 +126,14 @@ public class PayPalPaymentDetails implements Serializable {
 
     public void setTransactionId(String transactionId) {
         this.transactionId = transactionId;
+    }
+
+    public boolean isCompleteCheckoutOnCallback() {
+        return completeCheckoutOnCallback;
+    }
+
+    public void setCompleteCheckoutOnCallback(boolean completeCheckoutOnCallback) {
+        this.completeCheckoutOnCallback = completeCheckoutOnCallback;
     }
 
     @Override

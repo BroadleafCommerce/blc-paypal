@@ -59,9 +59,6 @@ public class PayPalExpressConfigurationServiceImpl implements PayPalExpressConfi
     @Value("${gateway.paypal.expressCheckout.cancelUrl}")
     protected String cancelUrl;
 
-    @Value("${gateway.paypal.expressCheckout.completeCheckoutOnCallback}")
-    protected String completeCheckoutOnCallback;
-
     protected int failureReportingThreshold = 1;
 
     protected boolean performAuthorizeAndCapture = true;
@@ -132,15 +129,6 @@ public class PayPalExpressConfigurationServiceImpl implements PayPalExpressConfi
         additionalConfigs.put("HDRBACKCOLOR", "FFFFFF");
         additionalConfigs.put("PAYFLOWCOLOR", "FFFFFF");
         return additionalConfigs;
-    }
-
-    @Override
-    public boolean completeCheckoutOnCallback() {
-        Boolean complete = false;
-        if ("true".equalsIgnoreCase(completeCheckoutOnCallback)){
-            complete = true;
-        }
-        return complete;
     }
 
     @Override

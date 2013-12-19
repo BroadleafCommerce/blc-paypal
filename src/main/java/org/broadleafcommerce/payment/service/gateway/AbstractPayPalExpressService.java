@@ -99,6 +99,7 @@ public abstract class AbstractPayPalExpressService extends AbstractExternalPayme
         request.setTransactionType(transactionType);
         request.setOrderId(requestDTO.getOrderId());
         request.setCurrency(requestDTO.getOrderCurrencyCode());
+        request.setCompleteCheckoutOnCallback(requestDTO.isCompleteCheckoutOnCallback());
 
         PayPalSummaryRequest summaryRequest = new PayPalSummaryRequest();
         summaryRequest.setGrandTotal(new Money(requestDTO.getTransactionTotal(), requestDTO.getOrderCurrencyCode()));
@@ -224,6 +225,7 @@ public abstract class AbstractPayPalExpressService extends AbstractExternalPayme
         if (response.getPaymentDetails()!= null) {
             responseDTO.amount(response.getPaymentDetails().getAmount())
                     .orderId(response.getPaymentDetails().getOrderId())
+                    .completeCheckoutOnCallback(response.getPaymentDetails().isCompleteCheckoutOnCallback())
                     .responseMap(MessageConstants.DETAILSPAYMENTALLOWEDMETHOD, response.getPaymentDetails().getPaymentMethod())
                     .responseMap(MessageConstants.DETAILSPAYMENTREQUESTID, response.getPaymentDetails().getPaymentRequestId())
                     .responseMap(MessageConstants.DETAILSPAYMENTTRANSACTIONID, response.getPaymentDetails().getTransactionId())
