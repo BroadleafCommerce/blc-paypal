@@ -117,6 +117,6 @@ public class BroadleafPayPalExpressController extends PaymentGatewayAbstractCont
                                  final RedirectAttributes redirectAttributes,
                                  @PathVariable Map<String, String> pathVars)
             throws PaymentException {
-        return getCartViewRedirect();
+        return getOrderReviewRedirect();
     }
 }
