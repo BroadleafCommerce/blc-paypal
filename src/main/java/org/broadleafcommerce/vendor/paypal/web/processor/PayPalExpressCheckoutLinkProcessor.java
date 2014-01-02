@@ -67,18 +67,20 @@ public class PayPalExpressCheckoutLinkProcessor extends AbstractAttributeModifie
         PaymentRequestDTO requestDTO = (PaymentRequestDTO) StandardExpressionProcessor.processExpression(arguments, element.getAttributeValue(attributeName));
         String url = "";
 
-        if ( element.getAttributeValue("complete_checkout") != null) {
-            Boolean completeCheckout = (Boolean) StandardExpressionProcessor.processExpression(arguments,
-                element.getAttributeValue("complete_checkout"));
-            element.removeAttribute("complete_checkout");
-            requestDTO.completeCheckoutOnCallback(completeCheckout);
-        }
+        if (requestDTO != null) {
+            if ( element.getAttributeValue("complete_checkout") != null) {
+                Boolean completeCheckout = (Boolean) StandardExpressionProcessor.processExpression(arguments,
+                    element.getAttributeValue("complete_checkout"));
+                element.removeAttribute("complete_checkout");
+                requestDTO.completeCheckoutOnCallback(completeCheckout);
+            }
 
-        try {
-            PaymentResponseDTO responseDTO = paymentGatewayHostedService.requestHostedEndpoint(requestDTO);
-            url = responseDTO.getResponseMap().get(MessageConstants.REDIRECTURL).toString();
-        } catch (PaymentException e) {
-            throw new RuntimeException("Unable to Create the PayPal Express Link", e);
+            try {
+                PaymentResponseDTO responseDTO = paymentGatewayHostedService.requestHostedEndpoint(requestDTO);
+                url = responseDTO.getResponseMap().get(MessageConstants.REDIRECTURL).toString();
+            } catch (PaymentException e) {
+                throw new RuntimeException("Unable to Create the PayPal Express Link", e);
+            }
         }
 
         attrs.put("href", url);
