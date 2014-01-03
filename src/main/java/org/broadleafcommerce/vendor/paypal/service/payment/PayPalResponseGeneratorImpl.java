@@ -31,7 +31,17 @@ import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPa
 import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPalPaymentRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPalPaymentResponse;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPalRefundInfo;
-import org.broadleafcommerce.vendor.paypal.service.payment.type.*;
+import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalAddressStatusType;
+import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalCheckoutStatusType;
+import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalHoldDecisionType;
+import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalMethodType;
+import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalPayerStatusType;
+import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalPaymentStatusType;
+import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalPaymentType;
+import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalPendingReasonType;
+import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalReasonCodeType;
+import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalRefundPendingReasonType;
+import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalRefundStatusType;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -150,11 +160,22 @@ public class PayPalResponseGeneratorImpl implements PayPalResponseGenerator {
         if (!StringUtils.isEmpty(paymentRequestTotalTax)) {
             paymentDetails.setTotalTax(new Money(paymentRequestTotalTax, Currency.getInstance(currencyCode)));
         }
-        paymentDetails.setOrderId(getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTINVNUM, new Integer[]{0}, new String[]{"n"})));
         paymentDetails.setTransactionId(getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTTRANSACTIONID, new Integer[]{0}, new String[]{"n"})));
         paymentDetails.setPaymentMethod(getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTALLOWEDMETHOD, new Integer[]{0}, new String[]{"n"})));
         paymentDetails.setPaymentRequestId(getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTREQUESTID, new Integer[]{0}, new String[]{"n"})));
-        paymentDetails.setCompleteCheckoutOnCallback(Boolean.valueOf(getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTCUSTOM, new Integer[]{0}, new String[]{"n"}))));
+
+        String customField = getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTCUSTOM, new Integer[]{0}, new String[]{"n"}));
+        String[] parsed = customField.split("_");
+        if (parsed.length != 2) {
+            throw new IllegalArgumentException("PAYMENTREQUEST_0_CUSTOM is not constructed correctly - (" + customField +"): " +
+                    "should be of the form completeCheckoutBoolean_orderIdLong");
+        }
+
+        Boolean compleCheckout = Boolean.valueOf(parsed[0]);
+        String orderId = parsed[1];
+
+        paymentDetails.setCompleteCheckoutOnCallback(compleCheckout);
+        paymentDetails.setOrderId(orderId);
 
         response.setPaymentDetails(paymentDetails);
         

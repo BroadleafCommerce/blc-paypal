@@ -145,11 +145,12 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
     protected void setNvpsForCheckoutOrAuth(List<NameValuePair> nvps, PayPalPaymentRequest paymentRequest, String payPalAction) {
         nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.PAYMENTACTION, new Integer[]{0}, new String[]{"n"}), payPalAction));
 
-        //PAYMENTREQUEST_0_INVNUM is the Order ID
-        nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTINVNUM, new Integer[]{0}, new String[]{"n"}), paymentRequest.getOrderId()));
-
-        //PAYMENTREQUEST_0_CUSTOM is the boolean of whether or not to Complete Checkout on Callback
-        nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTCUSTOM, new Integer[]{0}, new String[]{"n"}), Boolean.toString(paymentRequest.isCompleteCheckoutOnCallback())));
+        //PAYMENTREQUEST_0_CUSTOM is the boolean of whether or not to Complete Checkout on Callback and the Broadleaf Order ID
+        // concatenated with an underscore "_"
+        // for example if the complete checkout on callback = true and the order id = 12345
+        // the custom fields would be true_12345
+        String customField = Boolean.toString(paymentRequest.isCompleteCheckoutOnCallback()) + "_" + paymentRequest.getOrderId();
+        nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTCUSTOM, new Integer[]{0}, new String[]{"n"}), customField));
 
         //Determine if PayPal displays the shipping address fields on the PayPal pages.
         //For digital goods, this field is required and must be set to 1.
