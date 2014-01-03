@@ -367,7 +367,8 @@ public class PayPalResponseGeneratorImpl implements PayPalResponseGenerator {
             response.setErrorDetected(false);
             response.setSuccessful(true);
             response.setResponseToken(getResponseValue(rawResponse, MessageConstants.TOKEN));
-        } else if (ack.toLowerCase().equals(MessageConstants.SUCCESSWITHWARNINGS)) {
+        } else if (ack.toLowerCase().equals(MessageConstants.SUCCESSWITHWARNINGS) ||
+                ack.toLowerCase().equals(MessageConstants.SUCCESSWITHWARNING)) {
             response.setSuccessful(true);
             response.setErrorDetected(true);
             response.setResponseToken(getResponseValue(rawResponse, MessageConstants.TOKEN));

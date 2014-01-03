@@ -59,6 +59,7 @@ public class MessageConstants {
     public static final String ACK = "ACK";
     public static final String SUCCESS = "success";
     public static final String SUCCESSWITHWARNINGS = "successwithwarnings";
+    public static final String SUCCESSWITHWARNING = "successwithwarning";
     public static final String TOKEN = "TOKEN";
     public static final String CUSTOM = "CUSTOM";
     public static final String CORRELATIONID = "CORRELATIONID";

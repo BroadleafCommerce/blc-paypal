@@ -16,6 +16,7 @@
 
 package org.broadleafcommerce.payment.service.gateway;
 
+import org.broadleafcommerce.common.payment.PaymentTransactionType;
 import org.broadleafcommerce.common.payment.dto.PaymentRequestDTO;
 import org.broadleafcommerce.common.payment.dto.PaymentResponseDTO;
 import org.broadleafcommerce.common.payment.service.PaymentGatewayTransactionConfirmationService;
@@ -39,12 +40,15 @@ public class PayPalExpressTransactionConfirmationServiceImpl implements PaymentG
 
     @Override
     public PaymentResponseDTO confirmTransaction(PaymentRequestDTO paymentRequestDTO) throws PaymentException {
-
+        PaymentResponseDTO responseDTO = null;
         if (configurationService.isPerformAuthorizeAndCapture()){
-            return transactionService.authorizeAndCapture(paymentRequestDTO);
+            responseDTO = transactionService.authorizeAndCapture(paymentRequestDTO);
         } else {
-            return transactionService.authorize(paymentRequestDTO);
+            responseDTO =  transactionService.authorize(paymentRequestDTO);
         }
+
+        responseDTO.paymentTransactionType(PaymentTransactionType.CONFIRMED);
+        return responseDTO;
 
     }
 
