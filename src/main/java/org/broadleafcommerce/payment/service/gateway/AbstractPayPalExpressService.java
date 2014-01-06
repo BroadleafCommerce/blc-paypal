@@ -223,21 +223,30 @@ public abstract class AbstractPayPalExpressService extends AbstractExternalPayme
         }
 
         if (response.getPaymentDetails()!= null) {
+
+            String itemTotal =  (response.getPaymentDetails().getItemTotal() != null)? response.getPaymentDetails().getItemTotal().toString() : "";
+            String shippingDiscount = (response.getPaymentDetails().getShippingDiscount() != null)? response.getPaymentDetails().getShippingDiscount().toString() : "";
+            String shippingTotal = (response.getPaymentDetails().getShippingTotal() != null)? response.getPaymentDetails().getShippingTotal().toString() : "";
+            String totalTax = (response.getPaymentDetails().getTotalTax() != null)? response.getPaymentDetails().getTotalTax().toString() : "";
+
             responseDTO.amount(response.getPaymentDetails().getAmount())
                     .orderId(response.getPaymentDetails().getOrderId())
                     .completeCheckoutOnCallback(response.getPaymentDetails().isCompleteCheckoutOnCallback())
                     .responseMap(MessageConstants.DETAILSPAYMENTALLOWEDMETHOD, response.getPaymentDetails().getPaymentMethod())
                     .responseMap(MessageConstants.DETAILSPAYMENTREQUESTID, response.getPaymentDetails().getPaymentRequestId())
                     .responseMap(MessageConstants.DETAILSPAYMENTTRANSACTIONID, response.getPaymentDetails().getTransactionId())
-                    .responseMap(MessageConstants.DETAILSPAYMENTITEMTOTAL, response.getPaymentDetails().getItemTotal())
-                    .responseMap(MessageConstants.DETAILSPAYMENTSHIPPINGDISCOUNT, response.getPaymentDetails().getShippingDiscount())
-                    .responseMap(MessageConstants.DETAILSPAYMENTSHIPPINGTOTAL,response.getPaymentDetails().getShippingTotal())
-                    .responseMap(MessageConstants.DETAILSPAYMENTTOTALTAX, response.getPaymentDetails().getTotalTax());
+                    .responseMap(MessageConstants.DETAILSPAYMENTITEMTOTAL, itemTotal)
+                    .responseMap(MessageConstants.DETAILSPAYMENTSHIPPINGDISCOUNT, shippingDiscount)
+                    .responseMap(MessageConstants.DETAILSPAYMENTSHIPPINGTOTAL,shippingTotal)
+                    .responseMap(MessageConstants.DETAILSPAYMENTTOTALTAX, totalTax);
         }
 
         if (response.getCheckoutStatusType()!=null) {
             responseDTO.responseMap(MessageConstants.CHECKOUTSTATUS, response.getCheckoutStatusType().getType());
         }
+
+        String paypalAdjustment = (response.getPayPalAdjustment() != null)? response.getPayPalAdjustment().toString() : "";
+        String payerStatus = (response.getPayerStatus() != null)? response.getPayerStatus().toString() : "";
 
         responseDTO.customer()
             .firstName(response.getPayerFirstName())
@@ -249,8 +258,8 @@ public abstract class AbstractPayPalExpressService extends AbstractExternalPayme
         .responseMap(MessageConstants.TOKEN, response.getResponseToken())
         .responseMap(MessageConstants.PAYERID, response.getPayerId())
         .responseMap(MessageConstants.NOTE, response.getNote())
-        .responseMap(MessageConstants.PAYPALADJUSTMENT, response.getPayPalAdjustment())
-        .responseMap(MessageConstants.PAYERSTATUS, response.getPayerStatus());
+        .responseMap(MessageConstants.PAYPALADJUSTMENT, paypalAdjustment)
+        .responseMap(MessageConstants.PAYERSTATUS, payerStatus);
 
     }
 
