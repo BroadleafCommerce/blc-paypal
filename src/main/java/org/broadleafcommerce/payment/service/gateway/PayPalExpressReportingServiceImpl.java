@@ -22,6 +22,7 @@ import org.broadleafcommerce.common.payment.dto.PaymentResponseDTO;
 import org.broadleafcommerce.common.payment.service.PaymentGatewayReportingService;
 import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
 import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
+import org.broadleafcommerce.vendor.paypal.service.payment.PayPalExpressPaymentGatewayType;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.details.PayPalDetailsRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.details.PayPalDetailsResponse;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalMethodType;
@@ -48,7 +49,8 @@ public class PayPalExpressReportingServiceImpl extends AbstractPayPalExpressServ
         detailsRequest.setToken((String)paymentRequestDTO.getAdditionalFields().get(MessageConstants.TOKEN));
 
         PayPalDetailsResponse response = (PayPalDetailsResponse) process(detailsRequest);
-        PaymentResponseDTO responseDTO = new PaymentResponseDTO(PaymentType.THIRD_PARTY_ACCOUNT);
+        PaymentResponseDTO responseDTO = new PaymentResponseDTO(PaymentType.THIRD_PARTY_ACCOUNT,
+                PayPalExpressPaymentGatewayType.PAYPAL_EXPRESS);
         setCommonDetailsResponse(response, responseDTO);
         return responseDTO;
     }

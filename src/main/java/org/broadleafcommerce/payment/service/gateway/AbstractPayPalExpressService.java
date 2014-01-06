@@ -30,6 +30,7 @@ import org.broadleafcommerce.common.payment.dto.PaymentResponseDTO;
 import org.broadleafcommerce.common.payment.service.AbstractExternalPaymentGatewayCall;
 import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
 import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
+import org.broadleafcommerce.vendor.paypal.service.payment.PayPalExpressPaymentGatewayType;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalRequestGenerator;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalResponseGenerator;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalRequest;
@@ -164,7 +165,8 @@ public abstract class AbstractPayPalExpressService extends AbstractExternalPayme
         }
 
         PayPalPaymentResponse response = (PayPalPaymentResponse) process(request);
-        PaymentResponseDTO responseDTO = new PaymentResponseDTO(PaymentType.THIRD_PARTY_ACCOUNT);
+        PaymentResponseDTO responseDTO = new PaymentResponseDTO(PaymentType.THIRD_PARTY_ACCOUNT,
+                PayPalExpressPaymentGatewayType.PAYPAL_EXPRESS);
 
         setCommonPaymentResponse(response, responseDTO);
         responseDTO.successful(response.isSuccessful());

@@ -23,6 +23,7 @@ import org.broadleafcommerce.common.payment.dto.PaymentResponseDTO;
 import org.broadleafcommerce.common.payment.service.PaymentGatewayTransactionService;
 import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
 import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
+import org.broadleafcommerce.vendor.paypal.service.payment.PayPalExpressPaymentGatewayType;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPalPaymentRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPalPaymentResponse;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalMethodType;
@@ -60,7 +61,8 @@ public class PayPalExpressTransactionServiceImpl extends AbstractPayPalExpressSe
         request.setMethodType(PayPalMethodType.CAPTURE);
         request.setTransactionID((String)paymentRequestDTO.getAdditionalFields().get(MessageConstants.TRANSACTIONID));
 
-        PaymentResponseDTO responseDTO = new PaymentResponseDTO(PaymentType.THIRD_PARTY_ACCOUNT);
+        PaymentResponseDTO responseDTO = new PaymentResponseDTO(PaymentType.THIRD_PARTY_ACCOUNT,
+                PayPalExpressPaymentGatewayType.PAYPAL_EXPRESS);
         PayPalPaymentResponse response;
 
         response = (PayPalPaymentResponse) process(request);
@@ -90,7 +92,8 @@ public class PayPalExpressTransactionServiceImpl extends AbstractPayPalExpressSe
         request.setMethodType(PayPalMethodType.VOID);
         request.setTransactionID((String) paymentRequestDTO.getAdditionalFields().get(MessageConstants.TRANSACTIONID));
 
-        PaymentResponseDTO responseDTO = new PaymentResponseDTO(PaymentType.THIRD_PARTY_ACCOUNT);
+        PaymentResponseDTO responseDTO = new PaymentResponseDTO(PaymentType.THIRD_PARTY_ACCOUNT,
+                PayPalExpressPaymentGatewayType.PAYPAL_EXPRESS);
         PayPalPaymentResponse response;
 
         response = (PayPalPaymentResponse) process(request);
@@ -112,7 +115,8 @@ public class PayPalExpressTransactionServiceImpl extends AbstractPayPalExpressSe
         request.setRefundType(PayPalRefundType.getInstance((String) paymentRequestDTO.getAdditionalFields().get(MessageConstants.REFUNDTYPE)));
         request.setTransactionID((String)paymentRequestDTO.getAdditionalFields().get(MessageConstants.TRANSACTIONID));
 
-        PaymentResponseDTO responseDTO = new PaymentResponseDTO(PaymentType.THIRD_PARTY_ACCOUNT);
+        PaymentResponseDTO responseDTO = new PaymentResponseDTO(PaymentType.THIRD_PARTY_ACCOUNT,
+                PayPalExpressPaymentGatewayType.PAYPAL_EXPRESS);
         PayPalPaymentResponse response;
 
         response = (PayPalPaymentResponse) process(request);
@@ -134,7 +138,8 @@ public class PayPalExpressTransactionServiceImpl extends AbstractPayPalExpressSe
         request.setTransactionID((String) paymentRequestDTO.getAdditionalFields().get(MessageConstants.TRANSACTIONID));
 
         PayPalPaymentResponse response = (PayPalPaymentResponse) process(request);
-        PaymentResponseDTO responseDTO = new PaymentResponseDTO(PaymentType.THIRD_PARTY_ACCOUNT);
+        PaymentResponseDTO responseDTO = new PaymentResponseDTO(PaymentType.THIRD_PARTY_ACCOUNT,
+                PayPalExpressPaymentGatewayType.PAYPAL_EXPRESS);
         setCommonPaymentResponse(response, responseDTO);
         responseDTO.successful(response.isSuccessful());
         responseDTO.paymentTransactionType(PaymentTransactionType.VOID);
