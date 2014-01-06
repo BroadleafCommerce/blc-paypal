@@ -6,6 +6,8 @@ This module allows users to complete their shopping experience using their PayPa
 
 This module utilizes PayPal's NVP API defined here: https://developer.paypal.com/docs/classic/api/NVPAPIOverview/
 
+You can also read up on how to customize the PayPal Express Page here: https://developer.paypal.com/docs/classic/express-checkout/integration-guide/ECCustomizing/
+
 
 Notes:
 ## Showing Line Items on PayPal Express's Checkout Screen:

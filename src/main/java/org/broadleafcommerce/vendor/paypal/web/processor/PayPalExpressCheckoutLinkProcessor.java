@@ -78,6 +78,12 @@ public class PayPalExpressCheckoutLinkProcessor extends AbstractAttributeModifie
             try {
                 PaymentResponseDTO responseDTO = paymentGatewayHostedService.requestHostedEndpoint(requestDTO);
                 url = responseDTO.getResponseMap().get(MessageConstants.REDIRECTURL).toString();
+
+                //https://developer.paypal.com/docs/classic/express-checkout/integration-guide/ECCustomizing/
+                if (requestDTO.isCompleteCheckoutOnCallback()) {
+                    url = url + "&useraction=commit";
+                }
+
             } catch (PaymentException e) {
                 throw new RuntimeException("Unable to Create the PayPal Express Link", e);
             }
