@@ -43,11 +43,12 @@ public class PayPalExpressTransactionConfirmationServiceImpl implements PaymentG
         PaymentResponseDTO responseDTO = null;
         if (configurationService.isPerformAuthorizeAndCapture()){
             responseDTO = transactionService.authorizeAndCapture(paymentRequestDTO);
+            responseDTO.paymentTransactionType(PaymentTransactionType.AUTHORIZE_AND_CAPTURE);
         } else {
             responseDTO =  transactionService.authorize(paymentRequestDTO);
+            responseDTO.paymentTransactionType(PaymentTransactionType.AUTHORIZE);
         }
 
-        responseDTO.paymentTransactionType(PaymentTransactionType.CONFIRMED);
         return responseDTO;
 
     }

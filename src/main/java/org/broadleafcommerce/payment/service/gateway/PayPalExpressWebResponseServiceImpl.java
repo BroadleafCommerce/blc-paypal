@@ -50,16 +50,10 @@ public class PayPalExpressWebResponseServiceImpl implements PaymentGatewayWebRes
                 .additionalField(MessageConstants.TOKEN, request.getParameter(MessageConstants.HTTP_TOKEN));
         PaymentResponseDTO responseDTO = reportingService.findDetailsByTransaction(requestDTO);
 
-        PaymentTransactionType type = PaymentTransactionType.AUTHORIZE_AND_CAPTURE;
-        if (!configurationService.isPerformAuthorizeAndCapture()) {
-            type = PaymentTransactionType.AUTHORIZE;
-        }
-
         responseDTO.responseMap(MessageConstants.HTTP_PAYERID, request.getParameter(MessageConstants.HTTP_PAYERID))
                 .responseMap(MessageConstants.HTTP_TOKEN, request.getParameter(MessageConstants.HTTP_TOKEN))
                 .responseMap(MessageConstants.HTTP_REQUEST, webResponsePrintService.printRequest(request))
-                .confirmed(false)
-                .paymentTransactionType(type);
+                .paymentTransactionType(PaymentTransactionType.UNCONFIRMED);
 
         return responseDTO;
     }
