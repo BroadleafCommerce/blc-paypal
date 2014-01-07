@@ -16,9 +16,14 @@
 
 package org.broadleafcommerce.payment.service.gateway;
 
+import org.broadleafcommerce.common.payment.dto.PaymentRequestDTO;
 import org.broadleafcommerce.common.payment.dto.PaymentResponseDTO;
 import org.broadleafcommerce.common.payment.service.PaymentGatewayRollbackService;
+import org.broadleafcommerce.common.payment.service.PaymentGatewayTransactionService;
+import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
 import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
 
 /**
  * @author Elbert Bautista (elbertbautista)
@@ -26,24 +31,27 @@ import org.springframework.stereotype.Service;
 @Service("blPayPalExpressRollbackService")
 public class PayPalExpressRollbackServiceImpl implements PaymentGatewayRollbackService {
 
+    @Resource(name = "blPayPalExpressTransactionService")
+    protected PaymentGatewayTransactionService transactionService;
+
     @Override
-    public PaymentResponseDTO rollbackAuthorize(PaymentResponseDTO originalResponse) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    public PaymentResponseDTO rollbackAuthorize(PaymentRequestDTO transactionToBeRolledBack) throws PaymentException {
+        return transactionService.reverseAuthorize(transactionToBeRolledBack);
     }
 
     @Override
-    public PaymentResponseDTO rollbackCapture(PaymentResponseDTO originalResponse) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    public PaymentResponseDTO rollbackCapture(PaymentRequestDTO transactionToBeRolledBack) throws PaymentException {
+        return transactionService.voidPayment(transactionToBeRolledBack);
     }
 
     @Override
-    public PaymentResponseDTO rollbackAuthorizeAndCapture(PaymentResponseDTO originalResponse) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    public PaymentResponseDTO rollbackAuthorizeAndCapture(PaymentRequestDTO transactionToBeRolledBack) throws PaymentException {
+        return transactionService.voidPayment(transactionToBeRolledBack);
     }
 
     @Override
-    public PaymentResponseDTO rollbackRefund(PaymentResponseDTO originalResponse) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    public PaymentResponseDTO rollbackRefund(PaymentRequestDTO transactionToBeRolledBack) throws PaymentException {
+        throw new PaymentException("The Rollback Refund method is not supported for this module");
     }
 
 }
