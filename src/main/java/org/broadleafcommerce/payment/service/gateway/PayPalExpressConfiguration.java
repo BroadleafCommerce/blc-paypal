@@ -16,6 +16,7 @@
 
 package org.broadleafcommerce.payment.service.gateway;
 
+import org.broadleafcommerce.common.payment.service.PaymentGatewayConfiguration;
 import org.broadleafcommerce.common.payment.service.PaymentGatewayConfigurationService;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalShippingDisplayType;
 
@@ -24,7 +25,7 @@ import java.util.Map;
 /**
  * @author Elbert Bautista (elbertbautista)
  */
-public interface PayPalExpressConfigurationService extends PaymentGatewayConfigurationService {
+public interface PayPalExpressConfiguration extends PaymentGatewayConfiguration {
 
     /**
      * The URL endpoint for the NVP API server

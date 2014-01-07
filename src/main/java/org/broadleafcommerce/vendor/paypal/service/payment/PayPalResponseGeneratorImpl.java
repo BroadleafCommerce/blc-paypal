@@ -18,7 +18,7 @@ package org.broadleafcommerce.vendor.paypal.service.payment;
 
 import org.apache.commons.lang.StringUtils;
 import org.broadleafcommerce.common.money.Money;
-import org.broadleafcommerce.payment.service.gateway.PayPalExpressConfigurationService;
+import org.broadleafcommerce.payment.service.gateway.PayPalExpressConfiguration;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.ErrorCheckable;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalErrorResponse;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalRequest;
@@ -58,8 +58,8 @@ import java.util.Currency;
 @Service("blPayPalExpressResponseGenerator")
 public class PayPalResponseGeneratorImpl implements PayPalResponseGenerator {
 
-    @Resource(name = "blPayPalExpressConfigurationService")
-    protected PayPalExpressConfigurationService configurationService;
+    @Resource(name = "blPayPalExpressConfiguration")
+    protected PayPalExpressConfiguration configuration;
 
     protected SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
@@ -465,7 +465,7 @@ public class PayPalResponseGeneratorImpl implements PayPalResponseGenerator {
 
     @Override
     public String getUserRedirectUrl() {
-        return configurationService.getUserRedirectUrl();
+        return configuration.getUserRedirectUrl();
     }
 
 }

@@ -41,9 +41,6 @@ public class PayPalExpressWebResponseServiceImpl implements PaymentGatewayWebRes
     @Resource(name = "blPayPalExpressReportingService")
     protected PaymentGatewayReportingService reportingService;
 
-    @Resource(name = "blPayPalExpressConfigurationService")
-    protected PayPalExpressConfigurationService configurationService;
-
     @Override
     public PaymentResponseDTO translateWebResponse(HttpServletRequest request) throws PaymentException {
         PaymentRequestDTO requestDTO = new PaymentRequestDTO()

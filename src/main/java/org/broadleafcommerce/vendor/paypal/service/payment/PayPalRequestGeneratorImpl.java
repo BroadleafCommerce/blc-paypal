@@ -21,7 +21,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.broadleafcommerce.common.money.Money;
 import org.broadleafcommerce.common.web.BroadleafRequestContext;
-import org.broadleafcommerce.payment.service.gateway.PayPalExpressConfigurationService;
+import org.broadleafcommerce.payment.service.gateway.PayPalExpressConfiguration;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.details.PayPalDetailsRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPalItemRequest;
@@ -45,8 +45,8 @@ import javax.servlet.http.HttpServletRequest;
 @Service("blPayPalExpressRequestGenerator")
 public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
 
-    @Resource(name = "blPayPalExpressConfigurationService")
-    protected PayPalExpressConfigurationService configurationService;
+    @Resource(name = "blPayPalExpressConfiguration")
+    protected PayPalExpressConfiguration configuration;
 
     protected Logger logger = Logger.getLogger(PayPalRequestGeneratorImpl.class);
     
@@ -244,55 +244,55 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
 
     @Override
     public Map<String, String> getAdditionalConfig() {
-        return configurationService.getAdditionalConfig();
+        return configuration.getAdditionalConfig();
     }
 
 
     @Override
     public String getCancelUrl() {
         return Boolean.TRUE.equals(getUseRelativeUrls()) ?
-                getRequestedServerPrefix() + configurationService.getCancelUrl() : configurationService.getCancelUrl();
+                getRequestedServerPrefix() + configuration.getCancelUrl() : configuration.getCancelUrl();
     }
 
     @Override
     public String getLibVersion() {
-        return configurationService.getLibVersion();
+        return configuration.getLibVersion();
     }
 
     @Override
     public String getPassword() {
-        return configurationService.getPassword();
+        return configuration.getPassword();
     }
 
     @Override
     public String getReturnUrl() {
         return Boolean.TRUE.equals(getUseRelativeUrls()) ?
-                getRequestedServerPrefix() + configurationService.getReturnUrl() : configurationService.getReturnUrl();
+                getRequestedServerPrefix() + configuration.getReturnUrl() : configuration.getReturnUrl();
     }
 
     @Override
     public String getSignature() {
-        return configurationService.getSignature();
+        return configuration.getSignature();
     }
 
     @Override
     public String getUser() {
-        return configurationService.getUser();
+        return configuration.getUser();
     }
 
     @Override
     public String getTotalType() {
-        return configurationService.getTotalType();
+        return configuration.getTotalType();
     }
 
     @Override
 	public Boolean getUseRelativeUrls() {
-		return configurationService.getUseRelativeUrls();
+		return configuration.getUseRelativeUrls();
 	}
 
     @Override
     public PayPalShippingDisplayType getShippingDisplayType() {
-        return configurationService.getShippingDisplayType();
+        return configuration.getShippingDisplayType();
     }
 
 }

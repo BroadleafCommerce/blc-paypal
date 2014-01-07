@@ -29,8 +29,8 @@ import java.util.Map;
 /**
  * @author Elbert Bautista (elbertbautista)
  */
-@Service("blPayPalExpressConfigurationService")
-public class PayPalExpressConfigurationServiceImpl implements PayPalExpressConfigurationService {
+@Service("blPayPalExpressConfiguration")
+public class PayPalExpressConfigurationImpl implements PayPalExpressConfiguration {
 
     @Value("${gateway.paypal.expressCheckout.serverUrl}")
     protected String serverUrl;

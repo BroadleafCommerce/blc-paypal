@@ -58,8 +58,8 @@ public abstract class AbstractPayPalExpressService extends AbstractExternalPayme
 
     private static final Log LOG = LogFactory.getLog(AbstractPayPalExpressService.class);
 
-    @Resource(name = "blPayPalExpressConfigurationService")
-    protected PayPalExpressConfigurationService configurationService;
+    @Resource(name = "blPayPalExpressConfiguration")
+    protected PayPalExpressConfiguration configuration;
 
     @Resource(name = "blPayPalExpressRequestGenerator")
     protected PayPalRequestGenerator requestGenerator;
@@ -69,7 +69,7 @@ public abstract class AbstractPayPalExpressService extends AbstractExternalPayme
 
     @Override
     public Integer getFailureReportingThreshold() {
-        return configurationService.getFailureReportingThreshold();
+        return configuration.getFailureReportingThreshold();
     }
 
     @Override
@@ -85,7 +85,7 @@ public abstract class AbstractPayPalExpressService extends AbstractExternalPayme
     }
 
     public String getServerUrl() {
-        return configurationService.getServerUrl();
+        return configuration.getServerUrl();
     }
 
     protected PayPalPaymentRequest buildBasicRequest(PaymentRequestDTO requestDTO, PayPalTransactionType transactionType) {

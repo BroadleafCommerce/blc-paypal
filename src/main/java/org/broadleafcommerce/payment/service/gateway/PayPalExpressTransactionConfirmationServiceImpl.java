@@ -32,8 +32,8 @@ import javax.annotation.Resource;
 @Service("blPayPalExpressTransactionConfirmationService")
 public class PayPalExpressTransactionConfirmationServiceImpl implements PaymentGatewayTransactionConfirmationService {
 
-    @Resource(name = "blPayPalExpressConfigurationService")
-    protected PayPalExpressConfigurationService configurationService;
+    @Resource(name = "blPayPalExpressConfiguration")
+    protected PayPalExpressConfiguration configuration;
 
     @Resource(name = "blPayPalExpressTransactionService")
     protected PaymentGatewayTransactionService transactionService;
@@ -41,7 +41,7 @@ public class PayPalExpressTransactionConfirmationServiceImpl implements PaymentG
     @Override
     public PaymentResponseDTO confirmTransaction(PaymentRequestDTO paymentRequestDTO) throws PaymentException {
         PaymentResponseDTO responseDTO = null;
-        if (configurationService.isPerformAuthorizeAndCapture()){
+        if (configuration.isPerformAuthorizeAndCapture()){
             responseDTO = transactionService.authorizeAndCapture(paymentRequestDTO);
             responseDTO.paymentTransactionType(PaymentTransactionType.AUTHORIZE_AND_CAPTURE);
         } else {
