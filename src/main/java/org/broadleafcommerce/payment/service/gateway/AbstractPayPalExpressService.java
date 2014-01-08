@@ -308,27 +308,36 @@ public abstract class AbstractPayPalExpressService extends AbstractExternalPayme
         if (response.getRefundInfo().getRefundTransactionId() != null) {
             responseDTO.responseMap(MessageConstants.REFUNDTRANSACTIONID, response.getRefundInfo().getRefundTransactionId());
         }
+
+        if (response.getRefundInfo().getGrossRefundAmount() != null) {
+            responseDTO.amount(new Money(response.getRefundInfo().getGrossRefundAmount().toString()));
+            responseDTO.responseMap(MessageConstants.GROSSREFUNDAMT, response.getRefundInfo().getGrossRefundAmount().toString());
+        }
+
         if (response.getRefundInfo().getFeeRefundAmount() != null) {
             responseDTO.responseMap(MessageConstants.FEEREFUNDAMT, response.getRefundInfo().getFeeRefundAmount().toString());
         }
-        if (response.getRefundInfo().getGrossRefundAmount() != null) {
-            responseDTO.responseMap(MessageConstants.GROSSREFUNDAMT, response.getRefundInfo().getGrossRefundAmount().toString());
-        }
+
         if (response.getRefundInfo().getNetRefundAmount() != null) {
             responseDTO.responseMap(MessageConstants.NETREFUNDAMT, response.getRefundInfo().getNetRefundAmount().toString());
         }
+
         if (response.getRefundInfo().getTotalRefundAmount() != null) {
             responseDTO.responseMap(MessageConstants.TOTALREFUNDEDAMT, response.getRefundInfo().getTotalRefundAmount().toString());
         }
+
         if (response.getRefundInfo().getRefundInfo() != null) {
             responseDTO.responseMap(MessageConstants.REFUNDINFO, response.getRefundInfo().getRefundInfo());
         }
+
         if (response.getRefundInfo().getRefundStatusType() != null) {
             responseDTO.responseMap(MessageConstants.REFUNDSTATUS, response.getRefundInfo().getRefundStatusType().getType());
         }
+
         if (response.getRefundInfo().getPendingReasonType() != null) {
             responseDTO.responseMap(MessageConstants.PENDINGREASON, response.getRefundInfo().getPendingReasonType().getType());
         }
+
     }
 
 }
