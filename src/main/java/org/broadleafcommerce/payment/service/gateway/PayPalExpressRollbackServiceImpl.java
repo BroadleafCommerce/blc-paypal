@@ -21,6 +21,8 @@ import org.broadleafcommerce.common.payment.dto.PaymentResponseDTO;
 import org.broadleafcommerce.common.payment.service.PaymentGatewayRollbackService;
 import org.broadleafcommerce.common.payment.service.PaymentGatewayTransactionService;
 import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
+import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
+import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalRefundType;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -36,17 +38,20 @@ public class PayPalExpressRollbackServiceImpl implements PaymentGatewayRollbackS
 
     @Override
     public PaymentResponseDTO rollbackAuthorize(PaymentRequestDTO transactionToBeRolledBack) throws PaymentException {
-        return transactionService.reverseAuthorize(transactionToBeRolledBack);
+        transactionToBeRolledBack.additionalField(MessageConstants.REFUNDTYPE, PayPalRefundType.FULL.getType());
+        return transactionService.refund(transactionToBeRolledBack);
     }
 
     @Override
     public PaymentResponseDTO rollbackCapture(PaymentRequestDTO transactionToBeRolledBack) throws PaymentException {
-        return transactionService.voidPayment(transactionToBeRolledBack);
+        transactionToBeRolledBack.additionalField(MessageConstants.REFUNDTYPE, PayPalRefundType.FULL.getType());
+        return transactionService.refund(transactionToBeRolledBack);
     }
 
     @Override
     public PaymentResponseDTO rollbackAuthorizeAndCapture(PaymentRequestDTO transactionToBeRolledBack) throws PaymentException {
-        return transactionService.voidPayment(transactionToBeRolledBack);
+        transactionToBeRolledBack.additionalField(MessageConstants.REFUNDTYPE, PayPalRefundType.FULL.getType());
+        return transactionService.refund(transactionToBeRolledBack);
     }
 
     @Override
