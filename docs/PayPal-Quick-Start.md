@@ -16,7 +16,7 @@ Broadleaf Commerce offers an out-of-the-box PayPal solution that requires little
 
 3. Inject the PayPalExpressCheckoutLinkProcessor into the Broadleaf Thymeleaf Dialect Processors `blDialectProcessors` in your `applicationContext.xml`
 
-4. Define the `blPaymentGatewayConfiguration` bean with the `blPayPalExpressTransactionConfirmationService` in your `applicationContext.xml`
+4. Inject the `blPayPalExpressConfigurationService` bean into the `blPaymentGatewayConfigurationServices` list in your `applicationContext.xml`
 
 ```xml
     <!-- PayPal Express Checkout -->
@@ -36,8 +36,16 @@ Broadleaf Commerce offers an out-of-the-box PayPal solution that requires little
         <property name="targetRef" value="blDialectProcessors"/>
     </bean>
 
-    <bean id="blPaymentGatewayConfiguration" class="org.broadleafcommerce.common.payment.service.PaymentGatewayConfiguration">
-        <property name="transactionConfirmationService" ref="blPayPalExpressTransactionConfirmationService"/>
+    <bean id="mySampleConfigurationServices" class="org.springframework.beans.factory.config.ListFactoryBean">
+        <property name="sourceList">
+            <list>
+                <ref bean="blPayPalExpressConfigurationService"/>
+            </list>
+        </property>
+    </bean>
+    <bean class="org.broadleafcommerce.common.extensibility.context.merge.LateStageMergeBeanPostProcessor">
+        <property name="collectionRef" value="mySampleConfigurationServices"/>
+        <property name="targetRef" value="blPaymentGatewayConfigurationServices"/>
     </bean>
 ```
 
