@@ -22,17 +22,9 @@ import java.io.Serializable;
  * @author Jeff Fischer
  */
 public abstract class PayPalResponse implements Serializable {
-    
-    protected String referenceNumber;
+
     protected String responseToken;
-
-    public String getReferenceNumber() {
-        return referenceNumber;
-    }
-
-    public void setReferenceNumber(String referenceNumber) {
-        this.referenceNumber = referenceNumber;
-    }
+    protected String rawResponse;
 
     public String getResponseToken() {
         return responseToken;
@@ -42,6 +34,14 @@ public abstract class PayPalResponse implements Serializable {
         this.responseToken = responseToken;
     }
 
+    public String getRawResponse() {
+        return rawResponse;
+    }
+
+    public void setRawResponse(String rawResponse) {
+        this.rawResponse = rawResponse;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -49,7 +49,7 @@ public abstract class PayPalResponse implements Serializable {
 
         PayPalResponse that = (PayPalResponse) o;
 
-        if (referenceNumber != null ? !referenceNumber.equals(that.referenceNumber) : that.referenceNumber != null)
+        if (rawResponse != null ? !rawResponse.equals(that.rawResponse) : that.rawResponse != null)
             return false;
         if (responseToken != null ? !responseToken.equals(that.responseToken) : that.responseToken != null)
             return false;
@@ -59,7 +59,7 @@ public abstract class PayPalResponse implements Serializable {
 
     @Override
     public int hashCode() {
-        int result = referenceNumber != null ? referenceNumber.hashCode() : 0;
+        int result = rawResponse != null ? rawResponse.hashCode() : 0;
         result = 31 * result + (responseToken != null ? responseToken.hashCode() : 0);
         return result;
     }

@@ -1,4 +1,4 @@
-# PayPal Environment Setup
+# PayPal Express Checkout Environment Setup
 
 ## Prerequisites
 
@@ -13,13 +13,13 @@ Once you have established an account with PayPal, begin by including the PayPal 
 <dependency>
     <groupId>org.broadleafcommerce</groupId>
     <artifactId>broadleaf-paypal</artifactId>
-    <version>${broadleaf.thirdparty.version}</version>
+    <version>${broadleaf.paypal-express.version}</version>
     <type>jar</type>
     <scope>compile</scope>
 </dependency>
 ```
 
-Make sure to include the dependency in your site pom.xml as well:
+Make sure to include the dependency in your `site` AND `admin` pom.xml as well:
 
 ```xml
 <dependency>
@@ -33,41 +33,27 @@ You should now begin to setup your environment to work with Broadleaf Commerce P
 Broadleaf allows you to create your own property files per environment (e.g. common.properties, local.properties, development.properties, integrationdev.properties, integrationqa.properties, staging.properties, and production.properties) 
 You will need to enter the following key/value pairs in the appropriate locations and replace the "?" with your paypal api account details:
 
-### common.properties
-    paypal.version=78.0
-    paypal.shipping.display=? (e.g. 0, 1, or 2)
-    paypal.additional.HDRIMG=?
-    paypal.additional.HDRBORDERCOLOR=? (e.g. FFFFFF)
-    paypal.additional.HDRBACKCOLOR=? (e.g. FFFFFF)
-    paypal.additional.PAYFLOWCOLOR=? (e.g. FFFFFF)
+You can also store these configs in the Database by utilizing the `blSystemPropertiesService`. See the java docs for more details.
 
-- paypal.shipping.display: this property determines if PayPal displays the shipping address fields on the PayPal pages. For digital goods, this field is required and must be set to 1.
-    - 0 : PayPal displays the shipping address passed in.
-    - 1 : PayPal does not display the shipping fields at all.
-    - 2 : PayPal will obtain the shipping address from the buyer's profile.
-    
-### development.properties, local.properties etc...
-    paypal.user=?
-    paypal.password=?
-    paypal.signature=?
-    paypal.api.url=https://api-3t.sandbox.paypal.com/nvp
-    paypal.user.redirect.url=https://www.sandbox.paypal.com/cgi-bin/webscr
-    paypal.return.url=? (e.g. http://localhost:8080/paypal/process)
-    paypal.cancel.url=? (e.g. http://localhost:8080/cart)
+### Properties File Config
+- gateway.paypal.expressCheckout.libVersion=78.0
+- gateway.paypal.expressCheckout.serverUrl=https://api-3t.sandbox.paypal.com/nvp
+- gateway.paypal.expressCheckout.userRedirectUrl=https://www.sandbox.paypal.com/cgi-bin/webscr
+- gateway.paypal.expressCheckout.password=?
+- gateway.paypal.expressCheckout.user=?
+- gateway.paypal.expressCheckout.signature=?
+- gateway.paypal.expressCheckout.useRelativeUrls=false
+- gateway.paypal.expressCheckout.shippingDisplayType=?
+- gateway.paypal.expressCheckout.returnUrl=? (http://localhost:8080/paypal-express/return)
+- gateway.paypal.expressCheckout.cancelUrl=? (http://localhost:8080/paypal-express/cancel)
 
-- paypal.return.url: the URL PayPal should redirect to after completing the order
-- paypal.cancel.url: the URL PayPal should redirect to if a user abandons the order
+- gateway.paypal.expressCheckout.shippingDisplayType: (0 - PayPal displays the shipping address passed in, 1 - PayPal does not display the shipping fields at all. (Default), 2 - PayPal will obtain the shipping address from the buyer's profile.)
+- gateway.paypal.expressCheckout.returnUrl: the URL PayPal should redirect to after completing the order
+- gateway.paypal.expressCheckout.cancelUrl: the URL PayPal should redirect to if a user abandons the order
 
-### production.properties
-    paypal.user=?
-    paypal.password=?
-    paypal.signature=?
-    paypal.api.url=https://api-3t.paypal.com/nvp
-    paypal.user.redirect.url=https://www.paypal.com/cgi-bin/webscr
-    paypal.return.url=? (e.g. http://mycompany.com/paypal/process)
-    paypal.cancel.url=? (e.g. http://mycompany.com/cart)
+### Production Property Config
+- gateway.paypal.expressCheckout.serverUrl=https://api-3t.paypal.com/nvp
+- gateway.paypal.expressCheckout.userRedirectUrl=https://www.paypal.com/cgi-bin/webscr
 
-- paypal.return.url: the URL PayPal should redirect to after completing the order
-- paypal.cancel.url: the URL PayPal should redirect to if a user abandons the order
 
 Now that you have your environment set up, let's begin setting up the [[PayPal Module]].

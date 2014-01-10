@@ -33,11 +33,12 @@ public class PayPalPaymentDetails implements Serializable {
     protected Money shippingTotal;
     protected Money shippingDiscount;
     protected Money totalTax;
-    protected String referenceNumber;
+    protected String orderId;
     protected String transactionId;
     protected String paymentMethod;
     protected String paymentRequestId;
     protected List<PayPalPaymentItemDetails> itemDetails = new ArrayList<PayPalPaymentItemDetails>();
+    protected boolean completeCheckoutOnCallback = true;
 
     public Money getAmount() {
         return amount;
@@ -87,12 +88,12 @@ public class PayPalPaymentDetails implements Serializable {
         this.paymentRequestId = paymentRequestId;
     }
 
-    public String getReferenceNumber() {
-        return referenceNumber;
+    public String getOrderId() {
+        return orderId;
     }
 
-    public void setReferenceNumber(String referenceNumber) {
-        this.referenceNumber = referenceNumber;
+    public void setOrderId(String orderId) {
+        this.orderId = orderId;
     }
 
     public Money getShippingDiscount() {
@@ -127,6 +128,14 @@ public class PayPalPaymentDetails implements Serializable {
         this.transactionId = transactionId;
     }
 
+    public boolean isCompleteCheckoutOnCallback() {
+        return completeCheckoutOnCallback;
+    }
+
+    public void setCompleteCheckoutOnCallback(boolean completeCheckoutOnCallback) {
+        this.completeCheckoutOnCallback = completeCheckoutOnCallback;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -142,7 +151,7 @@ public class PayPalPaymentDetails implements Serializable {
             return false;
         if (paymentRequestId != null ? !paymentRequestId.equals(that.paymentRequestId) : that.paymentRequestId != null)
             return false;
-        if (referenceNumber != null ? !referenceNumber.equals(that.referenceNumber) : that.referenceNumber != null)
+        if (orderId != null ? !orderId.equals(that.orderId) : that.orderId != null)
             return false;
         if (shippingDiscount != null ? !shippingDiscount.equals(that.shippingDiscount) : that.shippingDiscount != null)
             return false;
@@ -163,7 +172,7 @@ public class PayPalPaymentDetails implements Serializable {
         result = 31 * result + (shippingTotal != null ? shippingTotal.hashCode() : 0);
         result = 31 * result + (shippingDiscount != null ? shippingDiscount.hashCode() : 0);
         result = 31 * result + (totalTax != null ? totalTax.hashCode() : 0);
-        result = 31 * result + (referenceNumber != null ? referenceNumber.hashCode() : 0);
+        result = 31 * result + (orderId != null ? orderId.hashCode() : 0);
         result = 31 * result + (transactionId != null ? transactionId.hashCode() : 0);
         result = 31 * result + (paymentMethod != null ? paymentMethod.hashCode() : 0);
         result = 31 * result + (paymentRequestId != null ? paymentRequestId.hashCode() : 0);

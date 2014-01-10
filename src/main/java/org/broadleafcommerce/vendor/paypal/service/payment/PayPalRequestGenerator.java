@@ -18,6 +18,7 @@ package org.broadleafcommerce.vendor.paypal.service.payment;
 
 import org.apache.commons.httpclient.NameValuePair;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalRequest;
+import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalShippingDisplayType;
 
 import java.util.List;
 import java.util.Map;
@@ -31,38 +32,22 @@ public interface PayPalRequestGenerator {
 
     Map<String, String> getAdditionalConfig();
 
-    void setAdditionalConfig(Map<String, String> additionalConfig);
-
     Boolean getUseRelativeUrls();
-
-    void setUseRelativeUrls(Boolean useRelativeUrls);
 
     String getCancelUrl();
 
-    void setCancelUrl(String cancelUrl);
-
     String getLibVersion();
-
-    void setLibVersion(String libVersion);
 
     String getPassword();
 
-    void setPassword(String password);
-
     String getReturnUrl();
-
-    void setReturnUrl(String returnUrl);
 
     String getSignature();
 
-    void setSignature(String signature);
-
     String getUser();
 
-    void setUser(String user);
+    String getTotalType();
 
-    String getShippingDisplayType();
-
-    void setShippingDisplayType(String shippingDisplayType);
+    PayPalShippingDisplayType getShippingDisplayType();
 
 }

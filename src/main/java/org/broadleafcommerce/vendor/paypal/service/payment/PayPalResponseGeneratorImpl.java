@@ -18,6 +18,7 @@ package org.broadleafcommerce.vendor.paypal.service.payment;
 
 import org.apache.commons.lang.StringUtils;
 import org.broadleafcommerce.common.money.Money;
+import org.broadleafcommerce.payment.service.gateway.PayPalExpressConfiguration;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.ErrorCheckable;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalErrorResponse;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalRequest;
@@ -30,8 +31,20 @@ import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPa
 import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPalPaymentRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPalPaymentResponse;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPalRefundInfo;
-import org.broadleafcommerce.vendor.paypal.service.payment.type.*;
+import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalAddressStatusType;
+import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalCheckoutStatusType;
+import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalHoldDecisionType;
+import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalMethodType;
+import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalPayerStatusType;
+import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalPaymentStatusType;
+import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalPaymentType;
+import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalPendingReasonType;
+import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalReasonCodeType;
+import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalRefundPendingReasonType;
+import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalRefundStatusType;
+import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URLDecoder;
@@ -42,14 +55,18 @@ import java.util.Currency;
 /**
  * @author Jeff Fischer
  */
+@Service("blPayPalExpressResponseGenerator")
 public class PayPalResponseGeneratorImpl implements PayPalResponseGenerator {
 
-    protected String userRedirectUrl;
+    @Resource(name = "blPayPalExpressConfiguration")
+    protected PayPalExpressConfiguration configuration;
+
     protected SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
     @Override
     public PayPalResponse buildResponse(String response, PayPalRequest paymentRequest) {
         PayPalResponse payPalResponse;
+
         if (PayPalMethodType.CHECKOUT.equals(paymentRequest.getMethodType()) || PayPalMethodType.AUTHORIZATION.equals(paymentRequest.getMethodType())) {
             payPalResponse = buildCheckoutResponse(response, (PayPalPaymentRequest) paymentRequest);
         } else if (PayPalMethodType.DETAILS.equals(paymentRequest.getMethodType())) {
@@ -68,6 +85,8 @@ public class PayPalResponseGeneratorImpl implements PayPalResponseGenerator {
 
     protected PayPalDetailsResponse buildDetailsResponse(String rawResponse) {
         PayPalDetailsResponse response = new PayPalDetailsResponse();
+        response.setRawResponse(rawResponse);
+
         response.setResponseToken(getResponseValue(rawResponse, MessageConstants.TOKEN));
         response.setPhoneNumber(getResponseValue(rawResponse, MessageConstants.PHONENUM));
         String payPalAdjustment = getResponseValue(rawResponse, MessageConstants.PAYPALADJUSTMENT);
@@ -141,10 +160,23 @@ public class PayPalResponseGeneratorImpl implements PayPalResponseGenerator {
         if (!StringUtils.isEmpty(paymentRequestTotalTax)) {
             paymentDetails.setTotalTax(new Money(paymentRequestTotalTax, Currency.getInstance(currencyCode)));
         }
-        paymentDetails.setReferenceNumber(getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTREFERENCENUMBER, new Integer[]{0}, new String[]{"n"})));
         paymentDetails.setTransactionId(getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTTRANSACTIONID, new Integer[]{0}, new String[]{"n"})));
         paymentDetails.setPaymentMethod(getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTALLOWEDMETHOD, new Integer[]{0}, new String[]{"n"})));
         paymentDetails.setPaymentRequestId(getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTREQUESTID, new Integer[]{0}, new String[]{"n"})));
+
+        String customField = getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTCUSTOM, new Integer[]{0}, new String[]{"n"}));
+        String[] parsed = customField.split("_");
+        if (parsed.length != 2) {
+            throw new IllegalArgumentException("PAYMENTREQUEST_0_CUSTOM is not constructed correctly - (" + customField +"): " +
+                    "should be of the form completeCheckoutBoolean_orderIdLong");
+        }
+
+        Boolean compleCheckout = Boolean.valueOf(parsed[0]);
+        String orderId = parsed[1];
+
+        paymentDetails.setCompleteCheckoutOnCallback(compleCheckout);
+        paymentDetails.setOrderId(orderId);
+
         response.setPaymentDetails(paymentDetails);
         
         eof = false;
@@ -345,6 +377,8 @@ public class PayPalResponseGeneratorImpl implements PayPalResponseGenerator {
 
     protected PayPalPaymentResponse buildCheckoutResponse(String rawResponse, PayPalPaymentRequest paymentRequest) {
         PayPalPaymentResponse response = new PayPalPaymentResponse();
+        response.setRawResponse(rawResponse);
+
         response.setTransactionType(paymentRequest.getTransactionType());
         response.setMethodType(paymentRequest.getMethodType());
         response.setCorrelationId(getResponseValue(rawResponse, MessageConstants.CORRELATIONID));
@@ -354,7 +388,8 @@ public class PayPalResponseGeneratorImpl implements PayPalResponseGenerator {
             response.setErrorDetected(false);
             response.setSuccessful(true);
             response.setResponseToken(getResponseValue(rawResponse, MessageConstants.TOKEN));
-        } else if (ack.toLowerCase().equals(MessageConstants.SUCCESSWITHWARNINGS)) {
+        } else if (ack.toLowerCase().equals(MessageConstants.SUCCESSWITHWARNINGS) ||
+                ack.toLowerCase().equals(MessageConstants.SUCCESSWITHWARNING)) {
             response.setSuccessful(true);
             response.setErrorDetected(true);
             response.setResponseToken(getResponseValue(rawResponse, MessageConstants.TOKEN));
@@ -430,11 +465,7 @@ public class PayPalResponseGeneratorImpl implements PayPalResponseGenerator {
 
     @Override
     public String getUserRedirectUrl() {
-        return userRedirectUrl;
+        return configuration.getUserRedirectUrl();
     }
 
-    @Override
-    public void setUserRedirectUrl(String userRedirectUrl) {
-        this.userRedirectUrl = userRedirectUrl;
-    }
 }
