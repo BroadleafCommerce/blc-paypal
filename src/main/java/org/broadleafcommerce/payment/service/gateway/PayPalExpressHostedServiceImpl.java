@@ -16,6 +16,8 @@
 
 package org.broadleafcommerce.payment.service.gateway;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.broadleafcommerce.common.payment.dto.PaymentRequestDTO;
 import org.broadleafcommerce.common.payment.dto.PaymentResponseDTO;
 import org.broadleafcommerce.common.payment.service.PaymentGatewayHostedService;
@@ -28,6 +30,8 @@ import org.springframework.stereotype.Service;
  */
 @Service("blPayPalExpressHostedService")
 public class PayPalExpressHostedServiceImpl extends AbstractPayPalExpressService implements PaymentGatewayHostedService {
+
+    protected static final Log LOG = LogFactory.getLog(PayPalExpressHostedServiceImpl.class);
 
     @Override
     public String getServiceName() {
@@ -42,7 +46,14 @@ public class PayPalExpressHostedServiceImpl extends AbstractPayPalExpressService
             transactionType = PayPalTransactionType.AUTHORIZE;
         }
 
-        return commonAuthorizeOrSale(paymentRequestDTO, transactionType, null, null);
+        PaymentResponseDTO responseDTO = commonAuthorizeOrSale(paymentRequestDTO, transactionType, null, null);
+
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Request to PayPal Express Checkout Hosted Endpoint with raw response: " +
+                responseDTO.getRawResponse());
+        }
+
+        return responseDTO;
 
     }
 

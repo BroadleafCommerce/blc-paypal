@@ -58,6 +58,9 @@ public class PayPalExpressConfigurationImpl implements PayPalExpressConfiguratio
     @Value("${gateway.paypal.expressCheckout.useRelativeUrls}")
     protected String useRelativeUrls;
 
+    @Value("${gateway.paypal.expressCheckout.shippingDisplayType}")
+    protected String shippingDisplayType;
+
     @Value("${gateway.paypal.expressCheckout.returnUrl}")
     protected String returnUrl;
 
@@ -121,6 +124,15 @@ public class PayPalExpressConfigurationImpl implements PayPalExpressConfiguratio
 
     @Override
     public PayPalShippingDisplayType getShippingDisplayType() {
+        String shippingType =
+                systemPropertiesService.resolveSystemProperty("gateway.paypal.expressCheckout.shippingDisplayType",
+                        shippingDisplayType);
+
+        PayPalShippingDisplayType displayType = PayPalShippingDisplayType.getInstance(shippingType);
+        if (displayType != null) {
+            return displayType;
+        }
+
         return PayPalShippingDisplayType.NO_DISPLAY;
     }
 

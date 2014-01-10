@@ -43,17 +43,17 @@ You can also store these configs in the Database by utilizing the `blSystemPrope
 - gateway.paypal.expressCheckout.user=?
 - gateway.paypal.expressCheckout.signature=?
 - gateway.paypal.expressCheckout.useRelativeUrls=false
+- gateway.paypal.expressCheckout.shippingDisplayType=?
 - gateway.paypal.expressCheckout.returnUrl=? (http://localhost:8080/paypal-express/return)
 - gateway.paypal.expressCheckout.cancelUrl=? (http://localhost:8080/paypal-express/cancel)
 
-- paypal.return.url: the URL PayPal should redirect to after completing the order
-- paypal.cancel.url: the URL PayPal should redirect to if a user abandons the order
+- gateway.paypal.expressCheckout.shippingDisplayType: (0 - PayPal displays the shipping address passed in, 1 - PayPal does not display the shipping fields at all. (Default), 2 - PayPal will obtain the shipping address from the buyer's profile.)
+- gateway.paypal.expressCheckout.returnUrl: the URL PayPal should redirect to after completing the order
+- gateway.paypal.expressCheckout.cancelUrl: the URL PayPal should redirect to if a user abandons the order
 
 ### Production Property Config
 - gateway.paypal.expressCheckout.serverUrl=https://api-3t.paypal.com/nvp
 - gateway.paypal.expressCheckout.userRedirectUrl=https://www.paypal.com/cgi-bin/webscr
 
-- paypal.return.url: the URL PayPal should redirect to after completing the order
-- paypal.cancel.url: the URL PayPal should redirect to if a user abandons the order
 
 Now that you have your environment set up, let's begin setting up the [[PayPal Module]].
