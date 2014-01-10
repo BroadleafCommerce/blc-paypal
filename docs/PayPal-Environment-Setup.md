@@ -19,7 +19,7 @@ Once you have established an account with PayPal, begin by including the PayPal 
 </dependency>
 ```
 
-Make sure to include the dependency in your site pom.xml as well:
+Make sure to include the dependency in your `site` AND `admin` pom.xml as well:
 
 ```xml
 <dependency>
@@ -32,6 +32,8 @@ You should now begin to setup your environment to work with Broadleaf Commerce P
 
 Broadleaf allows you to create your own property files per environment (e.g. common.properties, local.properties, development.properties, integrationdev.properties, integrationqa.properties, staging.properties, and production.properties) 
 You will need to enter the following key/value pairs in the appropriate locations and replace the "?" with your paypal api account details:
+
+You can also store these configs in the Database by utilizing the `blSystemPropertiesService`. See the java docs for more details.
 
 ### Properties File Config
 - gateway.paypal.expressCheckout.libVersion=78.0

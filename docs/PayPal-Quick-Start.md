@@ -6,22 +6,27 @@ Broadleaf Commerce offers an out-of-the-box PayPal solution that requires little
 
 ## Adding PayPal Express Checkout Support
 
-1. Add the following component scan in your `applicationContext-servlet.xml`
+1. Add the following component scan in your `applicationContext-servlet.xml` in your `site` module
 
 ```xml
     <context:component-scan base-package="org.broadleafcommerce.vendor.paypal"/>
 ```
 
-2. Add the PayPal Express component scan in your `applicationContext.xml`
+2. Add the PayPal Express component scan in your `applicationContext.xml` of your `core` module
 
-3. Inject the PayPalExpressCheckoutLinkProcessor into the Broadleaf Thymeleaf Dialect Processors `blDialectProcessors` in your `applicationContext.xml`
+3. Declare the bean `org.broadleafcommerce.vendor.paypal.service.payment.PayPalExpressPaymentGatewayType` so that Spring can initalize the Broadleaf Enumeration for both Site and Admin
 
-4. Inject the `blPayPalExpressConfigurationService` bean into the `blPaymentGatewayConfigurationServices` list in your `applicationContext.xml`
+4. Inject the PayPalExpressCheckoutLinkProcessor into the Broadleaf Thymeleaf Dialect Processors `blDialectProcessors` in your `applicationContext.xml` of your `core` module
+
+5. Inject the `blPayPalExpressConfigurationService` bean into the `blPaymentGatewayConfigurationServices` list in your `applicationContext.xml` of your `core` module
+
+Example:
 
 ```xml
     <!-- PayPal Express Checkout -->
     <context:component-scan base-package="org.broadleafcommerce.payment.service.gateway"/>
     <context:component-scan base-package="org.broadleafcommerce.vendor.paypal"/>
+    <bean class="org.broadleafcommerce.vendor.paypal.service.payment.PayPalExpressPaymentGatewayType"/>
 
     <bean id="blPayPalExpressCheckoutLinkProcessor" class="org.broadleafcommerce.vendor.paypal.web.processor.PayPalExpressCheckoutLinkProcessor"/>
     <bean id="myCompanyPaymentProcessors" class="org.springframework.beans.factory.config.SetFactoryBean">
