@@ -16,6 +16,7 @@
 
 package org.broadleafcommerce.payment.service.gateway;
 
+import org.broadleafcommerce.common.config.service.SystemPropertiesService;
 import org.broadleafcommerce.common.payment.PaymentGatewayType;
 import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalExpressPaymentGatewayType;
@@ -23,6 +24,7 @@ import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalShippingDi
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,6 +33,9 @@ import java.util.Map;
  */
 @Service("blPayPalExpressConfiguration")
 public class PayPalExpressConfigurationImpl implements PayPalExpressConfiguration {
+
+    @Resource(name = "blSystemPropertiesService")
+    protected SystemPropertiesService systemPropertiesService;
 
     @Value("${gateway.paypal.expressCheckout.serverUrl}")
     protected String serverUrl;
@@ -65,38 +70,40 @@ public class PayPalExpressConfigurationImpl implements PayPalExpressConfiguratio
 
     @Override
     public String getServerUrl() {
-        return serverUrl;
+        return systemPropertiesService.resolveSystemProperty("gateway.paypal.expressCheckout.serverUrl", serverUrl);
     }
 
     @Override
     public String getUserRedirectUrl() {
-        return userRedirectUrl;
+        return systemPropertiesService.resolveSystemProperty("gateway.paypal.expressCheckout.userRedirectUrl", userRedirectUrl);
     }
 
     @Override
     public String getLibVersion() {
-        return libVersion;
+        return systemPropertiesService.resolveSystemProperty("gateway.paypal.expressCheckout.libVersion", libVersion);
     }
 
     @Override
     public String getPassword() {
-        return password;
+        return systemPropertiesService.resolveSystemProperty("gateway.paypal.expressCheckout.password", password);
     }
 
     @Override
     public String getUser() {
-        return user;
+        return systemPropertiesService.resolveSystemProperty("gateway.paypal.expressCheckout.user", user);
     }
 
     @Override
     public String getSignature() {
-        return signature;
+        return systemPropertiesService.resolveSystemProperty("gateway.paypal.expressCheckout.signature", signature);
     }
 
     @Override
     public Boolean getUseRelativeUrls() {
         Boolean useRelative = false;
-        if ("true".equalsIgnoreCase(useRelativeUrls)){
+        if ("true".equalsIgnoreCase(
+                systemPropertiesService.resolveSystemProperty("gateway.paypal.expressCheckout.useRelativeUrls",
+                        useRelativeUrls))){
             useRelative = true;
         }
         return useRelative;
@@ -104,12 +111,12 @@ public class PayPalExpressConfigurationImpl implements PayPalExpressConfiguratio
 
     @Override
     public String getReturnUrl() {
-        return returnUrl;
+        return systemPropertiesService.resolveSystemProperty("gateway.paypal.expressCheckout.returnUrl", returnUrl);
     }
 
     @Override
     public String getCancelUrl() {
-        return cancelUrl;
+        return systemPropertiesService.resolveSystemProperty("gateway.paypal.expressCheckout.cancelUrl", cancelUrl);
     }
 
     @Override
