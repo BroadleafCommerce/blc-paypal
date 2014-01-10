@@ -21,6 +21,7 @@ import org.broadleafcommerce.core.checkout.service.CheckoutService;
 import org.broadleafcommerce.core.checkout.service.exception.CheckoutException;
 import org.broadleafcommerce.core.checkout.service.workflow.CheckoutResponse;
 import org.broadleafcommerce.core.order.domain.Order;
+import org.broadleafcommerce.core.order.service.OrderService;
 import org.broadleafcommerce.core.payment.domain.PaymentInfo;
 import org.broadleafcommerce.core.payment.domain.PaymentResponseItem;
 import org.broadleafcommerce.core.payment.domain.Referenced;
@@ -64,6 +65,9 @@ public class PayPalCheckoutServiceImpl implements PayPalCheckoutService {
     @Resource(name="blPayPalModule")
     protected PayPalPaymentModule payPalPaymentModule;
 
+    @Resource(name="blOrderService")
+    protected OrderService orderService;
+
     /**
      * Initiates an Express Checkout transaction by invoking the SetExpressCheckout API.
      * This will verify the PayPal PaymentInfo on the order when sent to the gateway.
@@ -76,6 +80,10 @@ public class PayPalCheckoutServiceImpl implements PayPalCheckoutService {
      */
     @Override
     public CompositePaymentResponse initiateExpressCheckout(Order order) throws PaymentException {
+
+        //NOTE: assumes only one payment info of type paypal on the order.
+        orderService.removePaymentsFromOrder(order, PaymentInfoType.PAYPAL);
+
         return compositePaymentService.executePaymentForGateway(order, new PayPalPaymentInfoFactoryImpl());
     }
 
