@@ -16,14 +16,13 @@
 
 package org.broadleafcommerce.payment.service.gateway;
 
-import org.broadleafcommerce.common.config.service.SystemPropertiesService;
 import org.broadleafcommerce.common.payment.PaymentGatewayType;
+import org.broadleafcommerce.common.util.BLCSystemProperty;
 import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalExpressPaymentGatewayType;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalShippingDisplayType;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,61 +32,58 @@ import java.util.Map;
 @Service("blPayPalExpressConfiguration")
 public class PayPalExpressConfigurationImpl implements PayPalExpressConfiguration {
 
-    @Resource(name = "blSystemPropertiesService")
-    protected SystemPropertiesService systemPropertiesService;
-
     protected int failureReportingThreshold = 1;
 
     protected boolean performAuthorizeAndCapture = true;
 
     @Override
     public String getServerUrl() {
-        return systemPropertiesService.resolveSystemProperty("gateway.paypal.expressCheckout.serverUrl");
+        return BLCSystemProperty.resolveSystemProperty("gateway.paypal.expressCheckout.serverUrl");
     }
 
     @Override
     public String getUserRedirectUrl() {
-        return systemPropertiesService.resolveSystemProperty("gateway.paypal.expressCheckout.userRedirectUrl");
+        return BLCSystemProperty.resolveSystemProperty("gateway.paypal.expressCheckout.userRedirectUrl");
     }
 
     @Override
     public String getLibVersion() {
-        return systemPropertiesService.resolveSystemProperty("gateway.paypal.expressCheckout.libVersion");
+        return BLCSystemProperty.resolveSystemProperty("gateway.paypal.expressCheckout.libVersion");
     }
 
     @Override
     public String getPassword() {
-        return systemPropertiesService.resolveSystemProperty("gateway.paypal.expressCheckout.password");
+        return BLCSystemProperty.resolveSystemProperty("gateway.paypal.expressCheckout.password");
     }
 
     @Override
     public String getUser() {
-        return systemPropertiesService.resolveSystemProperty("gateway.paypal.expressCheckout.user");
+        return BLCSystemProperty.resolveSystemProperty("gateway.paypal.expressCheckout.user");
     }
 
     @Override
     public String getSignature() {
-        return systemPropertiesService.resolveSystemProperty("gateway.paypal.expressCheckout.signature");
+        return BLCSystemProperty.resolveSystemProperty("gateway.paypal.expressCheckout.signature");
     }
 
     @Override
     public Boolean getUseRelativeUrls() {
-        return systemPropertiesService.resolveBooleanSystemProperty("gateway.paypal.expressCheckout.useRelativeUrls");
+        return BLCSystemProperty.resolveBooleanSystemProperty("gateway.paypal.expressCheckout.useRelativeUrls");
     }
 
     @Override
     public String getReturnUrl() {
-        return systemPropertiesService.resolveSystemProperty("gateway.paypal.expressCheckout.returnUrl");
+        return BLCSystemProperty.resolveSystemProperty("gateway.paypal.expressCheckout.returnUrl");
     }
 
     @Override
     public String getCancelUrl() {
-        return systemPropertiesService.resolveSystemProperty("gateway.paypal.expressCheckout.cancelUrl");
+        return BLCSystemProperty.resolveSystemProperty("gateway.paypal.expressCheckout.cancelUrl");
     }
 
     @Override
     public PayPalShippingDisplayType getShippingDisplayType() {
-        String shippingType = systemPropertiesService.resolveSystemProperty("gateway.paypal.expressCheckout.shippingDisplayType");
+        String shippingType = BLCSystemProperty.resolveSystemProperty("gateway.paypal.expressCheckout.shippingDisplayType");
 
         PayPalShippingDisplayType displayType = PayPalShippingDisplayType.getInstance(shippingType);
         if (displayType != null) {
