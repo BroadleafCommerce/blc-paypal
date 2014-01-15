@@ -20,6 +20,7 @@ import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.broadleafcommerce.common.money.Money;
+import org.broadleafcommerce.common.util.BLCRequestUtils;
 import org.broadleafcommerce.common.web.BroadleafRequestContext;
 import org.broadleafcommerce.payment.service.gateway.PayPalExpressConfiguration;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalRequest;
@@ -228,30 +229,16 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
         }
         return property;
     }
-    
-    protected String getRequestedServerPrefix() {
-        HttpServletRequest request = BroadleafRequestContext.getBroadleafRequestContext().getRequest();
-        String scheme = request.getScheme();
-        StringBuilder serverPrefix = new StringBuilder(scheme);
-        serverPrefix.append("://");
-        serverPrefix.append(request.getServerName());
-        if ((scheme.equalsIgnoreCase("http") && request.getServerPort() != 80) || (scheme.equalsIgnoreCase("https") && request.getServerPort() != 443)) {
-        	serverPrefix.append(":");
-        	serverPrefix.append(request.getServerPort());
-        }
-        return serverPrefix.toString();
-    }
 
     @Override
     public Map<String, String> getAdditionalConfig() {
         return configuration.getAdditionalConfig();
     }
 
-
     @Override
     public String getCancelUrl() {
         return Boolean.TRUE.equals(getUseRelativeUrls()) ?
-                getRequestedServerPrefix() + configuration.getCancelUrl() : configuration.getCancelUrl();
+                BLCRequestUtils.getRequestedServerPrefix() + configuration.getCancelUrl() : configuration.getCancelUrl();
     }
 
     @Override
@@ -267,7 +254,7 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
     @Override
     public String getReturnUrl() {
         return Boolean.TRUE.equals(getUseRelativeUrls()) ?
-                getRequestedServerPrefix() + configuration.getReturnUrl() : configuration.getReturnUrl();
+                BLCRequestUtils.getRequestedServerPrefix() + configuration.getReturnUrl() : configuration.getReturnUrl();
     }
 
     @Override
