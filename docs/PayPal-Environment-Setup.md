@@ -47,9 +47,13 @@ You can also store these configs in the Database by utilizing the `blSystemPrope
 - gateway.paypal.expressCheckout.returnUrl=? (http://localhost:8080/paypal-express/return)
 - gateway.paypal.expressCheckout.cancelUrl=? (http://localhost:8080/paypal-express/cancel)
 
+> Note - This module comes pre-configured with a Spring MVC controller with URL endpoints to handle:
+Enable these with your component scan if you would like to use these in your implementation.
+- `/paypal-express/return`
+- `/paypal-express/cancel`
+
+> Note - Shipping Display Type
 - gateway.paypal.expressCheckout.shippingDisplayType: (0 - PayPal displays the shipping address passed in, 1 - PayPal does not display the shipping fields at all. (Default), 2 - PayPal will obtain the shipping address from the buyer's profile.)
-- gateway.paypal.expressCheckout.returnUrl: the URL PayPal should redirect to after completing the order
-- gateway.paypal.expressCheckout.cancelUrl: the URL PayPal should redirect to if a user abandons the order
 
 ### Production Property Config
 - gateway.paypal.expressCheckout.serverUrl=https://api-3t.paypal.com/nvp
