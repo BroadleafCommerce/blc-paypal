@@ -15,6 +15,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <blc.version>3.1.0-SNAPSHOT</blc.version>
+        <project.uri>${user.dir}</project.uri>
     </properties>
     <scm>
         <connection>scm:git:git@github.com:BroadleafCommerce/blc-paypal.git</connection>
@@ -119,6 +120,48 @@
                         </excludes>
                     </instrumentation>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <version>1.5</version>
+                <configuration>
+                    <verbose>false</verbose>
+                    <addSvnKeyWords>false</addSvnKeyWords>
+                    <addJavaLicenseAfterPackage>false</addJavaLicenseAfterPackage>
+                    <organizationName>Broadleaf Commerce</organizationName>
+                    <inceptionYear>2009</inceptionYear>
+                    <licenseName>blc_apache</licenseName>
+                    <licenseResolver>file:${project.uri}/licenses</licenseResolver>
+                    <excludes>
+                        <exclude>**/*.sql</exclude>
+                        <exclude>**/*.html</exclude>
+                        <exclude>**/*font-awesome*</exclude>
+                        <exclude>**/*jquery*</exclude>
+                        <exclude>**/*modernizr*</exclude>
+                        <exclude>**/*responsive-tables*</exclude>
+                        <exclude>**/spectrum.css</exclude>
+                        <exclude>**/spectrum.js</exclude>
+                        <exclude>**/redactor.js</exclude>   
+                        <exclude>**/sitemap/**/*.xml</exclude>                       
+                    </excludes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>first</id>
+                        <goals>
+                            <goal>update-file-header</goal>
+                            <goal>update-project-license</goal>
+                        </goals>
+                        <phase>process-sources</phase>
+                        <configuration>
+                            <roots>
+                                <root>src/main</root>
+                                <root>src/test</root>
+                            </roots>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
