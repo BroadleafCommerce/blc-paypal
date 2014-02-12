@@ -56,26 +56,34 @@ Example:
 
 5. Add the PayPal Express Buttons to your site:
 
-If you are using the Heat Clinic Demo Site, add the following lines to:
+If you are using the Heat Clinic Demo Site:
 
-- cart.html
+- replace the following code in cart.html
 
 ```html
-    <a blc:paypal_express_link="${paymentRequestDTO}" complete_checkout="${false}">
-        <img src="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif" align="left" style="margin-right:7px;"/>
-    </a>
+<form blc:null_payment_hosted_action="${paymentRequestDTO}" complete_checkout="${false}" method="POST">
+...
+</form>
 ```
 
-- paymentMethodForm.html
+with
 
 ```html
-    <dd>
-        <div id="paypalfields">
-            <div class="form100">
-                <a blc:paypal_express_link="${paymentRequestDTO}" complete_checkout="${true}">
-                    <img src="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif" align="left" style="margin-right:7px;"/>
-                </a>
-            </div>
-        </div>
-    </dd>
+<a blc:paypal_express_link="${paymentRequestDTO}" complete_checkout="${false}">
+    <img src="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif" align="left" style="margin-right:7px;"/>
+</a>
+```
+
+- replace the following code in paymentMethodForm.html
+
+```html
+<img th:src="@{/img/paypal.gif}" alt="Pay with Paypal" width="100" />
+```
+
+with
+
+```html
+<a blc:paypal_express_link="${paymentRequestDTO}" complete_checkout="${true}">
+    <img src="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif" align="left" style="margin-right:7px;"/>
+</a>
 ```
