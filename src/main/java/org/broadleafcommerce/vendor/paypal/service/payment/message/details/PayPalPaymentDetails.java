@@ -1,19 +1,22 @@
 /*
- * Copyright 2008-2012 the original author or authors.
- *
+ * #%L
+ * BroadleafCommerce PayPal
+ * %%
+ * Copyright (C) 2009 - 2014 Broadleaf Commerce
+ * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *       http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * #L%
  */
-
 package org.broadleafcommerce.vendor.paypal.service.payment.message.details;
 
 import java.io.Serializable;
@@ -33,11 +36,12 @@ public class PayPalPaymentDetails implements Serializable {
     protected Money shippingTotal;
     protected Money shippingDiscount;
     protected Money totalTax;
-    protected String referenceNumber;
+    protected String orderId;
     protected String transactionId;
     protected String paymentMethod;
     protected String paymentRequestId;
     protected List<PayPalPaymentItemDetails> itemDetails = new ArrayList<PayPalPaymentItemDetails>();
+    protected boolean completeCheckoutOnCallback = true;
 
     public Money getAmount() {
         return amount;
@@ -87,12 +91,12 @@ public class PayPalPaymentDetails implements Serializable {
         this.paymentRequestId = paymentRequestId;
     }
 
-    public String getReferenceNumber() {
-        return referenceNumber;
+    public String getOrderId() {
+        return orderId;
     }
 
-    public void setReferenceNumber(String referenceNumber) {
-        this.referenceNumber = referenceNumber;
+    public void setOrderId(String orderId) {
+        this.orderId = orderId;
     }
 
     public Money getShippingDiscount() {
@@ -127,6 +131,14 @@ public class PayPalPaymentDetails implements Serializable {
         this.transactionId = transactionId;
     }
 
+    public boolean isCompleteCheckoutOnCallback() {
+        return completeCheckoutOnCallback;
+    }
+
+    public void setCompleteCheckoutOnCallback(boolean completeCheckoutOnCallback) {
+        this.completeCheckoutOnCallback = completeCheckoutOnCallback;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -142,7 +154,7 @@ public class PayPalPaymentDetails implements Serializable {
             return false;
         if (paymentRequestId != null ? !paymentRequestId.equals(that.paymentRequestId) : that.paymentRequestId != null)
             return false;
-        if (referenceNumber != null ? !referenceNumber.equals(that.referenceNumber) : that.referenceNumber != null)
+        if (orderId != null ? !orderId.equals(that.orderId) : that.orderId != null)
             return false;
         if (shippingDiscount != null ? !shippingDiscount.equals(that.shippingDiscount) : that.shippingDiscount != null)
             return false;
@@ -163,7 +175,7 @@ public class PayPalPaymentDetails implements Serializable {
         result = 31 * result + (shippingTotal != null ? shippingTotal.hashCode() : 0);
         result = 31 * result + (shippingDiscount != null ? shippingDiscount.hashCode() : 0);
         result = 31 * result + (totalTax != null ? totalTax.hashCode() : 0);
-        result = 31 * result + (referenceNumber != null ? referenceNumber.hashCode() : 0);
+        result = 31 * result + (orderId != null ? orderId.hashCode() : 0);
         result = 31 * result + (transactionId != null ? transactionId.hashCode() : 0);
         result = 31 * result + (paymentMethod != null ? paymentMethod.hashCode() : 0);
         result = 31 * result + (paymentRequestId != null ? paymentRequestId.hashCode() : 0);

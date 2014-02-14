@@ -1,19 +1,22 @@
 /*
- * Copyright 2008-2012 the original author or authors.
- *
+ * #%L
+ * BroadleafCommerce PayPal
+ * %%
+ * Copyright (C) 2009 - 2014 Broadleaf Commerce
+ * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *       http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * #L%
  */
-
 package org.broadleafcommerce.vendor.paypal.service.payment.message.payment;
 
 import java.util.ArrayList;
@@ -32,6 +35,7 @@ public class PayPalPaymentRequest extends PayPalRequest {
 
     private static final long serialVersionUID = 1L;
 
+    protected String orderId;
     protected String currency;
     protected String payerID;
     protected String token;
@@ -39,9 +43,17 @@ public class PayPalPaymentRequest extends PayPalRequest {
     protected List<PayPalShippingRequest> shippingRequests = new ArrayList<PayPalShippingRequest>();
     protected PayPalTransactionType transactionType;
     protected PayPalSummaryRequest summaryRequest;
-    protected String referenceNumber;
     protected String transactionID;
     protected PayPalRefundType refundType;
+    protected boolean completeCheckoutOnCallback = true;
+
+    public String getOrderId() {
+        return orderId;
+    }
+
+    public void setOrderId(String orderId) {
+        this.orderId = orderId;
+    }
 
     public PayPalTransactionType getTransactionType() {
         return transactionType;
@@ -73,14 +85,6 @@ public class PayPalPaymentRequest extends PayPalRequest {
 
     public void setSummaryRequest(PayPalSummaryRequest summaryRequest) {
         this.summaryRequest = summaryRequest;
-    }
-
-    public String getReferenceNumber() {
-        return referenceNumber;
-    }
-
-    public void setReferenceNumber(String referenceNumber) {
-        this.referenceNumber = referenceNumber;
     }
 
     public String getPayerID() {
@@ -123,6 +127,14 @@ public class PayPalPaymentRequest extends PayPalRequest {
         this.shippingRequests = shippingRequests;
     }
 
+    public boolean isCompleteCheckoutOnCallback() {
+        return completeCheckoutOnCallback;
+    }
+
+    public void setCompleteCheckoutOnCallback(boolean completeCheckoutOnCallback) {
+        this.completeCheckoutOnCallback = completeCheckoutOnCallback;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -137,7 +149,7 @@ public class PayPalPaymentRequest extends PayPalRequest {
         if (shippingRequests != null ? !shippingRequests.equals(request.shippingRequests) : request.shippingRequests != null)
             return false;
         if (payerID != null ? !payerID.equals(request.payerID) : request.payerID != null) return false;
-        if (referenceNumber != null ? !referenceNumber.equals(request.referenceNumber) : request.referenceNumber != null)
+        if (orderId != null ? !orderId.equals(request.orderId) : request.orderId != null)
             return false;
         if (refundType != null ? !refundType.equals(request.refundType) : request.refundType != null) return false;
         if (summaryRequest != null ? !summaryRequest.equals(request.summaryRequest) : request.summaryRequest != null)
@@ -161,7 +173,7 @@ public class PayPalPaymentRequest extends PayPalRequest {
         result = 31 * result + (shippingRequests != null ? shippingRequests.hashCode() : 0);
         result = 31 * result + (transactionType != null ? transactionType.hashCode() : 0);
         result = 31 * result + (summaryRequest != null ? summaryRequest.hashCode() : 0);
-        result = 31 * result + (referenceNumber != null ? referenceNumber.hashCode() : 0);
+        result = 31 * result + (orderId != null ? orderId.hashCode() : 0);
         result = 31 * result + (transactionID != null ? transactionID.hashCode() : 0);
         result = 31 * result + (refundType != null ? refundType.hashCode() : 0);
         return result;

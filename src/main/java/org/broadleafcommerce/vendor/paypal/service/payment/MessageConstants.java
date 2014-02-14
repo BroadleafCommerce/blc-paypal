@@ -1,19 +1,22 @@
 /*
- * Copyright 2008-2012 the original author or authors.
- *
+ * #%L
+ * BroadleafCommerce PayPal
+ * %%
+ * Copyright (C) 2009 - 2014 Broadleaf Commerce
+ * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *       http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * #L%
  */
-
 package org.broadleafcommerce.vendor.paypal.service.payment;
 
 /**
@@ -25,6 +28,10 @@ public class MessageConstants {
     public static final String SUBTOTAL = "SUBTOTAL";
     public static final String TOTALSHIPPING = "TOTALSHIPPING";
     public static final String TOTALTAX = "TOTALTAX";
+
+    public static final String TOTALTYPE = "TOTALTYPE";
+    public static final String TOTAL = "Total";
+    public static final String ESTIMATEDTOTAL = "EstimatedTotal";
 
     public static final String MODULEERRORCODE = "MODULEERRORCODE";
     public static final String MODULEERRORSHORTMESSAGE = "MODULEERRORSHORTMESSAGE";
@@ -55,7 +62,9 @@ public class MessageConstants {
     public static final String ACK = "ACK";
     public static final String SUCCESS = "success";
     public static final String SUCCESSWITHWARNINGS = "successwithwarnings";
+    public static final String SUCCESSWITHWARNING = "successwithwarning";
     public static final String TOKEN = "TOKEN";
+    public static final String CUSTOM = "CUSTOM";
     public static final String CORRELATIONID = "CORRELATIONID";
     public static final String TRANSACTIONID = "TRANSACTIONID";
     public static final String PARENTTRANSACTIONID = "PARENTTRANSACTIONID";
@@ -118,7 +127,8 @@ public class MessageConstants {
     public static final String DETAILSPAYMENTSHIPPINGTOTAL = "PAYMENTREQUEST_n_SHIPPINGAMT";
     public static final String DETAILSPAYMENTSHIPPINGDISCOUNT = "PAYMENTREQUEST_n_SHIPDISCAMT";
     public static final String DETAILSPAYMENTTOTALTAX = "PAYMENTREQUEST_n_TAXAMT";
-    public static final String DETAILSPAYMENTREFERENCENUMBER = "PAYMENTREQUEST_n_INVNUM";
+    public static final String DETAILSPAYMENTINVNUM = "PAYMENTREQUEST_n_INVNUM";
+    public static final String DETAILSPAYMENTCUSTOM = "PAYMENTREQUEST_n_CUSTOM";
     public static final String DETAILSPAYMENTTRANSACTIONID = "PAYMENTREQUEST_n_TRANSACTIONID";
     public static final String DETAILSPAYMENTALLOWEDMETHOD = "PAYMENTREQUEST_n_ALLOWEDPAYMENTMETHOD";
     public static final String DETAILSPAYMENTREQUESTID = "PAYMENTREQUEST_n_PAYMENTREQUESTID";
@@ -161,5 +171,9 @@ public class MessageConstants {
     public static final String VOIDACTION = "DoVoid";
     public static final String BN = "BUTTONSOURCE";
     public static final String BNCODE = "BroadleafCommerce_Cart_EC";
+
+    public static final String HTTP_PAYERID = "PayerID";
+    public static final String HTTP_TOKEN = "token";
+    public static final String HTTP_REQUEST = "HTTP_REQUEST";
 
 }

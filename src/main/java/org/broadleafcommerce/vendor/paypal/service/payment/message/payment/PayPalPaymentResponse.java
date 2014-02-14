@@ -1,44 +1,47 @@
 /*
- * Copyright 2008-2012 the original author or authors.
- *
+ * #%L
+ * BroadleafCommerce PayPal
+ * %%
+ * Copyright (C) 2009 - 2014 Broadleaf Commerce
+ * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *       http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * #L%
  */
-
 package org.broadleafcommerce.vendor.paypal.service.payment.message.payment;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.broadleafcommerce.common.vendor.service.message.PaymentResponse;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.ErrorCheckable;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalErrorResponse;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalResponse;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalMethodType;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalTransactionType;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
  * 
  * @author jfischer
  *
  */
-public class PayPalPaymentResponse extends PayPalResponse implements PaymentResponse, ErrorCheckable {
+public class PayPalPaymentResponse extends PayPalResponse implements ErrorCheckable {
         
     private static final long serialVersionUID = 1L;
     
     protected boolean isErrorDetected = false;
     protected boolean isSuccessful = true;
+    protected String orderId;
     protected String errorText;
     protected PayPalTransactionType transactionType;
     protected PayPalMethodType methodType;
@@ -49,6 +52,14 @@ public class PayPalPaymentResponse extends PayPalResponse implements PaymentResp
     protected String ack;
     protected PayPalPaymentInfo paymentInfo;
     protected PayPalRefundInfo refundInfo;
+
+    public String getOrderId() {
+        return orderId;
+    }
+
+    public void setOrderId(String orderId) {
+        this.orderId = orderId;
+    }
 
     public PayPalTransactionType getTransactionType() {
         return transactionType;
@@ -176,6 +187,7 @@ public class PayPalPaymentResponse extends PayPalResponse implements PaymentResp
             return false;
         if (paymentInfo != null ? !paymentInfo.equals(that.paymentInfo) : that.paymentInfo != null) return false;
         if (refundInfo != null ? !refundInfo.equals(that.refundInfo) : that.refundInfo != null) return false;
+        if (orderId != null ? !orderId.equals(that.orderId) : that.orderId != null) return false;
         if (transactionType != null ? !transactionType.equals(that.transactionType) : that.transactionType != null)
             return false;
         if (userRedirectUrl != null ? !userRedirectUrl.equals(that.userRedirectUrl) : that.userRedirectUrl != null)
@@ -199,6 +211,7 @@ public class PayPalPaymentResponse extends PayPalResponse implements PaymentResp
         result = 31 * result + (ack != null ? ack.hashCode() : 0);
         result = 31 * result + (paymentInfo != null ? paymentInfo.hashCode() : 0);
         result = 31 * result + (refundInfo != null ? refundInfo.hashCode() : 0);
+        result = 31 * result + (orderId != null ? orderId.hashCode() : 0);
         return result;
     }
 }

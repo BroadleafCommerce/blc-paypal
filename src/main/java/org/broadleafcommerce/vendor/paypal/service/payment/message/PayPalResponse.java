@@ -1,19 +1,22 @@
 /*
- * Copyright 2008-2012 the original author or authors.
- *
+ * #%L
+ * BroadleafCommerce PayPal
+ * %%
+ * Copyright (C) 2009 - 2014 Broadleaf Commerce
+ * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ * 
  *       http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * #L%
  */
-
 package org.broadleafcommerce.vendor.paypal.service.payment.message;
 
 import java.io.Serializable;
@@ -22,17 +25,9 @@ import java.io.Serializable;
  * @author Jeff Fischer
  */
 public abstract class PayPalResponse implements Serializable {
-    
-    protected String referenceNumber;
+
     protected String responseToken;
-
-    public String getReferenceNumber() {
-        return referenceNumber;
-    }
-
-    public void setReferenceNumber(String referenceNumber) {
-        this.referenceNumber = referenceNumber;
-    }
+    protected String rawResponse;
 
     public String getResponseToken() {
         return responseToken;
@@ -42,6 +37,14 @@ public abstract class PayPalResponse implements Serializable {
         this.responseToken = responseToken;
     }
 
+    public String getRawResponse() {
+        return rawResponse;
+    }
+
+    public void setRawResponse(String rawResponse) {
+        this.rawResponse = rawResponse;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -49,7 +52,7 @@ public abstract class PayPalResponse implements Serializable {
 
         PayPalResponse that = (PayPalResponse) o;
 
-        if (referenceNumber != null ? !referenceNumber.equals(that.referenceNumber) : that.referenceNumber != null)
+        if (rawResponse != null ? !rawResponse.equals(that.rawResponse) : that.rawResponse != null)
             return false;
         if (responseToken != null ? !responseToken.equals(that.responseToken) : that.responseToken != null)
             return false;
@@ -59,7 +62,7 @@ public abstract class PayPalResponse implements Serializable {
 
     @Override
     public int hashCode() {
-        int result = referenceNumber != null ? referenceNumber.hashCode() : 0;
+        int result = rawResponse != null ? rawResponse.hashCode() : 0;
         result = 31 * result + (responseToken != null ? responseToken.hashCode() : 0);
         return result;
     }
