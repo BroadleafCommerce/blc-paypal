@@ -13,7 +13,7 @@ Once you have established an account with PayPal, begin by including the PayPal 
 <dependency>
     <groupId>org.broadleafcommerce</groupId>
     <artifactId>broadleaf-paypal</artifactId>
-    <version>${broadleaf.paypal-express.version}</version>
+    <version>2.6.0-GA</version>
     <type>jar</type>
     <scope>compile</scope>
 </dependency>
