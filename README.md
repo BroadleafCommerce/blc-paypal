@@ -24,6 +24,7 @@ Your algorithm might look something like this:
 ```java
     Money amountItemSubtotal = new Money(0);
     List<OrderItem> orderItems = order.getOrderItems();
+    //Adds the order items as line items for the PayPal request.
     for (OrderItem orderItem : orderItems) {
         requestDTO.lineItem()
                 .shortDescription(orderItem.getName())
@@ -35,12 +36,14 @@ Your algorithm might look something like this:
     }
 
     Money additionalFees = new Money(0);
+    //Collects the sum of the Fulfillment Group fees, if any, to be added to the PayPal request.
     for (FulfillmentGroup fg : order.getFulfillmentGroups()){
         for (FulfillmentGroupFee fee : fg.getFulfillmentGroupFees()){
             additionalFees = additionalFees.add(fee.getAmount());
         }
     }
-
+    
+    //If there are fees, this adds it to the PayPal request as a line item.
     if (additionalFees.greaterThan(new Money(0))) {
         requestDTO.lineItem()
                 .shortDescription("Additional Fees")
@@ -50,6 +53,8 @@ Your algorithm might look something like this:
         amountItemSubtotal = amountItemSubtotal.add(additionalFees);
     }
 
+    //If there are order level offers, this adds it as a line item with a negative amount
+    //for the PayPal request.
     if (order.getTotalAdjustmentsValue() != null &&
       order.getTotalAdjustmentsValue().greaterThan(new Money(0))){
         requestDTO.lineItem()
