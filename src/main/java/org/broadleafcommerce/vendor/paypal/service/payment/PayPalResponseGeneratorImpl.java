@@ -47,7 +47,6 @@ import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalRefundPend
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalRefundStatusType;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URLDecoder;
@@ -55,16 +54,19 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Currency;
 
+import javax.annotation.Resource;
+
 /**
  * @author Jeff Fischer
  */
 @Service("blPayPalExpressResponseGenerator")
 public class PayPalResponseGeneratorImpl implements PayPalResponseGenerator {
 
+    protected String dateFormatWithMillis = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
+    protected String dateFormatWithoutMillis = "yyyy-MM-dd'T'HH:mm:ss'Z'"; //This is legacy.  It used to work, but now there are millis...
+
     @Resource(name = "blPayPalExpressConfiguration")
     protected PayPalExpressConfiguration configuration;
-
-    protected SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
     @Override
     public PayPalResponse buildResponse(String response, PayPalRequest paymentRequest) {
@@ -285,7 +287,15 @@ public class PayPalResponseGeneratorImpl implements PayPalResponseGenerator {
         String orderTime = getResponseValue(rawResponse, MessageConstants.ORDERITEM);
         if (!StringUtils.isEmpty(orderTime)) {
             try {
-                paymentInfo.setOrderTime(dateFormat.parse(orderTime));
+                //This recently changed.  Let's try with millis first and then without millis if this doesn't work
+                SimpleDateFormat dateFormat = new SimpleDateFormat(dateFormatWithMillis);
+                try {
+                    paymentInfo.setOrderTime(dateFormat.parse(orderTime));
+                } catch (ParseException e) {
+                    //Try without the milliseconds if it didn't work with the millis.
+                    dateFormat = new SimpleDateFormat(dateFormatWithoutMillis);
+                    paymentInfo.setOrderTime(dateFormat.parse(orderTime));
+                }
             } catch (ParseException e) {
                 throw new RuntimeException("Unable to parse the date string (" + orderTime + ")");
             }
@@ -333,7 +343,15 @@ public class PayPalResponseGeneratorImpl implements PayPalResponseGenerator {
         String orderTime = getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.PROCESSPAYMENTORDERITEM, new Integer[]{0}, new String[]{"n"}));
         if (!StringUtils.isEmpty(orderTime)) {
             try {
-                paymentInfo.setOrderTime(dateFormat.parse(orderTime));
+                //This recently changed.  Let's try with millis first and then without millis if this doesn't work
+                SimpleDateFormat dateFormat = new SimpleDateFormat(dateFormatWithMillis);
+                try {
+                    paymentInfo.setOrderTime(dateFormat.parse(orderTime));
+                } catch (ParseException e) {
+                    //Try without the milliseconds if it didn't work with the millis.
+                    dateFormat = new SimpleDateFormat(dateFormatWithoutMillis);
+                    paymentInfo.setOrderTime(dateFormat.parse(orderTime));
+                }
             } catch (ParseException e) {
                 throw new RuntimeException("Unable to parse the date string (" + orderTime + ")");
             }
