@@ -19,6 +19,7 @@
  */
 package org.broadleafcommerce.payment.service.gateway;
 
+import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.broadleafcommerce.common.money.Money;
 import org.broadleafcommerce.common.payment.PaymentTransactionType;
@@ -35,7 +36,6 @@ import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPa
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalMethodType;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalRefundType;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalTransactionType;
-import org.hibernate.annotations.common.util.impl.Log;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
