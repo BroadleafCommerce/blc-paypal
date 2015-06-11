@@ -24,7 +24,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.broadleafcommerce.common.money.Money;
 import org.broadleafcommerce.common.util.BLCRequestUtils;
-import org.broadleafcommerce.common.web.BroadleafRequestContext;
 import org.broadleafcommerce.payment.service.gateway.PayPalExpressConfiguration;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.details.PayPalDetailsRequest;
@@ -41,7 +40,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * @author Jeff Fischer
@@ -66,6 +64,7 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
             setNvpsForCheckoutOrAuth(nvps, (PayPalPaymentRequest) request, MessageConstants.AUTHORIZATIONACTION);
             nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTCURRENCYCODE, new Integer[]{0}, new String[]{"n"}), ((PayPalPaymentRequest) request).getCurrency()));
         } else if (PayPalMethodType.PROCESS.equals(request.getMethodType())) {
+            setCostNvps(nvps, (PayPalPaymentRequest) request);
             setNvpsForProcess(nvps, (PayPalPaymentRequest) request);
             nvps.add(new NameValuePair(replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTCURRENCYCODE, new Integer[]{0}, new String[]{"n"}), ((PayPalPaymentRequest) request).getCurrency()));
         } else if (PayPalMethodType.REFUND.equals(request.getMethodType())) {
