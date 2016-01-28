@@ -19,7 +19,7 @@
  */
 package org.broadleafcommerce.vendor.paypal.service.payment;
 
-import org.apache.commons.httpclient.NameValuePair;
+import org.apache.http.NameValuePair;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalShippingDisplayType;
 

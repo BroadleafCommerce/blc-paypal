@@ -19,11 +19,21 @@
  */
 package org.broadleafcommerce.payment.service.gateway;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.NameValuePair;
-import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.config.Registry;
+import org.apache.http.config.RegistryBuilder;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.conn.socket.PlainConnectionSocketFactory;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.impl.client.BasicResponseHandler;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.broadleafcommerce.common.money.Money;
 import org.broadleafcommerce.common.payment.PaymentTransactionType;
 import org.broadleafcommerce.common.payment.PaymentType;
@@ -48,11 +58,11 @@ import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPa
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalMethodType;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalTransactionType;
 import org.springframework.util.Assert;
-
-import javax.annotation.Resource;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.List;
+import javax.annotation.Resource;
+import javax.net.ssl.SSLContext;
 
 /**
  * @author Elbert Bautista (elbertbautista)
@@ -77,14 +87,30 @@ public abstract class AbstractPayPalExpressService extends AbstractExternalPayme
 
     @Override
     public PayPalResponse communicateWithVendor(PayPalRequest paymentRequest) throws Exception {
-        HttpClient httpClient = new HttpClient();
-        PostMethod postMethod = new PostMethod(getServerUrl());
-        List<NameValuePair> nvps = requestGenerator.buildRequest(paymentRequest);
-        postMethod.setRequestBody(nvps.toArray(new NameValuePair[nvps.size()]));
-        httpClient.executeMethod(postMethod);
-        String responseString = postMethod.getResponseBodyAsString();
+        SSLConnectionSocketFactory socketFactory = new SSLConnectionSocketFactory(
+                SSLContext.getDefault(),
+                new String[] {"TLSv1.2"},
+                null,
+                SSLConnectionSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER);
+        Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
+                .register("http", PlainConnectionSocketFactory.getSocketFactory())
+                .register("https", socketFactory)
+                .build();
 
-        return responseGenerator.buildResponse(responseString, paymentRequest);
+        PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
+        CloseableHttpClient httpClient = HttpClients.custom().setConnectionManager(cm).build();
+
+        try {
+            HttpPost postMethod = new HttpPost(getServerUrl());
+            List<NameValuePair> nvps = requestGenerator.buildRequest(paymentRequest);
+            postMethod.setEntity(new UrlEncodedFormEntity(nvps));
+            CloseableHttpResponse response = httpClient.execute(postMethod);
+            String responseString = new BasicResponseHandler().handleResponse(response);
+            return responseGenerator.buildResponse(responseString, paymentRequest);
+        } finally {
+            httpClient.close();
+        }
+
     }
 
     public String getServerUrl() {
