@@ -198,14 +198,30 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
     protected void setShippingNvps(List<NameValuePair> nvps, PayPalPaymentRequest paymentRequest) {
         int counter = 0;
         for (PayPalShippingRequest shippingRequest : paymentRequest.getShippingRequests()) {
-            nvps.add(new BasicNameValuePair(replaceNumericBoundProperty(MessageConstants.SHIPTONAME, new Integer[] {counter}, new String[] {"n"}), shippingRequest.getShipToName()));
-            nvps.add(new BasicNameValuePair(replaceNumericBoundProperty(MessageConstants.SHIPTOSTREET, new Integer[] {counter}, new String[] {"n"}), shippingRequest.getShipToStreet()));
-            nvps.add(new BasicNameValuePair(replaceNumericBoundProperty(MessageConstants.SHIPTOSTREET2, new Integer[] {counter}, new String[] {"n"}), shippingRequest.getShipToStreet2()));
-            nvps.add(new BasicNameValuePair(replaceNumericBoundProperty(MessageConstants.SHIPTOCITY, new Integer[] {counter}, new String[] {"n"}), shippingRequest.getShipToCity()));
-            nvps.add(new BasicNameValuePair(replaceNumericBoundProperty(MessageConstants.SHIPTOSTATE, new Integer[] {counter}, new String[] {"n"}), shippingRequest.getShipToState()));
-            nvps.add(new BasicNameValuePair(replaceNumericBoundProperty(MessageConstants.SHIPTOZIP, new Integer[] {counter}, new String[] {"n"}), shippingRequest.getShipToZip()));
-            nvps.add(new BasicNameValuePair(replaceNumericBoundProperty(MessageConstants.SHIPTOCOUNTRYCODE, new Integer[] {counter}, new String[] {"n"}), shippingRequest.getShipToCountryCode()));
-            nvps.add(new BasicNameValuePair(replaceNumericBoundProperty(MessageConstants.SHIPTOPHONENUMBER, new Integer[] {counter}, new String[] {"n"}), shippingRequest.getShipToPhoneNum()));
+            if (StringUtils.isNotBlank(shippingRequest.getShipToName())) {
+                nvps.add(new BasicNameValuePair(replaceNumericBoundProperty(MessageConstants.SHIPTONAME, new Integer[] {counter}, new String[] {"n"}), shippingRequest.getShipToName()));
+            }
+            if (StringUtils.isNotBlank(shippingRequest.getShipToStreet())) {
+                nvps.add(new BasicNameValuePair(replaceNumericBoundProperty(MessageConstants.SHIPTOSTREET, new Integer[] {counter}, new String[] {"n"}), shippingRequest.getShipToStreet()));
+            }
+            if (StringUtils.isNotBlank(shippingRequest.getShipToStreet2())) {
+                nvps.add(new BasicNameValuePair(replaceNumericBoundProperty(MessageConstants.SHIPTOSTREET2, new Integer[] {counter}, new String[] {"n"}), shippingRequest.getShipToStreet2()));
+            }
+            if (StringUtils.isNotBlank(shippingRequest.getShipToCity())) {
+                nvps.add(new BasicNameValuePair(replaceNumericBoundProperty(MessageConstants.SHIPTOCITY, new Integer[] {counter}, new String[] {"n"}), shippingRequest.getShipToCity()));
+            }
+            if (StringUtils.isNotBlank(shippingRequest.getShipToState())) {
+                nvps.add(new BasicNameValuePair(replaceNumericBoundProperty(MessageConstants.SHIPTOSTATE, new Integer[] {counter}, new String[] {"n"}), shippingRequest.getShipToState()));
+            }
+            if (StringUtils.isNotBlank(shippingRequest.getShipToZip())) {
+                nvps.add(new BasicNameValuePair(replaceNumericBoundProperty(MessageConstants.SHIPTOZIP, new Integer[] {counter}, new String[] {"n"}), shippingRequest.getShipToZip()));
+            }
+            if (StringUtils.isNotBlank(shippingRequest.getShipToCountryCode())) {
+                nvps.add(new BasicNameValuePair(replaceNumericBoundProperty(MessageConstants.SHIPTOCOUNTRYCODE, new Integer[] {counter}, new String[] {"n"}), shippingRequest.getShipToCountryCode()));
+            }
+            if (StringUtils.isNotBlank(shippingRequest.getShipToPhoneNum())) {
+                nvps.add(new BasicNameValuePair(replaceNumericBoundProperty(MessageConstants.SHIPTOPHONENUMBER, new Integer[] {counter}, new String[] {"n"}), shippingRequest.getShipToPhoneNum()));
+            }
             counter++;
         }
     }
