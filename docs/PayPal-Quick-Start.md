@@ -6,55 +6,7 @@ Broadleaf Commerce offers an out-of-the-box PayPal solution that requires little
 
 ## Adding PayPal Express Checkout Support
 
-1. Add the following component scan in your `applicationContext-servlet.xml` in your `site` module
-
-```xml
-    <context:component-scan base-package="org.broadleafcommerce.vendor.paypal"/>
-```
-
-2. Add the PayPal Express component scan in your `applicationContext.xml` of your `core` module
-
-3. Declare the bean `org.broadleafcommerce.vendor.paypal.service.payment.PayPalExpressPaymentGatewayType` so that Spring can initalize the Broadleaf Enumeration for both Site and Admin
-
-4. Inject the PayPalExpressCheckoutLinkProcessor into the Broadleaf Thymeleaf Dialect Processors `blDialectProcessors` in your `applicationContext.xml` of your `core` module
-
-5. Inject the `blPayPalExpressConfigurationService` bean into the `blPaymentGatewayConfigurationServices` list in your `applicationContext.xml` of your `core` module
-
-Example:
-
-```xml
-    <!-- PayPal Express Checkout -->
-    <context:component-scan base-package="org.broadleafcommerce.payment.service.gateway"/>
-    <context:component-scan base-package="org.broadleafcommerce.vendor.paypal"/>
-    <bean class="org.broadleafcommerce.vendor.paypal.service.payment.PayPalExpressPaymentGatewayType"/>
-
-    <bean id="blPayPalExpressCheckoutLinkProcessor" class="org.broadleafcommerce.vendor.paypal.web.processor.PayPalExpressCheckoutLinkProcessor"/>
-    <bean id="myCompanyPaymentProcessors" class="org.springframework.beans.factory.config.SetFactoryBean">
-        <property name="sourceSet">
-            <set>
-                <ref bean="blPayPalExpressCheckoutLinkProcessor"/>
-            </set>
-        </property>
-    </bean>
-    <bean class="org.broadleafcommerce.common.extensibility.context.merge.LateStageMergeBeanPostProcessor">
-        <property name="collectionRef" value="myCompanyPaymentProcessors"/>
-        <property name="targetRef" value="blDialectProcessors"/>
-    </bean>
-
-    <bean id="mySampleConfigurationServices" class="org.springframework.beans.factory.config.ListFactoryBean">
-        <property name="sourceList">
-            <list>
-                <ref bean="blPayPalExpressConfigurationService"/>
-            </list>
-        </property>
-    </bean>
-    <bean class="org.broadleafcommerce.common.extensibility.context.merge.LateStageMergeBeanPostProcessor">
-        <property name="collectionRef" value="mySampleConfigurationServices"/>
-        <property name="targetRef" value="blPaymentGatewayConfigurationServices"/>
-    </bean>
-```
-
-5. Add the PayPal Express Buttons to your site:
+1. Add the PayPal Express Buttons to your site:
 
 If you are using the Heat Clinic Demo Site:
 
@@ -87,3 +39,7 @@ with
     <img src="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif" align="left" style="margin-right:7px;"/>
 </a>
 ```
+
+## Done!
+At this point, all the configuration should be complete and you are now ready to test your integration with PayPal Express Checkout.
+Add something to your cart and proceed with checkout.

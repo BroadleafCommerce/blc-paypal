@@ -57,6 +57,7 @@ import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPa
 import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPalSummaryRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalMethodType;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalTransactionType;
+import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -67,9 +68,10 @@ import javax.net.ssl.SSLContext;
 /**
  * @author Elbert Bautista (elbertbautista)
  */
-public abstract class AbstractPayPalExpressService extends AbstractExternalPaymentGatewayCall<PayPalRequest, PayPalResponse> {
+@Service("blExternalCallPayPalExpressService")
+public class ExternalCallPayPalExpressServiceImpl extends AbstractExternalPaymentGatewayCall<PayPalRequest, PayPalResponse> implements ExternalCallPayPalExpressService {
 
-    private static final Log LOG = LogFactory.getLog(AbstractPayPalExpressService.class);
+    private static final Log LOG = LogFactory.getLog(ExternalCallPayPalExpressServiceImpl.class);
 
     @Resource(name = "blPayPalExpressConfiguration")
     protected PayPalExpressConfiguration configuration;
@@ -81,8 +83,18 @@ public abstract class AbstractPayPalExpressService extends AbstractExternalPayme
     protected PayPalResponseGenerator responseGenerator;
 
     @Override
+    public PayPalExpressConfiguration getConfiguration() {
+        return configuration;
+    }
+
+    @Override
     public Integer getFailureReportingThreshold() {
         return configuration.getFailureReportingThreshold();
+    }
+
+    @Override
+    public PayPalResponse call(PayPalRequest paymentRequest) throws PaymentException {
+        return super.process(paymentRequest);
     }
 
     @Override
@@ -117,7 +129,8 @@ public abstract class AbstractPayPalExpressService extends AbstractExternalPayme
         return configuration.getServerUrl();
     }
 
-    protected PayPalPaymentRequest buildBasicRequest(PaymentRequestDTO requestDTO, PayPalTransactionType transactionType) {
+    @Override
+    public PayPalPaymentRequest buildBasicRequest(PaymentRequestDTO requestDTO, PayPalTransactionType transactionType) {
         Assert.isTrue(requestDTO.getOrderId() != null, "The Order ID for the paypal request cannot be null");
         Assert.isTrue(requestDTO.getTransactionTotal() != null, "The Transaction Total for the paypal request cannot be null");
 
@@ -138,7 +151,8 @@ public abstract class AbstractPayPalExpressService extends AbstractExternalPayme
         return request;
     }
 
-    protected PaymentResponseDTO commonAuthorizeOrSale(PaymentRequestDTO requestDTO, PayPalTransactionType transactionType,
+    @Override
+    public PaymentResponseDTO commonAuthorizeOrSale(PaymentRequestDTO requestDTO, PayPalTransactionType transactionType,
                                                        String token, String payerId) throws PaymentException {
 
         PayPalPaymentRequest request = buildBasicRequest(requestDTO, transactionType);
@@ -215,7 +229,8 @@ public abstract class AbstractPayPalExpressService extends AbstractExternalPayme
         return responseDTO;
     }
 
-    protected void setCommonPaymentResponse(PayPalPaymentResponse response, PaymentResponseDTO responseDTO) {
+    @Override
+    public void setCommonPaymentResponse(PayPalPaymentResponse response, PaymentResponseDTO responseDTO) {
 
         try {
             responseDTO.rawResponse(URLDecoder.decode(response.getRawResponse(), "UTF-8"));
@@ -227,7 +242,8 @@ public abstract class AbstractPayPalExpressService extends AbstractExternalPayme
         responseDTO.responseMap(MessageConstants.CORRELATIONID, response.getCorrelationId());
     }
 
-    protected void setCommonDetailsResponse(PayPalDetailsResponse response, PaymentResponseDTO responseDTO) {
+    @Override
+    public void setCommonDetailsResponse(PayPalDetailsResponse response, PaymentResponseDTO responseDTO) {
 
         try {
             responseDTO.rawResponse(URLDecoder.decode(response.getRawResponse(), "UTF-8"));
@@ -294,7 +310,8 @@ public abstract class AbstractPayPalExpressService extends AbstractExternalPayme
 
     }
 
-    protected void setDecisionInformation(PayPalPaymentResponse response, PaymentResponseDTO responseDTO) {
+    @Override
+    public void setDecisionInformation(PayPalPaymentResponse response, PaymentResponseDTO responseDTO) {
         responseDTO.responseMap(MessageConstants.TRANSACTIONID, response.getPaymentInfo().getTransactionId());
 
         if (response.getPaymentInfo().getTotalAmount() != null) {
@@ -333,7 +350,8 @@ public abstract class AbstractPayPalExpressService extends AbstractExternalPayme
         }
     }
 
-    protected void setRefundInformation(PayPalPaymentResponse response, PaymentResponseDTO responseDTO) {
+    @Override
+    public void setRefundInformation(PayPalPaymentResponse response, PaymentResponseDTO responseDTO) {
         if (response.getRefundInfo().getRefundTransactionId() != null) {
             responseDTO.responseMap(MessageConstants.REFUNDTRANSACTIONID, response.getRefundInfo().getRefundTransactionId());
         }
@@ -369,4 +387,8 @@ public abstract class AbstractPayPalExpressService extends AbstractExternalPayme
 
     }
 
+    @Override
+    public String getServiceName() {
+        return getClass().getName();
+    }
 }

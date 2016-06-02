@@ -22,6 +22,7 @@ package org.broadleafcommerce.payment.service.gateway;
 import org.broadleafcommerce.common.payment.PaymentType;
 import org.broadleafcommerce.common.payment.dto.PaymentRequestDTO;
 import org.broadleafcommerce.common.payment.dto.PaymentResponseDTO;
+import org.broadleafcommerce.common.payment.service.AbstractPaymentGatewayReportingService;
 import org.broadleafcommerce.common.payment.service.PaymentGatewayReportingService;
 import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
 import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
@@ -31,17 +32,16 @@ import org.broadleafcommerce.vendor.paypal.service.payment.message.details.PayPa
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalMethodType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+import javax.annotation.Resource;
 
 /**
  * @author Elbert Bautista (elbertbautista)
  */
 @Service("blPayPalExpressReportingService")
-public class PayPalExpressReportingServiceImpl extends AbstractPayPalExpressService implements PaymentGatewayReportingService {
+public class PayPalExpressReportingServiceImpl extends AbstractPaymentGatewayReportingService implements PaymentGatewayReportingService {
 
-    @Override
-    public String getServiceName() {
-        return getClass().getName();
-    }
+    @Resource(name = "blExternalCallPayPalExpressService")
+    protected ExternalCallPayPalExpressService payPalExpressService;
 
     @Override
     public PaymentResponseDTO findDetailsByTransaction(PaymentRequestDTO paymentRequestDTO) throws PaymentException {
@@ -51,10 +51,10 @@ public class PayPalExpressReportingServiceImpl extends AbstractPayPalExpressServ
         detailsRequest.setMethodType(PayPalMethodType.DETAILS);
         detailsRequest.setToken((String)paymentRequestDTO.getAdditionalFields().get(MessageConstants.TOKEN));
 
-        PayPalDetailsResponse response = (PayPalDetailsResponse) process(detailsRequest);
+        PayPalDetailsResponse response = (PayPalDetailsResponse) payPalExpressService.call(detailsRequest);
         PaymentResponseDTO responseDTO = new PaymentResponseDTO(PaymentType.THIRD_PARTY_ACCOUNT,
                 PayPalExpressPaymentGatewayType.PAYPAL_EXPRESS);
-        setCommonDetailsResponse(response, responseDTO);
+        payPalExpressService.setCommonDetailsResponse(response, responseDTO);
         return responseDTO;
     }
 

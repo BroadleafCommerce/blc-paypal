@@ -19,6 +19,7 @@
  */
 package org.broadleafcommerce.payment.service.gateway;
 
+import org.broadleafcommerce.common.payment.service.AbstractPaymentGatewayConfigurationService;
 import org.broadleafcommerce.common.payment.service.PaymentGatewayConfiguration;
 import org.broadleafcommerce.common.payment.service.PaymentGatewayConfigurationService;
 import org.broadleafcommerce.common.payment.service.PaymentGatewayCreditCardService;
@@ -43,7 +44,7 @@ import javax.annotation.Resource;
  * @author Elbert Bautista (elbertbautista)
  */
 @Service("blPayPalExpressConfigurationService")
-public class PayPalExpressConfigurationServiceImpl implements PaymentGatewayConfigurationService {
+public class PayPalExpressConfigurationServiceImpl extends AbstractPaymentGatewayConfigurationService implements PaymentGatewayConfigurationService {
 
     @Resource(name = "blPayPalExpressConfiguration")
     protected PayPalExpressConfiguration configuration;
@@ -79,48 +80,12 @@ public class PayPalExpressConfigurationServiceImpl implements PaymentGatewayConf
         return reportingService;
     }
 
-    public PaymentGatewayCreditCardService getCreditCardService() {
-        return null;
-    }
-
-    public PaymentGatewayCustomerService getCustomerService() {
-        return null;
-    }
-
-    public PaymentGatewaySubscriptionService getSubscriptionService() {
-        return null;
-    }
-
-    public PaymentGatewayFraudService getFraudService() {
-        return null;
-    }
-
-    public PaymentGatewayHostedService getHostedService() {
-        return null;
-    }
-
     public PaymentGatewayRollbackService getRollbackService() {
         return rollbackService;
     }
 
     public PaymentGatewayWebResponseService getWebResponseService() {
         return webResponseService;
-    }
-
-    public PaymentGatewayTransparentRedirectService getTransparentRedirectService() {
-        return null;
-    }
-
-    public TRCreditCardExtensionHandler getCreditCardExtensionHandler() {
-        return null;
-    }
-
-    public PaymentGatewayFieldExtensionHandler getFieldExtensionHandler() {
-        return null;
-    }
-
-    public CreditCardTypesExtensionHandler getCreditCardTypesExtensionHandler() {
-        return null;
     }
 
 }

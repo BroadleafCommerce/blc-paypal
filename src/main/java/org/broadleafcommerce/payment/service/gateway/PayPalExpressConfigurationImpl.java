@@ -20,6 +20,7 @@
 package org.broadleafcommerce.payment.service.gateway;
 
 import org.broadleafcommerce.common.payment.PaymentGatewayType;
+import org.broadleafcommerce.common.payment.service.AbstractPaymentGatewayConfiguration;
 import org.broadleafcommerce.common.util.BLCSystemProperty;
 import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalExpressPaymentGatewayType;
@@ -33,7 +34,7 @@ import java.util.Map;
  * @author Elbert Bautista (elbertbautista)
  */
 @Service("blPayPalExpressConfiguration")
-public class PayPalExpressConfigurationImpl implements PayPalExpressConfiguration {
+public class PayPalExpressConfigurationImpl extends AbstractPaymentGatewayConfiguration implements PayPalExpressConfiguration {
 
     protected int failureReportingThreshold = 1;
 

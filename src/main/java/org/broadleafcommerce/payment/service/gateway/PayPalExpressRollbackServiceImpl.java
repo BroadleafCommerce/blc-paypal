@@ -21,6 +21,7 @@ package org.broadleafcommerce.payment.service.gateway;
 
 import org.broadleafcommerce.common.payment.dto.PaymentRequestDTO;
 import org.broadleafcommerce.common.payment.dto.PaymentResponseDTO;
+import org.broadleafcommerce.common.payment.service.AbstractPaymentGatewayRollbackService;
 import org.broadleafcommerce.common.payment.service.PaymentGatewayRollbackService;
 import org.broadleafcommerce.common.payment.service.PaymentGatewayTransactionService;
 import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
@@ -34,7 +35,7 @@ import javax.annotation.Resource;
  * @author Elbert Bautista (elbertbautista)
  */
 @Service("blPayPalExpressRollbackService")
-public class PayPalExpressRollbackServiceImpl implements PaymentGatewayRollbackService {
+public class PayPalExpressRollbackServiceImpl extends AbstractPaymentGatewayRollbackService implements PaymentGatewayRollbackService {
 
     @Resource(name = "blPayPalExpressTransactionService")
     protected PaymentGatewayTransactionService transactionService;

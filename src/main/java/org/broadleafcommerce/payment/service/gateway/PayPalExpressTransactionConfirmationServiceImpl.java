@@ -22,6 +22,7 @@ package org.broadleafcommerce.payment.service.gateway;
 import org.broadleafcommerce.common.payment.PaymentTransactionType;
 import org.broadleafcommerce.common.payment.dto.PaymentRequestDTO;
 import org.broadleafcommerce.common.payment.dto.PaymentResponseDTO;
+import org.broadleafcommerce.common.payment.service.AbstractPaymentGatewayTransactionConfirmationService;
 import org.broadleafcommerce.common.payment.service.PaymentGatewayTransactionConfirmationService;
 import org.broadleafcommerce.common.payment.service.PaymentGatewayTransactionService;
 import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
@@ -33,7 +34,7 @@ import javax.annotation.Resource;
  * @author Elbert Bautista (elbertbautista)
  */
 @Service("blPayPalExpressTransactionConfirmationService")
-public class PayPalExpressTransactionConfirmationServiceImpl implements PaymentGatewayTransactionConfirmationService {
+public class PayPalExpressTransactionConfirmationServiceImpl extends AbstractPaymentGatewayTransactionConfirmationService implements PaymentGatewayTransactionConfirmationService {
 
     @Resource(name = "blPayPalExpressConfiguration")
     protected PayPalExpressConfiguration configuration;

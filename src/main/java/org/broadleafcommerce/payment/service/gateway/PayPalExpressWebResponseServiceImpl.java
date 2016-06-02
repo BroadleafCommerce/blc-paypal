@@ -22,6 +22,7 @@ package org.broadleafcommerce.payment.service.gateway;
 import org.broadleafcommerce.common.payment.PaymentTransactionType;
 import org.broadleafcommerce.common.payment.dto.PaymentRequestDTO;
 import org.broadleafcommerce.common.payment.dto.PaymentResponseDTO;
+import org.broadleafcommerce.common.payment.service.AbstractPaymentGatewayWebResponseService;
 import org.broadleafcommerce.common.payment.service.PaymentGatewayReportingService;
 import org.broadleafcommerce.common.payment.service.PaymentGatewayWebResponsePrintService;
 import org.broadleafcommerce.common.payment.service.PaymentGatewayWebResponseService;
@@ -36,7 +37,7 @@ import javax.servlet.http.HttpServletRequest;
  * @author Elbert Bautista (elbertbautista)
  */
 @Service("blPayPalExpressWebResponseService")
-public class PayPalExpressWebResponseServiceImpl implements PaymentGatewayWebResponseService {
+public class PayPalExpressWebResponseServiceImpl extends AbstractPaymentGatewayWebResponseService implements PaymentGatewayWebResponseService {
 
     @Resource(name = "blPaymentGatewayWebResponsePrintService")
     protected PaymentGatewayWebResponsePrintService webResponsePrintService;
