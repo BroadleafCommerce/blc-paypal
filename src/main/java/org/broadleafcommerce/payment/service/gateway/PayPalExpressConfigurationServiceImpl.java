@@ -64,6 +64,9 @@ public class PayPalExpressConfigurationServiceImpl extends AbstractPaymentGatewa
     @Resource(name = "blPayPalExpressWebResponseService")
     protected PaymentGatewayWebResponseService webResponseService;
 
+    @Resource(name = "blPayPalExpressHostedService")
+    protected PaymentGatewayHostedService hostedService;
+
     public PaymentGatewayConfiguration getConfiguration() {
         return configuration;
     }
@@ -88,4 +91,7 @@ public class PayPalExpressConfigurationServiceImpl extends AbstractPaymentGatewa
         return webResponseService;
     }
 
+    public PaymentGatewayHostedService getHostedService() {
+        return hostedService;
+    }
 }
