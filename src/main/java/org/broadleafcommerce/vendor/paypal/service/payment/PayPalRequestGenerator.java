@@ -35,8 +35,6 @@ public interface PayPalRequestGenerator {
 
     Map<String, String> getAdditionalConfig();
 
-    Boolean getUseRelativeUrls();
-
     String getCancelUrl();
 
     String getLibVersion();

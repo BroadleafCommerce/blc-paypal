@@ -22,19 +22,26 @@ package org.broadleafcommerce.payment.service.gateway;
 import org.broadleafcommerce.common.payment.PaymentGatewayType;
 import org.broadleafcommerce.common.payment.service.AbstractPaymentGatewayConfiguration;
 import org.broadleafcommerce.common.util.BLCSystemProperty;
+import org.broadleafcommerce.common.web.BaseUrlResolver;
 import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalExpressPaymentGatewayType;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalShippingDisplayType;
 import org.springframework.stereotype.Service;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
+import javax.annotation.Resource;
 
 /**
  * @author Elbert Bautista (elbertbautista)
  */
 @Service("blPayPalExpressConfiguration")
 public class PayPalExpressConfigurationImpl extends AbstractPaymentGatewayConfiguration implements PayPalExpressConfiguration {
+
+    @Resource(name = "blBaseUrlResolver")
+    protected BaseUrlResolver urlResolver;
 
     protected int failureReportingThreshold = 1;
 
@@ -71,18 +78,35 @@ public class PayPalExpressConfigurationImpl extends AbstractPaymentGatewayConfig
     }
 
     @Override
-    public Boolean getUseRelativeUrls() {
-        return BLCSystemProperty.resolveBooleanSystemProperty("gateway.paypal.expressCheckout.useRelativeUrls");
-    }
-
-    @Override
     public String getReturnUrl() {
-        return BLCSystemProperty.resolveSystemProperty("gateway.paypal.expressCheckout.returnUrl");
+        String url = BLCSystemProperty.resolveSystemProperty("gateway.paypal.expressCheckout.returnUrl");
+        try {
+            URI u = new URI(url);
+            if (u.isAbsolute()) {
+                return url;
+            } else {
+                String baseUrl = urlResolver.getSiteBaseUrl();
+                return baseUrl + url;
+            }
+        } catch (URISyntaxException e) {
+            throw new IllegalArgumentException("The value for 'gateway.paypal.expressCheckout.returnUrl' is not valid.", e);
+        }
     }
 
     @Override
     public String getCancelUrl() {
-        return BLCSystemProperty.resolveSystemProperty("gateway.paypal.expressCheckout.cancelUrl");
+        String url = BLCSystemProperty.resolveSystemProperty("gateway.paypal.expressCheckout.cancelUrl");
+        try {
+            URI u = new URI(url);
+            if (u.isAbsolute()) {
+                return url;
+            } else {
+                String baseUrl = urlResolver.getSiteBaseUrl();
+                return baseUrl + url;
+            }
+        } catch (URISyntaxException e) {
+            throw new IllegalArgumentException("The value for 'gateway.paypal.expressCheckout.cancelUrl' is not valid.", e);
+        }
     }
 
     @Override

@@ -256,8 +256,7 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
 
     @Override
     public String getCancelUrl() {
-        return Boolean.TRUE.equals(getUseRelativeUrls()) ?
-                BLCRequestUtils.getRequestedServerPrefix() + configuration.getCancelUrl() : configuration.getCancelUrl();
+        return configuration.getCancelUrl();
     }
 
     @Override
@@ -272,8 +271,7 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
 
     @Override
     public String getReturnUrl() {
-        return Boolean.TRUE.equals(getUseRelativeUrls()) ?
-                BLCRequestUtils.getRequestedServerPrefix() + configuration.getReturnUrl() : configuration.getReturnUrl();
+        return configuration.getReturnUrl();
     }
 
     @Override
@@ -290,11 +288,6 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
     public String getTotalType() {
         return configuration.getTotalType();
     }
-
-    @Override
-	public Boolean getUseRelativeUrls() {
-		return configuration.getUseRelativeUrls();
-	}
 
     @Override
     public PayPalShippingDisplayType getShippingDisplayType() {

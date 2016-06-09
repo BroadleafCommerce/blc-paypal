@@ -76,17 +76,6 @@ public interface PayPalExpressConfiguration extends PaymentGatewayConfiguration 
     public String getSignature();
 
     /**
-     * If this flag is set, then the PayPalResponseGenerator will automatically construct
-     * the full URL for the Return and Cancel URLs.
-     * For example, getReturnURL() and getCancelURL() can be set to '/paypal-express/return'
-     * and '/paypal-express/cancel' which will then be converted to a full URL based on the
-     * current request context.
-     *
-     * @return Boolean
-     */
-    public Boolean getUseRelativeUrls();
-
-    /**
      * URL to which the buyer's browser is returned after choosing to pay with PayPal.
      * For digital goods, you must add JavaScript to this page to close the in-context experience.
      * Note: PayPal recommends that the value be the final review page on which the buyer confirms the order and
