@@ -36,20 +36,6 @@
 
     <bean class="org.broadleafcommerce.vendor.paypal.service.payment.PayPalExpressPaymentGatewayType"/>
 
-    <bean id="blPayPalCheckoutLinkProcessor" class="org.broadleafcommerce.vendor.paypal.web.processor.PayPalExpressCheckoutLinkProcessor"/>
-
-    <bean id="blPayPalPaymentProcessors" class="org.springframework.beans.factory.config.SetFactoryBean">
-        <property name="sourceSet">
-            <set>
-                <ref bean="blPayPalCheckoutLinkProcessor"/>
-            </set>
-        </property>
-    </bean>
-    <bean class="org.broadleafcommerce.common.extensibility.context.merge.LateStageMergeBeanPostProcessor">
-        <property name="collectionRef" value="blPayPalPaymentProcessors"/>
-        <property name="targetRef" value="blDialectProcessors"/>
-    </bean>
-
     <bean id="blPayPalConfigurationServices" class="org.springframework.beans.factory.config.ListFactoryBean">
         <property name="sourceList">
             <list>

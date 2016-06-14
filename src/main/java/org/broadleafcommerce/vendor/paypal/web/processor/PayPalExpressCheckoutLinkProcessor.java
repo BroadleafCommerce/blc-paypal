@@ -25,16 +25,19 @@ import org.broadleafcommerce.common.payment.service.PaymentGatewayHostedService;
 import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
 import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
 import org.springframework.stereotype.Component;
+import org.springframework.ui.Model;
 import org.thymeleaf.Arguments;
 import org.thymeleaf.dom.Element;
 import org.thymeleaf.processor.attr.AbstractAttributeModifierAttrProcessor;
 import org.thymeleaf.standard.expression.StandardExpressionProcessor;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
+ *
  * <p>A Thymeleaf processor that will generate a Redirect Link given a passed in PaymentRequestDTO.</p>
  *
  * <pre><code>
@@ -44,7 +47,9 @@ import java.util.Map;
  * </code></pre>
  *
  * @author Elbert Bautista (elbertbautista)
+ * @deprecated - use {@link org.broadleafcommerce.vendor.paypal.web.controller.BroadleafPayPalExpressController#redirectEndpoint(Model, HttpServletRequest)}
  */
+@Deprecated
 @Component("blPayPalExpressCheckoutLinkProcessor")
 public class PayPalExpressCheckoutLinkProcessor extends AbstractAttributeModifierAttrProcessor {
 

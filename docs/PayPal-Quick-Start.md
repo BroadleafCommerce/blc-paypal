@@ -21,7 +21,7 @@ If you are using the Heat Clinic Demo Site:
 with
 
 ```html
-<a blc:paypal_express_link="${paymentRequestDTO}" complete_checkout="${false}">
+<a th:href="@{/paypal-express/redirect}">
     <img src="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif" align="left" style="margin-right:7px;"/>
 </a>
 ```
@@ -35,7 +35,7 @@ with
 with
 
 ```html
-<a blc:paypal_express_link="${paymentRequestDTO}" complete_checkout="${true}">
+<a th:href="@{/paypal-express/redirect?complete=true}">
     <img src="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif" align="left" style="margin-right:7px;"/>
 </a>
 ```
