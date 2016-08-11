@@ -29,7 +29,7 @@ Your algorithm might look something like this:
         requestDTO.lineItem()
                 .shortDescription(orderItem.getName())
                 .systemId(orderItem.getId().toString())
-                .amount(orderItem.getTotalPrice().toString())
+                .amount(orderItem.getSalePrice().toString())
                 .quantity(orderItem.getQuantity() + "")
                 .done();
         amountItemSubtotal = amountItemSubtotal.add(orderItem.getPrice().multiply(orderItem.getQuantity()));
