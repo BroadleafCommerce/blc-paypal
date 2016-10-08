@@ -19,6 +19,9 @@
  */
 package org.broadleafcommerce.payment.service.gateway;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.broadleafcommerce.common.money.Money;
 import org.broadleafcommerce.common.payment.PaymentTransactionType;
 import org.broadleafcommerce.common.payment.PaymentType;
 import org.broadleafcommerce.common.payment.dto.PaymentRequestDTO;
@@ -29,6 +32,7 @@ import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalExpressPaymentGatewayType;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPalPaymentRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPalPaymentResponse;
+import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPalSummaryRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalMethodType;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalRefundType;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalTransactionType;
@@ -41,6 +45,8 @@ import org.springframework.util.Assert;
 @Service("blPayPalExpressTransactionService")
 public class PayPalExpressTransactionServiceImpl extends AbstractPayPalExpressService implements PaymentGatewayTransactionService {
 
+    protected static final Log LOG = LogFactory.getLog(PayPalExpressTransactionServiceImpl.class);
+    
     @Override
     public String getServiceName() {
         return getClass().getName();
@@ -110,12 +116,23 @@ public class PayPalExpressTransactionServiceImpl extends AbstractPayPalExpressSe
 
     @Override
     public PaymentResponseDTO refund(PaymentRequestDTO paymentRequestDTO) throws PaymentException  {
-        Assert.isTrue(paymentRequestDTO.getAdditionalFields().containsKey(MessageConstants.REFUNDTYPE), "The RequestDTO must contain a REFUNDTYPE");
         Assert.isTrue(paymentRequestDTO.getAdditionalFields().containsKey(MessageConstants.TRANSACTIONID), "The RequestDTO must contain a TRANSACTIONID");
 
         PayPalPaymentRequest request = buildBasicRequest(paymentRequestDTO, PayPalTransactionType.CREDIT);
         request.setMethodType(PayPalMethodType.REFUND);
-        request.setRefundType(PayPalRefundType.getInstance((String) paymentRequestDTO.getAdditionalFields().get(MessageConstants.REFUNDTYPE)));
+        if (paymentRequestDTO.getAdditionalFields().containsKey(MessageConstants.REFUNDTYPE)) {
+            request.setRefundType(PayPalRefundType.getInstance((String) paymentRequestDTO.getAdditionalFields().get(MessageConstants.REFUNDTYPE)));
+        } else {
+            LOG.debug("No refund type passed in, assuming partial refund with requested amount of " + paymentRequestDTO.getTransactionTotal());
+            request.setRefundType(PayPalRefundType.PARTIAL);
+        }
+        
+        if (PayPalRefundType.PARTIAL.equals(request.getRefundType())) {
+            PayPalSummaryRequest summary = new PayPalSummaryRequest();
+            summary.setGrandTotal(new Money(paymentRequestDTO.getTransactionTotal()));
+            request.setSummaryRequest(summary);
+        }
+        
         request.setTransactionID((String)paymentRequestDTO.getAdditionalFields().get(MessageConstants.TRANSACTIONID));
 
         PaymentResponseDTO responseDTO = new PaymentResponseDTO(PaymentType.THIRD_PARTY_ACCOUNT,

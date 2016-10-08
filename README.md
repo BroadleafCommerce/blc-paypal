@@ -11,6 +11,9 @@ You can also read up on how to customize the PayPal Express Page here: https://d
 When integrating Express Checkout, PayPal requires you to conform to certain requirements regarding placement,
 such as offering the option as both a Checkout option as well as a Payment Option. Please see documentation here: https://developer.paypal.com/docs/classic/express-checkout/integration-guide/ECUIRequirements/
 
+- Technical Support: (402) 952-8899
+    - getting through the IVR: "none", "no", "technical support"    
+
 
 Notes:
 ## Showing Line Items on PayPal Express's Checkout Screen:

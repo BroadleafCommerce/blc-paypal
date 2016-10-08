@@ -21,17 +21,21 @@ package org.broadleafcommerce.vendor.paypal.web.controller;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.broadleafcommerce.common.payment.dto.PaymentRequestDTO;
 import org.broadleafcommerce.common.payment.dto.PaymentResponseDTO;
 import org.broadleafcommerce.common.payment.service.PaymentGatewayConfiguration;
+import org.broadleafcommerce.common.payment.service.PaymentGatewayHostedService;
 import org.broadleafcommerce.common.payment.service.PaymentGatewayWebResponseService;
 import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
 import org.broadleafcommerce.common.web.payment.controller.PaymentGatewayAbstractController;
+import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.thymeleaf.standard.expression.StandardExpressionProcessor;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -49,6 +53,9 @@ public class BroadleafPayPalExpressController extends PaymentGatewayAbstractCont
 
     @Resource(name = "blPayPalExpressWebResponseService")
     protected PaymentGatewayWebResponseService paymentGatewayWebResponseService;
+
+    @Resource(name = "blPayPalExpressHostedService")
+    private PaymentGatewayHostedService paymentGatewayHostedService;
 
     @Resource(name = "blPayPalExpressConfiguration")
     protected PaymentGatewayConfiguration paymentGatewayConfiguration;
@@ -121,4 +128,71 @@ public class BroadleafPayPalExpressController extends PaymentGatewayAbstractCont
             throws PaymentException {
         return getOrderReviewRedirect();
     }
+
+    // ***********************************************
+    // PayPal Express Redirect Endpoint
+    // This endpoint can be used instead of the PayPalExpressCheckoutLinkProcessor
+    // which generates the links on page load
+    // ***********************************************
+
+    /**
+     * Stub endpoint that can be used as an alternative to {@link org.broadleafcommerce.vendor.paypal.web.processor.PayPalExpressCheckoutLinkProcessor}
+     * Because these modules have no dependency on framework-web, custom implementations that wish to use
+     * this have to provide their own implementation to get the Order from the CartState.
+     *
+     * To use: extend, provide a request mapping, and implement the {@link BroadleafPayPalExpressController#getDTOFromCartState()} method.
+     *
+     * @param model
+     * @param request
+     * @return
+     * @throws PaymentException
+     */
+    public String redirectEndpoint(Model model, HttpServletRequest request) throws PaymentException {
+
+        PaymentRequestDTO requestDTO = getDTOFromCartState();
+
+        if (requestDTO != null) {
+            try {
+                if ( request.getParameterMap().containsKey("complete") ) {
+                    Boolean completeCheckout = Boolean.parseBoolean(request.getParameter("complete"));
+                    requestDTO.completeCheckoutOnCallback(completeCheckout);
+                }
+
+                PaymentResponseDTO responseDTO = paymentGatewayHostedService.requestHostedEndpoint(requestDTO);
+                String url = responseDTO.getResponseMap().get(MessageConstants.REDIRECTURL).toString();
+
+                //https://developer.paypal.com/docs/classic/express-checkout/integration-guide/ECCustomizing/
+                if (requestDTO.isCompleteCheckoutOnCallback()) {
+                    url = url + "&useraction=commit";
+                }
+
+                url = "redirect:" + url;
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace("Redirecting to PayPal Express with URL: " + url);
+                }
+
+                return url;
+            } catch (Exception e) {
+                if (LOG.isErrorEnabled()) {
+                    LOG.error("Unable to Create the PayPal Express Redirect Link.", e);
+                }
+            }
+        }
+
+        throw new PaymentException("Unable to Create the PayPal Express Redirect Link. The Request DTO is null");
+
+    }
+
+    /**
+     * Stub implementation that is meant to be overriden by a custom controller.
+     * The modules have no dependency on Order or Cart, so this must be implemented if you wish to use
+     * the redirect mechanism in this controller instead of the Thymeleaf Processor.
+     *
+     * @return PaymentRequestDTO of the cart.
+     */
+    public PaymentRequestDTO getDTOFromCartState() {
+        return null;
+    }
+
+
 }
