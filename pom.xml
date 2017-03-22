@@ -10,10 +10,10 @@
     <artifactId>broadleaf-paypal</artifactId>
     <name>BroadleafCommerce PayPal</name>
     <description>BroadleafCommerce PayPal</description>
-    <version>3.0.0-SNAPSHOT</version>
+    <version>3.2.0-SNAPSHOT</version>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <blc.version>5.0.0-GA</blc.version>
+        <blc.version>5.2.0-SNAPSHOT</blc.version>
         <project.uri>${user.dir}</project.uri>
     </properties>
     <scm>
