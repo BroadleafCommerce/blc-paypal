@@ -35,6 +35,7 @@ import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalShippingDi
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -46,10 +47,13 @@ import javax.annotation.Resource;
 @Service("blPayPalExpressRequestGenerator")
 public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
 
+    protected Logger logger = Logger.getLogger(PayPalRequestGeneratorImpl.class);
+
     @Resource(name = "blPayPalExpressConfiguration")
     protected PayPalExpressConfiguration configuration;
-
-    protected Logger logger = Logger.getLogger(PayPalRequestGeneratorImpl.class);
+    
+    @Resource
+    protected CustomFieldSerializer customFieldSerializer;
     
     @Override
     public List<NameValuePair> buildRequest(PayPalRequest request) {
@@ -147,13 +151,29 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
     protected void setNvpsForCheckoutOrAuth(List<NameValuePair> nvps, PayPalPaymentRequest paymentRequest, String payPalAction) {
         nvps.add(new BasicNameValuePair(replaceNumericBoundProperty(MessageConstants.PAYMENTACTION, new Integer[]{0}, new String[]{"n"}), payPalAction));
 
-        //PAYMENTREQUEST_0_CUSTOM is the boolean of whether or not to Complete Checkout on Callback and the Broadleaf Order ID
+        // One of the custom fields is the boolean of whether or not to Complete Checkout on Callback and the Broadleaf Order ID
         // concatenated with an underscore "_"
         // for example if the complete checkout on callback = true and the order id = 12345
         // the custom fields would be true_12345
-        String customField = Boolean.toString(paymentRequest.isCompleteCheckoutOnCallback()) + "_" + paymentRequest.getOrderId();
-        nvps.add(new BasicNameValuePair(replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTCUSTOM, new Integer[]{0}, new String[]{"n"}), customField));
-
+        String checkoutOnCallback = Boolean.toString(paymentRequest.isCompleteCheckoutOnCallback()) + "_" + paymentRequest.getOrderId();
+        Map<String, String> customFields = getAdditionalCustomFields();
+        if (customFields == null) {
+            customFields = new HashMap<String, String>();
+        }
+        customFields.put(MessageConstants.COMPLETE_CHECKOUT_ON_CALLBACK_CUSTOM_FIELD, checkoutOnCallback);
+        String serializedFields = customFieldSerializer.serializeCustomFields(customFields);
+        
+        if (serializedFields.length() > MessageConstants.CUSTOMFIELD_CHARACTER_LIMIT) {
+            throw new IllegalStateException(String.format("The serialized custom field string of %s is %s characters but is limited to %s characters",
+                serializedFields,
+                serializedFields.length(),
+                MessageConstants.CUSTOMFIELD_CHARACTER_LIMIT));
+        }
+        
+        // PAYMENTREQUEST_0_CUSTOM is a serialized field limited to 256 characters that allows for easy extension
+        nvps.add(new BasicNameValuePair(replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTCUSTOM, new Integer[]{0}, new String[]{"n"}), serializedFields));
+        
+        
         //Determine if PayPal displays the shipping address fields on the PayPal pages.
         //For digital goods, this field is required and must be set to 1.
         // 0 - PayPal displays the shipping address passed in.
@@ -250,6 +270,11 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
     @Override
     public Map<String, String> getAdditionalConfig() {
         return configuration.getAdditionalConfig();
+    }
+    
+    @Override
+    public Map<String, String> getAdditionalCustomFields() {
+        return configuration.getAdditionalCustomFields();
     }
 
     @Override
