@@ -65,6 +65,9 @@ public class PayPalResponseGeneratorImpl implements PayPalResponseGenerator {
 
     @Resource(name = "blPayPalExpressConfiguration")
     protected PayPalExpressConfiguration configuration;
+    
+    @Resource
+    protected CustomFieldSerializer customFieldSerializer;
 
     @Override
     public PayPalResponse buildResponse(String response, PayPalRequest paymentRequest) {
@@ -168,7 +171,8 @@ public class PayPalResponseGeneratorImpl implements PayPalResponseGenerator {
         paymentDetails.setPaymentRequestId(getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTREQUESTID, new Integer[]{0}, new String[]{"n"})));
 
         String customField = getResponseValue(rawResponse, replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTCUSTOM, new Integer[]{0}, new String[]{"n"}));
-        String[] parsed = customField.split("_");
+        String checkoutOnCallbackValue = customFieldSerializer.deserializeCustomFields(customField).get(MessageConstants.COMPLETE_CHECKOUT_ON_CALLBACK_CUSTOM_FIELD);
+        String[] parsed = checkoutOnCallbackValue.split("_");
         if (parsed.length != 2) {
             throw new IllegalArgumentException("PAYMENTREQUEST_0_CUSTOM is not constructed correctly - (" + customField +"): " +
                     "should be of the form completeCheckoutBoolean_orderIdLong");

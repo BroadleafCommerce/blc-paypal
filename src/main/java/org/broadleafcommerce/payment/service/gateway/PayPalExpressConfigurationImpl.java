@@ -132,6 +132,12 @@ public class PayPalExpressConfigurationImpl extends AbstractPaymentGatewayConfig
         additionalConfigs.put("PAYFLOWCOLOR", "FFFFFF");
         return additionalConfigs;
     }
+    
+    @Override
+    public Map<String, String> getAdditionalCustomFields() {
+        // intentionally unimplemented, used as an extension point
+        return new HashMap<String, String>();
+    }
 
     @Override
     public boolean handlesAuthorize() {
