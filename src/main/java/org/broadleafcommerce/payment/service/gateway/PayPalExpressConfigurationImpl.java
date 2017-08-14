@@ -17,19 +17,21 @@
  */
 package org.broadleafcommerce.payment.service.gateway;
 
+import org.broadleafcommerce.common.config.service.SystemPropertiesService;
 import org.broadleafcommerce.common.payment.PaymentGatewayType;
 import org.broadleafcommerce.common.payment.service.AbstractPaymentGatewayConfiguration;
-import org.broadleafcommerce.common.util.BLCSystemProperty;
 import org.broadleafcommerce.common.web.BaseUrlResolver;
 import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalExpressPaymentGatewayType;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalShippingDisplayType;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.annotation.Resource;
 
 /**
@@ -41,43 +43,46 @@ public class PayPalExpressConfigurationImpl extends AbstractPaymentGatewayConfig
     @Resource(name = "blBaseUrlResolver")
     protected BaseUrlResolver urlResolver;
 
+    @Autowired
+    protected SystemPropertiesService propertiesService;
+
     protected int failureReportingThreshold = 1;
 
     protected boolean performAuthorizeAndCapture = true;
 
     @Override
     public String getServerUrl() {
-        return BLCSystemProperty.resolveSystemProperty("gateway.paypal.expressCheckout.serverUrl");
+        return propertiesService.resolveSystemProperty("gateway.paypal.expressCheckout.serverUrl");
     }
 
     @Override
     public String getUserRedirectUrl() {
-        return BLCSystemProperty.resolveSystemProperty("gateway.paypal.expressCheckout.userRedirectUrl");
+        return propertiesService.resolveSystemProperty("gateway.paypal.expressCheckout.userRedirectUrl");
     }
 
     @Override
     public String getLibVersion() {
-        return BLCSystemProperty.resolveSystemProperty("gateway.paypal.expressCheckout.libVersion");
+        return propertiesService.resolveSystemProperty("gateway.paypal.expressCheckout.libVersion");
     }
 
     @Override
     public String getPassword() {
-        return BLCSystemProperty.resolveSystemProperty("gateway.paypal.expressCheckout.password");
+        return propertiesService.resolveSystemProperty("gateway.paypal.expressCheckout.password");
     }
 
     @Override
     public String getUser() {
-        return BLCSystemProperty.resolveSystemProperty("gateway.paypal.expressCheckout.user");
+        return propertiesService.resolveSystemProperty("gateway.paypal.expressCheckout.user");
     }
 
     @Override
     public String getSignature() {
-        return BLCSystemProperty.resolveSystemProperty("gateway.paypal.expressCheckout.signature");
+        return propertiesService.resolveSystemProperty("gateway.paypal.expressCheckout.signature");
     }
 
     @Override
     public String getReturnUrl() {
-        String url = BLCSystemProperty.resolveSystemProperty("gateway.paypal.expressCheckout.returnUrl");
+        String url = propertiesService.resolveSystemProperty("gateway.paypal.expressCheckout.returnUrl");
         try {
             URI u = new URI(url);
             if (u.isAbsolute()) {
@@ -93,7 +98,7 @@ public class PayPalExpressConfigurationImpl extends AbstractPaymentGatewayConfig
 
     @Override
     public String getCancelUrl() {
-        String url = BLCSystemProperty.resolveSystemProperty("gateway.paypal.expressCheckout.cancelUrl");
+        String url = propertiesService.resolveSystemProperty("gateway.paypal.expressCheckout.cancelUrl");
         try {
             URI u = new URI(url);
             if (u.isAbsolute()) {
@@ -109,7 +114,7 @@ public class PayPalExpressConfigurationImpl extends AbstractPaymentGatewayConfig
 
     @Override
     public PayPalShippingDisplayType getShippingDisplayType() {
-        String shippingType = BLCSystemProperty.resolveSystemProperty("gateway.paypal.expressCheckout.shippingDisplayType");
+        String shippingType = propertiesService.resolveSystemProperty("gateway.paypal.expressCheckout.shippingDisplayType");
 
         PayPalShippingDisplayType displayType = PayPalShippingDisplayType.getInstance(shippingType);
         if (displayType != null) {
@@ -126,7 +131,7 @@ public class PayPalExpressConfigurationImpl extends AbstractPaymentGatewayConfig
 
     @Override
     public Map<String, String> getAdditionalConfig() {
-        Map<String, String> additionalConfigs = new HashMap<String, String>();
+        Map<String, String> additionalConfigs = new HashMap<>();
         additionalConfigs.put("HDRBORDERCOLOR", "FFFFFF");
         additionalConfigs.put("HDRBACKCOLOR", "FFFFFF");
         additionalConfigs.put("PAYFLOWCOLOR", "FFFFFF");
@@ -136,7 +141,7 @@ public class PayPalExpressConfigurationImpl extends AbstractPaymentGatewayConfig
     @Override
     public Map<String, String> getAdditionalCustomFields() {
         // intentionally unimplemented, used as an extension point
-        return new HashMap<String, String>();
+        return new HashMap<>();
     }
 
     @Override
