@@ -34,3 +34,9 @@ Here's a feature list to help you decide which approach to choose:
 | Refund Transaction                                                         |             | ✓        |
 | Void Transaction                                                           |             | ✓        |
 
+
+## Broadleaf Core Compatibility
+| `broadleaf-paypal` Version | Broadleaf Core Version |
+| :------------------------: | :--------------------: |
+| 2.7.0-GA | 5.0.0-GA+, not 5.2.0-GA+ |
+| 2.7.1-GA | 5.0.12-GA+, 5.1.5-GA+, 5.2.0-GA+ |
