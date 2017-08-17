@@ -4,42 +4,80 @@ Broadleaf Commerce offers an out-of-the-box PayPal solution that requires little
 
 **You must have completed the [[PayPal Environment Setup]] before continuing**
 
-## Adding PayPal Express Checkout Support
+## Prerequisites
+Please familiarize yourself with the []PayPal Express Checkout documentation](https://developer.paypal.com/docs/integration/direct/express-checkout/integration-jsv4/) before proceeding.
 
-1. Add the PayPal Express Buttons to your site:
 
-If you are using the Heat Clinic Demo Site:
+## Add the Maven Dependency
+Once you have established an account with PayPal, begin by including the PayPal Module dependency to your main pom.xml.
 
-- replace the following code in cart.html
-
-```html
-<form blc:null_payment_hosted_action="${paymentRequestDTO}" complete_checkout="${false}" method="POST">
-...
-</form>
+```xml
+<dependency>
+    <groupId>org.broadleafcommerce</groupId>
+    <artifactId>broadleaf-paypal</artifactId>
+    <version>2.7.1-SNAPSHOT</version>
+</dependency>
 ```
 
-with
+Make sure to include the dependency in your `site` AND `admin` pom.xml as well (or just in the shared `core` project):
+
+```xml
+<dependency>
+    <groupId>org.broadleafcommerce</groupId>
+    <artifactId>broadleaf-paypal</artifactId>
+</dependency>
+```
+
+## Template Updates for the Heat Clinic Demo Site
+
+1. In `cartOperations.html`, replace the `paypal-payment-method-container`'s contents with
 
 ```html
-<a th:href="@{/paypal-express/redirect}">
-    <img src="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif" align="left" style="margin-right:7px;"/>
+<a th:href="@{/paypal-express/redirect?complete=false}">
+    <img src="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif" align="center"/>
 </a>
 ```
 
-- replace the following code in paymentMethodForm.html
+2. In `payPalPaymentMethodForm.html`, replace the `read-only` fragment's content with
 
 ```html
-<img th:src="@{/img/paypal.gif}" alt="Pay with Paypal" width="100" />
+<div class="row">
+    <div class="col-sm-3">
+        <img src="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif" class="text-center-mobile"/>
+    </div>
+    <div class="col-sm-9" th:utext="#{checkout.paymentMethod.payPal.readOnly.message}"></div>
+</div>
 ```
 
-with
+and the `form` fragment's content with
 
 ```html
-<a th:href="@{/paypal-express/redirect?complete=true}">
-    <img src="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif" align="left" style="margin-right:7px;"/>
-</a>
+<th:block th:if="${#paymentMethod.cartContainsThirdPartyPayment()}">
+    <div class="row">
+        <div class="col-sm-3">
+            <img src="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif" class="text-center-mobile"/>
+        </div>
+        <div class="col-sm-9" th:utext="#{checkout.paymentMethod.payPal.edit.message}"></div>
+    </div>
+</th:block>
+
+<th:block th:unless="${#paymentMethod.cartContainsThirdPartyPayment()}">
+    <a th:href="@{/paypal-express/redirect?complete=false}" class="js-payPalPaymentMethodAction is-hidden"></a>
+    <div class="row">
+        <div class="col-sm-3">
+            <img src="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif" class="text-center-mobile"/>
+        </div>
+        <div class="col-sm-9" th:utext="#{checkout.paymentMethod.payPal.message}"></div>
+    </div>
+</th:block>
 ```
+
+## Configuration Properties
+To configure your connection to the PayPal API, please complete the items outlined in the [[PayPal Configuration Properties]] document.
+
+## Production Configurations
+For information on preparing this integration for production, please reference the [[PayPal Production Configurations]] document.
 
 ## Done!
 At this point, all the configuration should be complete and you are now ready to test your integration with PayPal Express Checkout.
-Add something to your cart and proceed with checkout.
+Add something to your cart and proceed with checkout!
