@@ -30,6 +30,7 @@
            http://schema.broadleafcommerce.org/mo/mo-3.0.xsd">
 
     <context:component-scan base-package="org.broadleafcommerce.payment.service.gateway"/>
+    <context:component-scan base-package="org.broadleafcommerce.payment.web"/>
     <context:component-scan base-package="org.broadleafcommerce.vendor.paypal">
         <context:exclude-filter type="regex" expression="org.broadleafcommerce.vendor.paypal.web.controller.*"/>
     </context:component-scan>
