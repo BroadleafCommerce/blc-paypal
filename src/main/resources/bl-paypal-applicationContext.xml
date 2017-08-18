@@ -47,5 +47,10 @@
         <property name="collectionRef" value="blPayPalConfigurationServices"/>
         <property name="targetRef" value="blPaymentGatewayConfigurationServices"/>
     </bean>
+    
+    <bean class="org.broadleafcommerce.common.logging.ModuleLifecycleLoggingBean">
+        <property name="moduleName" value="Paypal" />
+        <property name="lifeCycleEvent" value="LOADING" />
+    </bean>
 
 </beans>
