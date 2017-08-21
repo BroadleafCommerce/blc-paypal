@@ -1,4 +1,5 @@
 - [[Home | .]]
 - [[Release Notes]]
-- [[PayPal Environment Setup]]
 - [[PayPal Quick Start]]
+- [[PayPal Configuration Properties]]
+- [[PayPal Production Configurations]]
