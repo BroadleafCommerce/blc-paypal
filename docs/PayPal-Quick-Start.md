@@ -42,8 +42,8 @@ Make sure to include the dependency in your `site` AND `admin` pom.xml as well (
 
 ```html
 <div class="row">
-    <div class="col-sm-3">
-        <img src="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif" class="text-center-mobile"/>
+    <div class="col-sm-3 text-center-mobile">
+        <img src="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif"/>
     </div>
     <div class="col-sm-9" th:utext="#{checkout.paymentMethod.payPal.readOnly.message}"></div>
 </div>
@@ -54,8 +54,8 @@ and the `form` fragment's content with
 ```html
 <th:block th:if="${#paymentMethod.cartContainsThirdPartyPayment()}">
     <div class="row">
-        <div class="col-sm-3">
-            <img src="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif" class="text-center-mobile"/>
+        <div class="col-sm-3 text-center-mobile">
+            <img src="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif"/>
         </div>
         <div class="col-sm-9" th:utext="#{checkout.paymentMethod.payPal.edit.message}"></div>
     </div>
@@ -64,8 +64,8 @@ and the `form` fragment's content with
 <th:block th:unless="${#paymentMethod.cartContainsThirdPartyPayment()}">
     <a th:href="@{/paypal-express/redirect?complete=false}" class="js-payPalPaymentMethodAction is-hidden"></a>
     <div class="row">
-        <div class="col-sm-3">
-            <img src="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif" class="text-center-mobile"/>
+        <div class="col-sm-3 text-center-mobile">
+            <img src="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif"/>
         </div>
         <div class="col-sm-9" th:utext="#{checkout.paymentMethod.payPal.message}"></div>
     </div>
