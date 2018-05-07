@@ -2,7 +2,7 @@
  * #%L
  * BroadleafCommerce PayPal
  * %%
- * Copyright (C) 2009 - 2014 Broadleaf Commerce
+ * Copyright (C) 2009 - 2018 Broadleaf Commerce
  * %%
  * Licensed under the Broadleaf Fair Use License Agreement, Version 1.0
  * (the "Fair Use License" located  at http://license.broadleafcommerce.org/fair_use_license-1.0.txt)
@@ -18,11 +18,11 @@
 package org.broadleafcommerce.vendor.paypal.service.payment;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.log4j.Logger;
 import org.broadleafcommerce.common.money.Money;
-import org.broadleafcommerce.common.util.BLCRequestUtils;
 import org.broadleafcommerce.payment.service.gateway.PayPalExpressConfiguration;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.details.PayPalDetailsRequest;
@@ -47,14 +47,14 @@ import javax.annotation.Resource;
 @Service("blPayPalExpressRequestGenerator")
 public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
 
-    protected Logger logger = Logger.getLogger(PayPalRequestGeneratorImpl.class);
+    protected Log logger = LogFactory.getLog(PayPalRequestGeneratorImpl.class);
 
     @Resource(name = "blPayPalExpressConfiguration")
     protected PayPalExpressConfiguration configuration;
-    
+
     @Resource
     protected CustomFieldSerializer customFieldSerializer;
-    
+
     @Override
     public List<NameValuePair> buildRequest(PayPalRequest request) {
         List<NameValuePair> nvps = new ArrayList<NameValuePair>();
@@ -83,7 +83,7 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
         } else {
             throw new IllegalArgumentException("Method type not supported: " + request.getMethodType().getFriendlyType());
         }
-        
+
         return nvps;
     }
 
@@ -140,14 +140,14 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
         nvps.add(new BasicNameValuePair(MessageConstants.METHOD, MessageConstants.PROCESSPAYMENTACTION));
         nvps.add(new BasicNameValuePair(MessageConstants.BN, MessageConstants.BNCODE));
     }
-    
+
     protected void setBaseNvps(List<NameValuePair> nvps) {
         nvps.add(new BasicNameValuePair(MessageConstants.USER, getUser()));
         nvps.add(new BasicNameValuePair(MessageConstants.PASSWORD, getPassword()));
         nvps.add(new BasicNameValuePair(MessageConstants.SIGNATURE, getSignature()));
         nvps.add(new BasicNameValuePair(MessageConstants.VERSION, getLibVersion()));
     }
-    
+
     protected void setNvpsForCheckoutOrAuth(List<NameValuePair> nvps, PayPalPaymentRequest paymentRequest, String payPalAction) {
         nvps.add(new BasicNameValuePair(replaceNumericBoundProperty(MessageConstants.PAYMENTACTION, new Integer[]{0}, new String[]{"n"}), payPalAction));
 
@@ -162,18 +162,18 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
         }
         customFields.put(MessageConstants.COMPLETE_CHECKOUT_ON_CALLBACK_CUSTOM_FIELD, checkoutOnCallback);
         String serializedFields = customFieldSerializer.serializeCustomFields(customFields);
-        
+
         if (serializedFields.length() > MessageConstants.CUSTOMFIELD_CHARACTER_LIMIT) {
             throw new IllegalStateException(String.format("The serialized custom field string of %s is %s characters but is limited to %s characters",
                 serializedFields,
                 serializedFields.length(),
                 MessageConstants.CUSTOMFIELD_CHARACTER_LIMIT));
         }
-        
+
         // PAYMENTREQUEST_0_CUSTOM is a serialized field limited to 256 characters that allows for easy extension
         nvps.add(new BasicNameValuePair(replaceNumericBoundProperty(MessageConstants.DETAILSPAYMENTCUSTOM, new Integer[]{0}, new String[]{"n"}), serializedFields));
-        
-        
+
+
         //Determine if PayPal displays the shipping address fields on the PayPal pages.
         //For digital goods, this field is required and must be set to 1.
         // 0 - PayPal displays the shipping address passed in.
@@ -196,7 +196,7 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
         }
         nvps.add(new BasicNameValuePair(MessageConstants.METHOD, MessageConstants.EXPRESSCHECKOUTACTION));
     }
-    
+
     protected void setCostNvps(List<NameValuePair> nvps, PayPalPaymentRequest paymentRequest) {
         int counter = 0;
         for (PayPalItemRequest itemRequest : paymentRequest.getItemRequests()) {
@@ -252,7 +252,7 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
         }
         return money.toString();
     }
-    
+
     protected String replaceNumericBoundProperty(String property, Integer[] number, String[] positions) {
         int counter = 0;
         for (String position : positions) {
@@ -271,7 +271,7 @@ public class PayPalRequestGeneratorImpl implements PayPalRequestGenerator {
     public Map<String, String> getAdditionalConfig() {
         return configuration.getAdditionalConfig();
     }
-    
+
     @Override
     public Map<String, String> getAdditionalCustomFields() {
         return configuration.getAdditionalCustomFields();
