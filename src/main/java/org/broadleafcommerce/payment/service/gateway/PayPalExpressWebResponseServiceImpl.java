@@ -46,7 +46,8 @@ public class PayPalExpressWebResponseServiceImpl extends AbstractPaymentGatewayW
     @Override
     public PaymentResponseDTO translateWebResponse(HttpServletRequest request) throws PaymentException {
         PaymentRequestDTO requestDTO = new PaymentRequestDTO()
-                .additionalField(MessageConstants.TOKEN, request.getParameter(MessageConstants.HTTP_TOKEN));
+                .additionalField(MessageConstants.HTTP_PAYMENTID, request.getParameter(MessageConstants.HTTP_PAYMENTID))
+                .additionalField(MessageConstants.HTTP_PAYERID, request.getParameter(MessageConstants.HTTP_PAYERID));
         PaymentResponseDTO responseDTO = reportingService.findDetailsByTransaction(requestDTO);
 
         responseDTO.responseMap(MessageConstants.HTTP_REQUEST, webResponsePrintService.printRequest(request))

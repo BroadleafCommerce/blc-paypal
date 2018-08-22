@@ -17,6 +17,10 @@
  */
 package org.broadleafcommerce.payment.service.gateway;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.broadleafcommerce.common.payment.PaymentType;
 import org.broadleafcommerce.common.payment.dto.PaymentRequestDTO;
 import org.broadleafcommerce.common.payment.dto.PaymentResponseDTO;
@@ -25,11 +29,13 @@ import org.broadleafcommerce.common.payment.service.PaymentGatewayReportingServi
 import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
 import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalExpressPaymentGatewayType;
-import org.broadleafcommerce.vendor.paypal.service.payment.message.details.PayPalDetailsRequest;
-import org.broadleafcommerce.vendor.paypal.service.payment.message.details.PayPalDetailsResponse;
-import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalMethodType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+
+import com.paypal.api.payments.Payment;
+import com.paypal.base.rest.APIContext;
+import com.paypal.base.rest.PayPalRESTException;
+
 import javax.annotation.Resource;
 
 /**
@@ -38,21 +44,31 @@ import javax.annotation.Resource;
 @Service("blPayPalExpressReportingService")
 public class PayPalExpressReportingServiceImpl extends AbstractPaymentGatewayReportingService implements PaymentGatewayReportingService {
 
+    private static final Log LOG = LogFactory.getLog(PayPalExpressReportingServiceImpl.class);
+
     @Resource(name = "blExternalCallPayPalExpressService")
     protected ExternalCallPayPalExpressService payPalExpressService;
 
+    @Resource(name = "blPayPalApiContext")
+    protected APIContext apiContext;
+
     @Override
     public PaymentResponseDTO findDetailsByTransaction(PaymentRequestDTO paymentRequestDTO) throws PaymentException {
-        Assert.isTrue(paymentRequestDTO.getAdditionalFields().containsKey(MessageConstants.TOKEN), "The RequestDTO must contain a TOKEN");
+        Assert.isTrue(paymentRequestDTO.getAdditionalFields().containsKey(MessageConstants.HTTP_PAYERID), "The RequestDTO must contain a payerID");
+        Assert.isTrue(paymentRequestDTO.getAdditionalFields().containsKey(MessageConstants.HTTP_PAYMENTID), "The RequestDTO must contain a paymentID");
 
-        PayPalDetailsRequest detailsRequest = new PayPalDetailsRequest();
-        detailsRequest.setMethodType(PayPalMethodType.DETAILS);
-        detailsRequest.setToken((String)paymentRequestDTO.getAdditionalFields().get(MessageConstants.TOKEN));
-
-        PayPalDetailsResponse response = (PayPalDetailsResponse) payPalExpressService.call(detailsRequest);
+        Payment payment = null;
+        try {
+            payment = Payment.get(apiContext, (String) paymentRequestDTO.getAdditionalFields().get(MessageConstants.HTTP_PAYMENTID));
+        } catch (PayPalRESTException e) {
+            throw new PaymentException(e);
+        }
         PaymentResponseDTO responseDTO = new PaymentResponseDTO(PaymentType.THIRD_PARTY_ACCOUNT,
                 PayPalExpressPaymentGatewayType.PAYPAL_EXPRESS);
-        payPalExpressService.setCommonDetailsResponse(response, responseDTO);
+        payPalExpressService.setCommonDetailsResponse(payment, responseDTO);
+        responseDTO.responseMap(MessageConstants.PAYERID, (String) paymentRequestDTO.getAdditionalFields().get(MessageConstants.HTTP_PAYERID))
+                    .responseMap(MessageConstants.PAYMENTID, (String) paymentRequestDTO.getAdditionalFields().get(MessageConstants.HTTP_PAYMENTID));
+        LOG.info("ResponseDTO created: " + ToStringBuilder.reflectionToString(responseDTO, ToStringStyle.MULTI_LINE_STYLE));
         return responseDTO;
     }
 

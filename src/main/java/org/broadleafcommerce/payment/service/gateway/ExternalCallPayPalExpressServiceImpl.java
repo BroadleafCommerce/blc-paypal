@@ -17,21 +17,9 @@
  */
 package org.broadleafcommerce.payment.service.gateway;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.config.Registry;
-import org.apache.http.config.RegistryBuilder;
-import org.apache.http.conn.socket.ConnectionSocketFactory;
-import org.apache.http.conn.socket.PlainConnectionSocketFactory;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.impl.client.BasicResponseHandler;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.broadleafcommerce.common.money.Money;
 import org.broadleafcommerce.common.payment.PaymentTransactionType;
 import org.broadleafcommerce.common.payment.PaymentType;
@@ -46,8 +34,6 @@ import org.broadleafcommerce.vendor.paypal.service.payment.PayPalRequestGenerato
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalResponseGenerator;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalResponse;
-import org.broadleafcommerce.vendor.paypal.service.payment.message.details.PayPalDetailsResponse;
-import org.broadleafcommerce.vendor.paypal.service.payment.message.details.PayPalPayerAddress;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPalItemRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPalPaymentRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPalPaymentResponse;
@@ -57,11 +43,16 @@ import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalMethodType
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalTransactionType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+
+import com.paypal.api.payments.Details;
+import com.paypal.api.payments.Payment;
+import com.paypal.api.payments.ShippingAddress;
+import com.paypal.api.payments.Transaction;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.util.List;
+
 import javax.annotation.Resource;
-import javax.net.ssl.SSLContext;
 
 /**
  * @author Elbert Bautista (elbertbautista)
@@ -92,34 +83,12 @@ public class ExternalCallPayPalExpressServiceImpl extends AbstractExternalPaymen
 
     @Override
     public PayPalResponse call(PayPalRequest paymentRequest) throws PaymentException {
-        return super.process(paymentRequest);
+        throw new UnsupportedOperationException("Shouldn't use the call method because all calls should be done through the PayPal SDK using methods on the Payment object");
     }
 
     @Override
     public PayPalResponse communicateWithVendor(PayPalRequest paymentRequest) throws Exception {
-        SSLConnectionSocketFactory socketFactory = new SSLConnectionSocketFactory(
-                SSLContext.getDefault(),
-                new String[] {"TLSv1.2"},
-                null,
-                SSLConnectionSocketFactory.BROWSER_COMPATIBLE_HOSTNAME_VERIFIER);
-        Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
-                .register("http", PlainConnectionSocketFactory.getSocketFactory())
-                .register("https", socketFactory)
-                .build();
-
-        PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
-        CloseableHttpClient httpClient = HttpClients.custom().setConnectionManager(cm).build();
-
-        try {
-            HttpPost postMethod = new HttpPost(getServerUrl());
-            List<NameValuePair> nvps = requestGenerator.buildRequest(paymentRequest);
-            postMethod.setEntity(new UrlEncodedFormEntity(nvps));
-            CloseableHttpResponse response = httpClient.execute(postMethod);
-            String responseString = new BasicResponseHandler().handleResponse(response);
-            return responseGenerator.buildResponse(responseString, paymentRequest);
-        } finally {
-            httpClient.close();
-        }
+        throw new UnsupportedOperationException("Shouldn't use the communicateWithVendor method because all calls should be done through the PayPal SDK using methods on the Payment object");
 
     }
 
@@ -241,70 +210,95 @@ public class ExternalCallPayPalExpressServiceImpl extends AbstractExternalPaymen
     }
 
     @Override
-    public void setCommonDetailsResponse(PayPalDetailsResponse response, PaymentResponseDTO responseDTO) {
-
-        try {
-            responseDTO.rawResponse(URLDecoder.decode(response.getRawResponse(), "UTF-8"));
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }
-
-        if (response.getAddresses() != null && !response.getAddresses().isEmpty()) {
-            PayPalPayerAddress payerAddress = response.getAddresses().get(0);
+    public void setCommonDetailsResponse(Payment response, PaymentResponseDTO responseDTO) {
+        responseDTO.rawResponse(response.toJSON());
+        
+        // TODO Do we just use the first transaction?
+        if (CollectionUtils.isNotEmpty(response.getTransactions()) && 
+            response.getTransactions().get(0) != null &&
+            response.getTransactions().get(0).getItemList() != null) {
+            ShippingAddress shippingAddress = response.getTransactions().get(0).getItemList().getShippingAddress();
+            
             responseDTO.shipTo()
-                    .addressFirstName(payerAddress.getName())
-                    .addressLine1(payerAddress.getStreet())
-                    .addressLine2(payerAddress.getStreet2())
-                    .addressCityLocality(payerAddress.getCity())
-                    .addressStateRegion(payerAddress.getState())
-                    .addressPostalCode(payerAddress.getZip())
-                    .addressCountryCode(payerAddress.getCountryCode())
-                    .addressPhone(payerAddress.getPhoneNumber())
-                    .done();
-
-            if (payerAddress.getAddressStatus()!= null) {
-                    responseDTO.getShipTo().additionalFields(MessageConstants.ADDRESSSTATUS, payerAddress.getAddressStatus().getType());
+                .addressFirstName(shippingAddress.getRecipientName())
+                .addressLine1(shippingAddress.getLine1())
+                .addressLine2(shippingAddress.getLine2())
+                .addressCityLocality(shippingAddress.getCity())
+                .addressStateRegion(shippingAddress.getState())
+                .addressPostalCode(shippingAddress.getPostalCode())
+                .addressCountryCode(shippingAddress.getCountryCode())
+                .addressPhone(shippingAddress.getPhone())
+                .done();
+            
+            if (shippingAddress.getStatus() != null) {
+                responseDTO.getShipTo().additionalFields(MessageConstants.ADDRESSSTATUS, shippingAddress.getStatus());
             }
-        }
 
-        if (response.getPaymentDetails()!= null) {
-
-            String itemTotal =  (response.getPaymentDetails().getItemTotal() != null)? response.getPaymentDetails().getItemTotal().toString() : "";
-            String shippingDiscount = (response.getPaymentDetails().getShippingDiscount() != null)? response.getPaymentDetails().getShippingDiscount().toString() : "";
-            String shippingTotal = (response.getPaymentDetails().getShippingTotal() != null)? response.getPaymentDetails().getShippingTotal().toString() : "";
-            String totalTax = (response.getPaymentDetails().getTotalTax() != null)? response.getPaymentDetails().getTotalTax().toString() : "";
-
-            responseDTO.amount(response.getPaymentDetails().getAmount())
-                    .orderId(response.getPaymentDetails().getOrderId())
-                    .completeCheckoutOnCallback(response.getPaymentDetails().isCompleteCheckoutOnCallback())
-                    .responseMap(MessageConstants.DETAILSPAYMENTALLOWEDMETHOD, response.getPaymentDetails().getPaymentMethod())
-                    .responseMap(MessageConstants.DETAILSPAYMENTREQUESTID, response.getPaymentDetails().getPaymentRequestId())
-                    .responseMap(MessageConstants.DETAILSPAYMENTTRANSACTIONID, response.getPaymentDetails().getTransactionId())
+            // TODO Do we just use the first transaction?
+            Transaction transaction = response.getTransactions().get(0);
+            
+            String itemTotal = "";
+            String shippingDiscount = "";
+            String shippingTotal = "";
+            String totalTax = "";
+            String total = "0.00";
+            String currency = "USD";
+            if (transaction.getAmount() != null && transaction.getAmount().getDetails() != null) {
+                Details details = transaction.getAmount().getDetails();
+                if (details.getSubtotal() != null) {
+                    itemTotal = details.getSubtotal();
+                }
+                if (details.getShippingDiscount() != null) {
+                    shippingDiscount = details.getShippingDiscount();
+                }
+                if (details.getShipping() != null) {
+                    shippingTotal = details.getShipping();
+                }
+                if (details.getTax() != null) {
+                    totalTax = details.getTax();
+                }
+            }
+            if (transaction.getAmount() != null) {
+                total = transaction.getAmount().getTotal();
+                if (transaction.getAmount().getCurrency() != null) {
+                    currency = transaction.getAmount().getCurrency();
+                }
+            }
+            responseDTO.amount(new Money(total, currency))
+                    .orderId(transaction.getCustom())
+                    .successful(true)
+                    .valid(true)
+                    .completeCheckoutOnCallback(true) // TODO need to figure this out dynamically
+                    .responseMap(MessageConstants.DETAILSPAYMENTALLOWEDMETHOD, response.getPayer().getPaymentMethod())
+                    .responseMap(MessageConstants.DETAILSPAYMENTTRANSACTIONID, response.getId()) // TODO not sure if this is the correct id or not
                     .responseMap(MessageConstants.DETAILSPAYMENTITEMTOTAL, itemTotal)
                     .responseMap(MessageConstants.DETAILSPAYMENTSHIPPINGDISCOUNT, shippingDiscount)
                     .responseMap(MessageConstants.DETAILSPAYMENTSHIPPINGTOTAL,shippingTotal)
                     .responseMap(MessageConstants.DETAILSPAYMENTTOTALTAX, totalTax);
+            
+//            TODO don't have the slightest as to what this is now
+//            if (response.getCheckoutStatusType()!=null) {
+//                responseDTO.responseMap(MessageConstants.CHECKOUTSTATUS, response.getCheckoutStatusType().getType());
+//            }
+    
+//            TODO No idea what a paypal adjustment is
+//            String paypalAdjustment = (response.getPayPalAdjustment() != null)? response.getPayPalAdjustment().toString() : "";
+            String payerStatus = response.getPayer().getStatus();
+    
+            responseDTO.customer()
+                .firstName(response.getPayer().getPayerInfo().getFirstName())
+                .lastName(response.getPayer().getPayerInfo().getLastName())
+//                .companyName(response.getBusiness()) TODO No idea if this is even sent anymore
+                .phone(response.getPayer().getPayerInfo().getPhone())
+                .email(response.getPayer().getPayerInfo().getEmail())
+                .done()
+//             TODO I don't think I care about this anymore
+//            .responseMap(MessageConstants.TOKEN, response.getResponseToken())
+            .responseMap(MessageConstants.NOTE, response.getNoteToPayer())
+//            TODO don't know what this is
+//            .responseMap(MessageConstants.PAYPALADJUSTMENT, paypalAdjustment)
+            .responseMap(MessageConstants.PAYERSTATUS, payerStatus);
         }
-
-        if (response.getCheckoutStatusType()!=null) {
-            responseDTO.responseMap(MessageConstants.CHECKOUTSTATUS, response.getCheckoutStatusType().getType());
-        }
-
-        String paypalAdjustment = (response.getPayPalAdjustment() != null)? response.getPayPalAdjustment().toString() : "";
-        String payerStatus = (response.getPayerStatus() != null)? response.getPayerStatus().toString() : "";
-
-        responseDTO.customer()
-            .firstName(response.getPayerFirstName())
-            .lastName(response.getPayerLastName())
-            .companyName(response.getBusiness())
-            .phone(response.getPhoneNumber())
-            .email(response.getEmailAddress())
-            .done()
-        .responseMap(MessageConstants.TOKEN, response.getResponseToken())
-        .responseMap(MessageConstants.PAYERID, response.getPayerId())
-        .responseMap(MessageConstants.NOTE, response.getNote())
-        .responseMap(MessageConstants.PAYPALADJUSTMENT, paypalAdjustment)
-        .responseMap(MessageConstants.PAYERSTATUS, payerStatus);
 
     }
 

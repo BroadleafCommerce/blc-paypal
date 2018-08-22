@@ -22,10 +22,11 @@ import org.broadleafcommerce.common.payment.dto.PaymentResponseDTO;
 import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalResponse;
-import org.broadleafcommerce.vendor.paypal.service.payment.message.details.PayPalDetailsResponse;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPalPaymentRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPalPaymentResponse;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalTransactionType;
+
+import com.paypal.api.payments.Payment;
 
 /**
  * @author Elbert Bautista (elbertbautista)
@@ -43,7 +44,7 @@ public interface ExternalCallPayPalExpressService {
 
     void setCommonPaymentResponse(PayPalPaymentResponse response, PaymentResponseDTO responseDTO);
 
-    void setCommonDetailsResponse(PayPalDetailsResponse response, PaymentResponseDTO responseDTO);
+    void setCommonDetailsResponse(Payment response, PaymentResponseDTO responseDTO);
 
     void setDecisionInformation(PayPalPaymentResponse response, PaymentResponseDTO responseDTO);
 

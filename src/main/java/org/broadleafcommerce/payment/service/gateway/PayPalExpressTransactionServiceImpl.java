@@ -17,6 +17,8 @@
  */
 package org.broadleafcommerce.payment.service.gateway;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.broadleafcommerce.common.money.Money;
@@ -29,14 +31,18 @@ import org.broadleafcommerce.common.payment.service.PaymentGatewayTransactionSer
 import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
 import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalExpressPaymentGatewayType;
-import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPalPaymentRequest;
-import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPalPaymentResponse;
-import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPalSummaryRequest;
-import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalMethodType;
-import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalRefundType;
-import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalTransactionType;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
+
+import com.paypal.api.payments.Amount;
+import com.paypal.api.payments.Authorization;
+import com.paypal.api.payments.Capture;
+import com.paypal.api.payments.DetailedRefund;
+import com.paypal.api.payments.Payment;
+import com.paypal.api.payments.PaymentExecution;
+import com.paypal.api.payments.RefundRequest;
+import com.paypal.base.rest.APIContext;
+import com.paypal.base.rest.PayPalRESTException;
+
 import javax.annotation.Resource;
 
 /**
@@ -50,121 +56,157 @@ public class PayPalExpressTransactionServiceImpl extends AbstractPaymentGatewayT
     @Resource(name = "blExternalCallPayPalExpressService")
     protected ExternalCallPayPalExpressService payPalExpressService;
 
+    @Resource(name = "blPayPalApiContext")
+    protected APIContext apiContext;
 
     @Override
     public PaymentResponseDTO authorize(PaymentRequestDTO paymentRequestDTO) throws PaymentException  {
-        Assert.isTrue(paymentRequestDTO.getAdditionalFields().containsKey(MessageConstants.PAYERID), "The RequestDTO must contain a PAYERID");
-        Assert.isTrue(paymentRequestDTO.getAdditionalFields().containsKey(MessageConstants.TOKEN), "The RequestDTO must contain a TOKEN");
-
-        return payPalExpressService.commonAuthorizeOrSale(paymentRequestDTO, PayPalTransactionType.AUTHORIZE,
-                (String) paymentRequestDTO.getAdditionalFields().get(MessageConstants.TOKEN),
-                (String) paymentRequestDTO.getAdditionalFields().get(MessageConstants.PAYERID));
+        PaymentResponseDTO responseDTO = new PaymentResponseDTO(PaymentType.THIRD_PARTY_ACCOUNT, PayPalExpressPaymentGatewayType.PAYPAL_EXPRESS);
+        Payment authPayment;
+        try {
+            authPayment = authorizePayment(getPaymentId(paymentRequestDTO), getPayerId(paymentRequestDTO));
+        } catch (PayPalRESTException e) {
+            throw new PaymentException(e);
+        }
+        Authorization auth = authPayment.getTransactions().get(0).getRelatedResources().get(0).getAuthorization();
+        responseDTO
+            .successful(true)
+            .paymentTransactionType(PaymentTransactionType.AUTHORIZE)
+            .responseMap(MessageConstants.AUTHORIZATONID, auth.getId())
+            .amount(new Money(auth.getAmount().getTotal(), auth.getAmount().getCurrency()));
+        return responseDTO;
     }
 
     @Override
     public PaymentResponseDTO capture(PaymentRequestDTO paymentRequestDTO) throws PaymentException {
-        Assert.isTrue(paymentRequestDTO.getAdditionalFields().containsKey(MessageConstants.TRANSACTIONID), "The RequestDTO must contain a TRANSACTIONID");
-
-        PayPalPaymentRequest request = payPalExpressService.buildBasicRequest(paymentRequestDTO, PayPalTransactionType.CAPTURE);
-        request.setMethodType(PayPalMethodType.CAPTURE);
-        request.setTransactionID((String)paymentRequestDTO.getAdditionalFields().get(MessageConstants.TRANSACTIONID));
-
-        PaymentResponseDTO responseDTO = new PaymentResponseDTO(PaymentType.THIRD_PARTY_ACCOUNT,
-                PayPalExpressPaymentGatewayType.PAYPAL_EXPRESS);
-        PayPalPaymentResponse response;
-
-        response = (PayPalPaymentResponse) payPalExpressService.call(request);
-        payPalExpressService.setCommonPaymentResponse(response, responseDTO);
-        responseDTO.successful(response.isSuccessful());
-        responseDTO.paymentTransactionType(PaymentTransactionType.CAPTURE);
-        payPalExpressService.setDecisionInformation(response, responseDTO);
-
+        PaymentResponseDTO responseDTO = new PaymentResponseDTO(PaymentType.THIRD_PARTY_ACCOUNT, PayPalExpressPaymentGatewayType.PAYPAL_EXPRESS);
+        Capture capture;
+        try {
+            capture = capturePayment(getAuthorizationId(paymentRequestDTO));
+        } catch (PayPalRESTException e) {
+            throw new PaymentException(e);
+        }
+        responseDTO
+            .successful(true)
+            .paymentTransactionType(PaymentTransactionType.CAPTURE)
+            .responseMap(MessageConstants.CAPTUREID, capture.getId())
+            .amount(new Money(capture.getAmount().getTotal(), capture.getAmount().getCurrency()));
         return responseDTO;
     }
 
     @Override
     public PaymentResponseDTO authorizeAndCapture(PaymentRequestDTO paymentRequestDTO) throws PaymentException  {
-        Assert.isTrue(paymentRequestDTO.getAdditionalFields().containsKey(MessageConstants.PAYERID), "The RequestDTO must contain a PAYERID");
-        Assert.isTrue(paymentRequestDTO.getAdditionalFields().containsKey(MessageConstants.TOKEN), "The RequestDTO must contain a TOKEN");
-
-        return payPalExpressService.commonAuthorizeOrSale(paymentRequestDTO, PayPalTransactionType.AUTHORIZEANDCAPTURE,
-                (String) paymentRequestDTO.getAdditionalFields().get(MessageConstants.TOKEN),
-                (String) paymentRequestDTO.getAdditionalFields().get(MessageConstants.PAYERID));
+        PaymentResponseDTO responseDTO = new PaymentResponseDTO(PaymentType.THIRD_PARTY_ACCOUNT, PayPalExpressPaymentGatewayType.PAYPAL_EXPRESS);
+        Authorization auth;
+        Capture capture;
+        try {
+            Payment authPayment = authorizePayment(getPaymentId(paymentRequestDTO), getPayerId(paymentRequestDTO));
+            auth = authPayment.getTransactions().get(0).getRelatedResources().get(0).getAuthorization();
+            capture = capturePayment(auth);
+        } catch (PayPalRESTException e) {
+            throw new PaymentException(e);
+        }
+        responseDTO
+            .successful(true)
+            .paymentTransactionType(PaymentTransactionType.AUTHORIZE_AND_CAPTURE)
+            .responseMap(MessageConstants.CAPTUREID, capture.getId())
+            .responseMap(MessageConstants.AUTHORIZATONID, auth.getId())
+            .amount(new Money(capture.getAmount().getTotal(), capture.getAmount().getCurrency()));
+        return responseDTO;
     }
 
     @Override
     public PaymentResponseDTO reverseAuthorize(PaymentRequestDTO paymentRequestDTO) throws PaymentException {
-        Assert.isTrue(paymentRequestDTO.getAdditionalFields().containsKey(MessageConstants.TRANSACTIONID), "The RequestDTO must contain a TRANSACTIONID");
-
-        PayPalPaymentRequest request = payPalExpressService.buildBasicRequest(paymentRequestDTO, PayPalTransactionType.REVERSEAUTHORIZE);
-        request.setMethodType(PayPalMethodType.VOID);
-        request.setTransactionID((String) paymentRequestDTO.getAdditionalFields().get(MessageConstants.TRANSACTIONID));
-
-        PaymentResponseDTO responseDTO = new PaymentResponseDTO(PaymentType.THIRD_PARTY_ACCOUNT,
-                PayPalExpressPaymentGatewayType.PAYPAL_EXPRESS);
-        PayPalPaymentResponse response;
-
-        response = (PayPalPaymentResponse) payPalExpressService.call(request);
-        payPalExpressService.setCommonPaymentResponse(response, responseDTO);
-        responseDTO.successful(response.isSuccessful());
-        responseDTO.paymentTransactionType(PaymentTransactionType.REVERSE_AUTH);
-        payPalExpressService.setDecisionInformation(response, responseDTO);
-
+        PaymentResponseDTO responseDTO = new PaymentResponseDTO(PaymentType.THIRD_PARTY_ACCOUNT, PayPalExpressPaymentGatewayType.PAYPAL_EXPRESS);
+        Authorization auth;
+        try {
+            auth = Authorization.get(apiContext, getAuthorizationId(paymentRequestDTO));
+            auth = auth.doVoid(apiContext);
+        } catch (PayPalRESTException e) {
+            throw new PaymentException(e);
+        }
+        responseDTO
+            .successful(true)
+            .paymentTransactionType(PaymentTransactionType.REVERSE_AUTH)
+            .amount(new Money(auth.getAmount().getTotal(), auth.getAmount().getCurrency()));
         return responseDTO;
     }
 
     @Override
     public PaymentResponseDTO refund(PaymentRequestDTO paymentRequestDTO) throws PaymentException  {
-        Assert.isTrue(paymentRequestDTO.getAdditionalFields().containsKey(MessageConstants.TRANSACTIONID), "The RequestDTO must contain a TRANSACTIONID");
-
-        PayPalPaymentRequest request = payPalExpressService.buildBasicRequest(paymentRequestDTO, PayPalTransactionType.CREDIT);
-        request.setMethodType(PayPalMethodType.REFUND);
-        if (paymentRequestDTO.getAdditionalFields().containsKey(MessageConstants.REFUNDTYPE)) {
-            request.setRefundType(PayPalRefundType.getInstance((String) paymentRequestDTO.getAdditionalFields().get(MessageConstants.REFUNDTYPE)));
-        } else {
-            LOG.debug("No refund type passed in, assuming partial refund with requested amount of " + paymentRequestDTO.getTransactionTotal());
-            request.setRefundType(PayPalRefundType.PARTIAL);
+        PaymentResponseDTO responseDTO = new PaymentResponseDTO(PaymentType.THIRD_PARTY_ACCOUNT, PayPalExpressPaymentGatewayType.PAYPAL_EXPRESS);
+        DetailedRefund detailRefund;
+        try {
+            Capture capture = Capture.get(apiContext, getCaptureId(paymentRequestDTO));
+            RefundRequest refund = new RefundRequest();
+            refund.setAmount(capture.getAmount());
+            detailRefund = capture.refund(apiContext, refund);
+        } catch (PayPalRESTException e) {
+            throw new PaymentException(e);
         }
-        
-        if (PayPalRefundType.PARTIAL.equals(request.getRefundType())) {
-            PayPalSummaryRequest summary = new PayPalSummaryRequest();
-            summary.setGrandTotal(new Money(paymentRequestDTO.getTransactionTotal()));
-            request.setSummaryRequest(summary);
-        }
-        
-        request.setTransactionID((String)paymentRequestDTO.getAdditionalFields().get(MessageConstants.TRANSACTIONID));
-
-        PaymentResponseDTO responseDTO = new PaymentResponseDTO(PaymentType.THIRD_PARTY_ACCOUNT,
-                PayPalExpressPaymentGatewayType.PAYPAL_EXPRESS);
-        PayPalPaymentResponse response;
-
-        response = (PayPalPaymentResponse) payPalExpressService.call(request);
-        payPalExpressService.setCommonPaymentResponse(response, responseDTO);
-        responseDTO.successful(response.isSuccessful());
-        responseDTO.paymentTransactionType(PaymentTransactionType.REFUND);
-        payPalExpressService.setDecisionInformation(response, responseDTO);
-        payPalExpressService.setRefundInformation(response, responseDTO);
-
+        responseDTO
+            .successful(true)
+            .paymentTransactionType(PaymentTransactionType.REFUND)
+            .responseMap(MessageConstants.REFUNDID, detailRefund.getId())
+            .amount(new Money(detailRefund.getAmount().getTotal(), detailRefund.getAmount().getCurrency()));
         return responseDTO;
     }
 
     @Override
     public PaymentResponseDTO voidPayment(PaymentRequestDTO paymentRequestDTO) throws PaymentException {
-        Assert.isTrue(paymentRequestDTO.getAdditionalFields().containsKey(MessageConstants.TRANSACTIONID), "The RequestDTO must contain a TRANSACTIONID");
-
-        PayPalPaymentRequest request = payPalExpressService.buildBasicRequest(paymentRequestDTO, PayPalTransactionType.VOIDTRANSACTION);
-        request.setMethodType(PayPalMethodType.VOID);
-        request.setTransactionID((String) paymentRequestDTO.getAdditionalFields().get(MessageConstants.TRANSACTIONID));
-
-        PayPalPaymentResponse response = (PayPalPaymentResponse) payPalExpressService.call(request);
-        PaymentResponseDTO responseDTO = new PaymentResponseDTO(PaymentType.THIRD_PARTY_ACCOUNT,
-                PayPalExpressPaymentGatewayType.PAYPAL_EXPRESS);
-        payPalExpressService.setCommonPaymentResponse(response, responseDTO);
-        responseDTO.successful(response.isSuccessful());
-        responseDTO.paymentTransactionType(PaymentTransactionType.VOID);
-        payPalExpressService.setDecisionInformation(response, responseDTO);
-
+        PaymentResponseDTO responseDTO = new PaymentResponseDTO(PaymentType.THIRD_PARTY_ACCOUNT, PayPalExpressPaymentGatewayType.PAYPAL_EXPRESS);
+        Authorization auth;
+        try {
+            auth = Authorization.get(apiContext, getAuthorizationId(paymentRequestDTO));
+            auth = auth.doVoid(apiContext);
+        } catch (PayPalRESTException e) {
+            throw new PaymentException(e);
+        }
+        responseDTO
+            .successful(true)
+            .paymentTransactionType(PaymentTransactionType.VOID)
+            .amount(new Money(auth.getAmount().getTotal(), auth.getAmount().getCurrency()));
         return responseDTO;
     }
 
+    protected Payment authorizePayment(String paymentId, String payerId) throws PayPalRESTException {
+        Payment payment = new Payment();
+        payment.setId(paymentId);
+        PaymentExecution paymentExecution = new PaymentExecution();
+        paymentExecution.setPayerId(payerId);
+        return payment.execute(apiContext, paymentExecution);
+    }
+    
+    protected Capture capturePayment(Authorization auth) throws PayPalRESTException {
+        Capture capture = new Capture();
+        capture.setIsFinalCapture(true);
+        Amount amount = new Amount();
+        amount.setCurrency(auth.getAmount().getCurrency());
+        amount.setTotal(auth.getAmount().getTotal());
+        capture.setAmount(amount);
+        LOG.info("Auth about to be captured :\n" + ToStringBuilder.reflectionToString(auth, ToStringStyle.MULTI_LINE_STYLE));
+        LOG.info("Capture about to be captured :\n " + ToStringBuilder.reflectionToString(capture, ToStringStyle.MULTI_LINE_STYLE));
+        return auth.capture(apiContext, capture);
+    }
+   
+    protected Capture capturePayment(String authorizationId) throws PayPalRESTException {
+        Authorization auth = Authorization.get(apiContext, authorizationId);
+        return capturePayment(auth);
+    }
+
+    protected String getPaymentId(PaymentRequestDTO paymentRequestDTO) {
+        return (String) paymentRequestDTO.getAdditionalFields().get(MessageConstants.PAYMENTID);
+    }
+
+    protected String getPayerId(PaymentRequestDTO paymentRequestDTO) {
+        return (String) paymentRequestDTO.getAdditionalFields().get(MessageConstants.PAYERID);
+    }
+
+    protected String getAuthorizationId(PaymentRequestDTO paymentRequestDTO) {
+        return (String) paymentRequestDTO.getAdditionalFields().get(MessageConstants.AUTHORIZATONID);
+    }
+    
+    protected String getCaptureId(PaymentRequestDTO paymentRequestDTO) {
+        return (String) paymentRequestDTO.getAdditionalFields().get(MessageConstants.CAPTUREID);
+    }
 }

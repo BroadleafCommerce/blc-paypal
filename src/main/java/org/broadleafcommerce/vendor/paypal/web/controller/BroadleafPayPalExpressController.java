@@ -17,9 +17,10 @@
  */
 package org.broadleafcommerce.vendor.paypal.web.controller;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.broadleafcommerce.common.payment.dto.PaymentRequestDTO;
 import org.broadleafcommerce.common.payment.dto.PaymentResponseDTO;
 import org.broadleafcommerce.common.payment.service.CurrentOrderPaymentRequestService;
 import org.broadleafcommerce.common.payment.service.PaymentGatewayConfiguration;
@@ -27,18 +28,36 @@ import org.broadleafcommerce.common.payment.service.PaymentGatewayHostedService;
 import org.broadleafcommerce.common.payment.service.PaymentGatewayWebResponseService;
 import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
 import org.broadleafcommerce.common.web.payment.controller.PaymentGatewayAbstractController;
-import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
+import org.broadleafcommerce.core.order.domain.Order;
+import org.broadleafcommerce.core.web.order.CartState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import com.paypal.api.payments.Amount;
+import com.paypal.api.payments.Details;
+import com.paypal.api.payments.Payer;
+import com.paypal.api.payments.Payment;
+import com.paypal.api.payments.PaymentExecution;
+import com.paypal.api.payments.RedirectUrls;
+import com.paypal.api.payments.Transaction;
+import com.paypal.base.rest.APIContext;
+import com.paypal.base.rest.PayPalRESTException;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import java.util.Map;
 
 /**
  * @author Elbert Bautista (elbertbautista)
@@ -58,6 +77,9 @@ public class BroadleafPayPalExpressController extends PaymentGatewayAbstractCont
 
     @Resource(name = "blPayPalExpressConfiguration")
     protected PaymentGatewayConfiguration paymentGatewayConfiguration;
+
+    @Resource(name = "blPayPalApiContext")
+    protected APIContext apiContext;
 
     @Autowired(required=false)
     protected CurrentOrderPaymentRequestService currentOrderPaymentRequestService;
@@ -104,7 +126,7 @@ public class BroadleafPayPalExpressController extends PaymentGatewayAbstractCont
     // PayPal Express Default Endpoints
     // ***********************************************
     @Override
-    @RequestMapping(value = "/return", method = RequestMethod.GET)
+    @RequestMapping(value = "/return", method = RequestMethod.POST)
     public String returnEndpoint(Model model, HttpServletRequest request,
                                  final RedirectAttributes redirectAttributes,
                                  @PathVariable Map<String, String> pathVars)
@@ -132,57 +154,90 @@ public class BroadleafPayPalExpressController extends PaymentGatewayAbstractCont
     }
 
     // ***********************************************
-    // PayPal Express Redirect Endpoint
-    // which generates the links on page load
+    // PayPal Client side REST checkout
     // ***********************************************
-    @RequestMapping(value = "/redirect", method = RequestMethod.GET)
-    public String redirectEndpoint(Model model, HttpServletRequest request) throws PaymentException {
-
-        PaymentRequestDTO requestDTO = getCurrentOrder();
-
-        if (requestDTO != null) {
-            try {
-                if ( request.getParameterMap().containsKey("complete") ) {
-                    Boolean completeCheckout = Boolean.parseBoolean(request.getParameter("complete"));
-                    requestDTO.completeCheckoutOnCallback(completeCheckout);
-                }
-
-                PaymentResponseDTO responseDTO = paymentGatewayHostedService.requestHostedEndpoint(requestDTO);
-                String url = responseDTO.getResponseMap().get(MessageConstants.REDIRECTURL).toString();
-
-                //https://developer.paypal.com/docs/classic/express-checkout/integration-guide/ECCustomizing/
-                if (requestDTO.isCompleteCheckoutOnCallback()) {
-                    url = url + "&useraction=commit";
-                }
-
-                url = "redirect:" + url;
-                if (LOG.isTraceEnabled()) {
-                    LOG.trace("Redirecting to PayPal Express with URL: " + url);
-                }
-
-                return url;
-            } catch (Exception e) {
-                if (LOG.isErrorEnabled()) {
-                    LOG.error("Unable to Create the PayPal Express Redirect Link.", e);
-                }
-            }
-        }
-
-        throw new PaymentException("Unable to Create the PayPal Express Redirect Link. The Request DTO is null");
-
+    @RequestMapping(value = "/create-payment", method = RequestMethod.POST)
+    public @ResponseBody Map<String, String> createPayment() throws PayPalRESTException {
+        Map<String, String> response = new HashMap<>();
+        Payment payment = createPayPalPayment();
+        LOG.info("Payment before creation : " + ToStringBuilder.reflectionToString(payment, ToStringStyle.MULTI_LINE_STYLE));
+        Payment createdPayment = payment.create(apiContext);
+        LOG.info("Payment after creation : " + ToStringBuilder.reflectionToString(createdPayment, ToStringStyle.MULTI_LINE_STYLE));
+        response.put("id", createdPayment.getId());
+        return response;
     }
 
-    protected PaymentRequestDTO getCurrentOrder() {
-        if (LOG.isErrorEnabled()) {
-            if (currentOrderPaymentRequestService == null) {
-                LOG.trace("getCurrentOrder: CurrentOrderPaymentRequestService is null. Please check your configuration.");
-            }
+    @RequestMapping(value = "/execute-payment", method = RequestMethod.POST)
+    public @ResponseBody Map<String, Object> executePayment(@RequestParam("paymentID") String paymentId,
+                                                            @RequestParam("payerID") String payerId) throws PayPalRESTException {
+        Map<String, Object> response = new HashMap<>();
+        Payment payment = new Payment();
+        payment.setId(paymentId);
+        PaymentExecution paymentExecution = new PaymentExecution();
+        paymentExecution.setPayerId(payerId);
+        try {
+            Payment createdPayment = payment.execute(apiContext, paymentExecution);
+            response.put("success", true);
+            response.put("message", createdPayment.getState());
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", e.getMessage());
         }
-
-        if (currentOrderPaymentRequestService != null) {
-            return currentOrderPaymentRequestService.getPaymentRequestFromCurrentOrder();
-        }
-        return null;
+        return response;
+    }
+    
+    @RequestMapping(value = "/update-payment", method = RequestMethod.POST)
+    public @ResponseBody Boolean updatePayment(@RequestBody PayPalUpdatePaymentDTO updateDto) throws PayPalRESTException {
+        Payment payment = new Payment();
+        payment.setId(updateDto.getPaymentId());
+        payment.update(apiContext, updateDto.getPatches());
+        return true;
     }
 
+    public Payment createPayPalPayment() {
+
+        Order order = CartState.getCart();
+
+        // Set payer details
+        Payer payer = new Payer();
+        payer.setPaymentMethod("paypal");
+
+        // Set redirect URLs
+        RedirectUrls redirectUrls = new RedirectUrls();
+        redirectUrls.setCancelUrl("http://localhost:3000/cancel");
+        redirectUrls.setReturnUrl("http://localhost:3000/process");
+
+        // Set payment details
+        Details details = new Details();
+
+        details.setShipping(order.getTotalShipping().toString());
+        details.setSubtotal(order.getSubTotal().toString());
+        details.setTax(order.getTotalTax().toString());
+
+        // Payment amount
+        Amount amount = new Amount();
+        amount.setCurrency(order.getCurrency().getCurrencyCode());
+        // Total must be equal to sum of shipping, tax and subtotal.
+        amount.setTotal(order.getTotal().toString());
+        amount.setDetails(details);
+
+        // Transaction information
+        Transaction transaction = new Transaction();
+        transaction.setAmount(amount);
+        transaction.setDescription("This is the payment transaction description.");
+        transaction.setCustom(order.getId().toString());
+
+        // Add transaction to a list
+        List<Transaction> transactions = new ArrayList<>();
+        transactions.add(transaction);
+
+        // Add payment details
+        Payment payment = new Payment();
+        payment.setIntent("authorize");
+        payment.setPayer(payer);
+        payment.setRedirectUrls(redirectUrls);
+        payment.setTransactions(transactions);
+
+        return payment;
+    }
 }

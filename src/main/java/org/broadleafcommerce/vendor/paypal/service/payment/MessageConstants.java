@@ -68,6 +68,8 @@ public class MessageConstants {
     public static final String PARENTTRANSACTIONID = "PARENTTRANSACTIONID";
     public static final String RECEIPTID = "RECEIPTID";
     public static final String AUTHORIZATONID = "AUTHORIZATIONID";
+    public static final String CAPTUREID = "CAPTUREID";
+    public static final String REFUNDID = "REFUNDID";
     public static final String CURRENCYCODE = "CURRENCYCODE";
     public static final String NOSHIPPING = "NOSHIPPING";
     public static final String USER = "USER";
@@ -100,6 +102,7 @@ public class MessageConstants {
     public static final String CHECKOUTSTATUS = "CHECKOUTSTATUS";
     public static final String EMAILADDRESS = "EMAIL";
     public static final String PAYERID = "PAYERID";
+    public static final String PAYMENTID = "PAYMENTID";
     public static final String PAYERSTATUS = "PAYERSTATUS";
     public static final String COUNTRYCODE = "COUNTRYCODE";
     public static final String BUSINESS = "BUSINESS";
@@ -172,7 +175,8 @@ public class MessageConstants {
     public static final String BN = "BUTTONSOURCE";
     public static final String BNCODE = "BroadleafCommerce_Cart_EC";
 
-    public static final String HTTP_PAYERID = "PayerID";
+    public static final String HTTP_PAYERID = "payerID";
+    public static final String HTTP_PAYMENTID = "paymentID";
     public static final String HTTP_TOKEN = "token";
     public static final String HTTP_REQUEST = "HTTP_REQUEST";
 
