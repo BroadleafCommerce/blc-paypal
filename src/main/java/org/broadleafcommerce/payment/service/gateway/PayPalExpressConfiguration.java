@@ -29,51 +29,6 @@ import java.util.Map;
 public interface PayPalExpressConfiguration extends PaymentGatewayConfiguration {
 
     /**
-     * The URL endpoint for the NVP API server
-     * e.g. "https://api-3t.sandbox.paypal.com/nvp"
-     *
-     * @return String
-     */
-    public String getServerUrl();
-
-    /**
-     * The base URL to which you should redirect the user to after obtaining a transaction token
-     * e.g. "https://www.sandbox.paypal.com/cgi-bin/webscr"
-     *
-     * @return String
-     */
-    public String getUserRedirectUrl();
-
-    /**
-     * The PayPal API version
-     * e.g. "78.0"
-     *
-     * @return String
-     */
-    public String getLibVersion();
-
-    /**
-     * The PayPal Sandbox/Production Account Password
-     *
-     * @return String
-     */
-    public String getPassword();
-
-    /**
-     * The PayPal Sandbox/Production Account User
-     *
-     * @return String
-     */
-    public String getUser();
-
-    /**
-     * The PayPal Sandbox/Production Account Signature
-     *
-     * @return String
-     */
-    public String getSignature();
-
-    /**
      * URL to which the buyer's browser is returned after choosing to pay with PayPal.
      * For digital goods, you must add JavaScript to this page to close the in-context experience.
      * Note: PayPal recommends that the value be the final review page on which the buyer confirms the order and

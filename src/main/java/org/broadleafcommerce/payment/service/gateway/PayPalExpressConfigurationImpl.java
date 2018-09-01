@@ -51,38 +51,8 @@ public class PayPalExpressConfigurationImpl extends AbstractPaymentGatewayConfig
     protected boolean performAuthorizeAndCapture = true;
 
     @Override
-    public String getServerUrl() {
-        return propertiesService.resolveSystemProperty("gateway.paypal.expressCheckout.serverUrl");
-    }
-
-    @Override
-    public String getUserRedirectUrl() {
-        return propertiesService.resolveSystemProperty("gateway.paypal.expressCheckout.userRedirectUrl");
-    }
-
-    @Override
-    public String getLibVersion() {
-        return propertiesService.resolveSystemProperty("gateway.paypal.expressCheckout.libVersion");
-    }
-
-    @Override
-    public String getPassword() {
-        return propertiesService.resolveSystemProperty("gateway.paypal.expressCheckout.password");
-    }
-
-    @Override
-    public String getUser() {
-        return propertiesService.resolveSystemProperty("gateway.paypal.expressCheckout.user");
-    }
-
-    @Override
-    public String getSignature() {
-        return propertiesService.resolveSystemProperty("gateway.paypal.expressCheckout.signature");
-    }
-
-    @Override
     public String getReturnUrl() {
-        String url = propertiesService.resolveSystemProperty("gateway.paypal.expressCheckout.returnUrl");
+        String url = propertiesService.resolveSystemProperty("gateway.paypal.checkout.rest.returnUrl");
         try {
             URI u = new URI(url);
             if (u.isAbsolute()) {
@@ -92,13 +62,13 @@ public class PayPalExpressConfigurationImpl extends AbstractPaymentGatewayConfig
                 return baseUrl + url;
             }
         } catch (URISyntaxException e) {
-            throw new IllegalArgumentException("The value for 'gateway.paypal.expressCheckout.returnUrl' is not valid.", e);
+            throw new IllegalArgumentException("The value for 'gateway.paypal.checkout.rest.returnUrl' is not valid.", e);
         }
     }
 
     @Override
     public String getCancelUrl() {
-        String url = propertiesService.resolveSystemProperty("gateway.paypal.expressCheckout.cancelUrl");
+        String url = propertiesService.resolveSystemProperty("gateway.paypal.checkout.rest.cancelUrl");
         try {
             URI u = new URI(url);
             if (u.isAbsolute()) {
@@ -108,7 +78,7 @@ public class PayPalExpressConfigurationImpl extends AbstractPaymentGatewayConfig
                 return baseUrl + url;
             }
         } catch (URISyntaxException e) {
-            throw new IllegalArgumentException("The value for 'gateway.paypal.expressCheckout.cancelUrl' is not valid.", e);
+            throw new IllegalArgumentException("The value for 'gateway.paypal.checkout.rest.cancelUrl' is not valid.", e);
         }
     }
 

@@ -40,7 +40,6 @@ import org.broadleafcommerce.vendor.paypal.service.payment.PayPalPaymentInfoDTO;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalResponse;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalUpdatePaymentRequest;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.paypal.api.payments.Amount;
@@ -78,12 +77,6 @@ public class ExternalCallPayPalExpressServiceImpl extends AbstractExternalPaymen
 
     @Resource(name = "blPayPalApiContext")
     protected APIContext apiContext;
-
-    @Value("${gateway.paypal.checkout.rest.returnUrl}")
-    protected String returnUrl;
-
-    @Value("${gateway.paypal.checkout.rest.cancelUrl}")
-    protected String cancelUrl;
 
     @Override
     public PayPalExpressConfiguration getConfiguration() {
@@ -151,8 +144,8 @@ public class ExternalCallPayPalExpressServiceImpl extends AbstractExternalPaymen
 
         // Set redirect URLs
         RedirectUrls redirectUrls = new RedirectUrls();
-        redirectUrls.setCancelUrl(cancelUrl);
-        redirectUrls.setReturnUrl(returnUrl);
+        redirectUrls.setCancelUrl(configuration.getCancelUrl());
+        redirectUrls.setReturnUrl(configuration.getReturnUrl());
 
         Amount amount = getPayPalAmountFromOrder(order);
 
