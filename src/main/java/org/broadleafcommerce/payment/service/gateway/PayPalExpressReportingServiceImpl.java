@@ -29,12 +29,13 @@ import org.broadleafcommerce.common.payment.service.PaymentGatewayReportingServi
 import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
 import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalExpressPaymentGatewayType;
+import org.broadleafcommerce.vendor.paypal.service.payment.PayPalPaymentRetrievalRequest;
+import org.broadleafcommerce.vendor.paypal.service.payment.PayPalPaymentRetrievalResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import com.paypal.api.payments.Payment;
 import com.paypal.base.rest.APIContext;
-import com.paypal.base.rest.PayPalRESTException;
 
 import javax.annotation.Resource;
 
@@ -57,12 +58,8 @@ public class PayPalExpressReportingServiceImpl extends AbstractPaymentGatewayRep
         Assert.isTrue(paymentRequestDTO.getAdditionalFields().containsKey(MessageConstants.HTTP_PAYERID), "The RequestDTO must contain a payerID");
         Assert.isTrue(paymentRequestDTO.getAdditionalFields().containsKey(MessageConstants.HTTP_PAYMENTID), "The RequestDTO must contain a paymentID");
 
-        Payment payment = null;
-        try {
-            payment = Payment.get(apiContext, (String) paymentRequestDTO.getAdditionalFields().get(MessageConstants.HTTP_PAYMENTID));
-        } catch (PayPalRESTException e) {
-            throw new PaymentException(e);
-        }
+        PayPalPaymentRetrievalResponse response = (PayPalPaymentRetrievalResponse) payPalExpressService.call(new PayPalPaymentRetrievalRequest((String) paymentRequestDTO.getAdditionalFields().get(MessageConstants.HTTP_PAYMENTID), apiContext));
+        Payment payment = response.getPayment();
         PaymentResponseDTO responseDTO = new PaymentResponseDTO(PaymentType.THIRD_PARTY_ACCOUNT,
                 PayPalExpressPaymentGatewayType.PAYPAL_EXPRESS);
         payPalExpressService.setCommonDetailsResponse(payment, responseDTO);
