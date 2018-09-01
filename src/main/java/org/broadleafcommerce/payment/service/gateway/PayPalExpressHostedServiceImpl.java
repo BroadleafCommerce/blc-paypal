@@ -19,13 +19,15 @@ package org.broadleafcommerce.payment.service.gateway;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.broadleafcommerce.common.payment.PaymentTransactionType;
 import org.broadleafcommerce.common.payment.dto.PaymentRequestDTO;
 import org.broadleafcommerce.common.payment.dto.PaymentResponseDTO;
 import org.broadleafcommerce.common.payment.service.AbstractPaymentGatewayHostedService;
 import org.broadleafcommerce.common.payment.service.PaymentGatewayHostedService;
+import org.broadleafcommerce.common.payment.service.PaymentGatewayTransactionService;
 import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
-import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalTransactionType;
 import org.springframework.stereotype.Service;
+
 import javax.annotation.Resource;
 
 /**
@@ -39,15 +41,20 @@ public class PayPalExpressHostedServiceImpl extends AbstractPaymentGatewayHosted
     @Resource(name = "blExternalCallPayPalExpressService")
     protected ExternalCallPayPalExpressService payPalExpressService;
 
+    @Resource(name = "blPayPalExpressTransactionService")
+    protected PaymentGatewayTransactionService transactionService;
+
     @Override
     public PaymentResponseDTO requestHostedEndpoint(PaymentRequestDTO paymentRequestDTO) throws PaymentException {
 
-        PayPalTransactionType transactionType = PayPalTransactionType.AUTHORIZEANDCAPTURE;
-        if (!payPalExpressService.getConfiguration().isPerformAuthorizeAndCapture()) {
-            transactionType = PayPalTransactionType.AUTHORIZE;
+        PaymentResponseDTO responseDTO;
+        if (payPalExpressService.getConfiguration().isPerformAuthorizeAndCapture()) {
+            responseDTO = transactionService.authorizeAndCapture(paymentRequestDTO);
+            responseDTO.paymentTransactionType(PaymentTransactionType.AUTHORIZE_AND_CAPTURE);
+        } else {
+            responseDTO = transactionService.authorize(paymentRequestDTO);
+            responseDTO.paymentTransactionType(PaymentTransactionType.AUTHORIZE);
         }
-
-        PaymentResponseDTO responseDTO = payPalExpressService.commonAuthorizeOrSale(paymentRequestDTO, transactionType, null, null);
 
         if (LOG.isTraceEnabled()) {
             LOG.trace("Request to PayPal Express Checkout Hosted Endpoint with raw response: " +

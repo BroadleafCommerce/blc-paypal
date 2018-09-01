@@ -2,7 +2,7 @@
  * #%L
  * BroadleafCommerce PayPal
  * %%
- * Copyright (C) 2009 - 2014 Broadleaf Commerce
+ * Copyright (C) 2009 - 2018 Broadleaf Commerce
  * %%
  * Licensed under the Broadleaf Fair Use License Agreement, Version 1.0
  * (the "Fair Use License" located  at http://license.broadleafcommerce.org/fair_use_license-1.0.txt)
@@ -17,38 +17,31 @@
  */
 package org.broadleafcommerce.vendor.paypal.service.payment;
 
-import org.apache.http.NameValuePair;
-import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalRequest;
-import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalShippingDisplayType;
+import com.paypal.base.rest.APIContext;
+import com.paypal.base.rest.PayPalRESTException;
 
-import java.util.List;
-import java.util.Map;
+public abstract class PayPalRequest {
 
-/**
- * @author Jeff Fischer
- */
-public interface PayPalRequestGenerator {
+    protected Boolean executed = false;
+    protected APIContext apiContext;
 
-    List<NameValuePair> buildRequest(PayPalRequest paymentRequest);
+    public PayPalRequest(APIContext apiContext) {
+        this.apiContext = apiContext;
+    }
 
-    Map<String, String> getAdditionalConfig();
+    public PayPalResponse execute() throws PayPalRESTException {
+        if (isValid()) {
+            executed = true;
+            return executeInternal();
+        }
+        throw new RuntimeException();
+    }
 
-    Map<String, String> getAdditionalCustomFields();
-    
-    String getCancelUrl();
+    protected boolean isValid() {
+        return apiContext != null && isRequestValid() && !executed;
+    }
 
-    String getLibVersion();
+    protected abstract PayPalResponse executeInternal() throws PayPalRESTException;
 
-    String getPassword();
-
-    String getReturnUrl();
-
-    String getSignature();
-
-    String getUser();
-
-    String getTotalType();
-
-    PayPalShippingDisplayType getShippingDisplayType();
-
+    protected abstract boolean isRequestValid();
 }

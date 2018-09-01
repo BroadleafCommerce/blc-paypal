@@ -2,7 +2,7 @@
  * #%L
  * BroadleafCommerce PayPal
  * %%
- * Copyright (C) 2009 - 2014 Broadleaf Commerce
+ * Copyright (C) 2009 - 2018 Broadleaf Commerce
  * %%
  * Licensed under the Broadleaf Fair Use License Agreement, Version 1.0
  * (the "Fair Use License" located  at http://license.broadleafcommerce.org/fair_use_license-1.0.txt)
@@ -17,16 +17,17 @@
  */
 package org.broadleafcommerce.vendor.paypal.service.payment;
 
-import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalRequest;
-import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalResponse;
+import com.paypal.api.payments.DetailedRefund;
 
-/**
- * @author Jeff Fischer
- */
-public interface PayPalResponseGenerator {
+public class PayPalRefundResponse implements PayPalResponse {
 
-    public PayPalResponse buildResponse(String response, PayPalRequest paymentRequest);
+    protected DetailedRefund detailedRefund;
 
-    String getUserRedirectUrl();
+    public PayPalRefundResponse(DetailedRefund detailedRefund) {
+        this.detailedRefund = detailedRefund;
+    }
 
+    public DetailedRefund getDetailedRefund() {
+        return detailedRefund;
+    }
 }

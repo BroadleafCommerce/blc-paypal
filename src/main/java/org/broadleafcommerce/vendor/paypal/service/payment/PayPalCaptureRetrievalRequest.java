@@ -15,31 +15,32 @@
  * between you and Broadleaf Commerce. You may not use this file except in compliance with the applicable license.
  * #L%
  */
-package org.broadleafcommerce.vendor.paypal.web.controller;
+package org.broadleafcommerce.vendor.paypal.service.payment;
 
-import com.paypal.api.payments.Patch;
+import org.apache.commons.lang3.StringUtils;
 
-import java.util.List;
+import com.paypal.api.payments.Capture;
+import com.paypal.base.rest.APIContext;
+import com.paypal.base.rest.PayPalRESTException;
 
-public class PayPalUpdatePaymentDTO {
 
-    protected String paymentId;
-    protected List<Patch> patches;
+public class PayPalCaptureRetrievalRequest extends PayPalRequest {
 
-    public String getPaymentId() {
-        return paymentId;
+    protected String captureId;
+
+    public PayPalCaptureRetrievalRequest(String captureId, APIContext apiContext) {
+        super(apiContext);
+        this.captureId = captureId;
     }
 
-    public void setPaymentId(String paymentId) {
-        this.paymentId = paymentId;
+    @Override
+    protected PayPalResponse executeInternal() throws PayPalRESTException {
+        return new PayPalCaptureResponse(Capture.get(apiContext, captureId));
     }
 
-    public List<Patch> getPatches() {
-        return patches;
-    }
-
-    public void setPatches(List<Patch> patches) {
-        this.patches = patches;
+    @Override
+    protected boolean isRequestValid() {
+        return StringUtils.isNoneBlank(captureId);
     }
 
 }

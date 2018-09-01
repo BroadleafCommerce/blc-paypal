@@ -17,8 +17,6 @@
  */
 package org.broadleafcommerce.payment.service.gateway;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.broadleafcommerce.common.money.Money;
@@ -30,7 +28,19 @@ import org.broadleafcommerce.common.payment.service.AbstractPaymentGatewayTransa
 import org.broadleafcommerce.common.payment.service.PaymentGatewayTransactionService;
 import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
 import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
+import org.broadleafcommerce.vendor.paypal.service.payment.PayPalAuthorizationRetrievalRequest;
+import org.broadleafcommerce.vendor.paypal.service.payment.PayPalAuthorizationRetrievalResponse;
+import org.broadleafcommerce.vendor.paypal.service.payment.PayPalAuthorizeRequest;
+import org.broadleafcommerce.vendor.paypal.service.payment.PayPalAuthorizeResponse;
+import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCaptureRequest;
+import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCaptureResponse;
+import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCaptureRetrievalRequest;
+import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCaptureRetrievalResponse;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalExpressPaymentGatewayType;
+import org.broadleafcommerce.vendor.paypal.service.payment.PayPalRefundRequest;
+import org.broadleafcommerce.vendor.paypal.service.payment.PayPalRefundResponse;
+import org.broadleafcommerce.vendor.paypal.service.payment.PayPalVoidRequest;
+import org.broadleafcommerce.vendor.paypal.service.payment.PayPalVoidResponse;
 import org.springframework.stereotype.Service;
 
 import com.paypal.api.payments.Amount;
@@ -41,7 +51,6 @@ import com.paypal.api.payments.Payment;
 import com.paypal.api.payments.PaymentExecution;
 import com.paypal.api.payments.RefundRequest;
 import com.paypal.base.rest.APIContext;
-import com.paypal.base.rest.PayPalRESTException;
 
 import javax.annotation.Resource;
 
@@ -62,13 +71,7 @@ public class PayPalExpressTransactionServiceImpl extends AbstractPaymentGatewayT
     @Override
     public PaymentResponseDTO authorize(PaymentRequestDTO paymentRequestDTO) throws PaymentException  {
         PaymentResponseDTO responseDTO = new PaymentResponseDTO(PaymentType.THIRD_PARTY_ACCOUNT, PayPalExpressPaymentGatewayType.PAYPAL_EXPRESS);
-        Payment authPayment;
-        try {
-            authPayment = authorizePayment(getPaymentId(paymentRequestDTO), getPayerId(paymentRequestDTO));
-        } catch (PayPalRESTException e) {
-            throw new PaymentException(e);
-        }
-        Authorization auth = authPayment.getTransactions().get(0).getRelatedResources().get(0).getAuthorization();
+        Authorization auth = authorizePayment(paymentRequestDTO);
         responseDTO
             .successful(true)
             .paymentTransactionType(PaymentTransactionType.AUTHORIZE)
@@ -80,12 +83,8 @@ public class PayPalExpressTransactionServiceImpl extends AbstractPaymentGatewayT
     @Override
     public PaymentResponseDTO capture(PaymentRequestDTO paymentRequestDTO) throws PaymentException {
         PaymentResponseDTO responseDTO = new PaymentResponseDTO(PaymentType.THIRD_PARTY_ACCOUNT, PayPalExpressPaymentGatewayType.PAYPAL_EXPRESS);
-        Capture capture;
-        try {
-            capture = capturePayment(getAuthorizationId(paymentRequestDTO));
-        } catch (PayPalRESTException e) {
-            throw new PaymentException(e);
-        }
+        Authorization auth = getAuthorization(paymentRequestDTO);
+        Capture capture = capturePayment(auth);
         responseDTO
             .successful(true)
             .paymentTransactionType(PaymentTransactionType.CAPTURE)
@@ -97,15 +96,8 @@ public class PayPalExpressTransactionServiceImpl extends AbstractPaymentGatewayT
     @Override
     public PaymentResponseDTO authorizeAndCapture(PaymentRequestDTO paymentRequestDTO) throws PaymentException  {
         PaymentResponseDTO responseDTO = new PaymentResponseDTO(PaymentType.THIRD_PARTY_ACCOUNT, PayPalExpressPaymentGatewayType.PAYPAL_EXPRESS);
-        Authorization auth;
-        Capture capture;
-        try {
-            Payment authPayment = authorizePayment(getPaymentId(paymentRequestDTO), getPayerId(paymentRequestDTO));
-            auth = authPayment.getTransactions().get(0).getRelatedResources().get(0).getAuthorization();
-            capture = capturePayment(auth);
-        } catch (PayPalRESTException e) {
-            throw new PaymentException(e);
-        }
+        Authorization auth = authorizePayment(paymentRequestDTO);
+        Capture capture = capturePayment(auth);
         responseDTO
             .successful(true)
             .paymentTransactionType(PaymentTransactionType.AUTHORIZE_AND_CAPTURE)
@@ -118,13 +110,8 @@ public class PayPalExpressTransactionServiceImpl extends AbstractPaymentGatewayT
     @Override
     public PaymentResponseDTO reverseAuthorize(PaymentRequestDTO paymentRequestDTO) throws PaymentException {
         PaymentResponseDTO responseDTO = new PaymentResponseDTO(PaymentType.THIRD_PARTY_ACCOUNT, PayPalExpressPaymentGatewayType.PAYPAL_EXPRESS);
-        Authorization auth;
-        try {
-            auth = Authorization.get(apiContext, getAuthorizationId(paymentRequestDTO));
-            auth = auth.doVoid(apiContext);
-        } catch (PayPalRESTException e) {
-            throw new PaymentException(e);
-        }
+        Authorization auth = getAuthorization(paymentRequestDTO);
+        auth = voidAuthorization(auth);
         responseDTO
             .successful(true)
             .paymentTransactionType(PaymentTransactionType.REVERSE_AUTH)
@@ -135,15 +122,8 @@ public class PayPalExpressTransactionServiceImpl extends AbstractPaymentGatewayT
     @Override
     public PaymentResponseDTO refund(PaymentRequestDTO paymentRequestDTO) throws PaymentException  {
         PaymentResponseDTO responseDTO = new PaymentResponseDTO(PaymentType.THIRD_PARTY_ACCOUNT, PayPalExpressPaymentGatewayType.PAYPAL_EXPRESS);
-        DetailedRefund detailRefund;
-        try {
-            Capture capture = Capture.get(apiContext, getCaptureId(paymentRequestDTO));
-            RefundRequest refund = new RefundRequest();
-            refund.setAmount(capture.getAmount());
-            detailRefund = capture.refund(apiContext, refund);
-        } catch (PayPalRESTException e) {
-            throw new PaymentException(e);
-        }
+        Capture capture = getCapture(paymentRequestDTO);
+        DetailedRefund detailRefund = refundPayment(capture);
         responseDTO
             .successful(true)
             .paymentTransactionType(PaymentTransactionType.REFUND)
@@ -155,13 +135,8 @@ public class PayPalExpressTransactionServiceImpl extends AbstractPaymentGatewayT
     @Override
     public PaymentResponseDTO voidPayment(PaymentRequestDTO paymentRequestDTO) throws PaymentException {
         PaymentResponseDTO responseDTO = new PaymentResponseDTO(PaymentType.THIRD_PARTY_ACCOUNT, PayPalExpressPaymentGatewayType.PAYPAL_EXPRESS);
-        Authorization auth;
-        try {
-            auth = Authorization.get(apiContext, getAuthorizationId(paymentRequestDTO));
-            auth = auth.doVoid(apiContext);
-        } catch (PayPalRESTException e) {
-            throw new PaymentException(e);
-        }
+        Authorization auth = getAuthorization(paymentRequestDTO);
+        auth = voidAuthorization(auth);
         responseDTO
             .successful(true)
             .paymentTransactionType(PaymentTransactionType.VOID)
@@ -169,29 +144,46 @@ public class PayPalExpressTransactionServiceImpl extends AbstractPaymentGatewayT
         return responseDTO;
     }
 
-    protected Payment authorizePayment(String paymentId, String payerId) throws PayPalRESTException {
-        Payment payment = new Payment();
-        payment.setId(paymentId);
-        PaymentExecution paymentExecution = new PaymentExecution();
-        paymentExecution.setPayerId(payerId);
-        return payment.execute(apiContext, paymentExecution);
-    }
-    
-    protected Capture capturePayment(Authorization auth) throws PayPalRESTException {
+    protected Capture capturePayment(Authorization auth) throws PaymentException {
         Capture capture = new Capture();
         capture.setIsFinalCapture(true);
         Amount amount = new Amount();
         amount.setCurrency(auth.getAmount().getCurrency());
         amount.setTotal(auth.getAmount().getTotal());
         capture.setAmount(amount);
-        LOG.info("Auth about to be captured :\n" + ToStringBuilder.reflectionToString(auth, ToStringStyle.MULTI_LINE_STYLE));
-        LOG.info("Capture about to be captured :\n " + ToStringBuilder.reflectionToString(capture, ToStringStyle.MULTI_LINE_STYLE));
-        return auth.capture(apiContext, capture);
+        PayPalCaptureResponse captureResponse = (PayPalCaptureResponse) payPalExpressService.call(new PayPalCaptureRequest(auth, capture, apiContext));
+        return captureResponse.getCapture();
     }
-   
-    protected Capture capturePayment(String authorizationId) throws PayPalRESTException {
-        Authorization auth = Authorization.get(apiContext, authorizationId);
-        return capturePayment(auth);
+
+    protected Authorization authorizePayment(PaymentRequestDTO paymentRequestDTO) throws PaymentException {
+        Payment payment = new Payment();
+        payment.setId(getPaymentId(paymentRequestDTO));
+        PaymentExecution paymentExecution = new PaymentExecution();
+        paymentExecution.setPayerId(getPayerId(paymentRequestDTO));
+        PayPalAuthorizeResponse response = (PayPalAuthorizeResponse) payPalExpressService.call(new PayPalAuthorizeRequest(payment, paymentExecution, apiContext));
+        return response.getAuthorization();
+    }
+
+    protected Authorization voidAuthorization(Authorization auth) throws PaymentException {
+        PayPalVoidResponse response = (PayPalVoidResponse) payPalExpressService.call(new PayPalVoidRequest(auth, apiContext));
+        return response.getVoidedAuthorization();
+    }
+
+    protected DetailedRefund refundPayment(Capture capture) throws PaymentException {
+        RefundRequest refund = new RefundRequest();
+        refund.setAmount(capture.getAmount());
+        PayPalRefundResponse response = (PayPalRefundResponse) payPalExpressService.call(new PayPalRefundRequest(refund, capture, apiContext));
+        return response.getDetailedRefund();
+    }
+
+    protected Authorization getAuthorization(PaymentRequestDTO paymentRequestDTO) throws PaymentException {
+        PayPalAuthorizationRetrievalResponse authResponse = (PayPalAuthorizationRetrievalResponse) payPalExpressService.call(new PayPalAuthorizationRetrievalRequest(getAuthorizationId(paymentRequestDTO), apiContext));
+        return authResponse.getAuthorization();
+    }
+
+    protected Capture getCapture(PaymentRequestDTO paymentRequestDTO) throws PaymentException {
+        PayPalCaptureRetrievalResponse response = (PayPalCaptureRetrievalResponse) payPalExpressService.call((new PayPalCaptureRetrievalRequest(getCaptureId(paymentRequestDTO), apiContext)));
+        return response.getCapture();
     }
 
     protected String getPaymentId(PaymentRequestDTO paymentRequestDTO) {

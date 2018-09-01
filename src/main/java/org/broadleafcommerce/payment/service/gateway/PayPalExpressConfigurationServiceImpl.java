@@ -20,20 +20,12 @@ package org.broadleafcommerce.payment.service.gateway;
 import org.broadleafcommerce.common.payment.service.AbstractPaymentGatewayConfigurationService;
 import org.broadleafcommerce.common.payment.service.PaymentGatewayConfiguration;
 import org.broadleafcommerce.common.payment.service.PaymentGatewayConfigurationService;
-import org.broadleafcommerce.common.payment.service.PaymentGatewayCreditCardService;
-import org.broadleafcommerce.common.payment.service.PaymentGatewayCustomerService;
-import org.broadleafcommerce.common.payment.service.PaymentGatewayFraudService;
 import org.broadleafcommerce.common.payment.service.PaymentGatewayHostedService;
 import org.broadleafcommerce.common.payment.service.PaymentGatewayReportingService;
 import org.broadleafcommerce.common.payment.service.PaymentGatewayRollbackService;
-import org.broadleafcommerce.common.payment.service.PaymentGatewaySubscriptionService;
 import org.broadleafcommerce.common.payment.service.PaymentGatewayTransactionConfirmationService;
 import org.broadleafcommerce.common.payment.service.PaymentGatewayTransactionService;
-import org.broadleafcommerce.common.payment.service.PaymentGatewayTransparentRedirectService;
 import org.broadleafcommerce.common.payment.service.PaymentGatewayWebResponseService;
-import org.broadleafcommerce.common.web.payment.expression.PaymentGatewayFieldExtensionHandler;
-import org.broadleafcommerce.common.web.payment.processor.CreditCardTypesExtensionHandler;
-import org.broadleafcommerce.common.web.payment.processor.TRCreditCardExtensionHandler;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -65,30 +57,37 @@ public class PayPalExpressConfigurationServiceImpl extends AbstractPaymentGatewa
     @Resource(name = "blPayPalExpressHostedService")
     protected PaymentGatewayHostedService hostedService;
 
+    @Override
     public PaymentGatewayConfiguration getConfiguration() {
         return configuration;
     }
 
+    @Override
     public PaymentGatewayTransactionService getTransactionService() {
         return transactionService;
     }
 
+    @Override
     public PaymentGatewayTransactionConfirmationService getTransactionConfirmationService() {
         return transactionConfirmationService;
     }
 
+    @Override
     public PaymentGatewayReportingService getReportingService() {
         return reportingService;
     }
 
+    @Override
     public PaymentGatewayRollbackService getRollbackService() {
         return rollbackService;
     }
 
+    @Override
     public PaymentGatewayWebResponseService getWebResponseService() {
         return webResponseService;
     }
 
+    @Override
     public PaymentGatewayHostedService getHostedService() {
         return hostedService;
     }

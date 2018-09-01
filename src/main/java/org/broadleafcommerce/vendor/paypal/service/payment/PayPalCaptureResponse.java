@@ -2,7 +2,7 @@
  * #%L
  * BroadleafCommerce PayPal
  * %%
- * Copyright (C) 2009 - 2017 Broadleaf Commerce
+ * Copyright (C) 2009 - 2018 Broadleaf Commerce
  * %%
  * Licensed under the Broadleaf Fair Use License Agreement, Version 1.0
  * (the "Fair Use License" located  at http://license.broadleafcommerce.org/fair_use_license-1.0.txt)
@@ -15,27 +15,19 @@
  * between you and Broadleaf Commerce. You may not use this file except in compliance with the applicable license.
  * #L%
  */
-package org.broadleafcommerce.payment.web.expression;
+package org.broadleafcommerce.vendor.paypal.service.payment;
 
-import org.broadleafcommerce.common.web.expression.BroadleafVariableExpression;
-import org.broadleafcommerce.payment.service.gateway.PayPalExpressConfiguration;
-import org.springframework.stereotype.Component;
+import com.paypal.api.payments.Capture;
 
-import javax.annotation.Resource;
+public class PayPalCaptureResponse implements PayPalResponse {
 
-/**
- * @author Chris Kittrell (ckittrell)
- */
-@Component("blPayPalVariableExpression")
-public class PayPalVariableExpression implements BroadleafVariableExpression {
+    protected Capture capture;
 
-    @Resource(name = "blPayPalExpressConfiguration")
-    protected PayPalExpressConfiguration configuration;
-
-    @Override
-    public String getName() {
-        return "paypal";
+    public PayPalCaptureResponse(Capture capture) {
+        this.capture = capture;
     }
 
-
+    public Capture getCapture() {
+        return capture;
+    }
 }

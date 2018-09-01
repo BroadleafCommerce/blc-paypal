@@ -17,14 +17,12 @@
  */
 package org.broadleafcommerce.payment.service.gateway;
 
-import org.broadleafcommerce.common.payment.dto.PaymentRequestDTO;
 import org.broadleafcommerce.common.payment.dto.PaymentResponseDTO;
 import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
-import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalRequest;
-import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalResponse;
-import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPalPaymentRequest;
-import org.broadleafcommerce.vendor.paypal.service.payment.message.payment.PayPalPaymentResponse;
-import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalTransactionType;
+import org.broadleafcommerce.core.order.domain.Order;
+import org.broadleafcommerce.vendor.paypal.service.payment.PayPalPaymentInfoDTO;
+import org.broadleafcommerce.vendor.paypal.service.payment.PayPalRequest;
+import org.broadleafcommerce.vendor.paypal.service.payment.PayPalResponse;
 
 import com.paypal.api.payments.Payment;
 
@@ -35,18 +33,12 @@ public interface ExternalCallPayPalExpressService {
 
     PayPalExpressConfiguration getConfiguration();
 
-    PayPalResponse call(PayPalRequest paymentRequest) throws PaymentException;
-
-    PayPalPaymentRequest buildBasicRequest(PaymentRequestDTO requestDTO, PayPalTransactionType transactionType);
-
-    PaymentResponseDTO commonAuthorizeOrSale(PaymentRequestDTO requestDTO, PayPalTransactionType transactionType,
-                                             String token, String payerId) throws PaymentException;
-
-    void setCommonPaymentResponse(PayPalPaymentResponse response, PaymentResponseDTO responseDTO);
-
     void setCommonDetailsResponse(Payment response, PaymentResponseDTO responseDTO);
 
-    void setDecisionInformation(PayPalPaymentResponse response, PaymentResponseDTO responseDTO);
+    Payment createPayment(Order order, boolean performCheckoutOnReturn) throws PaymentException;
 
-    void setRefundInformation(PayPalPaymentResponse response, PaymentResponseDTO responseDTO);
+    PayPalPaymentInfoDTO updatePaymentForFulfillment(Order order) throws PaymentException;
+
+    PayPalResponse call(PayPalRequest paymentRequest) throws PaymentException;
+
 }

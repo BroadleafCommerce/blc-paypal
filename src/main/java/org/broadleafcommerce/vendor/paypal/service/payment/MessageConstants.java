@@ -175,8 +175,8 @@ public class MessageConstants {
     public static final String BN = "BUTTONSOURCE";
     public static final String BNCODE = "BroadleafCommerce_Cart_EC";
 
-    public static final String HTTP_PAYERID = "payerID";
-    public static final String HTTP_PAYMENTID = "paymentID";
+    public static final String HTTP_PAYERID = "PayerID";
+    public static final String HTTP_PAYMENTID = "paymentId";
     public static final String HTTP_TOKEN = "token";
     public static final String HTTP_REQUEST = "HTTP_REQUEST";
 

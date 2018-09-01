@@ -2,7 +2,7 @@
  * #%L
  * BroadleafCommerce PayPal
  * %%
- * Copyright (C) 2009 - 2014 Broadleaf Commerce
+ * Copyright (C) 2009 - 2018 Broadleaf Commerce
  * %%
  * Licensed under the Broadleaf Fair Use License Agreement, Version 1.0
  * (the "Fair Use License" located  at http://license.broadleafcommerce.org/fair_use_license-1.0.txt)
@@ -15,19 +15,19 @@
  * between you and Broadleaf Commerce. You may not use this file except in compliance with the applicable license.
  * #L%
  */
-package org.broadleafcommerce.vendor.paypal.service.payment.message;
+package org.broadleafcommerce.vendor.paypal.service.payment;
 
-import java.util.List;
+import com.paypal.api.payments.Authorization;
 
-import org.broadleafcommerce.vendor.paypal.service.payment.message.PayPalErrorResponse;
+public class PayPalVoidResponse implements PayPalResponse {
 
-/**
- * @author Jeff Fischer
- */
-public interface ErrorCheckable {
+    protected Authorization voidedAuthorization;
 
-    public List<PayPalErrorResponse> getErrorResponses();
+    public PayPalVoidResponse(Authorization voidedAuthorization) {
+        this.voidedAuthorization = voidedAuthorization;
+    }
 
-    public void setErrorResponses(List<PayPalErrorResponse> errorResponses);
-
+    public Authorization getVoidedAuthorization() {
+        return voidedAuthorization;
+    }
 }
