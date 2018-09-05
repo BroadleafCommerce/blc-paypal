@@ -83,6 +83,11 @@ public class PayPalExpressConfigurationImpl extends AbstractPaymentGatewayConfig
     }
 
     @Override
+    public String getWebProfileId() {
+        return propertiesService.resolveSystemProperty("gateway.paypal.checkout.rest.webProfileId");
+    }
+
+    @Override
     public PayPalShippingDisplayType getShippingDisplayType() {
         String shippingType = propertiesService.resolveSystemProperty("gateway.paypal.expressCheckout.shippingDisplayType");
 
@@ -193,4 +198,5 @@ public class PayPalExpressConfigurationImpl extends AbstractPaymentGatewayConfig
     public PaymentGatewayType getGatewayType() {
         return PayPalExpressPaymentGatewayType.PAYPAL_EXPRESS;
     }
+
 }

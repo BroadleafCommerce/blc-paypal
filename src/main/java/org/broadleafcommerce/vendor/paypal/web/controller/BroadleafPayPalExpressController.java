@@ -29,7 +29,7 @@ import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
 import org.broadleafcommerce.common.web.payment.controller.PaymentGatewayAbstractController;
 import org.broadleafcommerce.core.order.domain.Order;
 import org.broadleafcommerce.core.web.order.CartState;
-import org.broadleafcommerce.payment.service.gateway.ExternalCallPayPalExpressService;
+import org.broadleafcommerce.vendor.paypal.service.PayPalPaymentService;
 import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalPaymentInfoDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,8 +70,8 @@ public class BroadleafPayPalExpressController extends PaymentGatewayAbstractCont
     @Resource(name = "blPayPalExpressConfiguration")
     protected PaymentGatewayConfiguration paymentGatewayConfiguration;
 
-    @Resource(name = "blExternalCallPayPalExpressService")
-    protected ExternalCallPayPalExpressService paypalExternalService;
+    @Resource(name = "blPayPalPaymentService")
+    protected PayPalPaymentService paymentService;
 
     @Autowired(required = false)
     protected CurrentOrderPaymentRequestService currentOrderPaymentRequestService;
@@ -163,7 +163,7 @@ public class BroadleafPayPalExpressController extends PaymentGatewayAbstractCont
     @RequestMapping(value = "/checkout/complete", method = RequestMethod.POST)
     public String completeCheckout() throws Exception {
         Order cart = CartState.getCart();
-        PayPalPaymentInfoDTO info = paypalExternalService.updatePaymentForFulfillment(cart);
+        PayPalPaymentInfoDTO info = paymentService.updatePaymentForFulfillment(cart);
         if (info != null) {
             return "redirect:/paypal-express/return?" + MessageConstants.HTTP_PAYMENTID + "=" + info.getPaymentId() + "&" + MessageConstants.HTTP_PAYERID + "=" + info.getPayerId();
         }
@@ -177,7 +177,7 @@ public class BroadleafPayPalExpressController extends PaymentGatewayAbstractCont
     @RequestMapping(value = "/create-payment", method = RequestMethod.POST)
     public @ResponseBody Map<String, String> createPayment(@RequestParam("performCheckout") Boolean performCheckout) throws PaymentException {
         Map<String, String> response = new HashMap<>();
-        Payment createdPayment = paypalExternalService.createPayment(CartState.getCart(), performCheckout);
+        Payment createdPayment = paymentService.createPayment(CartState.getCart(), performCheckout);
         response.put("id", createdPayment.getId());
         return response;
     }
@@ -187,7 +187,7 @@ public class BroadleafPayPalExpressController extends PaymentGatewayAbstractCont
     // ***********************************************
     @RequestMapping(value = "/hosted/create-payment", method = RequestMethod.POST)
     public String createPaymentHostedJson(HttpServletRequest request, @RequestParam("performCheckout") Boolean performCheckout) throws PaymentException {
-        Payment createdPayment = paypalExternalService.createPayment(CartState.getCart(), performCheckout);
+        Payment createdPayment = paymentService.createPayment(CartState.getCart(), performCheckout);
         String redirect = getApprovalLink(createdPayment);
         if (isAjaxRequest(request)) {
             return "ajaxredirect:" + redirect;

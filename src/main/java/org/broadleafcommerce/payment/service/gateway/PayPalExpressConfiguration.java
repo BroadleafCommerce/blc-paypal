@@ -19,6 +19,7 @@ package org.broadleafcommerce.payment.service.gateway;
 
 import org.broadleafcommerce.common.payment.dto.PaymentRequestDTO;
 import org.broadleafcommerce.common.payment.service.PaymentGatewayConfiguration;
+import org.broadleafcommerce.vendor.paypal.service.PayPalWebProfileService;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalShippingDisplayType;
 
 import java.util.Map;
@@ -49,6 +50,14 @@ public interface PayPalExpressConfiguration extends PaymentGatewayConfiguration 
      * @return
      */
     public String getCancelUrl();
+
+    /**
+     * Gets the the property driven id of the WebProfile to be used when creating payments. For more information on WebProfiles go to {@link https://developer.paypal.com/docs/integration/direct/payment-experience/}
+     * {@link PayPalWebProfileService#getWebProfileId()} should be used instead if you want to find the web profile id to create a payment since it has the ability to create new WebProfiles based on injected beans along with using this method
+     * 
+     * @return
+     */
+    public String getWebProfileId();
 
     /**
      * For digital goods, this field is required and must be set to 1.
