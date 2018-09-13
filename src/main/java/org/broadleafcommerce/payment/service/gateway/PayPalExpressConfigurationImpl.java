@@ -88,6 +88,11 @@ public class PayPalExpressConfigurationImpl extends AbstractPaymentGatewayConfig
     }
 
     @Override
+    public String getPaymentDescription() {
+        return propertiesService.resolveSystemProperty("gateway.paypal.checkout.rest.description");
+    }
+
+    @Override
     public PayPalShippingDisplayType getShippingDisplayType() {
         String shippingType = propertiesService.resolveSystemProperty("gateway.paypal.expressCheckout.shippingDisplayType");
 

@@ -1,3 +1,20 @@
+/*
+ * #%L
+ * BroadleafCommerce PayPal
+ * %%
+ * Copyright (C) 2009 - 2018 Broadleaf Commerce
+ * %%
+ * Licensed under the Broadleaf Fair Use License Agreement, Version 1.0
+ * (the "Fair Use License" located  at http://license.broadleafcommerce.org/fair_use_license-1.0.txt)
+ * unless the restrictions on use therein are violated and require payment to Broadleaf in which case
+ * the Broadleaf End User License Agreement (EULA), Version 1.1
+ * (the "Commercial License" located at http://license.broadleafcommerce.org/commercial_license-1.1.txt)
+ * shall apply.
+ * 
+ * Alternatively, the Commercial License may be replaced with a mutually agreed upon license (the "Custom License")
+ * between you and Broadleaf Commerce. You may not use this file except in compliance with the applicable license.
+ * #L%
+ */
 package org.broadleafcommerce.vendor.paypal.service;
 
 import org.apache.commons.lang3.StringUtils;
@@ -39,6 +56,10 @@ public class PayPalWebProfileServiceImpl implements PayPalWebProfileService {
                 + "To avoid this either set an id on the provided WebProfile bean or set the property gateway.paypal.checkout.rest.webProfileId."
                 + "To obtain a WebProfile id either create a WebProfile or select an existing an id from you PayPal account following the instructions here https://developer.paypal.com/docs/api/payment-experience/v1/#web-profiles");
         }
+    }
+
+    public PayPalWebProfileServiceImpl() {
+        super();
     }
 
     @Override

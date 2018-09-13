@@ -35,7 +35,7 @@ public class PayPalCaptureRetrievalRequest extends PayPalRequest {
 
     @Override
     protected PayPalResponse executeInternal() throws PayPalRESTException {
-        return new PayPalCaptureResponse(Capture.get(apiContext, captureId));
+        return new PayPalCaptureRetrievalResponse(Capture.get(apiContext, captureId));
     }
 
     @Override

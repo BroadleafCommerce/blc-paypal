@@ -116,4 +116,6 @@ public interface PayPalExpressConfiguration extends PaymentGatewayConfiguration 
      * otherwise.
      */
     public Map<String, String> getAdditionalCustomFields();
+
+    String getPaymentDescription();
 }

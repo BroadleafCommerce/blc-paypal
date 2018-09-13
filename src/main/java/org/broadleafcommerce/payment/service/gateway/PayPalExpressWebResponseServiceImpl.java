@@ -25,6 +25,7 @@ import org.broadleafcommerce.common.payment.service.PaymentGatewayReportingServi
 import org.broadleafcommerce.common.payment.service.PaymentGatewayWebResponsePrintService;
 import org.broadleafcommerce.common.payment.service.PaymentGatewayWebResponseService;
 import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
+import org.broadleafcommerce.vendor.paypal.service.PayPalPaymentService;
 import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
 import org.springframework.stereotype.Service;
 
@@ -43,16 +44,23 @@ public class PayPalExpressWebResponseServiceImpl extends AbstractPaymentGatewayW
     @Resource(name = "blPayPalExpressReportingService")
     protected PaymentGatewayReportingService reportingService;
 
+    @Resource(name = "blPayPalPaymentService")
+    protected PayPalPaymentService paymentService;
+
     @Override
     public PaymentResponseDTO translateWebResponse(HttpServletRequest request) throws PaymentException {
+        String paymentId = request.getParameter(MessageConstants.HTTP_PAYMENTID);
+        String payerId = request.getParameter(MessageConstants.HTTP_PAYERID);
         PaymentRequestDTO requestDTO = new PaymentRequestDTO()
-                .additionalField(MessageConstants.HTTP_PAYMENTID, request.getParameter(MessageConstants.HTTP_PAYMENTID))
-                .additionalField(MessageConstants.HTTP_PAYERID, request.getParameter(MessageConstants.HTTP_PAYERID));
+                .additionalField(MessageConstants.HTTP_PAYMENTID, paymentId)
+                .additionalField(MessageConstants.HTTP_PAYERID, payerId);
         PaymentResponseDTO responseDTO = reportingService.findDetailsByTransaction(requestDTO);
 
         responseDTO.responseMap(MessageConstants.HTTP_REQUEST, webResponsePrintService.printRequest(request))
                 .paymentTransactionType(PaymentTransactionType.UNCONFIRMED);
 
+        paymentService.setPayPalPaymentIdOnCurrentOrder(paymentId);
+        paymentService.setPayPalPayerIdOnCurrentOrder(payerId);
         return responseDTO;
     }
 
