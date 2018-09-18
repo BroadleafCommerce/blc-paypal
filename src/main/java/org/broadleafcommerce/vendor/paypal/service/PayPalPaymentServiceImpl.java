@@ -96,7 +96,7 @@ public class PayPalPaymentServiceImpl implements PayPalPaymentService {
 
         // Add payment details
         Payment payment = new Payment();
-        payment.setIntent("authorize");
+        payment.setIntent(getIntent(performCheckoutOnReturn));
         payment.setPayer(payer);
         payment.setRedirectUrls(redirectUrls);
         payment.setTransactions(transactions);
@@ -254,6 +254,14 @@ public class PayPalPaymentServiceImpl implements PayPalPaymentService {
         } else {
             throw new PaymentException("Unable to set PayPal payer id on current order");
         }
+    }
+
+    public String getIntent(boolean performCheckoutOnReturn) {
+        if (externalCallService.getConfiguration().isPerformAuthorizeAndCapture()) {
+            return "sale";
+        }
+
+        return "authorize";
     }
 
 }

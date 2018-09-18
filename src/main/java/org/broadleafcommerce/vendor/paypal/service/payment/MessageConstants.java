@@ -26,6 +26,7 @@ public class MessageConstants {
     public static final String ESTIMATEDTOTAL = "EstimatedTotal";
     public static final String AUTHORIZATONID = "AUTHORIZATIONID";
     public static final String CAPTUREID = "CAPTUREID";
+    public static final String SALEID = "SALEID";
     public static final String REFUNDID = "REFUNDID";
     public static final String NOTE = "NOTE";
     public static final String PAYERID = "PAYERID";
