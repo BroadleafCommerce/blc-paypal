@@ -48,13 +48,19 @@ import org.broadleafcommerce.vendor.paypal.service.payment.PayPalVoidResponse;
 import org.springframework.stereotype.Service;
 import com.paypal.api.payments.Amount;
 import com.paypal.api.payments.Authorization;
+import com.paypal.api.payments.Billing;
 import com.paypal.api.payments.Capture;
 import com.paypal.api.payments.DetailedRefund;
+import com.paypal.api.payments.FundingInstrument;
+import com.paypal.api.payments.Payer;
 import com.paypal.api.payments.Payment;
 import com.paypal.api.payments.PaymentExecution;
 import com.paypal.api.payments.RefundRequest;
 import com.paypal.api.payments.Sale;
+import com.paypal.api.payments.Transaction;
 import com.paypal.base.rest.APIContext;
+import java.util.ArrayList;
+import java.util.List;
 import javax.annotation.Resource;
 
 /**
@@ -87,7 +93,7 @@ public class PayPalCheckoutTransactionServiceImpl extends AbstractPaymentGateway
     public PaymentResponseDTO capture(PaymentRequestDTO paymentRequestDTO) throws PaymentException {
         PaymentResponseDTO responseDTO = new PaymentResponseDTO(PaymentType.THIRD_PARTY_ACCOUNT, PayPalCheckoutPaymentGatewayType.PAYPAL_CHECKOUT);
         Authorization auth = getAuthorization(paymentRequestDTO);
-        Capture capture = capturePayment(auth);
+        Capture capture = capturePayment(paymentRequestDTO, auth);
         responseDTO
             .successful(true)
             .paymentTransactionType(PaymentTransactionType.CAPTURE)
@@ -127,7 +133,7 @@ public class PayPalCheckoutTransactionServiceImpl extends AbstractPaymentGateway
         Sale sale = getSale(paymentRequestDTO);
 
         if (capture != null) {
-            DetailedRefund detailRefund = refundPayment(capture);
+            DetailedRefund detailRefund = refundPayment(paymentRequestDTO, capture);
             responseDTO
                     .successful(true)
                     .paymentTransactionType(PaymentTransactionType.REFUND)
@@ -135,7 +141,7 @@ public class PayPalCheckoutTransactionServiceImpl extends AbstractPaymentGateway
                     .amount(new Money(detailRefund.getAmount().getTotal(), detailRefund.getAmount().getCurrency()));
             return responseDTO;
         } else if (sale != null){
-            DetailedRefund detailRefund = refundPayment(sale);
+            DetailedRefund detailRefund = refundPayment(paymentRequestDTO, sale);
             responseDTO
                     .successful(true)
                     .paymentTransactionType(PaymentTransactionType.REFUND)
@@ -159,12 +165,12 @@ public class PayPalCheckoutTransactionServiceImpl extends AbstractPaymentGateway
         return responseDTO;
     }
 
-    protected Capture capturePayment(Authorization auth) throws PaymentException {
+    protected Capture capturePayment(PaymentRequestDTO paymentRequestDTO, Authorization auth) throws PaymentException {
         Capture capture = new Capture();
         capture.setIsFinalCapture(true);
         Amount amount = new Amount();
-        amount.setCurrency(auth.getAmount().getCurrency());
-        amount.setTotal(auth.getAmount().getTotal());
+        amount.setCurrency(paymentRequestDTO.getOrderCurrencyCode());
+        amount.setTotal(paymentRequestDTO.getTransactionTotal());
         capture.setAmount(amount);
         PayPalCaptureResponse captureResponse = (PayPalCaptureResponse) payPalCheckoutService.call(new PayPalCaptureRequest(auth, capture, apiContext));
         return captureResponse.getCapture();
@@ -173,19 +179,59 @@ public class PayPalCheckoutTransactionServiceImpl extends AbstractPaymentGateway
     protected Authorization authorizePayment(PaymentRequestDTO paymentRequestDTO) throws PaymentException {
         Payment payment = new Payment();
         payment.setId(getPaymentId(paymentRequestDTO));
+        payment.setPayer(generateAuthorizePayer(paymentRequestDTO));
+        payment.setTransactions(generateAuthorizeTransactions(paymentRequestDTO));
         PaymentExecution paymentExecution = new PaymentExecution();
         paymentExecution.setPayerId(getPayerId(paymentRequestDTO));
         PayPalAuthorizeResponse response = (PayPalAuthorizeResponse) payPalCheckoutService.call(new PayPalAuthorizeRequest(payment, paymentExecution, apiContext));
         return response.getAuthorization();
     }
 
+    protected Payer generateAuthorizePayer(PaymentRequestDTO paymentRequestDTO) {
+        if (paymentRequestDTO.getAdditionalFields().containsKey(MessageConstants.BILLINGAGREEMENTID)) {
+            return generateBillingAgreementPayer(paymentRequestDTO);
+        }
+
+        return null;
+    }
+
+    protected List<Transaction> generateAuthorizeTransactions(PaymentRequestDTO paymentRequestDTO) {
+        return null;
+    }
+
     protected Sale salePayment(PaymentRequestDTO paymentRequestDTO) throws PaymentException {
         Payment payment = new Payment();
         payment.setId(getPaymentId(paymentRequestDTO));
+        payment.setPayer(generateSalePayer(paymentRequestDTO));
+        payment.setTransactions(generateSaleTransactions(paymentRequestDTO));
         PaymentExecution paymentExecution = new PaymentExecution();
         paymentExecution.setPayerId(getPayerId(paymentRequestDTO));
         PayPalSaleResponse response = (PayPalSaleResponse) payPalCheckoutService.call(new PayPalSaleRequest(payment, paymentExecution, apiContext));
         return response.getSale();
+    }
+
+    protected Payer generateSalePayer(PaymentRequestDTO paymentRequestDTO) {
+        if (paymentRequestDTO.getAdditionalFields().containsKey(MessageConstants.BILLINGAGREEMENTID)) {
+            return generateBillingAgreementPayer(paymentRequestDTO);
+        }
+
+        return null;
+    }
+
+    protected List<Transaction> generateSaleTransactions(PaymentRequestDTO paymentRequestDTO) {
+        return null;
+    }
+
+    protected Payer generateBillingAgreementPayer(PaymentRequestDTO paymentRequestDTO) {
+        Payer payer = new Payer();
+        List<FundingInstrument> fundingInstruments = new ArrayList<>();
+        FundingInstrument billingAgreement = new FundingInstrument();
+        Billing billing = new Billing();
+        billing.setBillingAgreementId((String)paymentRequestDTO.getAdditionalFields().get(MessageConstants.BILLINGAGREEMENTID));
+        billingAgreement.setBilling(billing);
+        fundingInstruments.add(billingAgreement);
+        payer.setFundingInstruments(fundingInstruments);
+        return payer;
     }
 
     protected Authorization voidAuthorization(Authorization auth) throws PaymentException {
@@ -193,16 +239,22 @@ public class PayPalCheckoutTransactionServiceImpl extends AbstractPaymentGateway
         return response.getVoidedAuthorization();
     }
 
-    protected DetailedRefund refundPayment(Capture capture) throws PaymentException {
+    protected DetailedRefund refundPayment(PaymentRequestDTO paymentRequestDTO, Capture capture) throws PaymentException {
         RefundRequest refund = new RefundRequest();
-        refund.setAmount(capture.getAmount());
+        Amount amount = new Amount();
+        amount.setCurrency(paymentRequestDTO.getOrderCurrencyCode());
+        amount.setTotal(paymentRequestDTO.getTransactionTotal());
+        refund.setAmount(amount);
         PayPalRefundResponse response = (PayPalRefundResponse) payPalCheckoutService.call(new PayPalRefundRequest(refund, capture, apiContext));
         return response.getDetailedRefund();
     }
 
-    protected DetailedRefund refundPayment(Sale sale) throws PaymentException {
+    protected DetailedRefund refundPayment(PaymentRequestDTO paymentRequestDTO, Sale sale) throws PaymentException {
         RefundRequest refund = new RefundRequest();
-        refund.setAmount(sale.getAmount());
+        Amount amount = new Amount();
+        amount.setCurrency(paymentRequestDTO.getOrderCurrencyCode());
+        amount.setTotal(paymentRequestDTO.getTransactionTotal());
+        refund.setAmount(amount);
         PayPalRefundResponse response = (PayPalRefundResponse) payPalCheckoutService.call(new PayPalRefundRequest(refund, sale, apiContext));
         return response.getDetailedRefund();
     }

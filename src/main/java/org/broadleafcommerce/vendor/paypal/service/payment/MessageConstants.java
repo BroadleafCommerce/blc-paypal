@@ -39,6 +39,7 @@ public class MessageConstants {
     public static final String DETAILSPAYMENTTOTALTAX = "PAYMENTREQUEST_n_TAXAMT";
     public static final String DETAILSPAYMENTTRANSACTIONID = "PAYMENTREQUEST_n_TRANSACTIONID";
     public static final String DETAILSPAYMENTALLOWEDMETHOD = "PAYMENTREQUEST_n_ALLOWEDPAYMENTMETHOD";
+    public static final String BILLINGAGREEMENTID = "BILLING_AGREEMENT_ID";
     public static final String BN = "PayPal-Partner-Attribution-Id";
     public static final String BNCODE = "BroadleafCommerce_Cart_EC";
     public static final String HTTP_PAYERID = "PayerID";
