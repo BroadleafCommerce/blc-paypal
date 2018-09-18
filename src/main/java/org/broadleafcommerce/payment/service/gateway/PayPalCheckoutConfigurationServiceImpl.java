@@ -33,28 +33,28 @@ import javax.annotation.Resource;
 /**
  * @author Elbert Bautista (elbertbautista)
  */
-@Service("blPayPalExpressConfigurationService")
-public class PayPalExpressConfigurationServiceImpl extends AbstractPaymentGatewayConfigurationService implements PaymentGatewayConfigurationService {
+@Service("blPayPalCheckoutConfigurationService")
+public class PayPalCheckoutConfigurationServiceImpl extends AbstractPaymentGatewayConfigurationService implements PaymentGatewayConfigurationService {
 
-    @Resource(name = "blPayPalExpressConfiguration")
-    protected PayPalExpressConfiguration configuration;
+    @Resource(name = "blPayPalCheckoutConfiguration")
+    protected PayPalCheckoutConfiguration configuration;
 
-    @Resource(name = "blPayPalExpressTransactionService")
+    @Resource(name = "blPayPalCheckoutTransactionService")
     protected PaymentGatewayTransactionService transactionService;
 
-    @Resource(name = "blPayPalExpressTransactionConfirmationService")
+    @Resource(name = "blPayPalCheckoutTransactionConfirmationService")
     protected PaymentGatewayTransactionConfirmationService transactionConfirmationService;
 
-    @Resource(name = "blPayPalExpressReportingService")
+    @Resource(name = "blPayPalCheckoutReportingService")
     protected PaymentGatewayReportingService reportingService;
 
-    @Resource(name = "blPayPalExpressRollbackService")
+    @Resource(name = "blPayPalCheckoutRollbackService")
     protected PaymentGatewayRollbackService rollbackService;
 
-    @Resource(name = "blPayPalExpressWebResponseService")
+    @Resource(name = "blPayPalCheckoutWebResponseService")
     protected PaymentGatewayWebResponseService webResponseService;
 
-    @Resource(name = "blPayPalExpressHostedService")
+    @Resource(name = "blPayPalCheckoutHostedService")
     protected PaymentGatewayHostedService hostedService;
 
     @Override

@@ -33,22 +33,22 @@ import javax.annotation.Resource;
 /**
  * @author Elbert Bautista (elbertbautista)
  */
-@Service("blPayPalExpressHostedService")
-public class PayPalExpressHostedServiceImpl extends AbstractPaymentGatewayHostedService implements PaymentGatewayHostedService {
+@Service("blPayPalCheckoutHostedService")
+public class PayPalCheckoutHostedServiceImpl extends AbstractPaymentGatewayHostedService implements PaymentGatewayHostedService {
 
-    protected static final Log LOG = LogFactory.getLog(PayPalExpressHostedServiceImpl.class);
+    protected static final Log LOG = LogFactory.getLog(PayPalCheckoutHostedServiceImpl.class);
 
-    @Resource(name = "blExternalCallPayPalExpressService")
-    protected ExternalCallPayPalExpressService payPalExpressService;
+    @Resource(name = "blExternalCallPayPalCheckoutService")
+    protected ExternalCallPayPalCheckoutService payPalCheckoutService;
 
-    @Resource(name = "blPayPalExpressTransactionService")
+    @Resource(name = "blPayPalCheckoutTransactionService")
     protected PaymentGatewayTransactionService transactionService;
 
     @Override
     public PaymentResponseDTO requestHostedEndpoint(PaymentRequestDTO paymentRequestDTO) throws PaymentException {
 
         PaymentResponseDTO responseDTO;
-        if (payPalExpressService.getConfiguration().isPerformAuthorizeAndCapture()) {
+        if (payPalCheckoutService.getConfiguration().isPerformAuthorizeAndCapture()) {
             responseDTO = transactionService.authorizeAndCapture(paymentRequestDTO);
             responseDTO.paymentTransactionType(PaymentTransactionType.AUTHORIZE_AND_CAPTURE);
         } else {
@@ -57,7 +57,7 @@ public class PayPalExpressHostedServiceImpl extends AbstractPaymentGatewayHosted
         }
 
         if (LOG.isTraceEnabled()) {
-            LOG.trace("Request to PayPal Express Checkout Hosted Endpoint with raw response: " +
+            LOG.trace("Request to PayPal Checkout Hosted Endpoint with raw response: " +
                 responseDTO.getRawResponse());
         }
 

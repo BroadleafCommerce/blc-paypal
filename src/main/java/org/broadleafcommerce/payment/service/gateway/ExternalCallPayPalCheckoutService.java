@@ -27,9 +27,9 @@ import com.paypal.api.payments.Payment;
 /**
  * @author Elbert Bautista (elbertbautista)
  */
-public interface ExternalCallPayPalExpressService {
+public interface ExternalCallPayPalCheckoutService {
 
-    PayPalExpressConfiguration getConfiguration();
+    PayPalCheckoutConfiguration getConfiguration();
 
     /**
      * Converts a PayPal payment into a PaymentResponseDTO

@@ -35,13 +35,13 @@ import javax.servlet.http.HttpServletRequest;
 /**
  * @author Elbert Bautista (elbertbautista)
  */
-@Service("blPayPalExpressWebResponseService")
-public class PayPalExpressWebResponseServiceImpl extends AbstractPaymentGatewayWebResponseService implements PaymentGatewayWebResponseService {
+@Service("blPayPalCheckoutWebResponseService")
+public class PayPalCheckoutWebResponseServiceImpl extends AbstractPaymentGatewayWebResponseService implements PaymentGatewayWebResponseService {
 
     @Resource(name = "blPaymentGatewayWebResponsePrintService")
     protected PaymentGatewayWebResponsePrintService webResponsePrintService;
 
-    @Resource(name = "blPayPalExpressReportingService")
+    @Resource(name = "blPayPalCheckoutReportingService")
     protected PaymentGatewayReportingService reportingService;
 
     @Resource(name = "blPayPalPaymentService")

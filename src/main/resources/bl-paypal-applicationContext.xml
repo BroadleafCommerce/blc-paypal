@@ -35,12 +35,12 @@
         <context:exclude-filter type="regex" expression="org.broadleafcommerce.vendor.paypal.web.controller.*"/>
     </context:component-scan>
 
-    <bean class="org.broadleafcommerce.vendor.paypal.service.payment.PayPalExpressPaymentGatewayType"/>
+    <bean class="org.broadleafcommerce.vendor.paypal.service.payment.PayPalCheckoutPaymentGatewayType"/>
 
     <bean id="blPayPalConfigurationServices" class="org.springframework.beans.factory.config.ListFactoryBean">
         <property name="sourceList">
             <list>
-                <ref bean="blPayPalExpressConfigurationService"/>
+                <ref bean="blPayPalCheckoutConfigurationService"/>
             </list>
         </property>
     </bean>

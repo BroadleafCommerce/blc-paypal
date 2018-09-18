@@ -24,7 +24,7 @@ import org.broadleafcommerce.common.payment.dto.LineItemDTO;
 import org.broadleafcommerce.common.payment.dto.PaymentRequestDTO;
 import org.broadleafcommerce.common.payment.service.CurrentOrderPaymentRequestService;
 import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
-import org.broadleafcommerce.payment.service.gateway.ExternalCallPayPalExpressService;
+import org.broadleafcommerce.payment.service.gateway.ExternalCallPayPalCheckoutService;
 import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCreatePaymentRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCreatePaymentResponse;
@@ -55,8 +55,8 @@ public class PayPalPaymentServiceImpl implements PayPalPaymentService {
     @Resource(name = "blPayPalApiContext")
     protected APIContext apiContext;
 
-    @Resource(name = "blExternalCallPayPalExpressService")
-    protected ExternalCallPayPalExpressService externalCallService;
+    @Resource(name = "blExternalCallPayPalCheckoutService")
+    protected ExternalCallPayPalCheckoutService externalCallService;
 
     @Resource(name = "blPayPalWebProfileService")
     protected PayPalWebProfileService webProfileService;

@@ -27,7 +27,7 @@ import java.util.Map;
 /**
  * @author Elbert Bautista (elbertbautista)
  */
-public interface PayPalExpressConfiguration extends PaymentGatewayConfiguration {
+public interface PayPalCheckoutConfiguration extends PaymentGatewayConfiguration {
 
     /**
      * URL to which the buyer's browser is returned after choosing to pay with PayPal.

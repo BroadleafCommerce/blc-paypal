@@ -30,10 +30,10 @@ import javax.annotation.Resource;
 /**
  * @author Elbert Bautista (elbertbautista)
  */
-@Service("blPayPalExpressRollbackService")
-public class PayPalExpressRollbackServiceImpl extends AbstractPaymentGatewayRollbackService implements PaymentGatewayRollbackService {
+@Service("blPayPalCheckoutRollbackService")
+public class PayPalCheckoutRollbackServiceImpl extends AbstractPaymentGatewayRollbackService implements PaymentGatewayRollbackService {
 
-    @Resource(name = "blPayPalExpressTransactionService")
+    @Resource(name = "blPayPalCheckoutTransactionService")
     protected PaymentGatewayTransactionService transactionService;
 
     @Override

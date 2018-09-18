@@ -37,14 +37,14 @@ import javax.annotation.Resource;
 /**
  * @author Elbert Bautista (elbertbautista)
  */
-@Service("blExternalCallPayPalExpressService")
-public class ExternalCallPayPalExpressServiceImpl extends AbstractExternalPaymentGatewayCall<PayPalRequest, PayPalResponse> implements ExternalCallPayPalExpressService {
+@Service("blExternalCallPayPalCheckoutService")
+public class ExternalCallPayPalCheckoutServiceImpl extends AbstractExternalPaymentGatewayCall<PayPalRequest, PayPalResponse> implements ExternalCallPayPalCheckoutService {
 
-    @Resource(name = "blPayPalExpressConfiguration")
-    protected PayPalExpressConfiguration configuration;
+    @Resource(name = "blPayPalCheckoutConfiguration")
+    protected PayPalCheckoutConfiguration configuration;
 
     @Override
-    public PayPalExpressConfiguration getConfiguration() {
+    public PayPalCheckoutConfiguration getConfiguration() {
         return configuration;
     }
 

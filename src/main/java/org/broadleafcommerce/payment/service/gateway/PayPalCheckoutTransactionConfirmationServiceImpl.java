@@ -31,13 +31,13 @@ import javax.annotation.Resource;
 /**
  * @author Elbert Bautista (elbertbautista)
  */
-@Service("blPayPalExpressTransactionConfirmationService")
-public class PayPalExpressTransactionConfirmationServiceImpl extends AbstractPaymentGatewayTransactionConfirmationService implements PaymentGatewayTransactionConfirmationService {
+@Service("blPayPalCheckoutTransactionConfirmationService")
+public class PayPalCheckoutTransactionConfirmationServiceImpl extends AbstractPaymentGatewayTransactionConfirmationService implements PaymentGatewayTransactionConfirmationService {
 
-    @Resource(name = "blPayPalExpressConfiguration")
-    protected PayPalExpressConfiguration configuration;
+    @Resource(name = "blPayPalCheckoutConfiguration")
+    protected PayPalCheckoutConfiguration configuration;
 
-    @Resource(name = "blPayPalExpressTransactionService")
+    @Resource(name = "blPayPalCheckoutTransactionService")
     protected PaymentGatewayTransactionService transactionService;
 
     @Override

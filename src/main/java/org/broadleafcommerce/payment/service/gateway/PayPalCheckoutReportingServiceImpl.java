@@ -28,7 +28,7 @@ import org.broadleafcommerce.common.payment.service.AbstractPaymentGatewayReport
 import org.broadleafcommerce.common.payment.service.PaymentGatewayReportingService;
 import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
 import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
-import org.broadleafcommerce.vendor.paypal.service.payment.PayPalExpressPaymentGatewayType;
+import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCheckoutPaymentGatewayType;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalPaymentRetrievalRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalPaymentRetrievalResponse;
 import org.springframework.stereotype.Service;
@@ -42,13 +42,13 @@ import javax.annotation.Resource;
 /**
  * @author Elbert Bautista (elbertbautista)
  */
-@Service("blPayPalExpressReportingService")
-public class PayPalExpressReportingServiceImpl extends AbstractPaymentGatewayReportingService implements PaymentGatewayReportingService {
+@Service("blPayPalCheckoutReportingService")
+public class PayPalCheckoutReportingServiceImpl extends AbstractPaymentGatewayReportingService implements PaymentGatewayReportingService {
 
-    private static final Log LOG = LogFactory.getLog(PayPalExpressReportingServiceImpl.class);
+    private static final Log LOG = LogFactory.getLog(PayPalCheckoutReportingServiceImpl.class);
 
-    @Resource(name = "blExternalCallPayPalExpressService")
-    protected ExternalCallPayPalExpressService payPalExpressService;
+    @Resource(name = "blExternalCallPayPalCheckoutService")
+    protected ExternalCallPayPalCheckoutService payPalCheckoutService;
 
     @Resource(name = "blPayPalApiContext")
     protected APIContext apiContext;
@@ -58,11 +58,11 @@ public class PayPalExpressReportingServiceImpl extends AbstractPaymentGatewayRep
         Assert.isTrue(paymentRequestDTO.getAdditionalFields().containsKey(MessageConstants.HTTP_PAYERID), "The RequestDTO must contain a payerID");
         Assert.isTrue(paymentRequestDTO.getAdditionalFields().containsKey(MessageConstants.HTTP_PAYMENTID), "The RequestDTO must contain a paymentID");
 
-        PayPalPaymentRetrievalResponse response = (PayPalPaymentRetrievalResponse) payPalExpressService.call(new PayPalPaymentRetrievalRequest((String) paymentRequestDTO.getAdditionalFields().get(MessageConstants.HTTP_PAYMENTID), apiContext));
+        PayPalPaymentRetrievalResponse response = (PayPalPaymentRetrievalResponse) payPalCheckoutService.call(new PayPalPaymentRetrievalRequest((String) paymentRequestDTO.getAdditionalFields().get(MessageConstants.HTTP_PAYMENTID), apiContext));
         Payment payment = response.getPayment();
         PaymentResponseDTO responseDTO = new PaymentResponseDTO(PaymentType.THIRD_PARTY_ACCOUNT,
-                PayPalExpressPaymentGatewayType.PAYPAL_EXPRESS);
-        payPalExpressService.setCommonDetailsResponse(payment, responseDTO);
+                PayPalCheckoutPaymentGatewayType.PAYPAL_CHECKOUT);
+        payPalCheckoutService.setCommonDetailsResponse(payment, responseDTO);
         responseDTO.responseMap(MessageConstants.PAYERID, (String) paymentRequestDTO.getAdditionalFields().get(MessageConstants.HTTP_PAYERID))
                     .responseMap(MessageConstants.PAYMENTID, (String) paymentRequestDTO.getAdditionalFields().get(MessageConstants.HTTP_PAYMENTID));
         LOG.info("ResponseDTO created: " + ToStringBuilder.reflectionToString(responseDTO, ToStringStyle.MULTI_LINE_STYLE));

@@ -21,7 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
-import org.broadleafcommerce.payment.service.gateway.ExternalCallPayPalExpressService;
+import org.broadleafcommerce.payment.service.gateway.ExternalCallPayPalCheckoutService;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCreateWebProfileRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCreateWebProfileResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,8 +41,8 @@ public class PayPalWebProfileServiceImpl implements PayPalWebProfileService {
 
     protected String beanProfileId;
     
-    @Resource(name = "blExternalCallPayPalExpressService")
-    protected ExternalCallPayPalExpressService externalCallService;
+    @Resource(name = "blExternalCallPayPalCheckoutService")
+    protected ExternalCallPayPalCheckoutService externalCallService;
 
     @Resource(name = "blPayPalApiContext")
     protected APIContext apiContext;

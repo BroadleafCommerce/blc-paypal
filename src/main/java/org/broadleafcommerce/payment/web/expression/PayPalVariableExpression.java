@@ -18,7 +18,7 @@
 package org.broadleafcommerce.payment.web.expression;
 
 import org.broadleafcommerce.common.web.expression.BroadleafVariableExpression;
-import org.broadleafcommerce.payment.service.gateway.PayPalExpressConfiguration;
+import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutConfiguration;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -29,8 +29,8 @@ import javax.annotation.Resource;
 @Component("blPayPalVariableExpression")
 public class PayPalVariableExpression implements BroadleafVariableExpression {
 
-    @Resource(name = "blPayPalExpressConfiguration")
-    protected PayPalExpressConfiguration configuration;
+    @Resource(name = "blPayPalCheckoutConfiguration")
+    protected PayPalCheckoutConfiguration configuration;
 
     @Override
     public String getName() {

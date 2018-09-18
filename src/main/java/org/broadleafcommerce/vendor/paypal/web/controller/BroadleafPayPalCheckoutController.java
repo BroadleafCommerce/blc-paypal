@@ -49,20 +49,20 @@ import javax.servlet.http.HttpServletRequest;
 /**
  * @author Elbert Bautista (elbertbautista)
  */
-@Controller("blPayPalExpressController")
-@RequestMapping("/" + BroadleafPayPalExpressController.GATEWAY_CONTEXT_KEY)
-public class BroadleafPayPalExpressController extends PaymentGatewayAbstractController {
+@Controller("blPayPalCheckoutController")
+@RequestMapping("/" + BroadleafPayPalCheckoutController.GATEWAY_CONTEXT_KEY)
+public class BroadleafPayPalCheckoutController extends PaymentGatewayAbstractController {
 
-    private static final Log LOG = LogFactory.getLog(BroadleafPayPalExpressController.class);
-    protected static final String GATEWAY_CONTEXT_KEY = "paypal-express";
+    private static final Log LOG = LogFactory.getLog(BroadleafPayPalCheckoutController.class);
+    protected static final String GATEWAY_CONTEXT_KEY = "paypal-checkout";
 
-    @Resource(name = "blPayPalExpressWebResponseService")
+    @Resource(name = "blPayPalCheckoutWebResponseService")
     protected PaymentGatewayWebResponseService paymentGatewayWebResponseService;
 
-    @Resource(name = "blPayPalExpressHostedService")
+    @Resource(name = "blPayPalCheckoutHostedService")
     protected PaymentGatewayHostedService paymentGatewayHostedService;
 
-    @Resource(name = "blPayPalExpressConfiguration")
+    @Resource(name = "blPayPalCheckoutConfiguration")
     protected PaymentGatewayConfiguration paymentGatewayConfiguration;
 
     @Resource(name = "blPayPalPaymentService")
@@ -107,7 +107,7 @@ public class BroadleafPayPalExpressController extends PaymentGatewayAbstractCont
     }
 
     // ***********************************************
-    // PayPal Express Default Endpoints
+    // PayPal Checkout Default Endpoints
     // ***********************************************
     @Override
     @RequestMapping(value = "/return", method = RequestMethod.GET)
@@ -163,7 +163,7 @@ public class BroadleafPayPalExpressController extends PaymentGatewayAbstractCont
         if (StringUtils.isBlank(payerId)) {
             throw new PaymentException("Unable to complete checkout because no PayPal payer id was found on the current order");
         }
-        return "redirect:/paypal-express/return?" + MessageConstants.HTTP_PAYMENTID + "=" + paymentId + "&" + MessageConstants.HTTP_PAYERID + "=" + payerId;
+        return "redirect:/paypal-checkout/return?" + MessageConstants.HTTP_PAYMENTID + "=" + paymentId + "&" + MessageConstants.HTTP_PAYERID + "=" + payerId;
     }
 
     // ***********************************************

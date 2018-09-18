@@ -22,7 +22,7 @@ import org.broadleafcommerce.common.payment.PaymentGatewayType;
 import org.broadleafcommerce.common.payment.service.AbstractPaymentGatewayConfiguration;
 import org.broadleafcommerce.common.web.BaseUrlResolver;
 import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
-import org.broadleafcommerce.vendor.paypal.service.payment.PayPalExpressPaymentGatewayType;
+import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCheckoutPaymentGatewayType;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalShippingDisplayType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,8 +37,8 @@ import javax.annotation.Resource;
 /**
  * @author Elbert Bautista (elbertbautista)
  */
-@Service("blPayPalExpressConfiguration")
-public class PayPalExpressConfigurationImpl extends AbstractPaymentGatewayConfiguration implements PayPalExpressConfiguration {
+@Service("blPayPalCheckoutConfiguration")
+public class PayPalCheckoutConfigurationImpl extends AbstractPaymentGatewayConfiguration implements PayPalCheckoutConfiguration {
 
     @Resource(name = "blBaseUrlResolver")
     protected BaseUrlResolver urlResolver;
@@ -201,7 +201,7 @@ public class PayPalExpressConfigurationImpl extends AbstractPaymentGatewayConfig
 
     @Override
     public PaymentGatewayType getGatewayType() {
-        return PayPalExpressPaymentGatewayType.PAYPAL_EXPRESS;
+        return PayPalCheckoutPaymentGatewayType.PAYPAL_CHECKOUT;
     }
 
 }
