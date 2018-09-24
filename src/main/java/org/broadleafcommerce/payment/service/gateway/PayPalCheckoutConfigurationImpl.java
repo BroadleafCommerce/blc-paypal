@@ -93,6 +93,11 @@ public class PayPalCheckoutConfigurationImpl extends AbstractPaymentGatewayConfi
     }
 
     @Override
+    public String getSmartPaymentEnvironment() {
+        return propertiesService.resolveSystemProperty("gateway.paypal.smart.button.env");
+    }
+
+    @Override
     public PayPalShippingDisplayType getShippingDisplayType() {
         String shippingType = propertiesService.resolveSystemProperty("gateway.paypal.expressCheckout.shippingDisplayType");
 

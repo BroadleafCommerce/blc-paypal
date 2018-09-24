@@ -59,6 +59,8 @@ public interface PayPalCheckoutConfiguration extends PaymentGatewayConfiguration
      */
     public String getWebProfileId();
 
+    String getSmartPaymentEnvironment();
+
     /**
      * For digital goods, this field is required and must be set to 1.
      * 0 - PayPal displays the shipping address passed in.
