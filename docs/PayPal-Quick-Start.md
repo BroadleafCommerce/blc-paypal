@@ -101,6 +101,12 @@ in `reviewStage.html`:
     <blc:form id="PayPalCheckoutSubmissionForm" class="is-hidden" th:action="@{/paypal-checkout/checkout/complete(guest-checkout=${#request.getParameter('guest-checkout')})}" method="POST" novalidate="novalidate">
 ```
 
+### Customizations
+
+One of the more typical customizations you may wish to do revolves around passing the appropriate data to PayPal.
+The service that handles translating a Broadleaf cart into the appropriate PayPal request is encapsulated in this spring component `blPayPalPaymentService`.
+This component handles things like `Payer`, `Transaction`, `Payment`, and `ShippingAddress` construction. You may wish
+to extend this service to send the appropriate values based on your business requirements.
 
 ## Done!
 At this point, all the configuration should be complete and you are now ready to test your integration with PayPal Checkout + Smart Payments.
