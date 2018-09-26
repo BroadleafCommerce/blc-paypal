@@ -14,9 +14,10 @@ gateway.paypal.checkout.rest.secret=?
 gateway.paypal.checkout.rest.mode=?
 gateway.paypal.checkout.rest.returnUrl=? (e.g. https://test.blc.localhost:8443/paypal-checkout/return)
 gateway.paypal.checkout.rest.cancelUrl=? (e.g. https://test.blc.localhost:8443/paypal-checkout/cancel)
+gateway.paypal.checkout.rest.description=? (e.g. My Test Store)
 # Options are "sandbox" or "production"
 gateway.paypal.smart.button.env=?
-gateway.paypal.smart.button.payment.url=? (e.g. /paypal-checkout/create-payment)
+gateway.paypal.smart.button.payment.url=? (e.g. /paypal-checkout/create-payment or /paypal-checkout/create-billing-agreement-token)
 gateway.paypal.smart.button.authorize.url=? (e.g. /paypal-checkout/return)
 ```
 

@@ -17,10 +17,7 @@
  */
 package org.broadleafcommerce.vendor.paypal.service;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.broadleafcommerce.common.payment.dto.AddressDTO;
-import org.broadleafcommerce.common.payment.dto.LineItemDTO;
 import org.broadleafcommerce.common.payment.dto.PaymentRequestDTO;
 import org.broadleafcommerce.common.payment.service.CurrentOrderPaymentRequestService;
 import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
@@ -31,22 +28,16 @@ import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCreatePaymentRe
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalUpdatePaymentRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import com.paypal.api.payments.Amount;
-import com.paypal.api.payments.Details;
-import com.paypal.api.payments.Item;
 import com.paypal.api.payments.ItemList;
 import com.paypal.api.payments.Patch;
 import com.paypal.api.payments.Payer;
 import com.paypal.api.payments.Payment;
 import com.paypal.api.payments.RedirectUrls;
-import com.paypal.api.payments.ShippingAddress;
 import com.paypal.api.payments.Transaction;
 import com.paypal.base.rest.APIContext;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.annotation.Resource;
 
 @Service("blPayPalPaymentService")
@@ -69,15 +60,14 @@ public class PayPalPaymentServiceImpl implements PayPalPaymentService {
         PaymentRequestDTO paymentRequestDTO = getPaymentRequestForCurrentOrder();
 
         // Set payer details
-        Payer payer = new Payer();
-        payer.setPaymentMethod("paypal");
+        Payer payer = constructPayer(paymentRequestDTO);
 
         // Set redirect URLs
         RedirectUrls redirectUrls = new RedirectUrls();
         redirectUrls.setCancelUrl(externalCallService.getConfiguration().getCancelUrl());
         redirectUrls.setReturnUrl(externalCallService.getConfiguration().getReturnUrl());
 
-        Amount amount = getPayPalAmountFromOrder(paymentRequestDTO);
+        Amount amount = externalCallService.getPayPalAmountFromOrder(paymentRequestDTO);
 
         // Transaction information
         Transaction transaction = new Transaction();
@@ -85,7 +75,7 @@ public class PayPalPaymentServiceImpl implements PayPalPaymentService {
         transaction.setDescription(externalCallService.getConfiguration().getPaymentDescription());
         transaction.setCustom(paymentRequestDTO.getOrderId() + "|" + performCheckoutOnReturn);
 
-        ItemList itemList = getPayPalItemListFromOrder(paymentRequestDTO);
+        ItemList itemList = externalCallService.getPayPalItemListFromOrder(paymentRequestDTO);
         if (itemList != null) {
             transaction.setItemList(itemList);
         }
@@ -108,6 +98,12 @@ public class PayPalPaymentServiceImpl implements PayPalPaymentService {
         return createPayment(payment);
     }
 
+    protected Payer constructPayer(PaymentRequestDTO paymentRequestDTO) {
+        Payer payer = new Payer();
+        payer.setPaymentMethod(MessageConstants.PAYER_PAYMENTMETHOD_PAYPAL);
+        return payer;
+    }
+
     @Override
     public void updatePayPalPaymentForFulfillment() throws PaymentException {
         PaymentRequestDTO paymentRequestDTO = getPaymentRequestForCurrentOrder();
@@ -123,11 +119,11 @@ public class PayPalPaymentServiceImpl implements PayPalPaymentService {
         Patch amountPatch = new Patch();
         amountPatch.setOp("replace");
         amountPatch.setPath("/transactions/0/amount");
-        Amount amount = getPayPalAmountFromOrder(paymentRequestDTO);
+        Amount amount = externalCallService.getPayPalAmountFromOrder(paymentRequestDTO);
         amountPatch.setValue(amount);
         patches.add(amountPatch);
 
-        ItemList itemList = getPayPalItemListFromOrder(paymentRequestDTO);
+        ItemList itemList = externalCallService.getPayPalItemListFromOrder(paymentRequestDTO);
         if (itemList != null) {
             Patch shipToPatch = new Patch();
             shipToPatch.setOp("replace");
@@ -146,61 +142,6 @@ public class PayPalPaymentServiceImpl implements PayPalPaymentService {
         paypalPayment.setId(paymentId);
         updatePayment(paypalPayment, patches);
 
-    }
-
-    protected ItemList getPayPalItemListFromOrder(PaymentRequestDTO paymentRequestDTO) {
-        ItemList itemList = new ItemList();
-        boolean returnItemList = false;
-        if (paymentRequestDTO.shipToPopulated()) {
-            ShippingAddress address = getPayPalShippingAddress(paymentRequestDTO);
-            itemList.setShippingAddress(address);
-            returnItemList = true;
-        }
-
-        if (CollectionUtils.isNotEmpty(paymentRequestDTO.getLineItems())) {
-            List<Item> items = new ArrayList<>();
-            for (LineItemDTO lineItem : paymentRequestDTO.getLineItems()) {
-                Item item = new Item();
-                item.setCategory(lineItem.getCategory());
-                item.setDescription(lineItem.getDescription());
-                item.setQuantity(lineItem.getQuantity());
-                item.setPrice(lineItem.getTotal());
-                item.setTax(lineItem.getTax());
-                item.setName(lineItem.getName());
-                items.add(item);
-            }
-            itemList.setItems(items);
-            returnItemList = true;
-        }
-        return returnItemList ? itemList : null;
-    }
-
-    protected Amount getPayPalAmountFromOrder(PaymentRequestDTO paymentRequestDTO) {
-        Details details = new Details();
-
-        details.setShipping(paymentRequestDTO.getShippingTotal());
-        details.setSubtotal(paymentRequestDTO.getOrderSubtotal());
-        details.setTax(paymentRequestDTO.getTaxTotal());
-
-        Amount amount = new Amount();
-        amount.setCurrency(paymentRequestDTO.getOrderCurrencyCode());
-        amount.setTotal(paymentRequestDTO.getTransactionTotal());
-        amount.setDetails(details);
-        return amount;
-    }
-
-    protected ShippingAddress getPayPalShippingAddress(PaymentRequestDTO paymentRequestDTO) {
-        ShippingAddress shipAddress = new ShippingAddress();
-        AddressDTO<PaymentRequestDTO> addressDTO = paymentRequestDTO.getShipTo();
-        shipAddress.setRecipientName(addressDTO.getAddressFullName());
-        shipAddress.setLine1(addressDTO.getAddressLine1());
-        shipAddress.setLine2(addressDTO.getAddressLine2());
-        shipAddress.setCity(addressDTO.getAddressCityLocality());
-        shipAddress.setState(addressDTO.getAddressStateRegion());
-        shipAddress.setPostalCode(addressDTO.getAddressPostalCode());
-        shipAddress.setCountryCode(addressDTO.getAddressCountryCode());
-        shipAddress.setPhone(addressDTO.getAddressPhone());
-        return shipAddress;
     }
 
     protected Payment createPayment(Payment payment) throws PaymentException {

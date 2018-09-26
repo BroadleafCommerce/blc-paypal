@@ -26,6 +26,8 @@ import org.broadleafcommerce.common.payment.service.PaymentGatewayHostedService;
 import org.broadleafcommerce.common.payment.service.PaymentGatewayWebResponseService;
 import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
 import org.broadleafcommerce.common.web.payment.controller.PaymentGatewayAbstractController;
+import org.broadleafcommerce.vendor.paypal.api.AgreementToken;
+import org.broadleafcommerce.vendor.paypal.service.PayPalAgreementTokenService;
 import org.broadleafcommerce.vendor.paypal.service.PayPalPaymentService;
 import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
 import org.springframework.stereotype.Controller;
@@ -36,13 +38,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
 import com.paypal.api.payments.Links;
 import com.paypal.api.payments.Payment;
-
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
@@ -67,6 +67,9 @@ public class BroadleafPayPalCheckoutController extends PaymentGatewayAbstractCon
 
     @Resource(name = "blPayPalPaymentService")
     protected PayPalPaymentService paymentService;
+
+    @Resource(name = "blPayPalAgreementTokenService")
+    protected PayPalAgreementTokenService agreementTokenService;
 
     @Override
     public void handleProcessingException(Exception e, final RedirectAttributes redirectAttributes)
@@ -114,6 +117,9 @@ public class BroadleafPayPalCheckoutController extends PaymentGatewayAbstractCon
     public String returnEndpoint(Model model, HttpServletRequest request,
                                  final RedirectAttributes redirectAttributes,
                                  @PathVariable Map<String, String> pathVars) throws PaymentException {
+        if (request.getParameter(MessageConstants.CHECKOUT_COMPLETE) != null) {
+            request.setAttribute(MessageConstants.CHECKOUT_COMPLETE, true);
+        }
         String path = super.process(model, request, redirectAttributes);
         if (isAjaxRequest(request) && StringUtils.startsWith(path, baseRedirect)) {
             return StringUtils.replace(path, baseRedirect, "ajaxredirect:");
@@ -166,6 +172,15 @@ public class BroadleafPayPalCheckoutController extends PaymentGatewayAbstractCon
         return "redirect:/paypal-checkout/return?" + MessageConstants.HTTP_PAYMENTID + "=" + paymentId + "&" + MessageConstants.HTTP_PAYERID + "=" + payerId;
     }
 
+    @RequestMapping(value = "/billing-agreement-token/complete", method = RequestMethod.POST)
+    public String completeBillingAgreementTokenCheckout() throws PaymentException {
+        String billingToken = agreementTokenService.getPayPalAgreementTokenFromCurrentOrder();
+        if (StringUtils.isBlank(billingToken)) {
+            throw new PaymentException("Unable to complete checkout because no PayPal Billing Token was found on the current order");
+        }
+        return "redirect:/paypal-checkout/return?" + MessageConstants.HTTP_BILLINGTOKEN + "=" + billingToken + "&" + MessageConstants.CHECKOUT_COMPLETE + "=true";
+    }
+
     // ***********************************************
     // PayPal Client side REST checkout (iframe)
     // ***********************************************
@@ -174,6 +189,14 @@ public class BroadleafPayPalCheckoutController extends PaymentGatewayAbstractCon
         Map<String, String> response = new HashMap<>();
         Payment createdPayment = paymentService.createPayPalPaymentForCurrentOrder(performCheckout);
         response.put("id", createdPayment.getId());
+        return response;
+    }
+
+    @RequestMapping(value = "/create-billing-agreement-token", method = RequestMethod.POST)
+    public @ResponseBody Map<String, String> createBillingAgreementToken(@RequestParam("performCheckout") Boolean performCheckout) throws PaymentException, URISyntaxException {
+        Map<String, String> response = new HashMap<>();
+        AgreementToken agreementToken = agreementTokenService.createPayPalAgreementTokenForCurrentOrder(performCheckout);
+        response.put("id", agreementToken.getTokenId());
         return response;
     }
     
@@ -190,8 +213,27 @@ public class BroadleafPayPalCheckoutController extends PaymentGatewayAbstractCon
         return "redirect:" + redirect;
     }
 
+    @RequestMapping(value = "/hosted/create-billing-agreement-token", method = RequestMethod.POST)
+    public String createBillingAgreementTokenHostedJson(HttpServletRequest request, @RequestParam("performCheckout") Boolean performCheckout) throws PaymentException {
+        AgreementToken agreementToken = agreementTokenService.createPayPalAgreementTokenForCurrentOrder(performCheckout);
+        String redirect = getApprovalLink(agreementToken);
+        if (isAjaxRequest(request)) {
+            return "ajaxredirect:" + redirect;
+        }
+        return "redirect:" + redirect;
+    }
+
     protected String getApprovalLink(Payment payment) {
         for (Links links : payment.getLinks()) {
+            if (links.getRel().equals("approval_url")) {
+                return links.getHref();
+            }
+        }
+        return null;
+    }
+
+    protected String getApprovalLink(AgreementToken agreementToken) {
+        for (Links links : agreementToken.getLinks()) {
             if (links.getRel().equals("approval_url")) {
                 return links.getHref();
             }

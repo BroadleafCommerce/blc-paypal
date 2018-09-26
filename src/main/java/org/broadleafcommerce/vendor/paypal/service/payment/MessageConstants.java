@@ -22,6 +22,7 @@ package org.broadleafcommerce.vendor.paypal.service.payment;
  */
 public class MessageConstants {
 
+    public static final String CHECKOUT_COMPLETE = "CheckoutComplete";
     public static final String TOTAL = "Total";
     public static final String ESTIMATEDTOTAL = "EstimatedTotal";
     public static final String AUTHORIZATONID = "AUTHORIZATIONID";
@@ -40,10 +41,17 @@ public class MessageConstants {
     public static final String DETAILSPAYMENTTRANSACTIONID = "PAYMENTREQUEST_n_TRANSACTIONID";
     public static final String DETAILSPAYMENTALLOWEDMETHOD = "PAYMENTREQUEST_n_ALLOWEDPAYMENTMETHOD";
     public static final String BILLINGAGREEMENTID = "BILLING_AGREEMENT_ID";
+    public static final String BILLINGECTOKEN = "BILLING_EC_TOKEN";
+    public static final String AGREEMENTTOKENID = "AGREEMENT_TOKEN_ID";
+    public static final String PAYER_PAYMENTMETHOD_PAYPAL = "paypal";
+    public static final String PLAN_TYPE_MERCHANTINITIATEDBILLING = "MERCHANT_INITIATED_BILLING";
+    public static final String MERCHANTPREF_ACCEPTEDPAYMENTTYPE_INSTANT = "INSTANT";
     public static final String BN = "PayPal-Partner-Attribution-Id";
     public static final String BNCODE = "BroadleafCommerce_Cart_EC";
-    public static final String HTTP_PAYERID = "PayerID";
+    public static final String HTTP_PAYERID = "payerId";
     public static final String HTTP_PAYMENTID = "paymentId";
+    public static final String HTTP_TOKEN = "token";
+    public static final String HTTP_BILLINGTOKEN = "billingToken";
     public static final String HTTP_REQUEST = "HTTP_REQUEST";
 
 }

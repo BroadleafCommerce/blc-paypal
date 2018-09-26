@@ -17,12 +17,18 @@
  */
 package org.broadleafcommerce.payment.service.gateway;
 
+import org.broadleafcommerce.common.money.Money;
+import org.broadleafcommerce.common.payment.dto.PaymentRequestDTO;
 import org.broadleafcommerce.common.payment.dto.PaymentResponseDTO;
 import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
+import org.broadleafcommerce.vendor.paypal.api.AgreementToken;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalResponse;
 
+import com.paypal.api.payments.Amount;
+import com.paypal.api.payments.ItemList;
 import com.paypal.api.payments.Payment;
+import com.paypal.api.payments.ShippingAddress;
 
 /**
  * @author Elbert Bautista (elbertbautista)
@@ -31,6 +37,9 @@ public interface ExternalCallPayPalCheckoutService {
 
     PayPalCheckoutConfiguration getConfiguration();
 
+    void setCommonDetailsResponse(AgreementToken response, PaymentResponseDTO responseDTO, Money amount,
+                                  String orderId, boolean checkoutComplete);
+
     /**
      * Converts a PayPal payment into a PaymentResponseDTO
      * 
@@ -38,6 +47,12 @@ public interface ExternalCallPayPalCheckoutService {
      * @param responseDTO The response dto that should be used to copy information from the PayPal payment
      */
     void setCommonDetailsResponse(Payment response, PaymentResponseDTO responseDTO);
+
+    ShippingAddress getPayPalShippingAddress(PaymentRequestDTO paymentRequestDTO);
+
+    ItemList getPayPalItemListFromOrder(PaymentRequestDTO paymentRequestDTO);
+
+    Amount getPayPalAmountFromOrder(PaymentRequestDTO paymentRequestDTO);
 
     /**
      * Makes a request to PayPal
