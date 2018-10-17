@@ -2,7 +2,7 @@
  * #%L
  * BroadleafCommerce PayPal
  * %%
- * Copyright (C) 2009 - 2017 Broadleaf Commerce
+ * Copyright (C) 2009 - 2018 Broadleaf Commerce
  * %%
  * Licensed under the Broadleaf Fair Use License Agreement, Version 1.0
  * (the "Fair Use License" located  at http://license.broadleafcommerce.org/fair_use_license-1.0.txt)
@@ -15,27 +15,16 @@
  * between you and Broadleaf Commerce. You may not use this file except in compliance with the applicable license.
  * #L%
  */
-package org.broadleafcommerce.payment.web.expression;
+package org.broadleafcommerce.vendor.paypal.service;
 
-import org.broadleafcommerce.common.web.expression.BroadleafVariableExpression;
-import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutConfiguration;
-import org.springframework.stereotype.Component;
+import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
+import com.paypal.api.payments.Agreement;
 
-import javax.annotation.Resource;
+public interface PayPalBillingAgreementService {
 
-/**
- * @author Chris Kittrell (ckittrell)
- */
-@Component("blPayPalVariableExpression")
-public class PayPalVariableExpression implements BroadleafVariableExpression {
+    Agreement createPayPalBillingAgreementForCurrentOrder(boolean performCheckoutOnReturn) throws PaymentException;
 
-    @Resource(name = "blPayPalCheckoutConfiguration")
-    protected PayPalCheckoutConfiguration configuration;
+    String getPayPalBillingTokenFromCurrentOrder() throws PaymentException;
 
-    @Override
-    public String getName() {
-        return "paypal";
-    }
-
-
+    void setPayPalBillingTokenOnCurrentOrder(String billingToken) throws PaymentException;
 }

@@ -35,12 +35,12 @@
         <context:exclude-filter type="regex" expression="org.broadleafcommerce.vendor.paypal.web.controller.*"/>
     </context:component-scan>
 
-    <bean class="org.broadleafcommerce.vendor.paypal.service.payment.PayPalExpressPaymentGatewayType"/>
+    <bean class="org.broadleafcommerce.vendor.paypal.service.payment.PayPalCheckoutPaymentGatewayType"/>
 
     <bean id="blPayPalConfigurationServices" class="org.springframework.beans.factory.config.ListFactoryBean">
         <property name="sourceList">
             <list>
-                <ref bean="blPayPalExpressConfigurationService"/>
+                <ref bean="blPayPalCheckoutConfigurationService"/>
             </list>
         </property>
     </bean>
@@ -53,5 +53,11 @@
         <property name="moduleName" value="Paypal" />
         <property name="lifeCycleEvent" value="LOADING" />
     </bean>
+    
+<!--     <bean id="blPayPalApiContext" class="com.paypal.base.rest.APIContext">
+        <constructor-arg name="clientID" value="#{gateway.paypal.checkout.rest.clientId}"/>
+        <constructor-arg name="clientSecret" value="#{gateway.paypal.checkout.rest.secret}"/>
+        <constructor-arg name="mode" value="#{gateway.paypal.checkout.rest.mode}"/>
+    </bean> -->
 
 </beans>

@@ -2,7 +2,7 @@
  * #%L
  * BroadleafCommerce PayPal
  * %%
- * Copyright (C) 2009 - 2017 Broadleaf Commerce
+ * Copyright (C) 2009 - 2018 Broadleaf Commerce
  * %%
  * Licensed under the Broadleaf Fair Use License Agreement, Version 1.0
  * (the "Fair Use License" located  at http://license.broadleafcommerce.org/fair_use_license-1.0.txt)
@@ -15,27 +15,29 @@
  * between you and Broadleaf Commerce. You may not use this file except in compliance with the applicable license.
  * #L%
  */
-package org.broadleafcommerce.payment.web.expression;
+package org.broadleafcommerce.vendor.paypal.service.payment;
 
-import org.broadleafcommerce.common.web.expression.BroadleafVariableExpression;
-import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutConfiguration;
-import org.springframework.stereotype.Component;
+import com.paypal.api.payments.Payment;
+import com.paypal.api.payments.Sale;
 
-import javax.annotation.Resource;
+public class PayPalSaleResponse implements PayPalResponse {
 
-/**
- * @author Chris Kittrell (ckittrell)
- */
-@Component("blPayPalVariableExpression")
-public class PayPalVariableExpression implements BroadleafVariableExpression {
+    protected Payment salePayment;
+    protected Sale sale;
 
-    @Resource(name = "blPayPalCheckoutConfiguration")
-    protected PayPalCheckoutConfiguration configuration;
-
-    @Override
-    public String getName() {
-        return "paypal";
+    public PayPalSaleResponse(Payment salePayment) {
+        this.salePayment = salePayment;
     }
 
+    public Payment getSalePayment() {
+        return salePayment;
+    }
+
+    public Sale getSale() {
+        if (sale == null) {
+            this.sale = salePayment.getTransactions().get(0).getRelatedResources().get(0).getSale();
+        }
+        return sale;
+    }
 
 }

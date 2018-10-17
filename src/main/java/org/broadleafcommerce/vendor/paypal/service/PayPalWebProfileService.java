@@ -2,7 +2,7 @@
  * #%L
  * BroadleafCommerce PayPal
  * %%
- * Copyright (C) 2009 - 2017 Broadleaf Commerce
+ * Copyright (C) 2009 - 2018 Broadleaf Commerce
  * %%
  * Licensed under the Broadleaf Fair Use License Agreement, Version 1.0
  * (the "Fair Use License" located  at http://license.broadleafcommerce.org/fair_use_license-1.0.txt)
@@ -15,27 +15,17 @@
  * between you and Broadleaf Commerce. You may not use this file except in compliance with the applicable license.
  * #L%
  */
-package org.broadleafcommerce.payment.web.expression;
+package org.broadleafcommerce.vendor.paypal.service;
 
-import org.broadleafcommerce.common.web.expression.BroadleafVariableExpression;
-import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutConfiguration;
-import org.springframework.stereotype.Component;
+import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
 
-import javax.annotation.Resource;
+public interface PayPalWebProfileService {
 
-/**
- * @author Chris Kittrell (ckittrell)
- */
-@Component("blPayPalVariableExpression")
-public class PayPalVariableExpression implements BroadleafVariableExpression {
-
-    @Resource(name = "blPayPalCheckoutConfiguration")
-    protected PayPalCheckoutConfiguration configuration;
-
-    @Override
-    public String getName() {
-        return "paypal";
-    }
-
-
+    /**
+     * Retrieves the id of the WebProfile to be used when creating a PayPal payment
+     * 
+     * @return
+     * @throws PaymentException 
+     */
+    public String getWebProfileId() throws PaymentException;
 }
