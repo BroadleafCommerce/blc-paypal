@@ -18,6 +18,7 @@
 package org.broadleafcommerce.payment.service.gateway;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.broadleafcommerce.common.money.Money;
 import org.broadleafcommerce.common.payment.dto.AddressDTO;
 import org.broadleafcommerce.common.payment.dto.LineItemDTO;
@@ -42,6 +43,7 @@ import com.paypal.api.payments.Transaction;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.annotation.Resource;
 
 /**
@@ -189,7 +191,9 @@ public class ExternalCallPayPalCheckoutServiceImpl extends AbstractExternalPayme
         shipAddress.setState(addressDTO.getAddressStateRegion());
         shipAddress.setPostalCode(addressDTO.getAddressPostalCode());
         shipAddress.setCountryCode(addressDTO.getAddressCountryCode());
-        shipAddress.setPhone(addressDTO.getAddressPhone());
+        if (StringUtils.isNotBlank(addressDTO.getAddressPhone())) {
+            shipAddress.setPhone(addressDTO.getAddressPhone());
+        }
         return shipAddress;
     }
 
