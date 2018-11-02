@@ -25,6 +25,7 @@ import org.broadleafcommerce.payment.service.gateway.ExternalCallPayPalCheckoutS
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCreateWebProfileRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCreateWebProfileResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.stereotype.Service;
 
 import com.paypal.api.payments.WebProfile;
@@ -44,8 +45,10 @@ public class PayPalWebProfileServiceImpl implements PayPalWebProfileService {
     @Resource(name = "blExternalCallPayPalCheckoutService")
     protected ExternalCallPayPalCheckoutService externalCallService;
 
-    @Resource(name = "blPayPalApiContext")
-    protected APIContext apiContext;
+    @Lookup("blPayPalApiContext")
+    protected APIContext getApiContext() {
+        return null;
+    }
     
     @Autowired(required = false)
     public PayPalWebProfileServiceImpl(WebProfile webProfile) {
@@ -90,7 +93,7 @@ public class PayPalWebProfileServiceImpl implements PayPalWebProfileService {
 
     protected WebProfile createWebProfile(WebProfile profile) {
         try {
-            PayPalCreateWebProfileResponse response = (PayPalCreateWebProfileResponse) externalCallService.call(new PayPalCreateWebProfileRequest(profile, apiContext));
+            PayPalCreateWebProfileResponse response = (PayPalCreateWebProfileResponse) externalCallService.call(new PayPalCreateWebProfileRequest(profile, getApiContext()));
             return response.getWebProfile();
         } catch (PaymentException e) {
             LOG.error("Error retrieving WebProfile from PayPal", e);

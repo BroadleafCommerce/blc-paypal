@@ -27,7 +27,9 @@ import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCreatePaymentRe
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCreatePaymentResponse;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalUpdatePaymentRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.stereotype.Service;
+
 import com.paypal.api.payments.Amount;
 import com.paypal.api.payments.ItemList;
 import com.paypal.api.payments.Patch;
@@ -36,15 +38,14 @@ import com.paypal.api.payments.Payment;
 import com.paypal.api.payments.RedirectUrls;
 import com.paypal.api.payments.Transaction;
 import com.paypal.base.rest.APIContext;
+
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.annotation.Resource;
 
 @Service("blPayPalPaymentService")
 public class PayPalPaymentServiceImpl implements PayPalPaymentService {
-
-    @Resource(name = "blPayPalApiContext")
-    protected APIContext apiContext;
 
     @Resource(name = "blExternalCallPayPalCheckoutService")
     protected ExternalCallPayPalCheckoutService externalCallService;
@@ -54,6 +55,11 @@ public class PayPalPaymentServiceImpl implements PayPalPaymentService {
 
     @Autowired(required = false)
     protected CurrentOrderPaymentRequestService currentOrderPaymentRequestService;
+
+    @Lookup("blPayPalApiContext")
+    protected APIContext getApiContext() {
+        return null;
+    }
 
     @Override
     public Payment createPayPalPaymentForCurrentOrder(boolean performCheckoutOnReturn) throws PaymentException {
@@ -145,12 +151,12 @@ public class PayPalPaymentServiceImpl implements PayPalPaymentService {
     }
 
     protected Payment createPayment(Payment payment) throws PaymentException {
-        PayPalCreatePaymentResponse response = (PayPalCreatePaymentResponse) externalCallService.call(new PayPalCreatePaymentRequest(payment, apiContext));
+        PayPalCreatePaymentResponse response = (PayPalCreatePaymentResponse) externalCallService.call(new PayPalCreatePaymentRequest(payment, getApiContext()));
         return response.getPayment();
     }
 
     protected void updatePayment(Payment payment, List<Patch> patches) throws PaymentException {
-        externalCallService.call(new PayPalUpdatePaymentRequest(payment, patches, apiContext));
+        externalCallService.call(new PayPalUpdatePaymentRequest(payment, patches, getApiContext()));
     }
 
     protected PaymentRequestDTO getPaymentRequestForCurrentOrder() throws PaymentException {
