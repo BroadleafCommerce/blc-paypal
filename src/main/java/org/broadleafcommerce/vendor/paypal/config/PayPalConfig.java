@@ -19,8 +19,10 @@ package org.broadleafcommerce.vendor.paypal.config;
 
 import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Scope;
 
 import com.paypal.base.rest.APIContext;
 
@@ -28,6 +30,7 @@ import com.paypal.base.rest.APIContext;
 public class PayPalConfig {
 
     @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public APIContext blPayPalApiContext(@Value("${gateway.paypal.checkout.rest.clientId}") String clientId,
                                          @Value("${gateway.paypal.checkout.rest.secret}") String secret,
                                          @Value("${gateway.paypal.checkout.rest.mode}") String mode) {

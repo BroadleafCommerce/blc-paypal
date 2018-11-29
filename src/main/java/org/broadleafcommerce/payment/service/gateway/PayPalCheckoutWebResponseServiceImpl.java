@@ -39,8 +39,11 @@ import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCheckoutPaymentGatewayType;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalExecuteAgreementTokenRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalExecuteAgreementTokenResponse;
+import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.stereotype.Service;
+
 import com.paypal.base.rest.APIContext;
+
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
@@ -51,9 +54,6 @@ import javax.servlet.http.HttpServletRequest;
 public class PayPalCheckoutWebResponseServiceImpl extends AbstractPaymentGatewayWebResponseService implements PaymentGatewayWebResponseService {
 
     private static final Log LOG = LogFactory.getLog(PayPalCheckoutWebResponseServiceImpl.class);
-
-    @Resource(name = "blPayPalApiContext")
-    protected APIContext apiContext;
 
     @Resource(name = "blExternalCallPayPalCheckoutService")
     protected ExternalCallPayPalCheckoutService externalCallService;
@@ -69,6 +69,11 @@ public class PayPalCheckoutWebResponseServiceImpl extends AbstractPaymentGateway
 
     @Resource(name = "blPayPalAgreementTokenService")
     protected PayPalAgreementTokenService agreementTokenService;
+
+    @Lookup("blPayPalApiContext")
+    protected APIContext getApiContext() {
+        return null;
+    }
 
     @Override
     public PaymentResponseDTO translateWebResponse(HttpServletRequest request) throws PaymentException {
@@ -140,7 +145,7 @@ public class PayPalCheckoutWebResponseServiceImpl extends AbstractPaymentGateway
     }
 
     protected AgreementToken executeAgreementToken(AgreementToken agreementToken) throws PaymentException {
-        PayPalExecuteAgreementTokenResponse response = (PayPalExecuteAgreementTokenResponse) externalCallService.call(new PayPalExecuteAgreementTokenRequest(agreementToken, apiContext));
+        PayPalExecuteAgreementTokenResponse response = (PayPalExecuteAgreementTokenResponse) externalCallService.call(new PayPalExecuteAgreementTokenRequest(agreementToken, getApiContext()));
         return response.getAgreementToken();
     }
 

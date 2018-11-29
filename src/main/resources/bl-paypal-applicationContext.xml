@@ -54,10 +54,4 @@
         <property name="lifeCycleEvent" value="LOADING" />
     </bean>
     
-<!--     <bean id="blPayPalApiContext" class="com.paypal.base.rest.APIContext">
-        <constructor-arg name="clientID" value="#{gateway.paypal.checkout.rest.clientId}"/>
-        <constructor-arg name="clientSecret" value="#{gateway.paypal.checkout.rest.secret}"/>
-        <constructor-arg name="mode" value="#{gateway.paypal.checkout.rest.mode}"/>
-    </bean> -->
-
 </beans>
