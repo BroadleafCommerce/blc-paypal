@@ -198,10 +198,10 @@ public class ExternalCallPayPalCheckoutServiceImpl extends AbstractExternalPayme
     }
 
     @Override
-    public ItemList getPayPalItemListFromOrder(PaymentRequestDTO paymentRequestDTO) {
+    public ItemList getPayPalItemListFromOrder(PaymentRequestDTO paymentRequestDTO, boolean shouldPopulateShipping) {
         ItemList itemList = new ItemList();
         boolean returnItemList = false;
-        if (paymentRequestDTO.shipToPopulated()) {
+        if (paymentRequestDTO.shipToPopulated() && shouldPopulateShipping) {
             ShippingAddress address = getPayPalShippingAddress(paymentRequestDTO);
             itemList.setShippingAddress(address);
             returnItemList = true;

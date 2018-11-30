@@ -50,7 +50,7 @@ public interface ExternalCallPayPalCheckoutService {
 
     ShippingAddress getPayPalShippingAddress(PaymentRequestDTO paymentRequestDTO);
 
-    ItemList getPayPalItemListFromOrder(PaymentRequestDTO paymentRequestDTO);
+    ItemList getPayPalItemListFromOrder(PaymentRequestDTO paymentRequestDTO, boolean shouldPopulateShipping);
 
     Amount getPayPalAmountFromOrder(PaymentRequestDTO paymentRequestDTO);
 

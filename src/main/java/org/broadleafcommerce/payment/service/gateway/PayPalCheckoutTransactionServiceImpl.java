@@ -267,7 +267,7 @@ public class PayPalCheckoutTransactionServiceImpl extends AbstractPaymentGateway
         transaction.setDescription(payPalCheckoutService.getConfiguration().getPaymentDescription());
         transaction.setCustom(paymentRequestDTO.getOrderId());
 
-        ItemList itemList = payPalCheckoutService.getPayPalItemListFromOrder(paymentRequestDTO);
+        ItemList itemList = payPalCheckoutService.getPayPalItemListFromOrder(paymentRequestDTO, true);
         if (itemList != null) {
             transaction.setItemList(itemList);
         }
