@@ -28,6 +28,7 @@ import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCreatePaymentRe
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalUpdatePaymentRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Lookup;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.paypal.api.payments.Amount;
@@ -56,6 +57,9 @@ public class PayPalPaymentServiceImpl implements PayPalPaymentService {
     @Autowired(required = false)
     protected CurrentOrderPaymentRequestService currentOrderPaymentRequestService;
 
+    @Value("${gateway.paypal.checkout.rest.populate.shipping.create.payment:true}")
+    protected boolean shouldPopulateShippingOnPaymentCreation;
+
     @Lookup("blPayPalApiContext")
     protected APIContext getApiContext() {
         return null;
@@ -81,7 +85,7 @@ public class PayPalPaymentServiceImpl implements PayPalPaymentService {
         transaction.setDescription(externalCallService.getConfiguration().getPaymentDescription());
         transaction.setCustom(paymentRequestDTO.getOrderId() + "|" + performCheckoutOnReturn);
 
-        ItemList itemList = externalCallService.getPayPalItemListFromOrder(paymentRequestDTO);
+        ItemList itemList = externalCallService.getPayPalItemListFromOrder(paymentRequestDTO, shouldPopulateShippingOnPaymentCreation);
         if (itemList != null) {
             transaction.setItemList(itemList);
         }
@@ -129,7 +133,7 @@ public class PayPalPaymentServiceImpl implements PayPalPaymentService {
         amountPatch.setValue(amount);
         patches.add(amountPatch);
 
-        ItemList itemList = externalCallService.getPayPalItemListFromOrder(paymentRequestDTO);
+        ItemList itemList = externalCallService.getPayPalItemListFromOrder(paymentRequestDTO, true);
         if (itemList != null) {
             Patch shipToPatch = new Patch();
             shipToPatch.setOp("replace");
