@@ -31,7 +31,6 @@ import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalResponse;
 import org.springframework.stereotype.Service;
-
 import com.paypal.api.payments.Address;
 import com.paypal.api.payments.Amount;
 import com.paypal.api.payments.Details;
@@ -40,10 +39,8 @@ import com.paypal.api.payments.ItemList;
 import com.paypal.api.payments.Payment;
 import com.paypal.api.payments.ShippingAddress;
 import com.paypal.api.payments.Transaction;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.annotation.Resource;
 
 /**
@@ -216,6 +213,7 @@ public class ExternalCallPayPalCheckoutServiceImpl extends AbstractExternalPayme
                 item.setQuantity(lineItem.getQuantity());
                 item.setPrice(lineItem.getTotal());
                 item.setTax(lineItem.getTax());
+                item.setCurrency(paymentRequestDTO.getOrderCurrencyCode());
                 item.setName(lineItem.getName());
                 items.add(item);
             }
