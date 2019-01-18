@@ -142,8 +142,8 @@ public class PayPalCheckoutTransactionServiceImpl extends AbstractPaymentGateway
                 responseDTO
                         .successful(true)
                         .rawResponse(payment.toJSON())
-                        .paymentTransactionType(PaymentTransactionType.AUTHORIZE)
-                        .responseMap(MessageConstants.AUTHORIZATONID, payment.getId())
+                        .paymentTransactionType(PaymentTransactionType.AUTHORIZE_AND_CAPTURE)
+                        .responseMap(MessageConstants.SALEID, payment.getId())
                         .amount(new Money(amount.getTotal(), amount.getCurrency()));
             }
         } else {
