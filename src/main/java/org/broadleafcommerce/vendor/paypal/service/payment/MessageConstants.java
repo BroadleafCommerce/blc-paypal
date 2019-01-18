@@ -46,6 +46,9 @@ public class MessageConstants {
     public static final String PAYER_PAYMENTMETHOD_PAYPAL = "paypal";
     public static final String PLAN_TYPE_MERCHANTINITIATEDBILLING = "MERCHANT_INITIATED_BILLING";
     public static final String MERCHANTPREF_ACCEPTEDPAYMENTTYPE_INSTANT = "INSTANT";
+    public static final String HTTP_HEADER_AUTH_ASSERTION = "PayPal-Auth-Assertion";
+    public static final String HTTP_HEADER_CLIENT_METADATA_ID = "PayPal-Client-Metadata-Id";
+    public static final String HTTP_HEADER_REQUEST_ID = "PayPal-Request-Id";
     public static final String BN = "PayPal-Partner-Attribution-Id";
     public static final String BNCODE = "BroadleafCommerce_Cart_EC";
     public static final String HTTP_PAYERID = "payerId";
