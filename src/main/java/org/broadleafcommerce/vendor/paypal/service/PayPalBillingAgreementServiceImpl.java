@@ -28,9 +28,7 @@ import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCreatePlanReque
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCreatePlanResponse;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalUpdatePlanRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.stereotype.Service;
-
 import com.paypal.api.payments.Agreement;
 import com.paypal.api.payments.Amount;
 import com.paypal.api.payments.Currency;
@@ -40,13 +38,10 @@ import com.paypal.api.payments.Payer;
 import com.paypal.api.payments.PaymentDefinition;
 import com.paypal.api.payments.Plan;
 import com.paypal.api.payments.ShippingAddress;
-import com.paypal.base.rest.APIContext;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.annotation.Resource;
 
 /**
@@ -67,11 +62,6 @@ public class PayPalBillingAgreementServiceImpl implements PayPalBillingAgreement
     @Autowired(required = false)
     protected CurrentOrderPaymentRequestService currentOrderPaymentRequestService;
 
-    @Lookup("blPayPalApiContext")
-    protected APIContext getApiContext() {
-        return null;
-    }
-
     @Override
     public Agreement createPayPalBillingAgreementForCurrentOrder(boolean performCheckoutOnReturn) throws PaymentException {
         PaymentRequestDTO paymentRequestDTO = getPaymentRequestForCurrentOrder();
@@ -91,12 +81,12 @@ public class PayPalBillingAgreementServiceImpl implements PayPalBillingAgreement
         patch.setOp("replace");
         patchRequestList.add(patch);
 
-        updatePlan(plan, patchRequestList);
+        updatePlan(plan, patchRequestList, paymentRequestDTO);
 
         // 3. Create Agreement Details
         Agreement agreement = constructAgreement(paymentRequestDTO, plan);
 
-        return createAgreement(agreement);
+        return createAgreement(agreement, paymentRequestDTO);
     }
 
     protected Agreement constructAgreement(PaymentRequestDTO paymentRequestDTO, Plan plan) {
@@ -150,20 +140,22 @@ public class PayPalBillingAgreementServiceImpl implements PayPalBillingAgreement
         paymentDefinitions.add(paymentDefinition);
         plan.setPaymentDefinitions(paymentDefinitions);
 
-        return createPlan(plan);
+        return createPlan(plan, paymentRequestDTO);
     }
 
-    protected Plan createPlan(Plan plan) throws PaymentException {
-        PayPalCreatePlanResponse response = (PayPalCreatePlanResponse) externalCallService.call(new PayPalCreatePlanRequest(plan, getApiContext()));
+    protected Plan createPlan(Plan plan, PaymentRequestDTO paymentRequestDTO) throws PaymentException {
+        PayPalCreatePlanResponse response = (PayPalCreatePlanResponse) externalCallService.call(
+                new PayPalCreatePlanRequest(plan, externalCallService.constructAPIContext(paymentRequestDTO)));
         return response.getPlan();
     }
 
-    protected void updatePlan(Plan plan, List<Patch> patches) throws PaymentException {
-        externalCallService.call(new PayPalUpdatePlanRequest(plan, patches, getApiContext()));
+    protected void updatePlan(Plan plan, List<Patch> patches, PaymentRequestDTO paymentRequestDTO) throws PaymentException {
+        externalCallService.call(new PayPalUpdatePlanRequest(plan, patches, externalCallService.constructAPIContext(paymentRequestDTO)));
     }
 
-    protected Agreement createAgreement(Agreement agreement) throws PaymentException {
-        PayPalCreateBillingAgreementResponse response = (PayPalCreateBillingAgreementResponse) externalCallService.call(new PayPalCreateBillingAgreementRequest(agreement, getApiContext()));
+    protected Agreement createAgreement(Agreement agreement, PaymentRequestDTO paymentRequestDTO) throws PaymentException {
+        PayPalCreateBillingAgreementResponse response = (PayPalCreateBillingAgreementResponse) externalCallService.call(
+                new PayPalCreateBillingAgreementRequest(agreement, externalCallService.constructAPIContext(paymentRequestDTO)));
         return response.getAgreement();
     }
 

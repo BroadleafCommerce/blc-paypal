@@ -47,9 +47,7 @@ import org.broadleafcommerce.vendor.paypal.service.payment.PayPalSaleRetrievalRe
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalSaleRetrievalResponse;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalVoidRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalVoidResponse;
-import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.stereotype.Service;
-
 import com.paypal.api.payments.Amount;
 import com.paypal.api.payments.Authorization;
 import com.paypal.api.payments.Billing;
@@ -63,12 +61,9 @@ import com.paypal.api.payments.PaymentExecution;
 import com.paypal.api.payments.RefundRequest;
 import com.paypal.api.payments.Sale;
 import com.paypal.api.payments.Transaction;
-import com.paypal.base.rest.APIContext;
 import com.paypal.base.rest.PayPalResource;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.annotation.Resource;
 
 /**
@@ -81,11 +76,6 @@ public class PayPalCheckoutTransactionServiceImpl extends AbstractPaymentGateway
 
     @Resource(name = "blExternalCallPayPalCheckoutService")
     protected ExternalCallPayPalCheckoutService payPalCheckoutService;
-
-    @Lookup("blPayPalApiContext")
-    protected APIContext getApiContext() {
-        return null;
-    }
 
     @Override
     public PaymentResponseDTO authorize(PaymentRequestDTO paymentRequestDTO) throws PaymentException  {
@@ -220,7 +210,8 @@ public class PayPalCheckoutTransactionServiceImpl extends AbstractPaymentGateway
         amount.setCurrency(paymentRequestDTO.getOrderCurrencyCode());
         amount.setTotal(paymentRequestDTO.getTransactionTotal());
         capture.setAmount(amount);
-        PayPalCaptureResponse captureResponse = (PayPalCaptureResponse) payPalCheckoutService.call(new PayPalCaptureRequest(auth, capture, populateAPIContext(getApiContext(), paymentRequestDTO)));
+        PayPalCaptureResponse captureResponse = (PayPalCaptureResponse) payPalCheckoutService.call(
+                new PayPalCaptureRequest(auth, capture, payPalCheckoutService.constructAPIContext(paymentRequestDTO)));
         return captureResponse.getCapture();
     }
 
@@ -234,11 +225,13 @@ public class PayPalCheckoutTransactionServiceImpl extends AbstractPaymentGateway
         if (isBillingAgreementRequest(paymentRequestDTO)) {
             payment.setIntent("authorize");
             payment.setPayer(generateAuthorizePayer(paymentRequestDTO));
-            PayPalCreatePaymentResponse response = (PayPalCreatePaymentResponse) payPalCheckoutService.call(new PayPalCreatePaymentRequest(payment, populateAPIContext(getApiContext(), paymentRequestDTO)));
+            PayPalCreatePaymentResponse response = (PayPalCreatePaymentResponse) payPalCheckoutService.call(
+                    new PayPalCreatePaymentRequest(payment, payPalCheckoutService.constructAPIContext(paymentRequestDTO)));
             return response.getPayment();
         }
 
-        PayPalAuthorizeResponse response = (PayPalAuthorizeResponse) payPalCheckoutService.call(new PayPalAuthorizeRequest(payment, paymentExecution, populateAPIContext(getApiContext(), paymentRequestDTO)));
+        PayPalAuthorizeResponse response = (PayPalAuthorizeResponse) payPalCheckoutService.call(
+                new PayPalAuthorizeRequest(payment, paymentExecution, payPalCheckoutService.constructAPIContext(paymentRequestDTO)));
         return response.getAuthorization();
     }
 
@@ -288,11 +281,13 @@ public class PayPalCheckoutTransactionServiceImpl extends AbstractPaymentGateway
         if (isBillingAgreementRequest(paymentRequestDTO)) {
             payment.setIntent("sale");
             payment.setPayer(generateSalePayer(paymentRequestDTO));
-            PayPalCreatePaymentResponse response = (PayPalCreatePaymentResponse) payPalCheckoutService.call(new PayPalCreatePaymentRequest(payment, populateAPIContext(getApiContext(), paymentRequestDTO)));
+            PayPalCreatePaymentResponse response = (PayPalCreatePaymentResponse) payPalCheckoutService.call(
+                    new PayPalCreatePaymentRequest(payment, payPalCheckoutService.constructAPIContext(paymentRequestDTO)));
             return response.getPayment();
         }
 
-        PayPalSaleResponse response = (PayPalSaleResponse) payPalCheckoutService.call(new PayPalSaleRequest(payment, paymentExecution, populateAPIContext(getApiContext(), paymentRequestDTO)));
+        PayPalSaleResponse response = (PayPalSaleResponse) payPalCheckoutService.call(
+                new PayPalSaleRequest(payment, paymentExecution, payPalCheckoutService.constructAPIContext(paymentRequestDTO)));
         return response.getSale();
     }
 
@@ -322,7 +317,8 @@ public class PayPalCheckoutTransactionServiceImpl extends AbstractPaymentGateway
     }
 
     protected Authorization voidAuthorization(Authorization auth, PaymentRequestDTO paymentRequestDTO) throws PaymentException {
-        PayPalVoidResponse response = (PayPalVoidResponse) payPalCheckoutService.call(new PayPalVoidRequest(auth, populateAPIContext(getApiContext(), paymentRequestDTO)));
+        PayPalVoidResponse response = (PayPalVoidResponse) payPalCheckoutService.call(
+                new PayPalVoidRequest(auth, payPalCheckoutService.constructAPIContext(paymentRequestDTO)));
         return response.getVoidedAuthorization();
     }
 
@@ -332,7 +328,8 @@ public class PayPalCheckoutTransactionServiceImpl extends AbstractPaymentGateway
         amount.setCurrency(paymentRequestDTO.getOrderCurrencyCode());
         amount.setTotal(paymentRequestDTO.getTransactionTotal());
         refund.setAmount(amount);
-        PayPalRefundResponse response = (PayPalRefundResponse) payPalCheckoutService.call(new PayPalRefundRequest(refund, capture, populateAPIContext(getApiContext(), paymentRequestDTO)));
+        PayPalRefundResponse response = (PayPalRefundResponse) payPalCheckoutService.call(
+                new PayPalRefundRequest(refund, capture, payPalCheckoutService.constructAPIContext(paymentRequestDTO)));
         return response.getDetailedRefund();
     }
 
@@ -342,22 +339,26 @@ public class PayPalCheckoutTransactionServiceImpl extends AbstractPaymentGateway
         amount.setCurrency(paymentRequestDTO.getOrderCurrencyCode());
         amount.setTotal(paymentRequestDTO.getTransactionTotal());
         refund.setAmount(amount);
-        PayPalRefundResponse response = (PayPalRefundResponse) payPalCheckoutService.call(new PayPalRefundRequest(refund, sale, populateAPIContext(getApiContext(), paymentRequestDTO)));
+        PayPalRefundResponse response = (PayPalRefundResponse) payPalCheckoutService.call(
+                new PayPalRefundRequest(refund, sale, payPalCheckoutService.constructAPIContext(paymentRequestDTO)));
         return response.getDetailedRefund();
     }
 
     protected Authorization getAuthorization(PaymentRequestDTO paymentRequestDTO) throws PaymentException {
-        PayPalAuthorizationRetrievalResponse authResponse = (PayPalAuthorizationRetrievalResponse) payPalCheckoutService.call(new PayPalAuthorizationRetrievalRequest(getAuthorizationId(paymentRequestDTO), populateAPIContext(getApiContext(), paymentRequestDTO)));
+        PayPalAuthorizationRetrievalResponse authResponse = (PayPalAuthorizationRetrievalResponse) payPalCheckoutService.call(
+                new PayPalAuthorizationRetrievalRequest(getAuthorizationId(paymentRequestDTO), payPalCheckoutService.constructAPIContext(paymentRequestDTO)));
         return authResponse.getAuthorization();
     }
 
     protected Sale getSale(PaymentRequestDTO paymentRequestDTO) throws PaymentException {
-        PayPalSaleRetrievalResponse saleResponse = (PayPalSaleRetrievalResponse) payPalCheckoutService.call(new PayPalSaleRetrievalRequest(getSaleId(paymentRequestDTO), populateAPIContext(getApiContext(), paymentRequestDTO)));
+        PayPalSaleRetrievalResponse saleResponse = (PayPalSaleRetrievalResponse) payPalCheckoutService.call(
+                new PayPalSaleRetrievalRequest(getSaleId(paymentRequestDTO), payPalCheckoutService.constructAPIContext(paymentRequestDTO)));
         return saleResponse.getSale();
     }
 
     protected Capture getCapture(PaymentRequestDTO paymentRequestDTO) throws PaymentException {
-        PayPalCaptureRetrievalResponse response = (PayPalCaptureRetrievalResponse) payPalCheckoutService.call((new PayPalCaptureRetrievalRequest(getCaptureId(paymentRequestDTO), populateAPIContext(getApiContext(), paymentRequestDTO))));
+        PayPalCaptureRetrievalResponse response = (PayPalCaptureRetrievalResponse) payPalCheckoutService.call((
+                new PayPalCaptureRetrievalRequest(getCaptureId(paymentRequestDTO), payPalCheckoutService.constructAPIContext(paymentRequestDTO))));
         return response.getCapture();
     }
 
@@ -379,21 +380,6 @@ public class PayPalCheckoutTransactionServiceImpl extends AbstractPaymentGateway
     
     protected String getCaptureId(PaymentRequestDTO paymentRequestDTO) {
         return (String) paymentRequestDTO.getAdditionalFields().get(MessageConstants.CAPTUREID);
-    }
-
-    private APIContext populateAPIContext(APIContext apiContext, PaymentRequestDTO paymentRequestDTO) {
-        if (apiContext != null && paymentRequestDTO != null) {
-            if (paymentRequestDTO.getAdditionalFields().containsKey(MessageConstants.HTTP_HEADER_REQUEST_ID)) {
-                apiContext.setRequestId((String)paymentRequestDTO.getAdditionalFields().get(MessageConstants.HTTP_HEADER_REQUEST_ID));
-            }
-            if (paymentRequestDTO.getAdditionalFields().containsKey(MessageConstants.HTTP_HEADER_AUTH_ASSERTION)) {
-                apiContext.getHTTPHeaders().put(MessageConstants.HTTP_HEADER_AUTH_ASSERTION, (String) paymentRequestDTO.getAdditionalFields().get(MessageConstants.HTTP_HEADER_AUTH_ASSERTION));
-            }
-            if (paymentRequestDTO.getAdditionalFields().containsKey(MessageConstants.HTTP_HEADER_CLIENT_METADATA_ID)) {
-                apiContext.getHTTPHeaders().put(MessageConstants.HTTP_HEADER_CLIENT_METADATA_ID, (String) paymentRequestDTO.getAdditionalFields().get(MessageConstants.HTTP_HEADER_CLIENT_METADATA_ID));
-            }
-        }
-        return apiContext;
     }
 
 }

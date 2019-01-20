@@ -26,14 +26,10 @@ import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCreateAgreementTokenRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCreateAgreementTokenResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.stereotype.Service;
-
 import com.paypal.api.payments.MerchantPreferences;
 import com.paypal.api.payments.Payer;
 import com.paypal.api.payments.Plan;
-import com.paypal.base.rest.APIContext;
-
 import javax.annotation.Resource;
 
 @Service("blPayPalAgreementTokenService")
@@ -47,11 +43,6 @@ public class PayPalAgreementTokenServiceImpl implements PayPalAgreementTokenServ
 
     @Autowired(required = false)
     protected CurrentOrderPaymentRequestService currentOrderPaymentRequestService;
-
-    @Lookup("blPayPalApiContext")
-    protected APIContext getApiContext() {
-        return null;
-    }
 
     /**
      * To support PayPal Reference Transactions and Billing Agreement Tokens
@@ -70,7 +61,7 @@ public class PayPalAgreementTokenServiceImpl implements PayPalAgreementTokenServ
         Payer payer = constructPayer(paymentRequestDTO);
         Plan plan = constructPlan(paymentRequestDTO, performCheckoutOnReturn);
         AgreementToken agreementToken = new AgreementToken(agreementDescription, payer, plan);
-        return createAgreementToken(agreementToken);
+        return createAgreementToken(agreementToken, paymentRequestDTO);
     }
 
     protected Plan constructPlan(PaymentRequestDTO paymentRequestDTO, boolean performCheckoutOnReturn) {
@@ -96,8 +87,10 @@ public class PayPalAgreementTokenServiceImpl implements PayPalAgreementTokenServ
         return payer;
     }
 
-    protected AgreementToken createAgreementToken(AgreementToken agreementToken) throws PaymentException {
-        PayPalCreateAgreementTokenResponse response = (PayPalCreateAgreementTokenResponse) externalCallService.call(new PayPalCreateAgreementTokenRequest(agreementToken, getApiContext()));
+    protected AgreementToken createAgreementToken(AgreementToken agreementToken, PaymentRequestDTO paymentRequestDTO) throws PaymentException {
+        PayPalCreateAgreementTokenResponse response = (PayPalCreateAgreementTokenResponse) externalCallService.call(
+                new PayPalCreateAgreementTokenRequest(agreementToken,
+                        externalCallService.constructAPIContext(paymentRequestDTO)));
         return response.getAgreementToken();
     }
 

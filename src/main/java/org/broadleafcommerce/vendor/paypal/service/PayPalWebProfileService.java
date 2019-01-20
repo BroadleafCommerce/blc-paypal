@@ -17,6 +17,7 @@
  */
 package org.broadleafcommerce.vendor.paypal.service;
 
+import org.broadleafcommerce.common.payment.dto.PaymentRequestDTO;
 import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
 
 public interface PayPalWebProfileService {
@@ -27,5 +28,5 @@ public interface PayPalWebProfileService {
      * @return
      * @throws PaymentException 
      */
-    public String getWebProfileId() throws PaymentException;
+    public String getWebProfileId(PaymentRequestDTO paymentRequestDTO) throws PaymentException;
 }

@@ -39,6 +39,7 @@ import com.paypal.api.payments.ItemList;
 import com.paypal.api.payments.Payment;
 import com.paypal.api.payments.ShippingAddress;
 import com.paypal.api.payments.Transaction;
+import com.paypal.base.rest.APIContext;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Resource;
@@ -257,6 +258,24 @@ public class ExternalCallPayPalCheckoutServiceImpl extends AbstractExternalPayme
     @Override
     public Integer getFailureReportingThreshold() {
         return configuration.getFailureReportingThreshold();
+    }
+
+    @Override
+    public APIContext constructAPIContext(PaymentRequestDTO paymentRequestDTO) {
+        APIContext context = new APIContext(configuration.getCheckoutRestClientId(),
+                configuration.getCheckoutRestSecret(),
+                configuration.getCheckoutRestMode());
+        context.addHTTPHeader(MessageConstants.BN, MessageConstants.BNCODE);
+        if (paymentRequestDTO.getAdditionalFields().containsKey(MessageConstants.HTTP_HEADER_REQUEST_ID)) {
+            context.setRequestId((String)paymentRequestDTO.getAdditionalFields().get(MessageConstants.HTTP_HEADER_REQUEST_ID));
+        }
+        if (paymentRequestDTO.getAdditionalFields().containsKey(MessageConstants.HTTP_HEADER_AUTH_ASSERTION)) {
+            context.getHTTPHeaders().put(MessageConstants.HTTP_HEADER_AUTH_ASSERTION, (String) paymentRequestDTO.getAdditionalFields().get(MessageConstants.HTTP_HEADER_AUTH_ASSERTION));
+        }
+        if (paymentRequestDTO.getAdditionalFields().containsKey(MessageConstants.HTTP_HEADER_CLIENT_METADATA_ID)) {
+            context.getHTTPHeaders().put(MessageConstants.HTTP_HEADER_CLIENT_METADATA_ID, (String) paymentRequestDTO.getAdditionalFields().get(MessageConstants.HTTP_HEADER_CLIENT_METADATA_ID));
+        }
+        return context;
     }
 
 }

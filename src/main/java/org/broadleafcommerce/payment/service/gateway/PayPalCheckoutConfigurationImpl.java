@@ -130,6 +130,21 @@ public class PayPalCheckoutConfigurationImpl extends AbstractPaymentGatewayConfi
     }
 
     @Override
+    public String getCheckoutRestClientId() {
+        return propertiesService.resolveSystemProperty("gateway.paypal.checkout.rest.clientId");
+    }
+
+    @Override
+    public String getCheckoutRestSecret() {
+        return propertiesService.resolveSystemProperty("gateway.paypal.checkout.rest.secret");
+    }
+
+    @Override
+    public String getCheckoutRestMode() {
+        return propertiesService.resolveSystemProperty("gateway.paypal.checkout.rest.mode");
+    }
+
+    @Override
     public boolean handlesAuthorize() {
         return true;
     }

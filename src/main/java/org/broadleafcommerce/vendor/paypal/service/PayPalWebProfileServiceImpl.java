@@ -20,17 +20,14 @@ package org.broadleafcommerce.vendor.paypal.service;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.broadleafcommerce.common.payment.dto.PaymentRequestDTO;
 import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
 import org.broadleafcommerce.payment.service.gateway.ExternalCallPayPalCheckoutService;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCreateWebProfileRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCreateWebProfileResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.stereotype.Service;
-
 import com.paypal.api.payments.WebProfile;
-import com.paypal.base.rest.APIContext;
-
 import javax.annotation.Resource;
 
 @Service("blPayPalWebProfileService")
@@ -45,11 +42,6 @@ public class PayPalWebProfileServiceImpl implements PayPalWebProfileService {
     @Resource(name = "blExternalCallPayPalCheckoutService")
     protected ExternalCallPayPalCheckoutService externalCallService;
 
-    @Lookup("blPayPalApiContext")
-    protected APIContext getApiContext() {
-        return null;
-    }
-    
     @Autowired(required = false)
     public PayPalWebProfileServiceImpl(WebProfile webProfile) {
         super();
@@ -66,15 +58,15 @@ public class PayPalWebProfileServiceImpl implements PayPalWebProfileService {
     }
 
     @Override
-    public String getWebProfileId() {
+    public String getWebProfileId(PaymentRequestDTO paymentRequestDTO) {
         String profileId = getPropertyWebProfileId();
         if (StringUtils.isNotBlank(profileId)) {
             return profileId;
         }
-        return getBeanWebProfileId();
+        return getBeanWebProfileId(paymentRequestDTO);
     }
 
-    protected String getBeanWebProfileId() {
+    protected String getBeanWebProfileId(PaymentRequestDTO paymentRequestDTO) {
         if (StringUtils.isNotBlank(beanProfileId)) {
             return beanProfileId;
         }
@@ -84,16 +76,17 @@ public class PayPalWebProfileServiceImpl implements PayPalWebProfileService {
         if (StringUtils.isNotBlank(webProfile.getId())) {
             return webProfile.getId();
         }
-        WebProfile profile = createWebProfile(webProfile);
+        WebProfile profile = createWebProfile(webProfile, paymentRequestDTO);
         if (profile != null) {
             beanProfileId = profile.getId();
         }
         return beanProfileId;
     }
 
-    protected WebProfile createWebProfile(WebProfile profile) {
+    protected WebProfile createWebProfile(WebProfile profile, PaymentRequestDTO paymentRequestDTO) {
         try {
-            PayPalCreateWebProfileResponse response = (PayPalCreateWebProfileResponse) externalCallService.call(new PayPalCreateWebProfileRequest(profile, getApiContext()));
+            PayPalCreateWebProfileResponse response = (PayPalCreateWebProfileResponse) externalCallService.call(
+                    new PayPalCreateWebProfileRequest(profile, externalCallService.constructAPIContext(paymentRequestDTO)));
             return response.getWebProfile();
         } catch (PaymentException e) {
             LOG.error("Error retrieving WebProfile from PayPal", e);

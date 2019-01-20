@@ -120,4 +120,10 @@ public interface PayPalCheckoutConfiguration extends PaymentGatewayConfiguration
     public Map<String, String> getAdditionalCustomFields();
 
     String getPaymentDescription();
+
+    String getCheckoutRestClientId();
+
+    String getCheckoutRestSecret();
+
+    String getCheckoutRestMode();
 }

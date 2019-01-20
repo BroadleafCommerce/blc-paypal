@@ -27,10 +27,8 @@ import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCreatePaymentRe
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCreatePaymentResponse;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalUpdatePaymentRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
 import com.paypal.api.payments.Amount;
 import com.paypal.api.payments.ItemList;
 import com.paypal.api.payments.Patch;
@@ -38,11 +36,8 @@ import com.paypal.api.payments.Payer;
 import com.paypal.api.payments.Payment;
 import com.paypal.api.payments.RedirectUrls;
 import com.paypal.api.payments.Transaction;
-import com.paypal.base.rest.APIContext;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.annotation.Resource;
 
 @Service("blPayPalPaymentService")
@@ -59,11 +54,6 @@ public class PayPalPaymentServiceImpl implements PayPalPaymentService {
 
     @Value("${gateway.paypal.checkout.rest.populate.shipping.create.payment:true}")
     protected boolean shouldPopulateShippingOnPaymentCreation;
-
-    @Lookup("blPayPalApiContext")
-    protected APIContext getApiContext() {
-        return null;
-    }
 
     @Override
     public Payment createPayPalPaymentForCurrentOrder(boolean performCheckoutOnReturn) throws PaymentException {
@@ -101,11 +91,11 @@ public class PayPalPaymentServiceImpl implements PayPalPaymentService {
         payment.setRedirectUrls(redirectUrls);
         payment.setTransactions(transactions);
 
-        String profileId = webProfileService.getWebProfileId();
+        String profileId = webProfileService.getWebProfileId(paymentRequestDTO);
         if (StringUtils.isNotBlank(profileId)) {
             payment.setExperienceProfileId(profileId);
         }
-        return createPayment(payment);
+        return createPayment(payment, paymentRequestDTO);
     }
 
     protected Payer constructPayer(PaymentRequestDTO paymentRequestDTO) {
@@ -150,17 +140,19 @@ public class PayPalPaymentServiceImpl implements PayPalPaymentService {
 
         Payment paypalPayment = new Payment();
         paypalPayment.setId(paymentId);
-        updatePayment(paypalPayment, patches);
+        updatePayment(paypalPayment, patches, paymentRequestDTO);
 
     }
 
-    protected Payment createPayment(Payment payment) throws PaymentException {
-        PayPalCreatePaymentResponse response = (PayPalCreatePaymentResponse) externalCallService.call(new PayPalCreatePaymentRequest(payment, getApiContext()));
+    protected Payment createPayment(Payment payment, PaymentRequestDTO paymentRequestDTO) throws PaymentException {
+        PayPalCreatePaymentResponse response = (PayPalCreatePaymentResponse) externalCallService.call(
+                new PayPalCreatePaymentRequest(payment, externalCallService.constructAPIContext(paymentRequestDTO)));
         return response.getPayment();
     }
 
-    protected void updatePayment(Payment payment, List<Patch> patches) throws PaymentException {
-        externalCallService.call(new PayPalUpdatePaymentRequest(payment, patches, getApiContext()));
+    protected void updatePayment(Payment payment, List<Patch> patches, PaymentRequestDTO paymentRequestDTO) throws PaymentException {
+        externalCallService.call(
+                new PayPalUpdatePaymentRequest(payment, patches, externalCallService.constructAPIContext(paymentRequestDTO)));
     }
 
     protected PaymentRequestDTO getPaymentRequestForCurrentOrder() throws PaymentException {

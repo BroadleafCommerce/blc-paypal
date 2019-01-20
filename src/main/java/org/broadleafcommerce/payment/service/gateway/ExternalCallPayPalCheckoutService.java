@@ -29,6 +29,7 @@ import com.paypal.api.payments.Amount;
 import com.paypal.api.payments.ItemList;
 import com.paypal.api.payments.Payment;
 import com.paypal.api.payments.ShippingAddress;
+import com.paypal.base.rest.APIContext;
 
 /**
  * @author Elbert Bautista (elbertbautista)
@@ -63,4 +64,5 @@ public interface ExternalCallPayPalCheckoutService {
      */
     PayPalResponse call(PayPalRequest paymentRequest) throws PaymentException;
 
+    APIContext constructAPIContext(PaymentRequestDTO paymentRequestDTO);
 }

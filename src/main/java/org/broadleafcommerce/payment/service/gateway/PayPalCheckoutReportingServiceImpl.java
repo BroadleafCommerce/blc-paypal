@@ -31,13 +31,9 @@ import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCheckoutPaymentGatewayType;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalPaymentRetrievalRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalPaymentRetrievalResponse;
-import org.springframework.beans.factory.annotation.Lookup;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
-
 import com.paypal.api.payments.Payment;
-import com.paypal.base.rest.APIContext;
-
 import javax.annotation.Resource;
 
 /**
@@ -51,16 +47,14 @@ public class PayPalCheckoutReportingServiceImpl extends AbstractPaymentGatewayRe
     @Resource(name = "blExternalCallPayPalCheckoutService")
     protected ExternalCallPayPalCheckoutService payPalCheckoutService;
 
-    @Lookup("blPayPalApiContext")
-    protected APIContext getApiContext() {
-        return null;
-    }
     @Override
     public PaymentResponseDTO findDetailsByTransaction(PaymentRequestDTO paymentRequestDTO) throws PaymentException {
         Assert.isTrue(paymentRequestDTO.getAdditionalFields().containsKey(MessageConstants.HTTP_PAYERID), "The RequestDTO must contain a payerID");
         Assert.isTrue(paymentRequestDTO.getAdditionalFields().containsKey(MessageConstants.HTTP_PAYMENTID), "The RequestDTO must contain a paymentID");
 
-        PayPalPaymentRetrievalResponse response = (PayPalPaymentRetrievalResponse) payPalCheckoutService.call(new PayPalPaymentRetrievalRequest((String) paymentRequestDTO.getAdditionalFields().get(MessageConstants.HTTP_PAYMENTID), getApiContext()));
+        PayPalPaymentRetrievalResponse response = (PayPalPaymentRetrievalResponse) payPalCheckoutService.call(
+                new PayPalPaymentRetrievalRequest((String) paymentRequestDTO.getAdditionalFields().get(MessageConstants.HTTP_PAYMENTID),
+                        payPalCheckoutService.constructAPIContext(paymentRequestDTO)));
         Payment payment = response.getPayment();
         PaymentResponseDTO responseDTO = new PaymentResponseDTO(PaymentType.THIRD_PARTY_ACCOUNT,
                 PayPalCheckoutPaymentGatewayType.PAYPAL_CHECKOUT);
