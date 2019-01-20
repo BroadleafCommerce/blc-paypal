@@ -270,10 +270,10 @@ public class ExternalCallPayPalCheckoutServiceImpl extends AbstractExternalPayme
             context.setRequestId((String)paymentRequestDTO.getAdditionalFields().get(MessageConstants.HTTP_HEADER_REQUEST_ID));
         }
         if (paymentRequestDTO.getAdditionalFields().containsKey(MessageConstants.HTTP_HEADER_AUTH_ASSERTION)) {
-            context.getHTTPHeaders().put(MessageConstants.HTTP_HEADER_AUTH_ASSERTION, (String) paymentRequestDTO.getAdditionalFields().get(MessageConstants.HTTP_HEADER_AUTH_ASSERTION));
+            context.addHTTPHeader(MessageConstants.HTTP_HEADER_AUTH_ASSERTION, (String) paymentRequestDTO.getAdditionalFields().get(MessageConstants.HTTP_HEADER_AUTH_ASSERTION));
         }
         if (paymentRequestDTO.getAdditionalFields().containsKey(MessageConstants.HTTP_HEADER_CLIENT_METADATA_ID)) {
-            context.getHTTPHeaders().put(MessageConstants.HTTP_HEADER_CLIENT_METADATA_ID, (String) paymentRequestDTO.getAdditionalFields().get(MessageConstants.HTTP_HEADER_CLIENT_METADATA_ID));
+            context.addHTTPHeader(MessageConstants.HTTP_HEADER_CLIENT_METADATA_ID, (String) paymentRequestDTO.getAdditionalFields().get(MessageConstants.HTTP_HEADER_CLIENT_METADATA_ID));
         }
         return context;
     }
