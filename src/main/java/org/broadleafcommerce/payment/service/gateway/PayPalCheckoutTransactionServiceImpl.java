@@ -177,7 +177,7 @@ public class PayPalCheckoutTransactionServiceImpl extends AbstractPaymentGateway
             DetailedRefund detailRefund = refundPayment(paymentRequestDTO, capture);
             responseDTO
                     .successful(true)
-                    .rawResponse(sale.toJSON())
+                    .rawResponse(detailRefund.toJSON())
                     .paymentTransactionType(PaymentTransactionType.REFUND)
                     .responseMap(MessageConstants.REFUNDID, detailRefund.getId())
                     .amount(new Money(detailRefund.getAmount().getTotal(), detailRefund.getAmount().getCurrency()));
@@ -186,6 +186,7 @@ public class PayPalCheckoutTransactionServiceImpl extends AbstractPaymentGateway
             DetailedRefund detailRefund = refundPayment(paymentRequestDTO, sale);
             responseDTO
                     .successful(true)
+                    .rawResponse(detailRefund.toJSON())
                     .paymentTransactionType(PaymentTransactionType.REFUND)
                     .responseMap(MessageConstants.REFUNDID, detailRefund.getId())
                     .amount(new Money(detailRefund.getAmount().getTotal(), detailRefund.getAmount().getCurrency()));
