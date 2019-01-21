@@ -165,8 +165,13 @@ public class PayPalCheckoutTransactionServiceImpl extends AbstractPaymentGateway
     @Override
     public PaymentResponseDTO refund(PaymentRequestDTO paymentRequestDTO) throws PaymentException  {
         PaymentResponseDTO responseDTO = new PaymentResponseDTO(PaymentType.THIRD_PARTY_ACCOUNT, PayPalCheckoutPaymentGatewayType.PAYPAL_CHECKOUT);
-        Capture capture = getCapture(paymentRequestDTO);
-        Sale sale = getSale(paymentRequestDTO);
+        Capture capture = null;
+        Sale sale = null;
+        if (getCaptureId(paymentRequestDTO) != null) {
+            capture = getCapture(paymentRequestDTO);
+        } else if (getSaleId(paymentRequestDTO) != null) {
+            sale = getSale(paymentRequestDTO);
+        }
 
         if (capture != null) {
             DetailedRefund detailRefund = refundPayment(paymentRequestDTO, capture);
