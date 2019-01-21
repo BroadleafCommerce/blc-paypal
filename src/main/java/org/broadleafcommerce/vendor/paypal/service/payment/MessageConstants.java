@@ -49,6 +49,7 @@ public class MessageConstants {
     public static final String HTTP_HEADER_AUTH_ASSERTION = "PayPal-Auth-Assertion";
     public static final String HTTP_HEADER_CLIENT_METADATA_ID = "PayPal-Client-Metadata-Id";
     public static final String HTTP_HEADER_REQUEST_ID = "PayPal-Request-Id";
+    public static final String HTTP_HEADER_MOCK_RESPONSE = "PayPal-Mock-Response";
     public static final String BN = "PayPal-Partner-Attribution-Id";
     public static final String BNCODE = "BroadleafCommerce_Cart_EC";
     public static final String HTTP_PAYERID = "payerId";

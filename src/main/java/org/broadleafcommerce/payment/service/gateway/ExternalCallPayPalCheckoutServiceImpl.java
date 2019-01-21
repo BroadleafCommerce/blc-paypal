@@ -262,10 +262,7 @@ public class ExternalCallPayPalCheckoutServiceImpl extends AbstractExternalPayme
 
     @Override
     public APIContext constructAPIContext(PaymentRequestDTO paymentRequestDTO) {
-        APIContext context = new APIContext(configuration.getCheckoutRestClientId(),
-                configuration.getCheckoutRestSecret(),
-                configuration.getCheckoutRestMode());
-        context.addHTTPHeader(MessageConstants.BN, MessageConstants.BNCODE);
+        APIContext context = initializeAPIContext();
         if (paymentRequestDTO.getAdditionalFields().containsKey(MessageConstants.HTTP_HEADER_REQUEST_ID)) {
             context.setRequestId((String)paymentRequestDTO.getAdditionalFields().get(MessageConstants.HTTP_HEADER_REQUEST_ID));
         }
@@ -275,6 +272,17 @@ public class ExternalCallPayPalCheckoutServiceImpl extends AbstractExternalPayme
         if (paymentRequestDTO.getAdditionalFields().containsKey(MessageConstants.HTTP_HEADER_CLIENT_METADATA_ID)) {
             context.addHTTPHeader(MessageConstants.HTTP_HEADER_CLIENT_METADATA_ID, (String) paymentRequestDTO.getAdditionalFields().get(MessageConstants.HTTP_HEADER_CLIENT_METADATA_ID));
         }
+        if (paymentRequestDTO.getAdditionalFields().containsKey(MessageConstants.HTTP_HEADER_MOCK_RESPONSE)) {
+            context.addHTTPHeader(MessageConstants.HTTP_HEADER_MOCK_RESPONSE, (String) paymentRequestDTO.getAdditionalFields().get(MessageConstants.HTTP_HEADER_MOCK_RESPONSE));
+        }
+        return context;
+    }
+
+    private APIContext initializeAPIContext() {
+        APIContext context = new APIContext(configuration.getCheckoutRestClientId(),
+                configuration.getCheckoutRestSecret(),
+                configuration.getCheckoutRestMode());
+        context.addHTTPHeader(MessageConstants.BN, MessageConstants.BNCODE);
         return context;
     }
 
