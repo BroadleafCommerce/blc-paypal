@@ -8,9 +8,10 @@ flows (including integration with the NVP APIs) in favor of PayPal Checkout + Sm
 PayPal's REST API.
 
 ## Broadleaf Core Compatibility
-| `broadleaf-paypal` Version | Broadleaf Core Version |
-| :------------------------: | :--------------------: |
-| 2.7.0-GA | 5.0.0-GA+, not 5.2.0-GA+ |
-| 2.7.1-GA | 5.0.12-GA+, 5.1.5-GA+, 5.2.0-GA+ |
-| 2.8.0-GA | 5.2.0-GA+ |
-| 3.0.0-GA | 6.0.0-GA+ |
+
+| `broadleaf-paypal` Version | Broadleaf Core Version           |
+| :------------------------: | :-------------------------------:|
+| 2.7.0-GA                   | 5.0.0-GA+, not 5.2.0-GA+         |
+| 2.7.1-GA                   | 5.0.12-GA+, 5.1.5-GA+, 5.2.0-GA+ |
+| 2.8.0-GA                   | 5.2.0-GA+                        |
+| 3.0.0-GA                   | 6.0.0-GA+                        |
