@@ -59,6 +59,7 @@ import com.paypal.api.payments.Payer;
 import com.paypal.api.payments.Payment;
 import com.paypal.api.payments.PaymentExecution;
 import com.paypal.api.payments.RefundRequest;
+import com.paypal.api.payments.RelatedResources;
 import com.paypal.api.payments.Sale;
 import com.paypal.api.payments.Transaction;
 import com.paypal.base.rest.PayPalResource;
@@ -129,11 +130,23 @@ public class PayPalCheckoutTransactionServiceImpl extends AbstractPaymentGateway
             Transaction transaction = payment.getTransactions().get(0);
             if (transaction != null) {
                 Amount amount = transaction.getAmount();
+                List<Transaction> transactions = payment.getTransactions();
+                String saleId = null;
+                for (Transaction tx : transactions) {
+                    List<RelatedResources> relatedResources = tx.getRelatedResources();
+                    for (RelatedResources rr : relatedResources) {
+                        if (rr.getSale() != null) {
+                            saleId = rr.getSale().getId();
+                        }
+                    }
+                }
+
                 responseDTO
                         .successful(true)
                         .rawResponse(payment.toJSON())
                         .paymentTransactionType(PaymentTransactionType.AUTHORIZE_AND_CAPTURE)
-                        .responseMap(MessageConstants.SALEID, payment.getId())
+                        .responseMap(MessageConstants.PAYMENTID, payment.getId())
+                        .responseMap(MessageConstants.SALEID,saleId)
                         .amount(new Money(amount.getTotal(), amount.getCurrency()));
             }
         } else {
@@ -143,6 +156,7 @@ public class PayPalCheckoutTransactionServiceImpl extends AbstractPaymentGateway
                     .rawResponse(sale.toJSON())
                     .paymentTransactionType(PaymentTransactionType.AUTHORIZE_AND_CAPTURE)
                     .responseMap(MessageConstants.SALEID, s.getId())
+                    .responseMap(MessageConstants.BILLINGAGREEMENTID, s.getBillingAgreementId())
                     .amount(new Money(s.getAmount().getTotal(), s.getAmount().getCurrency()));
         }
 
@@ -180,6 +194,7 @@ public class PayPalCheckoutTransactionServiceImpl extends AbstractPaymentGateway
                     .rawResponse(detailRefund.toJSON())
                     .paymentTransactionType(PaymentTransactionType.REFUND)
                     .responseMap(MessageConstants.REFUNDID, detailRefund.getId())
+                    .responseMap(MessageConstants.CAPTUREID, detailRefund.getCaptureId())
                     .amount(new Money(detailRefund.getAmount().getTotal(), detailRefund.getAmount().getCurrency()));
             return responseDTO;
         } else if (sale != null){
@@ -189,6 +204,7 @@ public class PayPalCheckoutTransactionServiceImpl extends AbstractPaymentGateway
                     .rawResponse(detailRefund.toJSON())
                     .paymentTransactionType(PaymentTransactionType.REFUND)
                     .responseMap(MessageConstants.REFUNDID, detailRefund.getId())
+                    .responseMap(MessageConstants.SALEID, detailRefund.getSaleId())
                     .amount(new Money(detailRefund.getAmount().getTotal(), detailRefund.getAmount().getCurrency()));
             return responseDTO;
         }
