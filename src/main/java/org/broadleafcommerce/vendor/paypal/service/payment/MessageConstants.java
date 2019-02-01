@@ -44,6 +44,9 @@ public class MessageConstants {
     public static final String BILLINGECTOKEN = "BILLING_EC_TOKEN";
     public static final String AGREEMENTTOKENID = "AGREEMENT_TOKEN_ID";
     public static final String PAYER_PAYMENTMETHOD_PAYPAL = "paypal";
+    public static final String PAYER_INFO_EMAIL = "PAYPAL_PAYER_INFO_EMAIL";
+    public static final String PAYER_INFO_FIRST_NAME = "PAYPAL_PAYER_INFO_FIRST_NAME";
+    public static final String PAYER_INFO_LAST_NAME = "PAYPAL_PAYER_INFO_LAST_NAME";
     public static final String PLAN_TYPE_MERCHANTINITIATEDBILLING = "MERCHANT_INITIATED_BILLING";
     public static final String MERCHANTPREF_ACCEPTEDPAYMENTTYPE_INSTANT = "INSTANT";
     public static final String HTTP_HEADER_AUTH_ASSERTION = "PayPal-Auth-Assertion";

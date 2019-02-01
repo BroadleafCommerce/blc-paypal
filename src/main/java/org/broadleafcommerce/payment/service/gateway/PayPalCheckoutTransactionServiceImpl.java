@@ -128,7 +128,8 @@ public class PayPalCheckoutTransactionServiceImpl extends AbstractPaymentGateway
         if (sale instanceof Payment) {
             Payment payment = (Payment) sale;
             Transaction transaction = payment.getTransactions().get(0);
-            if (transaction != null) {
+            Payer payer = payment.getPayer();
+            if (transaction != null && payer != null) {
                 Amount amount = transaction.getAmount();
                 List<Transaction> transactions = payment.getTransactions();
                 String saleId = null;
@@ -141,12 +142,32 @@ public class PayPalCheckoutTransactionServiceImpl extends AbstractPaymentGateway
                     }
                 }
 
+                String billingAgreementId = null;
+                for (FundingInstrument fi : payer.getFundingInstruments()) {
+                    if (fi.getBilling() != null) {
+                        billingAgreementId = fi.getBilling().getBillingAgreementId();
+                    }
+                }
+
+                String payerEmail = null;
+                String payerFirstName = null;
+                String payerLastName = null;
+                if (payer.getPayerInfo() != null) {
+                    payerEmail = payer.getPayerInfo().getEmail();
+                    payerFirstName = payer.getPayerInfo().getFirstName();
+                    payerLastName = payer.getPayerInfo().getLastName();
+                }
+
                 responseDTO
                         .successful(true)
                         .rawResponse(payment.toJSON())
                         .paymentTransactionType(PaymentTransactionType.AUTHORIZE_AND_CAPTURE)
                         .responseMap(MessageConstants.PAYMENTID, payment.getId())
                         .responseMap(MessageConstants.SALEID,saleId)
+                        .responseMap(MessageConstants.BILLINGAGREEMENTID, billingAgreementId)
+                        .responseMap(MessageConstants.PAYER_INFO_EMAIL, payerEmail)
+                        .responseMap(MessageConstants.PAYER_INFO_FIRST_NAME, payerFirstName)
+                        .responseMap(MessageConstants.PAYER_INFO_LAST_NAME, payerLastName)
                         .amount(new Money(amount.getTotal(), amount.getCurrency()));
             }
         } else {
