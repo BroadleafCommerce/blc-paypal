@@ -53,6 +53,7 @@ import com.paypal.api.payments.Authorization;
 import com.paypal.api.payments.Billing;
 import com.paypal.api.payments.Capture;
 import com.paypal.api.payments.DetailedRefund;
+import com.paypal.api.payments.Error;
 import com.paypal.api.payments.FundingInstrument;
 import com.paypal.api.payments.ItemList;
 import com.paypal.api.payments.Payer;
@@ -62,6 +63,7 @@ import com.paypal.api.payments.RefundRequest;
 import com.paypal.api.payments.RelatedResources;
 import com.paypal.api.payments.Sale;
 import com.paypal.api.payments.Transaction;
+import com.paypal.base.rest.PayPalRESTException;
 import com.paypal.base.rest.PayPalResource;
 import java.util.ArrayList;
 import java.util.List;
@@ -81,104 +83,145 @@ public class PayPalCheckoutTransactionServiceImpl extends AbstractPaymentGateway
     @Override
     public PaymentResponseDTO authorize(PaymentRequestDTO paymentRequestDTO) throws PaymentException  {
         PaymentResponseDTO responseDTO = new PaymentResponseDTO(PaymentType.THIRD_PARTY_ACCOUNT, PayPalCheckoutPaymentGatewayType.PAYPAL_CHECKOUT);
-        PayPalResource auth = authorizePayment(paymentRequestDTO);
-        if (auth instanceof Payment) {
-            Payment payment = (Payment) auth;
-            Transaction transaction = payment.getTransactions().get(0);
-            if (transaction != null) {
-                Amount amount = transaction.getAmount();
+
+        try {
+            PayPalResource auth = authorizePayment(paymentRequestDTO);
+            if (auth instanceof Payment) {
+                Payment payment = (Payment) auth;
+                Transaction transaction = payment.getTransactions().get(0);
+                if (transaction != null) {
+                    Amount amount = transaction.getAmount();
+                    responseDTO
+                            .successful(true)
+                            .rawResponse(payment.toJSON())
+                            .paymentTransactionType(PaymentTransactionType.AUTHORIZE)
+                            .responseMap(MessageConstants.AUTHORIZATONID, payment.getId())
+                            .amount(new Money(amount.getTotal(), amount.getCurrency()));
+                }
+            } else {
+                Authorization authorization = (Authorization) auth;
                 responseDTO
                         .successful(true)
-                        .rawResponse(payment.toJSON())
+                        .rawResponse(authorization.toJSON())
                         .paymentTransactionType(PaymentTransactionType.AUTHORIZE)
-                        .responseMap(MessageConstants.AUTHORIZATONID, payment.getId())
-                        .amount(new Money(amount.getTotal(), amount.getCurrency()));
+                        .responseMap(MessageConstants.AUTHORIZATONID, authorization.getId())
+                        .amount(new Money(authorization.getAmount().getTotal(), authorization.getAmount().getCurrency()));
             }
-        } else {
-            Authorization authorization = (Authorization) auth;
-            responseDTO
-                    .successful(true)
-                    .rawResponse(authorization.toJSON())
-                    .paymentTransactionType(PaymentTransactionType.AUTHORIZE)
-                    .responseMap(MessageConstants.AUTHORIZATONID, authorization.getId())
-                    .amount(new Money(authorization.getAmount().getTotal(), authorization.getAmount().getCurrency()));
+        } catch (PaymentException ex) {
+            if (ex.getCause() instanceof PayPalRESTException) {
+                PayPalRESTException restException = (PayPalRESTException) ex.getCause();
+                responseDTO
+                        .successful(false)
+                        .rawResponse(restException.toString())
+                        .paymentTransactionType(PaymentTransactionType.AUTHORIZE);
+                populateErrorResponseMap(responseDTO, restException);
+                return responseDTO;
+            }
+            throw ex;
         }
-
         return responseDTO;
     }
 
     @Override
     public PaymentResponseDTO capture(PaymentRequestDTO paymentRequestDTO) throws PaymentException {
         PaymentResponseDTO responseDTO = new PaymentResponseDTO(PaymentType.THIRD_PARTY_ACCOUNT, PayPalCheckoutPaymentGatewayType.PAYPAL_CHECKOUT);
-        Authorization auth = getAuthorization(paymentRequestDTO);
-        Capture capture = capturePayment(paymentRequestDTO, auth);
-        responseDTO
-            .successful(true)
-            .rawResponse(capture.toJSON())
-            .paymentTransactionType(PaymentTransactionType.CAPTURE)
-            .responseMap(MessageConstants.CAPTUREID, capture.getId())
-            .amount(new Money(capture.getAmount().getTotal(), capture.getAmount().getCurrency()));
+
+        try {
+            Authorization auth = getAuthorization(paymentRequestDTO);
+            Capture capture = capturePayment(paymentRequestDTO, auth);
+            responseDTO
+                    .successful(true)
+                    .rawResponse(capture.toJSON())
+                    .paymentTransactionType(PaymentTransactionType.CAPTURE)
+                    .responseMap(MessageConstants.CAPTUREID, capture.getId())
+                    .amount(new Money(capture.getAmount().getTotal(), capture.getAmount().getCurrency()));
+        } catch (PaymentException ex) {
+            if (ex.getCause() instanceof PayPalRESTException) {
+                PayPalRESTException restException = (PayPalRESTException) ex.getCause();
+                responseDTO
+                        .successful(false)
+                        .rawResponse(restException.toString())
+                        .paymentTransactionType(PaymentTransactionType.CAPTURE);
+                populateErrorResponseMap(responseDTO, restException);
+                return responseDTO;
+            }
+            throw ex;
+        }
         return responseDTO;
     }
 
     @Override
     public PaymentResponseDTO authorizeAndCapture(PaymentRequestDTO paymentRequestDTO) throws PaymentException  {
         PaymentResponseDTO responseDTO = new PaymentResponseDTO(PaymentType.THIRD_PARTY_ACCOUNT, PayPalCheckoutPaymentGatewayType.PAYPAL_CHECKOUT);
-        PayPalResource sale = salePayment(paymentRequestDTO);
-        if (sale instanceof Payment) {
-            Payment payment = (Payment) sale;
-            Transaction transaction = payment.getTransactions().get(0);
-            Payer payer = payment.getPayer();
-            if (transaction != null && payer != null) {
-                Amount amount = transaction.getAmount();
-                List<Transaction> transactions = payment.getTransactions();
-                String saleId = null;
-                for (Transaction tx : transactions) {
-                    List<RelatedResources> relatedResources = tx.getRelatedResources();
-                    for (RelatedResources rr : relatedResources) {
-                        if (rr.getSale() != null) {
-                            saleId = rr.getSale().getId();
+
+        try {
+            PayPalResource sale = salePayment(paymentRequestDTO);
+            if (sale instanceof Payment) {
+                Payment payment = (Payment) sale;
+                Transaction transaction = payment.getTransactions().get(0);
+                Payer payer = payment.getPayer();
+                if (transaction != null && payer != null) {
+                    Amount amount = transaction.getAmount();
+                    List<Transaction> transactions = payment.getTransactions();
+                    String saleId = null;
+                    for (Transaction tx : transactions) {
+                        List<RelatedResources> relatedResources = tx.getRelatedResources();
+                        for (RelatedResources rr : relatedResources) {
+                            if (rr.getSale() != null) {
+                                saleId = rr.getSale().getId();
+                            }
                         }
                     }
-                }
 
-                String billingAgreementId = null;
-                for (FundingInstrument fi : payer.getFundingInstruments()) {
-                    if (fi.getBilling() != null) {
-                        billingAgreementId = fi.getBilling().getBillingAgreementId();
+                    String billingAgreementId = null;
+                    for (FundingInstrument fi : payer.getFundingInstruments()) {
+                        if (fi.getBilling() != null) {
+                            billingAgreementId = fi.getBilling().getBillingAgreementId();
+                        }
                     }
-                }
 
-                String payerEmail = null;
-                String payerFirstName = null;
-                String payerLastName = null;
-                if (payer.getPayerInfo() != null) {
-                    payerEmail = payer.getPayerInfo().getEmail();
-                    payerFirstName = payer.getPayerInfo().getFirstName();
-                    payerLastName = payer.getPayerInfo().getLastName();
-                }
+                    String payerEmail = null;
+                    String payerFirstName = null;
+                    String payerLastName = null;
+                    if (payer.getPayerInfo() != null) {
+                        payerEmail = payer.getPayerInfo().getEmail();
+                        payerFirstName = payer.getPayerInfo().getFirstName();
+                        payerLastName = payer.getPayerInfo().getLastName();
+                    }
 
+                    responseDTO
+                            .successful(true)
+                            .rawResponse(payment.toJSON())
+                            .paymentTransactionType(PaymentTransactionType.AUTHORIZE_AND_CAPTURE)
+                            .responseMap(MessageConstants.PAYMENTID, payment.getId())
+                            .responseMap(MessageConstants.SALEID, saleId)
+                            .responseMap(MessageConstants.BILLINGAGREEMENTID, billingAgreementId)
+                            .responseMap(MessageConstants.PAYER_INFO_EMAIL, payerEmail)
+                            .responseMap(MessageConstants.PAYER_INFO_FIRST_NAME, payerFirstName)
+                            .responseMap(MessageConstants.PAYER_INFO_LAST_NAME, payerLastName)
+                            .amount(new Money(amount.getTotal(), amount.getCurrency()));
+                }
+            } else {
+                Sale s = (Sale) sale;
                 responseDTO
                         .successful(true)
-                        .rawResponse(payment.toJSON())
+                        .rawResponse(sale.toJSON())
                         .paymentTransactionType(PaymentTransactionType.AUTHORIZE_AND_CAPTURE)
-                        .responseMap(MessageConstants.PAYMENTID, payment.getId())
-                        .responseMap(MessageConstants.SALEID,saleId)
-                        .responseMap(MessageConstants.BILLINGAGREEMENTID, billingAgreementId)
-                        .responseMap(MessageConstants.PAYER_INFO_EMAIL, payerEmail)
-                        .responseMap(MessageConstants.PAYER_INFO_FIRST_NAME, payerFirstName)
-                        .responseMap(MessageConstants.PAYER_INFO_LAST_NAME, payerLastName)
-                        .amount(new Money(amount.getTotal(), amount.getCurrency()));
+                        .responseMap(MessageConstants.SALEID, s.getId())
+                        .responseMap(MessageConstants.BILLINGAGREEMENTID, s.getBillingAgreementId())
+                        .amount(new Money(s.getAmount().getTotal(), s.getAmount().getCurrency()));
             }
-        } else {
-            Sale s = (Sale) sale;
-            responseDTO
-                    .successful(true)
-                    .rawResponse(sale.toJSON())
-                    .paymentTransactionType(PaymentTransactionType.AUTHORIZE_AND_CAPTURE)
-                    .responseMap(MessageConstants.SALEID, s.getId())
-                    .responseMap(MessageConstants.BILLINGAGREEMENTID, s.getBillingAgreementId())
-                    .amount(new Money(s.getAmount().getTotal(), s.getAmount().getCurrency()));
+        } catch (PaymentException ex) {
+            if (ex.getCause() instanceof PayPalRESTException) {
+                PayPalRESTException restException = (PayPalRESTException) ex.getCause();
+                responseDTO
+                        .successful(false)
+                        .rawResponse(restException.toString())
+                        .paymentTransactionType(PaymentTransactionType.AUTHORIZE_AND_CAPTURE);
+                populateErrorResponseMap(responseDTO, restException);
+                return responseDTO;
+            }
+            throw ex;
         }
 
         return responseDTO;
@@ -187,47 +230,76 @@ public class PayPalCheckoutTransactionServiceImpl extends AbstractPaymentGateway
     @Override
     public PaymentResponseDTO reverseAuthorize(PaymentRequestDTO paymentRequestDTO) throws PaymentException {
         PaymentResponseDTO responseDTO = new PaymentResponseDTO(PaymentType.THIRD_PARTY_ACCOUNT, PayPalCheckoutPaymentGatewayType.PAYPAL_CHECKOUT);
-        Authorization auth = getAuthorization(paymentRequestDTO);
-        auth = voidAuthorization(auth, paymentRequestDTO);
-        responseDTO
-            .successful(true)
-            .rawResponse(auth.toJSON())
-            .paymentTransactionType(PaymentTransactionType.REVERSE_AUTH)
-            .amount(new Money(auth.getAmount().getTotal(), auth.getAmount().getCurrency()));
+
+        try {
+            Authorization auth = getAuthorization(paymentRequestDTO);
+            auth = voidAuthorization(auth, paymentRequestDTO);
+            responseDTO
+                    .successful(true)
+                    .rawResponse(auth.toJSON())
+                    .paymentTransactionType(PaymentTransactionType.REVERSE_AUTH)
+                    .amount(new Money(auth.getAmount().getTotal(), auth.getAmount().getCurrency()));
+        } catch (PaymentException ex) {
+            if (ex.getCause() instanceof PayPalRESTException) {
+                PayPalRESTException restException = (PayPalRESTException) ex.getCause();
+                responseDTO
+                        .successful(false)
+                        .rawResponse(restException.toString())
+                        .paymentTransactionType(PaymentTransactionType.REVERSE_AUTH);
+                populateErrorResponseMap(responseDTO, restException);
+                return responseDTO;
+            }
+            throw ex;
+        }
+
         return responseDTO;
     }
 
     @Override
     public PaymentResponseDTO refund(PaymentRequestDTO paymentRequestDTO) throws PaymentException  {
         PaymentResponseDTO responseDTO = new PaymentResponseDTO(PaymentType.THIRD_PARTY_ACCOUNT, PayPalCheckoutPaymentGatewayType.PAYPAL_CHECKOUT);
-        Capture capture = null;
-        Sale sale = null;
-        if (getCaptureId(paymentRequestDTO) != null) {
-            capture = getCapture(paymentRequestDTO);
-        } else if (getSaleId(paymentRequestDTO) != null) {
-            sale = getSale(paymentRequestDTO);
-        }
 
-        if (capture != null) {
-            DetailedRefund detailRefund = refundPayment(paymentRequestDTO, capture);
-            responseDTO
-                    .successful(true)
-                    .rawResponse(detailRefund.toJSON())
-                    .paymentTransactionType(PaymentTransactionType.REFUND)
-                    .responseMap(MessageConstants.REFUNDID, detailRefund.getId())
-                    .responseMap(MessageConstants.CAPTUREID, detailRefund.getCaptureId())
-                    .amount(new Money(detailRefund.getAmount().getTotal(), detailRefund.getAmount().getCurrency()));
-            return responseDTO;
-        } else if (sale != null){
-            DetailedRefund detailRefund = refundPayment(paymentRequestDTO, sale);
-            responseDTO
-                    .successful(true)
-                    .rawResponse(detailRefund.toJSON())
-                    .paymentTransactionType(PaymentTransactionType.REFUND)
-                    .responseMap(MessageConstants.REFUNDID, detailRefund.getId())
-                    .responseMap(MessageConstants.SALEID, detailRefund.getSaleId())
-                    .amount(new Money(detailRefund.getAmount().getTotal(), detailRefund.getAmount().getCurrency()));
-            return responseDTO;
+        try {
+            Capture capture = null;
+            Sale sale = null;
+            if (getCaptureId(paymentRequestDTO) != null) {
+                capture = getCapture(paymentRequestDTO);
+            } else if (getSaleId(paymentRequestDTO) != null) {
+                sale = getSale(paymentRequestDTO);
+            }
+
+            if (capture != null) {
+                DetailedRefund detailRefund = refundPayment(paymentRequestDTO, capture);
+                responseDTO
+                        .successful(true)
+                        .rawResponse(detailRefund.toJSON())
+                        .paymentTransactionType(PaymentTransactionType.REFUND)
+                        .responseMap(MessageConstants.REFUNDID, detailRefund.getId())
+                        .responseMap(MessageConstants.CAPTUREID, detailRefund.getCaptureId())
+                        .amount(new Money(detailRefund.getAmount().getTotal(), detailRefund.getAmount().getCurrency()));
+                return responseDTO;
+            } else if (sale != null) {
+                DetailedRefund detailRefund = refundPayment(paymentRequestDTO, sale);
+                responseDTO
+                        .successful(true)
+                        .rawResponse(detailRefund.toJSON())
+                        .paymentTransactionType(PaymentTransactionType.REFUND)
+                        .responseMap(MessageConstants.REFUNDID, detailRefund.getId())
+                        .responseMap(MessageConstants.SALEID, detailRefund.getSaleId())
+                        .amount(new Money(detailRefund.getAmount().getTotal(), detailRefund.getAmount().getCurrency()));
+                return responseDTO;
+            }
+        } catch (PaymentException ex) {
+            if (ex.getCause() instanceof PayPalRESTException) {
+                PayPalRESTException restException = (PayPalRESTException) ex.getCause();
+                responseDTO
+                        .successful(false)
+                        .rawResponse(restException.toString())
+                        .paymentTransactionType(PaymentTransactionType.REFUND);
+                populateErrorResponseMap(responseDTO, restException);
+                return responseDTO;
+            }
+            throw ex;
         }
 
         throw new PaymentException("Unable to perform refund. Unable to find corresponding capture or sale transaction.");
@@ -236,13 +308,27 @@ public class PayPalCheckoutTransactionServiceImpl extends AbstractPaymentGateway
     @Override
     public PaymentResponseDTO voidPayment(PaymentRequestDTO paymentRequestDTO) throws PaymentException {
         PaymentResponseDTO responseDTO = new PaymentResponseDTO(PaymentType.THIRD_PARTY_ACCOUNT, PayPalCheckoutPaymentGatewayType.PAYPAL_CHECKOUT);
-        Authorization auth = getAuthorization(paymentRequestDTO);
-        auth = voidAuthorization(auth, paymentRequestDTO);
-        responseDTO
-            .successful(true)
-            .rawResponse(auth.toJSON())
-            .paymentTransactionType(PaymentTransactionType.VOID)
-            .amount(new Money(auth.getAmount().getTotal(), auth.getAmount().getCurrency()));
+
+        try {
+            Authorization auth = getAuthorization(paymentRequestDTO);
+            auth = voidAuthorization(auth, paymentRequestDTO);
+            responseDTO
+                    .successful(true)
+                    .rawResponse(auth.toJSON())
+                    .paymentTransactionType(PaymentTransactionType.VOID)
+                    .amount(new Money(auth.getAmount().getTotal(), auth.getAmount().getCurrency()));
+        } catch (PaymentException ex) {
+            if (ex.getCause() instanceof PayPalRESTException) {
+                PayPalRESTException restException = (PayPalRESTException) ex.getCause();
+                responseDTO
+                        .successful(false)
+                        .rawResponse(restException.toString())
+                        .paymentTransactionType(PaymentTransactionType.VOID);
+                populateErrorResponseMap(responseDTO, restException);
+                return responseDTO;
+            }
+            throw ex;
+        }
         return responseDTO;
     }
 
@@ -423,6 +509,15 @@ public class PayPalCheckoutTransactionServiceImpl extends AbstractPaymentGateway
     
     protected String getCaptureId(PaymentRequestDTO paymentRequestDTO) {
         return (String) paymentRequestDTO.getAdditionalFields().get(MessageConstants.CAPTUREID);
+    }
+
+    protected void populateErrorResponseMap(PaymentResponseDTO responseDTO, PayPalRESTException restException) {
+        Error error = restException.getDetails();
+        if (error != null) {
+            responseDTO.responseMap(MessageConstants.EXCEPTION_NAME, error.getName())
+                    .responseMap(MessageConstants.EXCEPTION_MESSAGE, error.getMessage())
+                    .responseMap(MessageConstants.EXCEPTION_DEBUG_ID, error.getDebugId());
+        }
     }
 
 }

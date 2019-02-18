@@ -60,5 +60,8 @@ public class MessageConstants {
     public static final String HTTP_TOKEN = "token";
     public static final String HTTP_BILLINGTOKEN = "billingToken";
     public static final String HTTP_REQUEST = "HTTP_REQUEST";
+    public static final String EXCEPTION_NAME = "EXCEPTION_NAME";
+    public static final String EXCEPTION_MESSAGE = "EXCEPTION_MESSAGE";
+    public static final String EXCEPTION_DEBUG_ID = "EXCEPTION_DEBUG_ID";
 
 }
