@@ -164,19 +164,25 @@ public class PayPalCheckoutTransactionServiceImpl extends AbstractPaymentGateway
                     Amount amount = transaction.getAmount();
                     List<Transaction> transactions = payment.getTransactions();
                     String saleId = null;
-                    for (Transaction tx : transactions) {
-                        List<RelatedResources> relatedResources = tx.getRelatedResources();
-                        for (RelatedResources rr : relatedResources) {
-                            if (rr.getSale() != null) {
-                                saleId = rr.getSale().getId();
+                    if (transactions != null) {
+                        for (Transaction tx : transactions) {
+                            List<RelatedResources> relatedResources = tx.getRelatedResources();
+                            if (relatedResources != null) {
+                                for (RelatedResources rr : relatedResources) {
+                                    if (rr.getSale() != null) {
+                                        saleId = rr.getSale().getId();
+                                    }
+                                }
                             }
                         }
                     }
 
                     String billingAgreementId = null;
-                    for (FundingInstrument fi : payer.getFundingInstruments()) {
-                        if (fi.getBilling() != null) {
-                            billingAgreementId = fi.getBilling().getBillingAgreementId();
+                    if (payer.getFundingInstruments() != null) {
+                        for (FundingInstrument fi : payer.getFundingInstruments()) {
+                            if (fi.getBilling() != null) {
+                                billingAgreementId = fi.getBilling().getBillingAgreementId();
+                            }
                         }
                     }
 
