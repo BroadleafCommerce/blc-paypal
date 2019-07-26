@@ -10,7 +10,7 @@
  * the Broadleaf End User License Agreement (EULA), Version 1.1
  * (the "Commercial License" located at http://license.broadleafcommerce.org/commercial_license-1.1.txt)
  * shall apply.
- * 
+ *
  * Alternatively, the Commercial License may be replaced with a mutually agreed upon license (the "Custom License")
  * between you and Broadleaf Commerce. You may not use this file except in compliance with the applicable license.
  * #L%
@@ -63,5 +63,7 @@ public class MessageConstants {
     public static final String EXCEPTION_NAME = "EXCEPTION_NAME";
     public static final String EXCEPTION_MESSAGE = "EXCEPTION_MESSAGE";
     public static final String EXCEPTION_DEBUG_ID = "EXCEPTION_DEBUG_ID";
+    public static final String CUSTOM_FIELD = "custom_field";
+    public static final String TRANSACTION_STATUS="TRANSACTION_STATUS";
 
 }
