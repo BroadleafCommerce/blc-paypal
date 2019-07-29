@@ -17,8 +17,7 @@
  */
 package org.broadleafcommerce.payment.service.gateway;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.commons.lang.StringUtils;
 import org.broadleafcommerce.common.payment.PaymentGatewayType;
 import org.broadleafcommerce.common.payment.PaymentType;
 import org.broadleafcommerce.common.payment.dto.PaymentRequestDTO;
@@ -39,77 +38,76 @@ import java.util.Map;
 import javax.annotation.Resource;
 
 /**
- * This takes the {@link PaymentRequestDTO} and call the {@link ReportingTransactions#get(Map, APIContext)} to read all the
- * {@link ReportingTransactionResponse} and then filter the result with matching  {@link TransactionInfo#getPaypal_reference_id()}
+ * This takes the {@link PaymentRequestDTO} and calls the {@link ReportingTransactions#get(Map, APIContext)} to read all the
+ * {@link ReportingTransactionResponse} and then filters the results by matching the {@link TransactionInfo#getPaypal_reference_id()}
  * and {@link TransactionInfo#getCustom_field()}
+ *
+ * Note: in the PayPal payload, the {@link TransactionInfo#getCustom_field()} is used to capture and custom info that we want.
+ * This class assumes that a BLC-produced transaction id is being sent to PayPal.
+ *
  * @author venkat
  *
  */
-public class PayPalSyncTransactionServiceImpl implements PayPalSyncTransactionService{
-
-    private static final Log LOG = LogFactory.getLog(PayPalSyncTransactionServiceImpl.class);
+public class PayPalSyncTransactionServiceImpl implements PayPalSyncTransactionService {
 
     @Resource(name = "blExternalCallPayPalCheckoutService")
     protected ExternalCallPayPalCheckoutService payPalCheckoutService;
 
     @Override
-    public PaymentResponseDTO findTransactionByQueryParams(PaymentRequestDTO paymentRequestDTO) {
+    public PaymentResponseDTO lookupTransactionByQueryParams(PaymentRequestDTO paymentRequestDTO) throws PayPalRESTException {
         APIContext apiContext = payPalCheckoutService.constructAPIContext(paymentRequestDTO);
-        Map<String,String> queryParamsMap=prepareQueryParameters(paymentRequestDTO);
-        PaymentResponseDTO paymentResponseDTO=new PaymentResponseDTO(PaymentType.CREDIT_CARD, PaymentGatewayType.PASSTHROUGH);
-        try {
-            ReportingTransactionResponse reportingTransactions = executeTransactionSearchCall(apiContext,queryParamsMap);
-            if(null!=reportingTransactions && null!=reportingTransactions.getTransaction_details()) {
-                List<TransactionDetail> transaction_details = reportingTransactions.getTransaction_details();
-                for (TransactionDetail transactionDetail : transaction_details) {
-                      TransactionInfo transactionInfo = transactionDetail.getTransaction_info();
-                      if(havingMatchBillingAgreementIDAndCustomField(paymentRequestDTO,transactionInfo)) {
-                          paymentResponseDTO.getResponseMap().put(MessageConstants.TRANSACTION_STATUS, transactionInfo.getTransaction_status());
-                      }
-                }
+        Map<String,String> queryParamsMap = prepareQueryParameters(paymentRequestDTO);
+        PaymentResponseDTO paymentResponseDTO = new PaymentResponseDTO(PaymentType.CREDIT_CARD, PaymentGatewayType.PASSTHROUGH);
+
+        ReportingTransactionResponse reportingTransactions = executeTransactionSearch(apiContext,queryParamsMap);
+
+        if (null != reportingTransactions && null != reportingTransactions.getTransaction_details()) {
+            List<TransactionDetail> transactionDetails = reportingTransactions.getTransaction_details();
+
+            for (TransactionDetail transactionDetail : transactionDetails) {
+                  TransactionInfo transactionInfo = transactionDetail.getTransaction_info();
+
+                  if (hasMatchingBillingAgreementID(paymentRequestDTO, transactionInfo)
+                          && hasMatchingTransactionId(paymentRequestDTO, transactionInfo)) {
+                      String transactionStatus = transactionInfo.getTransaction_status();
+
+                      paymentResponseDTO.getResponseMap().put(MessageConstants.TRANSACTION_STATUS, transactionStatus);
+                  }
             }
-        } catch (PayPalRESTException e) {
-            Integer pageNo = 1;
-            if(null!=paymentRequestDTO.getAdditionalFields().get("PAGE_NO")) {
-                pageNo = Integer.valueOf(paymentRequestDTO.getAdditionalFields().get("PAGE_NO").toString());
-            }
-            LOG.error("pageNo "+pageNo);
-            LOG.error("Exception occured while fetching the Reporting transactions ",
-                    e);
         }
+
         return paymentResponseDTO;
     }
+
     /**
      * Prepare the query parameters to pass to the Reporting Transaction API from the {@link PaymentRequestDTO}
      * @param paymentRequestDTO
      * @return
      */
-    protected Map<String,String> prepareQueryParameters(PaymentRequestDTO paymentRequestDTO){
-        Map<String,String> queryParamsMap=new HashMap<>();
-        if(paymentRequestDTO.getAdditionalFields().get("start_date")!=null) {
-            queryParamsMap.put("start_date", paymentRequestDTO.getAdditionalFields().get("start_date").toString());
+    protected Map<String,String> prepareQueryParameters(PaymentRequestDTO paymentRequestDTO) {
+        Map<String,String> queryParamsMap = new HashMap<>();
+
+        Map<String, Object> additionalFields = paymentRequestDTO.getAdditionalFields();
+        if (additionalFields.get("start_date") != null) {
+            queryParamsMap.put("start_date", additionalFields.get("start_date").toString());
         }
-        if(paymentRequestDTO.getAdditionalFields().get("end_date")!=null) {
-            queryParamsMap.put("end_date", paymentRequestDTO.getAdditionalFields().get("end_date").toString());
+        if (additionalFields.get("end_date") != null) {
+            queryParamsMap.put("end_date", additionalFields.get("end_date").toString());
         }
-        if(paymentRequestDTO.getAdditionalFields().get("transaction_amount")!=null) {
-            queryParamsMap.put("transaction_amount", paymentRequestDTO.getAdditionalFields().get("transaction_amount").toString());
+        if (additionalFields.get("transaction_amount") != null) {
+            queryParamsMap.put("transaction_amount", additionalFields.get("transaction_amount").toString());
         }
+
         return queryParamsMap;
     }
 
     @Override
-    public ReportingTransactionResponse getAllTransactionsByMatchingQueryParams(
-            Map<String, String> queryFilter) {
-        PaymentRequestDTO paymentRequestDTO=new PaymentRequestDTO();
+    public ReportingTransactionResponse lookupTransactionsByQueryParams(
+            Map<String, String> queryFilter) throws PayPalRESTException {
+        PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO();
         APIContext apiContext = payPalCheckoutService.constructAPIContext(paymentRequestDTO);
-        ReportingTransactionResponse reportingTransactionsResponse=null;
-        try {
-            reportingTransactionsResponse = executeTransactionSearchCall(apiContext,queryFilter);
-        } catch (PayPalRESTException e) {
-            e.printStackTrace();
-        }
-        return reportingTransactionsResponse;
+
+        return executeTransactionSearch(apiContext, queryFilter);
     }
 
     /**
@@ -120,9 +118,11 @@ public class PayPalSyncTransactionServiceImpl implements PayPalSyncTransactionSe
      * @return
      * @throws PayPalRESTException
      */
-    protected ReportingTransactionResponse executeTransactionSearchCall(APIContext apiContext,Map<String,String> queryParamsMap) throws PayPalRESTException {
-        ReportingTransactions reeportingTransactions=new ReportingTransactions();
-        return reeportingTransactions.get(queryParamsMap, apiContext);
+    protected ReportingTransactionResponse executeTransactionSearch(APIContext apiContext,
+                                                                    Map<String,String> queryParamsMap) throws PayPalRESTException {
+        ReportingTransactions reportingTransactions = new ReportingTransactions();
+
+        return reportingTransactions.get(queryParamsMap, apiContext);
     }
 
     /**
@@ -131,37 +131,60 @@ public class PayPalSyncTransactionServiceImpl implements PayPalSyncTransactionSe
      * @return
      */
     protected String getBillingAgreementId(PaymentRequestDTO paymentRequestDTO) {
-        if(null!=paymentRequestDTO.getAdditionalFields().get(MessageConstants.BILLINGAGREEMENTID)) {
-            return paymentRequestDTO.getAdditionalFields().get(MessageConstants.BILLINGAGREEMENTID).toString();
+        Map<String, Object> additionalFields = paymentRequestDTO.getAdditionalFields();
+
+        if (null != additionalFields.get(MessageConstants.BILLINGAGREEMENTID)) {
+            return additionalFields.get(MessageConstants.BILLINGAGREEMENTID).toString();
         }
+
         return null;
     }
 
     /**
-     * Get the BillingAgreementID from the {@link PaymentRequestDTO#getAdditionalFields()} having key {@link MessageConstants#CUSTOM_FIELD}
+     * Get the BLC-defined transactionId from the {@link PaymentRequestDTO#getAdditionalFields()}
+     * having key {@link MessageConstants#CUSTOM_FIELD}.
+     *
      * @param paymentRequestDTO
      * @return
      */
-    protected String getCustomField(PaymentRequestDTO paymentRequestDTO) {
-        if(null!=paymentRequestDTO.getAdditionalFields().get(MessageConstants.CUSTOM_FIELD)) {
-            return paymentRequestDTO.getAdditionalFields().get(MessageConstants.CUSTOM_FIELD).toString();
+    protected String getTransactionId(PaymentRequestDTO paymentRequestDTO) {
+        Map<String, Object> additionalFields = paymentRequestDTO.getAdditionalFields();
+
+        if (null != additionalFields.get(MessageConstants.CUSTOM_FIELD)) {
+            return additionalFields.get(MessageConstants.CUSTOM_FIELD).toString();
         }
+
         return null;
     }
 
     /**
      * Return true
-     *  if {@link TransactionInfo#getPaypal_reference_id()} matches the value of the {@link PaymentRequestDTO#getAdditionalFields()} mapping key {@link MessageConstants#BILLINGAGREEMENTID}
-     *  and if {@link TransactionInfo#getCustom_field()} matches the value of the {@link PaymentRequestDTO#getAdditionalFields()} mapping key {@link MessageConstants#CUSTOM_FIELD}
+     *  if {@link TransactionInfo#getPaypal_reference_id()} matches the value of the
+     *  {@link PaymentRequestDTO#getAdditionalFields()} mapping key {@link MessageConstants#BILLINGAGREEMENTID}
      * @param paymentRequestDTO
      * @param transactionInfo
      * @return
      */
-    protected boolean havingMatchBillingAgreementIDAndCustomField(PaymentRequestDTO paymentRequestDTO,TransactionInfo transactionInfo) {
-        return transactionInfo.getPaypal_reference_id().equalsIgnoreCase(getBillingAgreementId(paymentRequestDTO))
-                && (null!=getCustomField(paymentRequestDTO) && (getCustomField(paymentRequestDTO).equalsIgnoreCase(transactionInfo.getCustom_field())));
+    protected boolean hasMatchingBillingAgreementID(PaymentRequestDTO paymentRequestDTO, TransactionInfo transactionInfo) {
+        String paypalReferenceId = transactionInfo.getPaypal_reference_id();
+        String billingAgreementId = getBillingAgreementId(paymentRequestDTO);
 
+        return StringUtils.equalsIgnoreCase(paypalReferenceId, billingAgreementId);
+    }
 
+    /**
+     * Return true
+     *  if {@link TransactionInfo#getCustom_field()} matches the value of the
+     *  {@link PaymentRequestDTO#getAdditionalFields()} mapping key {@link MessageConstants#CUSTOM_FIELD}
+     * @param paymentRequestDTO
+     * @param transactionInfo
+     * @return
+     */
+    protected boolean hasMatchingTransactionId(PaymentRequestDTO paymentRequestDTO, TransactionInfo transactionInfo) {
+        String customField = transactionInfo.getCustom_field();
+        String transactionId = getTransactionId(paymentRequestDTO);
+
+        return StringUtils.equalsIgnoreCase(customField, transactionId);
     }
 
 }

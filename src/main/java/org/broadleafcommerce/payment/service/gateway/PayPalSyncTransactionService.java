@@ -21,13 +21,15 @@ import org.broadleafcommerce.common.payment.dto.PaymentRequestDTO;
 import org.broadleafcommerce.common.payment.dto.PaymentResponseDTO;
 import org.broadleafcommerce.vendor.paypal.domain.ReportingTransactionResponse;
 
+import com.paypal.base.rest.PayPalRESTException;
+
 import java.util.Map;
 
 public interface PayPalSyncTransactionService {
 
 
-    ReportingTransactionResponse getAllTransactionsByMatchingQueryParams(Map<String,String> queryFilter);
+    ReportingTransactionResponse lookupTransactionsByQueryParams(Map<String,String> queryFilter) throws PayPalRESTException;
 
-    PaymentResponseDTO findTransactionByQueryParams(PaymentRequestDTO paymentRequestDTO);
+    PaymentResponseDTO lookupTransactionByQueryParams(PaymentRequestDTO paymentRequestDTO) throws PayPalRESTException;
 
 }
