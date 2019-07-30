@@ -17,22 +17,14 @@
  */
 package org.broadleafcommerce.payment.service.gateway;
 
-import org.apache.commons.lang.StringUtils;
-import org.broadleafcommerce.common.payment.PaymentGatewayType;
-import org.broadleafcommerce.common.payment.PaymentType;
 import org.broadleafcommerce.common.payment.dto.PaymentRequestDTO;
-import org.broadleafcommerce.common.payment.dto.PaymentResponseDTO;
 import org.broadleafcommerce.vendor.paypal.api.ReportingTransactions;
 import org.broadleafcommerce.vendor.paypal.domain.ReportingTransactionResponse;
-import org.broadleafcommerce.vendor.paypal.domain.TransactionDetail;
 import org.broadleafcommerce.vendor.paypal.domain.TransactionInfo;
-import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
 
 import com.paypal.base.rest.APIContext;
 import com.paypal.base.rest.PayPalRESTException;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Resource;
@@ -52,7 +44,6 @@ public class PayPalSyncTransactionServiceImpl implements PayPalSyncTransactionSe
 
     @Resource(name = "blExternalCallPayPalCheckoutService")
     protected ExternalCallPayPalCheckoutService payPalCheckoutService;
-
 
     @Override
     public ReportingTransactionResponse lookupTransactionsByQueryParams(
@@ -75,68 +66,6 @@ public class PayPalSyncTransactionServiceImpl implements PayPalSyncTransactionSe
         ReportingTransactions reportingTransactions = new ReportingTransactions();
 
         return reportingTransactions.get(queryParamsMap, apiContext);
-    }
-
-    /**
-     * Get the BillingAgreementID from the {@link PaymentRequestDTO#getAdditionalFields()} having key {@link MessageConstants#BILLINGAGREEMENTID}
-     * @param paymentRequestDTO
-     * @return
-     */
-    protected String getBillingAgreementId(PaymentRequestDTO paymentRequestDTO) {
-        Map<String, Object> additionalFields = paymentRequestDTO.getAdditionalFields();
-
-        if (null != additionalFields.get(MessageConstants.BILLINGAGREEMENTID)) {
-            return additionalFields.get(MessageConstants.BILLINGAGREEMENTID).toString();
-        }
-
-        return null;
-    }
-
-    /**
-     * Get the BLC-defined transactionId from the {@link PaymentRequestDTO#getAdditionalFields()}
-     * having key {@link MessageConstants#CUSTOM_FIELD}.
-     *
-     * @param paymentRequestDTO
-     * @return
-     */
-    protected String getTransactionId(PaymentRequestDTO paymentRequestDTO) {
-        Map<String, Object> additionalFields = paymentRequestDTO.getAdditionalFields();
-
-        if (null != additionalFields.get(MessageConstants.CUSTOM_FIELD)) {
-            return additionalFields.get(MessageConstants.CUSTOM_FIELD).toString();
-        }
-
-        return null;
-    }
-
-    /**
-     * Return true
-     *  if {@link TransactionInfo#getPaypal_reference_id()} matches the value of the
-     *  {@link PaymentRequestDTO#getAdditionalFields()} mapping key {@link MessageConstants#BILLINGAGREEMENTID}
-     * @param paymentRequestDTO
-     * @param transactionInfo
-     * @return
-     */
-    protected boolean hasMatchingBillingAgreementID(PaymentRequestDTO paymentRequestDTO, TransactionInfo transactionInfo) {
-        String paypalReferenceId = transactionInfo.getPaypal_reference_id();
-        String billingAgreementId = getBillingAgreementId(paymentRequestDTO);
-
-        return StringUtils.equalsIgnoreCase(paypalReferenceId, billingAgreementId);
-    }
-
-    /**
-     * Return true
-     *  if {@link TransactionInfo#getCustom_field()} matches the value of the
-     *  {@link PaymentRequestDTO#getAdditionalFields()} mapping key {@link MessageConstants#CUSTOM_FIELD}
-     * @param paymentRequestDTO
-     * @param transactionInfo
-     * @return
-     */
-    protected boolean hasMatchingTransactionId(PaymentRequestDTO paymentRequestDTO, TransactionInfo transactionInfo) {
-        String customField = transactionInfo.getCustom_field();
-        String transactionId = getTransactionId(paymentRequestDTO);
-
-        return StringUtils.equalsIgnoreCase(customField, transactionId);
     }
 
 }
