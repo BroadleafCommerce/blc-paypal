@@ -13,7 +13,6 @@
     <version>3.0.3-SNAPSHOT</version>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <blc.version>6.0.0-GA</blc.version>
         <project.uri>${user.dir}</project.uri>
     </properties>
     <scm>
@@ -119,8 +118,8 @@
         </dependency>
         <dependency>
             <groupId>org.broadleafcommerce</groupId>
-            <artifactId>broadleaf-common</artifactId>
-            <version>${blc.version}</version>
+            <artifactId>broadleaf-payment-gateway-common</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.paypal.sdk</groupId>
