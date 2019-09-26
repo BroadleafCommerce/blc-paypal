@@ -1,38 +1,23 @@
-/*
- * #%L
- * BroadleafCommerce PayPal
- * %%
- * Copyright (C) 2009 - 2014 Broadleaf Commerce
- * %%
- * Licensed under the Broadleaf Fair Use License Agreement, Version 1.0
- * (the "Fair Use License" located  at http://license.broadleafcommerce.org/fair_use_license-1.0.txt)
- * unless the restrictions on use therein are violated and require payment to Broadleaf in which case
- * the Broadleaf End User License Agreement (EULA), Version 1.1
- * (the "Commercial License" located at http://license.broadleafcommerce.org/commercial_license-1.1.txt)
- * shall apply.
- * 
- * Alternatively, the Commercial License may be replaced with a mutually agreed upon license (the "Custom License")
- * between you and Broadleaf Commerce. You may not use this file except in compliance with the applicable license.
- * #L%
- */
 package org.broadleafcommerce.payment.service.gateway;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.broadleafcommerce.common.money.Money;
-import org.broadleafcommerce.common.payment.dto.AddressDTO;
-import org.broadleafcommerce.common.payment.dto.LineItemDTO;
-import org.broadleafcommerce.common.payment.dto.PaymentRequestDTO;
-import org.broadleafcommerce.common.payment.dto.PaymentResponseDTO;
-import org.broadleafcommerce.common.payment.service.AbstractExternalPaymentGatewayCall;
-import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
 import org.broadleafcommerce.vendor.paypal.api.AgreementToken;
 import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalResponse;
 import org.springframework.stereotype.Service;
-import com.paypal.api.payments.Address;
+
+import com.broadleafcommerce.money.CurrencyContext;
+import com.broadleafcommerce.money.SimpleCurrencyContext;
+import com.broadleafcommerce.paymentgateway.domain.Address;
+import com.broadleafcommerce.paymentgateway.domain.LineItem;
+import com.broadleafcommerce.paymentgateway.domain.PaymentRequest;
+import com.broadleafcommerce.paymentgateway.domain.PaymentResponse;
+import com.broadleafcommerce.paymentgateway.service.AbstractExternalPaymentGatewayCall;
+import com.broadleafcommerce.paymentgateway.service.exception.PaymentException;
 import com.paypal.api.payments.Amount;
+import com.paypal.api.payments.CartBase;
 import com.paypal.api.payments.Details;
 import com.paypal.api.payments.Item;
 import com.paypal.api.payments.ItemList;
@@ -40,15 +25,23 @@ import com.paypal.api.payments.Payment;
 import com.paypal.api.payments.ShippingAddress;
 import com.paypal.api.payments.Transaction;
 import com.paypal.base.rest.APIContext;
+
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+
 import javax.annotation.Resource;
+import javax.money.Monetary;
 
 /**
  * @author Elbert Bautista (elbertbautista)
  */
 @Service("blExternalCallPayPalCheckoutService")
-public class ExternalCallPayPalCheckoutServiceImpl extends AbstractExternalPaymentGatewayCall<PayPalRequest, PayPalResponse> implements ExternalCallPayPalCheckoutService {
+public class ExternalCallPayPalCheckoutServiceImpl
+        extends AbstractExternalPaymentGatewayCall<PayPalRequest, PayPalResponse>
+        implements ExternalCallPayPalCheckoutService {
 
     @Resource(name = "blPayPalCheckoutConfiguration")
     protected PayPalCheckoutConfiguration configuration;
@@ -59,45 +52,50 @@ public class ExternalCallPayPalCheckoutServiceImpl extends AbstractExternalPayme
     }
 
     @Override
-    public void setCommonDetailsResponse(AgreementToken response, PaymentResponseDTO responseDTO, Money amount,
-                                         String orderId, boolean checkoutComplete) {
+    public void setCommonDetailsResponse(AgreementToken agreementToken,
+            PaymentResponse paymentResponse,
+            PaymentRequest paymentRequest,
+            boolean checkoutComplete) {
 
-        if (response != null) {
-            responseDTO.rawResponse(response.toJSON());
+        if (agreementToken != null) {
+            paymentResponse.rawResponse(agreementToken.toJSON());
 
-            Address shippingAddress = response.getShippingAddress();
+            com.paypal.api.payments.Address shippingAddress = agreementToken.getShippingAddress();
 
             if (shippingAddress != null) {
-                responseDTO.shipTo()
+                paymentResponse.shipTo()
                         .addressLine1(shippingAddress.getLine1())
                         .addressLine2(shippingAddress.getLine2())
-                        .addressCityLocality(shippingAddress.getCity())
-                        .addressStateRegion(shippingAddress.getState())
-                        .addressPostalCode(shippingAddress.getPostalCode())
-                        .addressCountryCode(shippingAddress.getCountryCode())
-                        .addressPhone(shippingAddress.getPhone())
+                        .city(shippingAddress.getCity())
+                        .stateRegion(shippingAddress.getState())
+                        .postalCode(shippingAddress.getPostalCode())
+                        .countryCode(shippingAddress.getCountryCode())
+                        .phoneNumber(shippingAddress.getPhone())
                         .done();
             }
         }
 
-        responseDTO.amount(amount)
-                .orderId(orderId)
+        paymentResponse.amount(paymentRequest.getTransactionTotal())
+                .currencyContext(paymentRequest.getCurrencyContext())
+                .orderId(paymentRequest.getOrderId())
                 .successful(true)
                 .valid(true)
                 .completeCheckoutOnCallback(checkoutComplete);
     }
 
     @Override
-    public void setCommonDetailsResponse(Payment response, PaymentResponseDTO responseDTO) {
+    public void setCommonDetailsResponse(Payment response, PaymentResponse responseDTO) {
         responseDTO.rawResponse(response.toJSON());
-        
-        if (CollectionUtils.isNotEmpty(response.getTransactions()) && 
-            response.getTransactions().get(0) != null &&
-            response.getTransactions().get(0).getItemList() != null) {
-            ShippingAddress shippingAddress = response.getTransactions().get(0).getItemList().getShippingAddress();
-            
+
+        if (CollectionUtils.isNotEmpty(response.getTransactions()) &&
+                response.getTransactions().get(0) != null &&
+                response.getTransactions().get(0).getItemList() != null) {
+            ShippingAddress shippingAddress =
+                    response.getTransactions().get(0).getItemList().getShippingAddress();
+
             String shipPhone = shippingAddress.getPhone();
-            String itemListPhone = response.getTransactions().get(0).getItemList().getShippingPhoneNumber();
+            String itemListPhone =
+                    response.getTransactions().get(0).getItemList().getShippingPhoneNumber();
             String payerPhone = response.getPayer().getPayerInfo().getPhone();
             String phone = "";
             if (shipPhone != null) {
@@ -108,113 +106,147 @@ public class ExternalCallPayPalCheckoutServiceImpl extends AbstractExternalPayme
                 phone = payerPhone;
             }
             responseDTO.shipTo()
-                .addressFullName(shippingAddress.getRecipientName())
-                .addressLine1(shippingAddress.getLine1())
-                .addressLine2(shippingAddress.getLine2())
-                .addressCityLocality(shippingAddress.getCity())
-                .addressStateRegion(shippingAddress.getState())
-                .addressPostalCode(shippingAddress.getPostalCode())
-                .addressCountryCode(shippingAddress.getCountryCode())
-                .addressPhone(phone)
-                .done();
-            
+                    .fullName(shippingAddress.getRecipientName())
+                    .addressLine1(shippingAddress.getLine1())
+                    .addressLine2(shippingAddress.getLine2())
+                    .city(shippingAddress.getCity())
+                    .stateRegion(shippingAddress.getState())
+                    .postalCode(shippingAddress.getPostalCode())
+                    .countryCode(shippingAddress.getCountryCode())
+                    .phoneNumber(phone)
+                    .done();
+
             if (shippingAddress.getStatus() != null) {
-                responseDTO.getShipTo().additionalFields(MessageConstants.ADDRESSSTATUS, shippingAddress.getStatus());
+                responseDTO.getShipTo().additionalFields(MessageConstants.ADDRESSSTATUS,
+                        shippingAddress.getStatus());
             }
 
             Transaction transaction = response.getTransactions().get(0);
-            
-            String itemTotal = "";
-            String shippingDiscount = "";
-            String shippingTotal = "";
-            String totalTax = "";
-            String total = "0.00";
-            String currency = "USD";
-            if (transaction.getAmount() != null && transaction.getAmount().getDetails() != null) {
-                Details details = transaction.getAmount().getDetails();
-                if (details.getSubtotal() != null) {
-                    itemTotal = details.getSubtotal();
-                }
-                if (details.getShippingDiscount() != null) {
-                    shippingDiscount = details.getShippingDiscount();
-                }
-                if (details.getShipping() != null) {
-                    shippingTotal = details.getShipping();
-                }
-                if (details.getTax() != null) {
-                    totalTax = details.getTax();
-                }
-            }
-            if (transaction.getAmount() != null) {
-                total = transaction.getAmount().getTotal();
-                if (transaction.getAmount().getCurrency() != null) {
-                    currency = transaction.getAmount().getCurrency();
-                }
-            }
+
+            String itemTotal = getItemTotal(transaction);
+            String shippingDiscount = getShippingDiscount(transaction);
+            String shippingTotal = getShippingTotal(transaction);
+            String totalTax = getTotalTax(transaction);
+            BigDecimal total = getTotal(transaction);
+            CurrencyContext currencyContext = getCurrency(transaction);
+
             String[] customFields = transaction.getCustom().split("\\|");
-            responseDTO.amount(new Money(total, currency))
+            responseDTO.amount(total)
+                    .currencyContext(currencyContext)
                     .orderId(customFields[0])
                     .successful(true)
                     .valid(true)
                     .completeCheckoutOnCallback(Boolean.parseBoolean(customFields[1]))
-                    .responseMap(MessageConstants.DETAILSPAYMENTALLOWEDMETHOD, response.getPayer().getPaymentMethod())
+                    .responseMap(MessageConstants.DETAILSPAYMENTALLOWEDMETHOD,
+                            response.getPayer().getPaymentMethod())
                     .responseMap(MessageConstants.DETAILSPAYMENTTRANSACTIONID, response.getId())
                     .responseMap(MessageConstants.DETAILSPAYMENTITEMTOTAL, itemTotal)
                     .responseMap(MessageConstants.DETAILSPAYMENTSHIPPINGDISCOUNT, shippingDiscount)
-                    .responseMap(MessageConstants.DETAILSPAYMENTSHIPPINGTOTAL,shippingTotal)
+                    .responseMap(MessageConstants.DETAILSPAYMENTSHIPPINGTOTAL, shippingTotal)
                     .responseMap(MessageConstants.DETAILSPAYMENTTOTALTAX, totalTax);
-            
+
             String payerStatus = response.getPayer().getStatus();
-    
+
             responseDTO.customer()
-                .firstName(response.getPayer().getPayerInfo().getFirstName())
-                .lastName(response.getPayer().getPayerInfo().getLastName())
-                .phone(response.getPayer().getPayerInfo().getPhone())
-                .email(response.getPayer().getPayerInfo().getEmail())
-                .done()
-            .responseMap(MessageConstants.NOTE, response.getNoteToPayer())
-            .responseMap(MessageConstants.PAYERSTATUS, payerStatus);
+                    .firstName(response.getPayer().getPayerInfo().getFirstName())
+                    .lastName(response.getPayer().getPayerInfo().getLastName())
+                    .phone(response.getPayer().getPayerInfo().getPhone())
+                    .email(response.getPayer().getPayerInfo().getEmail())
+                    .done()
+                    .responseMap(MessageConstants.NOTE, response.getNoteToPayer())
+                    .responseMap(MessageConstants.PAYERSTATUS, payerStatus);
         }
 
     }
 
+    private String getItemTotal(Transaction transaction) {
+        return Optional.ofNullable(transaction)
+                .map(CartBase::getAmount)
+                .map(Amount::getDetails)
+                .map(Details::getSubtotal)
+                .orElse(null);
+    }
+
+    private String getShippingDiscount(Transaction transaction) {
+        return Optional.ofNullable(transaction)
+                .map(CartBase::getAmount)
+                .map(Amount::getDetails)
+                .map(Details::getShippingDiscount)
+                .orElse(null);
+    }
+
+    private String getShippingTotal(Transaction transaction) {
+        return Optional.ofNullable(transaction)
+                .map(CartBase::getAmount)
+                .map(Amount::getDetails)
+                .map(Details::getShipping)
+                .orElse(null);
+    }
+
+    private String getTotalTax(Transaction transaction) {
+        return Optional.ofNullable(transaction)
+                .map(CartBase::getAmount)
+                .map(Amount::getDetails)
+                .map(Details::getTax)
+                .orElse(null);
+    }
+
+    private BigDecimal getTotal(Transaction transaction) {
+        return Optional.ofNullable(transaction)
+                .map(CartBase::getAmount)
+                .map(Amount::getTotal)
+                .map(BigDecimal::new)
+                .orElse(BigDecimal.ZERO);
+    }
+
+    private CurrencyContext getCurrency(Transaction transaction) {
+        return Optional.ofNullable(transaction)
+                .map(CartBase::getAmount)
+                .map(Amount::getCurrency)
+                .map(currencyCode -> {
+                    return new SimpleCurrencyContext(Monetary.getCurrency(currencyCode));
+                })
+                .orElse(null);
+    }
+
     @Override
-    public ShippingAddress getPayPalShippingAddress(PaymentRequestDTO paymentRequestDTO) {
+    public ShippingAddress getPayPalShippingAddress(PaymentRequest paymentRequest) {
         ShippingAddress shipAddress = new ShippingAddress();
-        AddressDTO<PaymentRequestDTO> addressDTO = paymentRequestDTO.getShipTo();
-        shipAddress.setRecipientName(addressDTO.getAddressFullName());
-        shipAddress.setLine1(addressDTO.getAddressLine1());
-        shipAddress.setLine2(addressDTO.getAddressLine2());
-        shipAddress.setCity(addressDTO.getAddressCityLocality());
-        shipAddress.setState(addressDTO.getAddressStateRegion());
-        shipAddress.setPostalCode(addressDTO.getAddressPostalCode());
-        shipAddress.setCountryCode(addressDTO.getAddressCountryCode());
-        if (StringUtils.isNotBlank(addressDTO.getAddressPhone())) {
-            shipAddress.setPhone(addressDTO.getAddressPhone());
+        Address<PaymentRequest> address = paymentRequest.getShipTo();
+        shipAddress.setRecipientName(address.getFullName());
+        shipAddress.setLine1(address.getAddressLine1());
+        shipAddress.setLine2(address.getAddressLine2());
+        shipAddress.setCity(address.getCity());
+        shipAddress.setState(address.getStateRegion());
+        shipAddress.setPostalCode(address.getPostalCode());
+        shipAddress.setCountryCode(address.getCountryCode());
+        if (StringUtils.isNotBlank(address.getPhoneNumber())) {
+            shipAddress.setPhone(address.getPhoneNumber());
         }
         return shipAddress;
     }
 
     @Override
-    public ItemList getPayPalItemListFromOrder(PaymentRequestDTO paymentRequestDTO, boolean shouldPopulateShipping) {
+    public ItemList getPayPalItemListFromOrder(PaymentRequest paymentRequest,
+            boolean shouldPopulateShipping) {
         ItemList itemList = new ItemList();
         boolean returnItemList = false;
-        if (paymentRequestDTO.shipToPopulated() && shouldPopulateShipping) {
-            ShippingAddress address = getPayPalShippingAddress(paymentRequestDTO);
+        if (paymentRequest.shipToPopulated() && shouldPopulateShipping) {
+            ShippingAddress address = getPayPalShippingAddress(paymentRequest);
             itemList.setShippingAddress(address);
             returnItemList = true;
         }
 
-        if (CollectionUtils.isNotEmpty(paymentRequestDTO.getLineItems())) {
+        if (CollectionUtils.isNotEmpty(paymentRequest.getLineItems())) {
             List<Item> items = new ArrayList<>();
-            for (LineItemDTO lineItem : paymentRequestDTO.getLineItems()) {
+            for (LineItem lineItem : paymentRequest.getLineItems()) {
                 Item item = new Item();
                 item.setCategory(lineItem.getCategory());
                 item.setDescription(lineItem.getDescription());
-                item.setQuantity(lineItem.getQuantity());
-                item.setPrice(lineItem.getTotal());
-                item.setTax(lineItem.getTax());
-                item.setCurrency(paymentRequestDTO.getOrderCurrencyCode());
+                item.setQuantity(Objects.toString(lineItem.getQuantity(), null));
+                item.setPrice(Objects.toString(lineItem.getTotal(), null));
+                item.setTax(Objects.toString(lineItem.getTax(), null));
+                item.setCurrency(paymentRequest.getCurrencyCode());
                 item.setName(lineItem.getName());
                 items.add(item);
             }
@@ -225,16 +257,16 @@ public class ExternalCallPayPalCheckoutServiceImpl extends AbstractExternalPayme
     }
 
     @Override
-    public Amount getPayPalAmountFromOrder(PaymentRequestDTO paymentRequestDTO) {
+    public Amount getPayPalAmountFromOrder(PaymentRequest paymentRequest) {
         Details details = new Details();
 
-        details.setShipping(paymentRequestDTO.getShippingTotal());
-        details.setSubtotal(paymentRequestDTO.getOrderSubtotal());
-        details.setTax(paymentRequestDTO.getTaxTotal());
+        details.setShipping(Objects.toString(paymentRequest.getShippingTotal(), null));
+        details.setSubtotal(Objects.toString(paymentRequest.getOrderSubtotal(), null));
+        details.setTax(Objects.toString(paymentRequest.getTaxTotal(), null));
 
         Amount amount = new Amount();
-        amount.setCurrency(paymentRequestDTO.getOrderCurrencyCode());
-        amount.setTotal(paymentRequestDTO.getTransactionTotal());
+        amount.setCurrency(paymentRequest.getCurrencyCode());
+        amount.setTotal(Objects.toString(paymentRequest.getTransactionTotal(), null));
         amount.setDetails(details);
         return amount;
     }
@@ -261,19 +293,30 @@ public class ExternalCallPayPalCheckoutServiceImpl extends AbstractExternalPayme
     }
 
     @Override
-    public APIContext constructAPIContext(PaymentRequestDTO paymentRequestDTO) {
+    public APIContext constructAPIContext(PaymentRequest paymentRequest) {
         APIContext context = initializeAPIContext();
-        if (paymentRequestDTO.getAdditionalFields().containsKey(MessageConstants.HTTP_HEADER_REQUEST_ID)) {
-            context.setRequestId((String)paymentRequestDTO.getAdditionalFields().get(MessageConstants.HTTP_HEADER_REQUEST_ID));
+        if (paymentRequest.getAdditionalFields()
+                .containsKey(MessageConstants.HTTP_HEADER_REQUEST_ID)) {
+            context.setRequestId((String) paymentRequest.getAdditionalFields()
+                    .get(MessageConstants.HTTP_HEADER_REQUEST_ID));
         }
-        if (paymentRequestDTO.getAdditionalFields().containsKey(MessageConstants.HTTP_HEADER_AUTH_ASSERTION)) {
-            context.addHTTPHeader(MessageConstants.HTTP_HEADER_AUTH_ASSERTION, (String) paymentRequestDTO.getAdditionalFields().get(MessageConstants.HTTP_HEADER_AUTH_ASSERTION));
+        if (paymentRequest.getAdditionalFields()
+                .containsKey(MessageConstants.HTTP_HEADER_AUTH_ASSERTION)) {
+            context.addHTTPHeader(MessageConstants.HTTP_HEADER_AUTH_ASSERTION,
+                    (String) paymentRequest.getAdditionalFields()
+                            .get(MessageConstants.HTTP_HEADER_AUTH_ASSERTION));
         }
-        if (paymentRequestDTO.getAdditionalFields().containsKey(MessageConstants.HTTP_HEADER_CLIENT_METADATA_ID)) {
-            context.addHTTPHeader(MessageConstants.HTTP_HEADER_CLIENT_METADATA_ID, (String) paymentRequestDTO.getAdditionalFields().get(MessageConstants.HTTP_HEADER_CLIENT_METADATA_ID));
+        if (paymentRequest.getAdditionalFields()
+                .containsKey(MessageConstants.HTTP_HEADER_CLIENT_METADATA_ID)) {
+            context.addHTTPHeader(MessageConstants.HTTP_HEADER_CLIENT_METADATA_ID,
+                    (String) paymentRequest.getAdditionalFields()
+                            .get(MessageConstants.HTTP_HEADER_CLIENT_METADATA_ID));
         }
-        if (paymentRequestDTO.getAdditionalFields().containsKey(MessageConstants.HTTP_HEADER_MOCK_RESPONSE)) {
-            context.addHTTPHeader(MessageConstants.HTTP_HEADER_MOCK_RESPONSE, (String) paymentRequestDTO.getAdditionalFields().get(MessageConstants.HTTP_HEADER_MOCK_RESPONSE));
+        if (paymentRequest.getAdditionalFields()
+                .containsKey(MessageConstants.HTTP_HEADER_MOCK_RESPONSE)) {
+            context.addHTTPHeader(MessageConstants.HTTP_HEADER_MOCK_RESPONSE,
+                    (String) paymentRequest.getAdditionalFields()
+                            .get(MessageConstants.HTTP_HEADER_MOCK_RESPONSE));
         }
         return context;
     }

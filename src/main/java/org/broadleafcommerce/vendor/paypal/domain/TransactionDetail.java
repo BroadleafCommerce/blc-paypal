@@ -19,7 +19,7 @@ package org.broadleafcommerce.vendor.paypal.domain;
 
 import com.paypal.base.rest.PayPalModel;
 
-public class TransactionDetail extends PayPalModel{
+public class TransactionDetail extends PayPalModel {
 
     private TransactionInfo transaction_info;
 
@@ -46,17 +46,25 @@ public class TransactionDetail extends PayPalModel{
     @java.lang.Override
     @java.lang.SuppressWarnings("all")
     public boolean equals(final java.lang.Object o) {
-        if (o == this) return true;
-        if (!(o instanceof TransactionDetail)) return false;
+        if (o == this)
+            return true;
+        if (!(o instanceof TransactionDetail))
+            return false;
         final TransactionDetail other = (TransactionDetail) o;
-        if (!other.canEqual((java.lang.Object) this)) return false;
-        if (!super.equals(o)) return false;
+        if (!other.canEqual((java.lang.Object) this))
+            return false;
+        if (!super.equals(o))
+            return false;
         final java.lang.Object this$transaction_info = this.getTransaction_info();
         final java.lang.Object other$transaction_info = other.getTransaction_info();
-        if (this$transaction_info == null ? other$transaction_info != null : !this$transaction_info.equals(other$transaction_info)) return false;
+        if (this$transaction_info == null ? other$transaction_info != null
+                : !this$transaction_info.equals(other$transaction_info))
+            return false;
         final java.lang.Object this$payer_info = this.getPayer_info();
         final java.lang.Object other$payer_info = other.getPayer_info();
-        if (this$payer_info == null ? other$payer_info != null : !this$payer_info.equals(other$payer_info)) return false;
+        if (this$payer_info == null ? other$payer_info != null
+                : !this$payer_info.equals(other$payer_info))
+            return false;
         return true;
     }
 

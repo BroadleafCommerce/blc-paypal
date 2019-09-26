@@ -27,19 +27,34 @@ public interface PayPalSyncTransactionService {
 
 
     /**
-     * <p>This returns all the matching transactions wrapped in the {@link ReportingTransactionResponse} based on the @param queryFilter</p>
      * <p>
-     * The queryFilter mapping keys required are : </br></br>
-     * &nbsp;<b>start_date</b> : Filters the transactions in the response by a start date and time. The date format required is, <a href="https://tools.ietf.org/html/rfc3339#section-5.6">Internet date and time format</a>. Seconds are required. Fractional seconds are optional.</br>
-     * &nbsp;<b>end_date</b> : Filters the transactions in the response by a start date and time. The date format required is, <a href="https://tools.ietf.org/html/rfc3339#section-5.6">Internet date and time format</a>. Seconds are required. Fractional seconds are optional.</br>
-     * &nbsp;<b>transaction_amount</b> : Filters the transactions in the response by a gross transaction amount range. Specify the range as <start-range> TO <end-range>.For example, to search for transactions from $5.00 to $10.05, specify [500 TO 1005].</br>
-     * &nbsp;<b>page</b> : Page number derives the page to be retrieved from the returned result set.
+     * This returns all the matching transactions wrapped in the
+     * {@link ReportingTransactionResponse} based on the @param queryFilter
      * </p>
+     * <p>
+     * The queryFilter mapping keys required are : </br>
+     * </br>
+     * &nbsp;<b>start_date</b> : Filters the transactions in the response by a start date and time.
+     * The date format required is,
+     * <a href="https://tools.ietf.org/html/rfc3339#section-5.6">Internet date and time format</a>.
+     * Seconds are required. Fractional seconds are optional.</br>
+     * &nbsp;<b>end_date</b> : Filters the transactions in the response by a start date and time.
+     * The date format required is,
+     * <a href="https://tools.ietf.org/html/rfc3339#section-5.6">Internet date and time format</a>.
+     * Seconds are required. Fractional seconds are optional.</br>
+     * &nbsp;<b>transaction_amount</b> : Filters the transactions in the response by a gross
+     * transaction amount range. Specify the range as <start-range> TO <end-range>.For example, to
+     * search for transactions from $5.00 to $10.05, specify [500 TO 1005].</br>
+     * &nbsp;<b>page</b> : Page number derives the page to be retrieved from the returned result
+     * set.
+     * </p>
+     * 
      * @param queryFilter
      * @return
      * @throws PayPalRESTException
      */
-    ReportingTransactionResponse lookupTransactionsByQueryParams(Map<String,String> queryFilter) throws PayPalRESTException;
+    ReportingTransactionResponse lookupTransactionsByQueryParams(Map<String, String> queryFilter)
+            throws PayPalRESTException;
 
 
 }

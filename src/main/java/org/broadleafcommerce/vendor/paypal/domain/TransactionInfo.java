@@ -1,26 +1,9 @@
-/*-
- * #%L
- * BroadleafCommerce PayPal
- * %%
- * Copyright (C) 2009 - 2019 Broadleaf Commerce
- * %%
- * Licensed under the Broadleaf Fair Use License Agreement, Version 1.0
- * (the "Fair Use License" located  at http://license.broadleafcommerce.org/fair_use_license-1.0.txt)
- * unless the restrictions on use therein are violated and require payment to Broadleaf in which case
- * the Broadleaf End User License Agreement (EULA), Version 1.1
- * (the "Commercial License" located at http://license.broadleafcommerce.org/commercial_license-1.1.txt)
- * shall apply.
- * 
- * Alternatively, the Commercial License may be replaced with a mutually agreed upon license (the "Custom License")
- * between you and Broadleaf Commerce. You may not use this file except in compliance with the applicable license.
- * #L%
- */
 package org.broadleafcommerce.vendor.paypal.domain;
 
 
 import com.paypal.base.rest.PayPalModel;
 
-public class TransactionInfo extends PayPalModel{
+public class TransactionInfo extends PayPalModel {
 
     private String paypal_account_id;
 
@@ -168,50 +151,82 @@ public class TransactionInfo extends PayPalModel{
     @java.lang.Override
     @java.lang.SuppressWarnings("all")
     public boolean equals(final java.lang.Object o) {
-        if (o == this) return true;
-        if (!(o instanceof TransactionInfo)) return false;
+        if (o == this)
+            return true;
+        if (!(o instanceof TransactionInfo))
+            return false;
         final TransactionInfo other = (TransactionInfo) o;
-        if (!other.canEqual((java.lang.Object) this)) return false;
-        if (!super.equals(o)) return false;
+        if (!other.canEqual((java.lang.Object) this))
+            return false;
+        if (!super.equals(o))
+            return false;
         final java.lang.Object this$paypal_account_id = this.getPaypal_account_id();
         final java.lang.Object other$paypal_account_id = other.getPaypal_account_id();
-        if (this$paypal_account_id == null ? other$paypal_account_id != null : !this$paypal_account_id.equals(other$paypal_account_id)) return false;
+        if (this$paypal_account_id == null ? other$paypal_account_id != null
+                : !this$paypal_account_id.equals(other$paypal_account_id))
+            return false;
         final java.lang.Object this$transaction_id = this.getTransaction_id();
         final java.lang.Object other$transaction_id = other.getTransaction_id();
-        if (this$transaction_id == null ? other$transaction_id != null : !this$transaction_id.equals(other$transaction_id)) return false;
+        if (this$transaction_id == null ? other$transaction_id != null
+                : !this$transaction_id.equals(other$transaction_id))
+            return false;
         final java.lang.Object this$paypal_reference_id = this.getPaypal_reference_id();
         final java.lang.Object other$paypal_reference_id = other.getPaypal_reference_id();
-        if (this$paypal_reference_id == null ? other$paypal_reference_id != null : !this$paypal_reference_id.equals(other$paypal_reference_id)) return false;
+        if (this$paypal_reference_id == null ? other$paypal_reference_id != null
+                : !this$paypal_reference_id.equals(other$paypal_reference_id))
+            return false;
         final java.lang.Object this$paypal_reference_id_type = this.getPaypal_reference_id_type();
         final java.lang.Object other$paypal_reference_id_type = other.getPaypal_reference_id_type();
-        if (this$paypal_reference_id_type == null ? other$paypal_reference_id_type != null : !this$paypal_reference_id_type.equals(other$paypal_reference_id_type)) return false;
+        if (this$paypal_reference_id_type == null ? other$paypal_reference_id_type != null
+                : !this$paypal_reference_id_type.equals(other$paypal_reference_id_type))
+            return false;
         final java.lang.Object this$transaction_event_code = this.getTransaction_event_code();
         final java.lang.Object other$transaction_event_code = other.getTransaction_event_code();
-        if (this$transaction_event_code == null ? other$transaction_event_code != null : !this$transaction_event_code.equals(other$transaction_event_code)) return false;
-        final java.lang.Object this$transaction_initiation_date = this.getTransaction_initiation_date();
-        final java.lang.Object other$transaction_initiation_date = other.getTransaction_initiation_date();
-        if (this$transaction_initiation_date == null ? other$transaction_initiation_date != null : !this$transaction_initiation_date.equals(other$transaction_initiation_date)) return false;
+        if (this$transaction_event_code == null ? other$transaction_event_code != null
+                : !this$transaction_event_code.equals(other$transaction_event_code))
+            return false;
+        final java.lang.Object this$transaction_initiation_date =
+                this.getTransaction_initiation_date();
+        final java.lang.Object other$transaction_initiation_date =
+                other.getTransaction_initiation_date();
+        if (this$transaction_initiation_date == null ? other$transaction_initiation_date != null
+                : !this$transaction_initiation_date.equals(other$transaction_initiation_date))
+            return false;
         final java.lang.Object this$transaction_updated_date = this.getTransaction_updated_date();
         final java.lang.Object other$transaction_updated_date = other.getTransaction_updated_date();
-        if (this$transaction_updated_date == null ? other$transaction_updated_date != null : !this$transaction_updated_date.equals(other$transaction_updated_date)) return false;
+        if (this$transaction_updated_date == null ? other$transaction_updated_date != null
+                : !this$transaction_updated_date.equals(other$transaction_updated_date))
+            return false;
         final java.lang.Object this$transaction_amount = this.getTransaction_amount();
         final java.lang.Object other$transaction_amount = other.getTransaction_amount();
-        if (this$transaction_amount == null ? other$transaction_amount != null : !this$transaction_amount.equals(other$transaction_amount)) return false;
+        if (this$transaction_amount == null ? other$transaction_amount != null
+                : !this$transaction_amount.equals(other$transaction_amount))
+            return false;
         final java.lang.Object this$transaction_status = this.getTransaction_status();
         final java.lang.Object other$transaction_status = other.getTransaction_status();
-        if (this$transaction_status == null ? other$transaction_status != null : !this$transaction_status.equals(other$transaction_status)) return false;
+        if (this$transaction_status == null ? other$transaction_status != null
+                : !this$transaction_status.equals(other$transaction_status))
+            return false;
         final java.lang.Object this$transaction_subject = this.getTransaction_subject();
         final java.lang.Object other$transaction_subject = other.getTransaction_subject();
-        if (this$transaction_subject == null ? other$transaction_subject != null : !this$transaction_subject.equals(other$transaction_subject)) return false;
+        if (this$transaction_subject == null ? other$transaction_subject != null
+                : !this$transaction_subject.equals(other$transaction_subject))
+            return false;
         final java.lang.Object this$transaction_note = this.getTransaction_note();
         final java.lang.Object other$transaction_note = other.getTransaction_note();
-        if (this$transaction_note == null ? other$transaction_note != null : !this$transaction_note.equals(other$transaction_note)) return false;
+        if (this$transaction_note == null ? other$transaction_note != null
+                : !this$transaction_note.equals(other$transaction_note))
+            return false;
         final java.lang.Object this$payment_tracking_id = this.getPayment_tracking_id();
         final java.lang.Object other$payment_tracking_id = other.getPayment_tracking_id();
-        if (this$payment_tracking_id == null ? other$payment_tracking_id != null : !this$payment_tracking_id.equals(other$payment_tracking_id)) return false;
+        if (this$payment_tracking_id == null ? other$payment_tracking_id != null
+                : !this$payment_tracking_id.equals(other$payment_tracking_id))
+            return false;
         final java.lang.Object this$custom_field = this.getCustom_field();
         final java.lang.Object other$custom_field = other.getCustom_field();
-        if (this$custom_field == null ? other$custom_field != null : !this$custom_field.equals(other$custom_field)) return false;
+        if (this$custom_field == null ? other$custom_field != null
+                : !this$custom_field.equals(other$custom_field))
+            return false;
         return true;
     }
 
@@ -231,25 +246,34 @@ public class TransactionInfo extends PayPalModel{
         final java.lang.Object $transaction_id = this.getTransaction_id();
         result = result * PRIME + ($transaction_id == null ? 43 : $transaction_id.hashCode());
         final java.lang.Object $paypal_reference_id = this.getPaypal_reference_id();
-        result = result * PRIME + ($paypal_reference_id == null ? 43 : $paypal_reference_id.hashCode());
+        result = result * PRIME
+                + ($paypal_reference_id == null ? 43 : $paypal_reference_id.hashCode());
         final java.lang.Object $paypal_reference_id_type = this.getPaypal_reference_id_type();
-        result = result * PRIME + ($paypal_reference_id_type == null ? 43 : $paypal_reference_id_type.hashCode());
+        result = result * PRIME
+                + ($paypal_reference_id_type == null ? 43 : $paypal_reference_id_type.hashCode());
         final java.lang.Object $transaction_event_code = this.getTransaction_event_code();
-        result = result * PRIME + ($transaction_event_code == null ? 43 : $transaction_event_code.hashCode());
+        result = result * PRIME
+                + ($transaction_event_code == null ? 43 : $transaction_event_code.hashCode());
         final java.lang.Object $transaction_initiation_date = this.getTransaction_initiation_date();
-        result = result * PRIME + ($transaction_initiation_date == null ? 43 : $transaction_initiation_date.hashCode());
+        result = result * PRIME + ($transaction_initiation_date == null ? 43
+                : $transaction_initiation_date.hashCode());
         final java.lang.Object $transaction_updated_date = this.getTransaction_updated_date();
-        result = result * PRIME + ($transaction_updated_date == null ? 43 : $transaction_updated_date.hashCode());
+        result = result * PRIME
+                + ($transaction_updated_date == null ? 43 : $transaction_updated_date.hashCode());
         final java.lang.Object $transaction_amount = this.getTransaction_amount();
-        result = result * PRIME + ($transaction_amount == null ? 43 : $transaction_amount.hashCode());
+        result = result * PRIME
+                + ($transaction_amount == null ? 43 : $transaction_amount.hashCode());
         final java.lang.Object $transaction_status = this.getTransaction_status();
-        result = result * PRIME + ($transaction_status == null ? 43 : $transaction_status.hashCode());
+        result = result * PRIME
+                + ($transaction_status == null ? 43 : $transaction_status.hashCode());
         final java.lang.Object $transaction_subject = this.getTransaction_subject();
-        result = result * PRIME + ($transaction_subject == null ? 43 : $transaction_subject.hashCode());
+        result = result * PRIME
+                + ($transaction_subject == null ? 43 : $transaction_subject.hashCode());
         final java.lang.Object $transaction_note = this.getTransaction_note();
         result = result * PRIME + ($transaction_note == null ? 43 : $transaction_note.hashCode());
         final java.lang.Object $payment_tracking_id = this.getPayment_tracking_id();
-        result = result * PRIME + ($payment_tracking_id == null ? 43 : $payment_tracking_id.hashCode());
+        result = result * PRIME
+                + ($payment_tracking_id == null ? 43 : $payment_tracking_id.hashCode());
         final java.lang.Object $custom_field = this.getCustom_field();
         result = result * PRIME + ($custom_field == null ? 43 : $custom_field.hashCode());
         return result;

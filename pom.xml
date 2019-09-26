@@ -2,102 +2,63 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.broadleafcommerce</groupId>
-        <artifactId>broadleaf-module-parent</artifactId>
-        <version>3.0.0-GA</version>
+        <groupId>com.broadleafcommerce.microservices</groupId>
+        <artifactId>broadleaf-microservices-build-parent</artifactId>
+        <version>0.5.0-SNAPSHOT</version>
+        <relativePath />
     </parent>
 
     <artifactId>broadleaf-paypal</artifactId>
     <name>BroadleafCommerce PayPal</name>
     <description>BroadleafCommerce PayPal</description>
-    <version>3.0.3-SNAPSHOT</version>
+    <version>4.0.0-SNAPSHOT</version>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.uri>${user.dir}</project.uri>
     </properties>
+
+    <repositories>
+        <repository>
+            <id>broadleaf-microservices</id>
+            <url>https://repository.broadleafcommerce.com/repository/microservices/</url>
+        </repository>
+    </repositories>
+
     <scm>
         <connection>scm:git:git@github.com:BroadleafCommerce/blc-paypal.git</connection>
         <developerConnection>scm:git:git@github.com:BroadleafCommerce/blc-paypal.git</developerConnection>
-        <url>https://github.com/BroadleafCommerce/BroadleafCommerce</url>
+        <url>https://github.com/BroadleafCommerce/blc-paypal</url>
         <tag>HEAD</tag>
     </scm>
 
-    <url>http://www.broadleafcommerce.com</url>
-    <licenses>
-        <license>
-            <name>Broadleaf Fair Use 1.0</name>
-            <url>http://license.broadleafcommerce.org/fair_use_license-1.0.txt</url>
-            <distribution>repo</distribution>
-            <comments>Fair Use Community License</comments>
-        </license>
-        <license>
-            <name>Broadleaf End User License Agreement 1.1</name>
-            <url>http://license.broadleafcommerce.org/commercial_license-1.1.txt</url>
-            <distribution>repo</distribution>
-            <comments>Commercial License Applicable When Bounds of Fair Use License Are Exceeded</comments>
-        </license>
-    </licenses>
-    <developers>
-        <developer>
-            <id>jeff</id>
-            <name>Jeff Fischer</name>
-            <email>jfischer@broadleafcommerce.org</email>
-            <organization>Broadleaf Commerce</organization>
-            <organizationUrl>http://www.broadleafcommerce.org</organizationUrl>
-            <roles>
-                <role>cto</role>
-                <role>architect</role>
-                <role>developer</role>
-            </roles>
-            <timezone>-6</timezone>
-        </developer>
-        <developer>
-            <id>brian</id>
-            <name>Brian Polster</name>
-            <email>bpolster@broadleafcommerce.org</email>
-            <organization>Broadleaf Commerce</organization>
-            <organizationUrl>http://www.broadleafcommerce.org</organizationUrl>
-            <roles>
-                <role>president</role>
-                <role>architect</role>
-                <role>developer</role>
-            </roles>
-            <timezone>-6</timezone>
-        </developer>
-    </developers>
-    <repositories>
+    <distributionManagement>
         <repository>
-            <id>public releases</id>
-            <name>public releases</name>
-            <url>http://nexus.broadleafcommerce.org/nexus/content/repositories/releases</url>
+            <id>broadleaf-microservices</id>
+            <url>https://repository.broadleafcommerce.com/repository/microservices/</url>
         </repository>
-        <repository>
-            <id>public snapshots</id>
-            <name>public snapshots</name>
-            <url>http://www.broadleafcommerce.org/nexus/content/repositories/snapshots/</url>
-        </repository>
-    </repositories>
+    </distributionManagement>
+
     <build>
         <plugins>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>license-maven-plugin</artifactId>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <licenseName>blc_dual</licenseName>
+                    <showWarnings>true</showWarnings>
+                    <compilerArgs>
+                        <arg>-Xlint:-options</arg>
+                        <arg>-Xlint:deprecation</arg>
+                        <arg>-Werror</arg>
+                        <arg>-parameters</arg>
+                    </compilerArgs>
                 </configuration>
             </plugin>
         </plugins>
     </build>
-    <distributionManagement>
-        <snapshotRepository>
-            <id>snapshots</id>
-            <url>http://nexus.broadleafcommerce.org/nexus/content/repositories/snapshots</url>
-        </snapshotRepository>
-        <repository>
-            <id>releases</id>
-            <url>http://nexus.broadleafcommerce.org/nexus/content/repositories/releases</url>
-        </repository>
-    </distributionManagement>
 
     <dependencyManagement>
         <dependencies>
@@ -108,24 +69,20 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
     <dependencies>
         <dependency>
-            <groupId>org.broadleafcommerce</groupId>
-            <artifactId>broadleaf-third-party-integration-config</artifactId>
-            <version>default</version>
-            <scope>compile</scope>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>org.broadleafcommerce</groupId>
+            <groupId>com.broadleafcommerce.microservices</groupId>
             <artifactId>broadleaf-payment-gateway-common</artifactId>
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
+
         <dependency>
             <groupId>com.paypal.sdk</groupId>
             <artifactId>rest-api-sdk</artifactId>
             <version>1.14.0</version>
         </dependency>
+
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>servlet-api</artifactId>
@@ -134,5 +91,9 @@
             <scope>provided</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
     </dependencies>
 </project>

@@ -1,34 +1,20 @@
-/*
- * #%L
- * BroadleafCommerce PayPal
- * %%
- * Copyright (C) 2009 - 2018 Broadleaf Commerce
- * %%
- * Licensed under the Broadleaf Fair Use License Agreement, Version 1.0
- * (the "Fair Use License" located  at http://license.broadleafcommerce.org/fair_use_license-1.0.txt)
- * unless the restrictions on use therein are violated and require payment to Broadleaf in which case
- * the Broadleaf End User License Agreement (EULA), Version 1.1
- * (the "Commercial License" located at http://license.broadleafcommerce.org/commercial_license-1.1.txt)
- * shall apply.
- * 
- * Alternatively, the Commercial License may be replaced with a mutually agreed upon license (the "Custom License")
- * between you and Broadleaf Commerce. You may not use this file except in compliance with the applicable license.
- * #L%
- */
 package org.broadleafcommerce.vendor.paypal.service;
 
-import org.broadleafcommerce.common.payment.dto.PaymentRequestDTO;
-import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
 import org.broadleafcommerce.vendor.paypal.api.AgreementToken;
 
-public interface PayPalAgreementTokenService {
-    AgreementToken createPayPalAgreementTokenForCurrentOrder(boolean performCheckoutOnReturn) throws PaymentException;
+import com.broadleafcommerce.paymentgateway.domain.PaymentRequest;
+import com.broadleafcommerce.paymentgateway.service.exception.PaymentException;
 
-    PaymentRequestDTO getPaymentRequestForCurrentOrder() throws PaymentException;
+public interface PayPalAgreementTokenService {
+    AgreementToken createPayPalAgreementTokenForCurrentOrder(boolean performCheckoutOnReturn)
+            throws PaymentException;
+
+    PaymentRequest getPaymentRequestForCurrentOrder() throws PaymentException;
 
     String getPayPalBillingAgreementIdFromCurrentOrder() throws PaymentException;
 
-    void setPayPalBillingAgreementIdOnCurrentOrder(String billingAgreementId) throws PaymentException;
+    void setPayPalBillingAgreementIdOnCurrentOrder(String billingAgreementId)
+            throws PaymentException;
 
     String getPayPalAgreementTokenFromCurrentOrder() throws PaymentException;
 

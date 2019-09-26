@@ -17,11 +17,11 @@
  */
 package org.broadleafcommerce.payment.service.gateway;
 
-import org.broadleafcommerce.common.payment.dto.PaymentRequestDTO;
 import org.broadleafcommerce.vendor.paypal.api.ReportingTransactions;
 import org.broadleafcommerce.vendor.paypal.domain.ReportingTransactionResponse;
 import org.broadleafcommerce.vendor.paypal.domain.TransactionInfo;
 
+import com.broadleafcommerce.paymentgateway.domain.PaymentRequest;
 import com.paypal.base.rest.APIContext;
 import com.paypal.base.rest.PayPalRESTException;
 
@@ -30,12 +30,14 @@ import java.util.Map;
 import javax.annotation.Resource;
 
 /**
- * This takes the {@link PaymentRequestDTO} and calls the {@link ReportingTransactions#get(Map, APIContext)} to read all the
- * {@link ReportingTransactionResponse} and then filters the results by matching the {@link TransactionInfo#getPaypal_reference_id()}
- * and {@link TransactionInfo#getCustom_field()}
+ * This takes the {@link PaymentRequest} and calls the
+ * {@link ReportingTransactions#get(Map, APIContext)} to read all the
+ * {@link ReportingTransactionResponse} and then filters the results by matching the
+ * {@link TransactionInfo#getPaypal_reference_id()} and {@link TransactionInfo#getCustom_field()}
  *
- * Note: in the PayPal payload, the {@link TransactionInfo#getCustom_field()} is used to capture and custom info that we want.
- * This class assumes that a BLC-produced transaction id is being sent to PayPal.
+ * Note: in the PayPal payload, the {@link TransactionInfo#getCustom_field()} is used to capture and
+ * custom info that we want. This class assumes that a BLC-produced transaction id is being sent to
+ * PayPal.
  *
  * @author venkat
  *
@@ -48,21 +50,22 @@ public class PayPalSyncTransactionServiceImpl implements PayPalSyncTransactionSe
     @Override
     public ReportingTransactionResponse lookupTransactionsByQueryParams(
             Map<String, String> queryFilter) throws PayPalRESTException {
-        PaymentRequestDTO paymentRequestDTO = new PaymentRequestDTO();
-        APIContext apiContext = payPalCheckoutService.constructAPIContext(paymentRequestDTO);
+        PaymentRequest paymentRequest = new PaymentRequest();
+        APIContext apiContext = payPalCheckoutService.constructAPIContext(paymentRequest);
         return executeTransactionSearch(apiContext, queryFilter);
     }
 
     /**
-     * This calls the {@link ReportingTransactions#get(Map, APIContext)} to fetch the reporting transactions of type
-     * {@link ReportingTransactions}
+     * This calls the {@link ReportingTransactions#get(Map, APIContext)} to fetch the reporting
+     * transactions of type {@link ReportingTransactions}
+     * 
      * @param apiContext
      * @param queryParamsMap
      * @return
      * @throws PayPalRESTException
      */
     protected ReportingTransactionResponse executeTransactionSearch(APIContext apiContext,
-                                                                    Map<String,String> queryParamsMap) throws PayPalRESTException {
+            Map<String, String> queryParamsMap) throws PayPalRESTException {
         ReportingTransactions reportingTransactions = new ReportingTransactions();
 
         return reportingTransactions.get(queryParamsMap, apiContext);

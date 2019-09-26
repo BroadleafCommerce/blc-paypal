@@ -1,30 +1,14 @@
-/*
- * #%L
- * BroadleafCommerce PayPal
- * %%
- * Copyright (C) 2009 - 2014 Broadleaf Commerce
- * %%
- * Licensed under the Broadleaf Fair Use License Agreement, Version 1.0
- * (the "Fair Use License" located  at http://license.broadleafcommerce.org/fair_use_license-1.0.txt)
- * unless the restrictions on use therein are violated and require payment to Broadleaf in which case
- * the Broadleaf End User License Agreement (EULA), Version 1.1
- * (the "Commercial License" located at http://license.broadleafcommerce.org/commercial_license-1.1.txt)
- * shall apply.
- * 
- * Alternatively, the Commercial License may be replaced with a mutually agreed upon license (the "Custom License")
- * between you and Broadleaf Commerce. You may not use this file except in compliance with the applicable license.
- * #L%
- */
 package org.broadleafcommerce.payment.service.gateway;
 
-import org.broadleafcommerce.common.payment.PaymentGatewayType;
-import org.broadleafcommerce.common.payment.service.AbstractPaymentGatewayConfiguration;
 import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCheckoutPaymentGatewayType;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalShippingDisplayType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
+
+import com.broadleafcommerce.paymentgateway.domain.enums.PaymentGatewayType;
+import com.broadleafcommerce.paymentgateway.service.configuration.AbstractPaymentGatewayConfiguration;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -35,7 +19,8 @@ import java.util.Map;
  * @author Elbert Bautista (elbertbautista)
  */
 @Service("blPayPalCheckoutConfiguration")
-public class PayPalCheckoutConfigurationImpl extends AbstractPaymentGatewayConfiguration implements PayPalCheckoutConfiguration {
+public class PayPalCheckoutConfigurationImpl extends AbstractPaymentGatewayConfiguration
+        implements PayPalCheckoutConfiguration {
 
     @Autowired
     protected Environment env;
@@ -52,11 +37,13 @@ public class PayPalCheckoutConfigurationImpl extends AbstractPaymentGatewayConfi
                 return url;
             } else {
                 return null; // TODO: what to do with the baseUrl?
-//                String baseUrl = urlResolver.getSiteBaseUrl();
-//                return baseUrl + url;
+                // String baseUrl = urlResolver.getSiteBaseUrl();
+                // return baseUrl + url;
             }
         } catch (URISyntaxException e) {
-            throw new IllegalArgumentException("The value for 'gateway.paypal.checkout.rest.returnUrl' is not valid.", e);
+            throw new IllegalArgumentException(
+                    "The value for 'gateway.paypal.checkout.rest.returnUrl' is not valid.",
+                    e);
         }
     }
 
@@ -69,11 +56,13 @@ public class PayPalCheckoutConfigurationImpl extends AbstractPaymentGatewayConfi
                 return url;
             } else {
                 return null; // TODO: what to do with the baseUrl?
-//                String baseUrl = urlResolver.getSiteBaseUrl();
-//                return baseUrl + url;
+                // String baseUrl = urlResolver.getSiteBaseUrl();
+                // return baseUrl + url;
             }
         } catch (URISyntaxException e) {
-            throw new IllegalArgumentException("The value for 'gateway.paypal.checkout.rest.cancelUrl' is not valid.", e);
+            throw new IllegalArgumentException(
+                    "The value for 'gateway.paypal.checkout.rest.cancelUrl' is not valid.",
+                    e);
         }
     }
 
@@ -96,7 +85,8 @@ public class PayPalCheckoutConfigurationImpl extends AbstractPaymentGatewayConfi
     public PayPalShippingDisplayType getShippingDisplayType() {
         String shippingType = env.getProperty("gateway.paypal.expressCheckout.shippingDisplayType");
 
-        PayPalShippingDisplayType displayType = PayPalShippingDisplayType.getInstance(shippingType);
+        PayPalShippingDisplayType displayType =
+                PayPalShippingDisplayType.getByTypeKey(shippingType);
         if (displayType != null) {
             return displayType;
         }
@@ -117,7 +107,7 @@ public class PayPalCheckoutConfigurationImpl extends AbstractPaymentGatewayConfi
         additionalConfigs.put("PAYFLOWCOLOR", "FFFFFF");
         return additionalConfigs;
     }
-    
+
     @Override
     public Map<String, String> getAdditionalCustomFields() {
         // intentionally unimplemented, used as an extension point

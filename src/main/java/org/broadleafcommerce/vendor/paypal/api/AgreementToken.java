@@ -1,20 +1,3 @@
-/*
- * #%L
- * BroadleafCommerce PayPal
- * %%
- * Copyright (C) 2009 - 2018 Broadleaf Commerce
- * %%
- * Licensed under the Broadleaf Fair Use License Agreement, Version 1.0
- * (the "Fair Use License" located  at http://license.broadleafcommerce.org/fair_use_license-1.0.txt)
- * unless the restrictions on use therein are violated and require payment to Broadleaf in which case
- * the Broadleaf End User License Agreement (EULA), Version 1.1
- * (the "Commercial License" located at http://license.broadleafcommerce.org/commercial_license-1.1.txt)
- * shall apply.
- * 
- * Alternatively, the Commercial License may be replaced with a mutually agreed upon license (the "Custom License")
- * between you and Broadleaf Commerce. You may not use this file except in compliance with the applicable license.
- * #L%
- */
 package org.broadleafcommerce.vendor.paypal.api;
 
 import com.paypal.api.payments.Address;
@@ -25,14 +8,15 @@ import com.paypal.base.rest.APIContext;
 import com.paypal.base.rest.HttpMethod;
 import com.paypal.base.rest.PayPalRESTException;
 import com.paypal.base.rest.PayPalResource;
+
 import java.util.List;
 
 /**
- * The PayPal REST SDK does not currently contain support for
- * Reference Transactions and Merchant Initiated Billing Agreements
+ * The PayPal REST SDK does not currently contain support for Reference Transactions and Merchant
+ * Initiated Billing Agreements
  *
- * This was created to support the need to call the Billing Agreement Token endpoints
- * See: https://developer.paypal.com/docs/limited-release/reference-transactions/#overview
+ * This was created to support the need to call the Billing Agreement Token endpoints See:
+ * https://developer.paypal.com/docs/limited-release/reference-transactions/#overview
  */
 public class AgreementToken extends PayPalResource {
 
@@ -45,7 +29,8 @@ public class AgreementToken extends PayPalResource {
      */
     private String description;
     /**
-     * Details of the buyer who is enrolling in this agreement. This information is gathered from execution of the approval URL.
+     * Details of the buyer who is enrolling in this agreement. This information is gathered from
+     * execution of the approval URL.
      */
     private Payer payer;
     /**
@@ -53,7 +38,8 @@ public class AgreementToken extends PayPalResource {
      */
     private Plan plan;
     /**
-     * Shipping address object of the agreement, which should be provided if it is different from the default address.
+     * Shipping address object of the agreement, which should be provided if it is different from
+     * the default address.
      */
     private Address shippingAddress;
     /**
@@ -62,8 +48,7 @@ public class AgreementToken extends PayPalResource {
     private String tokenId;
     private List<Links> links;
 
-    public AgreementToken() {
-    }
+    public AgreementToken() {}
 
     public AgreementToken(String tokenId) {
         this.tokenId = tokenId;
@@ -76,32 +61,36 @@ public class AgreementToken extends PayPalResource {
     }
 
     /**
-     * Create a new billing agreement token by passing the details for the agreement, including the description, payer, and billing plan in the request JSON.
-     * @param apiContext
-     * {@link APIContext} used for the API call.
+     * Create a new billing agreement token by passing the details for the agreement, including the
+     * description, payer, and billing plan in the request JSON.
+     * 
+     * @param apiContext {@link APIContext} used for the API call.
      * @return AgreementToken
      * @throws PayPalRESTException
      */
     public AgreementToken create(APIContext apiContext) throws PayPalRESTException {
         String resourcePath = "v1/billing-agreements/agreement-tokens";
         String payLoad = this.toJSON();
-        AgreementToken agreementToken = (AgreementToken)configureAndExecute(apiContext, HttpMethod.POST, resourcePath, payLoad, AgreementToken.class);
+        AgreementToken agreementToken = (AgreementToken) configureAndExecute(apiContext,
+                HttpMethod.POST, resourcePath, payLoad, AgreementToken.class);
         return agreementToken;
     }
 
     /**
-     * Execute a billing agreement after buyer approval by passing the payment token to the request URI.
-     * @param apiContext
-     * {@link APIContext} used for the API call.
-     * @param tokenId
-     * payment tokenId (e.g., BA-8A802366G0648845Y)
+     * Execute a billing agreement after buyer approval by passing the payment token to the request
+     * URI.
+     * 
+     * @param apiContext {@link APIContext} used for the API call.
+     * @param tokenId payment tokenId (e.g., BA-8A802366G0648845Y)
      * @return AgreementToken
      * @throws PayPalRESTException
      */
-    public static AgreementToken execute(AgreementToken agreementToken, APIContext apiContext) throws PayPalRESTException {
+    public static AgreementToken execute(AgreementToken agreementToken, APIContext apiContext)
+            throws PayPalRESTException {
         String resourcePath = "v1/billing-agreements/agreements";
         String payLoad = agreementToken.toJSON();
-        return (AgreementToken)configureAndExecute(apiContext, HttpMethod.POST, resourcePath, payLoad, AgreementToken.class);
+        return (AgreementToken) configureAndExecute(apiContext, HttpMethod.POST, resourcePath,
+                payLoad, AgreementToken.class);
     }
 
     public String getId() {
@@ -170,32 +159,45 @@ public class AgreementToken extends PayPalResource {
     @java.lang.Override
     @java.lang.SuppressWarnings("all")
     public boolean equals(final java.lang.Object o) {
-        if (o == this) return true;
-        if (!(o instanceof AgreementToken)) return false;
+        if (o == this)
+            return true;
+        if (!(o instanceof AgreementToken))
+            return false;
         final AgreementToken other = (AgreementToken) o;
-        if (!other.canEqual((java.lang.Object) this)) return false;
-        if (!super.equals(o)) return false;
+        if (!other.canEqual((java.lang.Object) this))
+            return false;
+        if (!super.equals(o))
+            return false;
         final java.lang.Object this$id = this.getId();
         final java.lang.Object other$id = other.getId();
-        if (this$id == null ? other$id != null : !this$id.equals(other$id)) return false;
+        if (this$id == null ? other$id != null : !this$id.equals(other$id))
+            return false;
         final java.lang.Object this$description = this.getDescription();
         final java.lang.Object other$description = other.getDescription();
-        if (this$description == null ? other$description != null : !this$description.equals(other$description)) return false;
+        if (this$description == null ? other$description != null
+                : !this$description.equals(other$description))
+            return false;
         final java.lang.Object this$payer = this.getPayer();
         final java.lang.Object other$payer = other.getPayer();
-        if (this$payer == null ? other$payer != null : !this$payer.equals(other$payer)) return false;
+        if (this$payer == null ? other$payer != null : !this$payer.equals(other$payer))
+            return false;
         final java.lang.Object this$shippingAddress = this.getShippingAddress();
         final java.lang.Object other$shippingAddress = other.getShippingAddress();
-        if (this$shippingAddress == null ? other$shippingAddress != null : !this$shippingAddress.equals(other$shippingAddress)) return false;
+        if (this$shippingAddress == null ? other$shippingAddress != null
+                : !this$shippingAddress.equals(other$shippingAddress))
+            return false;
         final java.lang.Object this$plan = this.getPlan();
         final java.lang.Object other$plan = other.getPlan();
-        if (this$plan == null ? other$plan != null : !this$plan.equals(other$plan)) return false;
+        if (this$plan == null ? other$plan != null : !this$plan.equals(other$plan))
+            return false;
         final java.lang.Object this$tokenId = this.getTokenId();
         final java.lang.Object other$tokenId = other.getTokenId();
-        if (this$tokenId == null ? other$tokenId != null : !this$tokenId.equals(other$tokenId)) return false;
+        if (this$tokenId == null ? other$tokenId != null : !this$tokenId.equals(other$tokenId))
+            return false;
         final java.lang.Object this$links = this.getLinks();
         final java.lang.Object other$links = other.getLinks();
-        if (this$links == null ? other$links != null : !this$links.equals(other$links)) return false;
+        if (this$links == null ? other$links != null : !this$links.equals(other$links))
+            return false;
         return true;
     }
 

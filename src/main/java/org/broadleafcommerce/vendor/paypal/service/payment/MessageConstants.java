@@ -1,19 +1,14 @@
 /*
- * #%L
- * BroadleafCommerce PayPal
- * %%
- * Copyright (C) 2009 - 2014 Broadleaf Commerce
- * %%
- * Licensed under the Broadleaf Fair Use License Agreement, Version 1.0
- * (the "Fair Use License" located  at http://license.broadleafcommerce.org/fair_use_license-1.0.txt)
- * unless the restrictions on use therein are violated and require payment to Broadleaf in which case
- * the Broadleaf End User License Agreement (EULA), Version 1.1
- * (the "Commercial License" located at http://license.broadleafcommerce.org/commercial_license-1.1.txt)
- * shall apply.
+ * #%L BroadleafCommerce PayPal %% Copyright (C) 2009 - 2014 Broadleaf Commerce %% Licensed under
+ * the Broadleaf Fair Use License Agreement, Version 1.0 (the "Fair Use License" located at
+ * http://license.broadleafcommerce.org/fair_use_license-1.0.txt) unless the restrictions on use
+ * therein are violated and require payment to Broadleaf in which case the Broadleaf End User
+ * License Agreement (EULA), Version 1.1 (the "Commercial License" located at
+ * http://license.broadleafcommerce.org/commercial_license-1.1.txt) shall apply.
  *
- * Alternatively, the Commercial License may be replaced with a mutually agreed upon license (the "Custom License")
- * between you and Broadleaf Commerce. You may not use this file except in compliance with the applicable license.
- * #L%
+ * Alternatively, the Commercial License may be replaced with a mutually agreed upon license (the
+ * "Custom License") between you and Broadleaf Commerce. You may not use this file except in
+ * compliance with the applicable license. #L%
  */
 package org.broadleafcommerce.vendor.paypal.service.payment;
 
@@ -39,7 +34,8 @@ public class MessageConstants {
     public static final String DETAILSPAYMENTSHIPPINGDISCOUNT = "PAYMENTREQUEST_n_SHIPDISCAMT";
     public static final String DETAILSPAYMENTTOTALTAX = "PAYMENTREQUEST_n_TAXAMT";
     public static final String DETAILSPAYMENTTRANSACTIONID = "PAYMENTREQUEST_n_TRANSACTIONID";
-    public static final String DETAILSPAYMENTALLOWEDMETHOD = "PAYMENTREQUEST_n_ALLOWEDPAYMENTMETHOD";
+    public static final String DETAILSPAYMENTALLOWEDMETHOD =
+            "PAYMENTREQUEST_n_ALLOWEDPAYMENTMETHOD";
     public static final String BILLINGAGREEMENTID = "BILLING_AGREEMENT_ID";
     public static final String BILLINGECTOKEN = "BILLING_EC_TOKEN";
     public static final String AGREEMENTTOKENID = "AGREEMENT_TOKEN_ID";
@@ -64,7 +60,7 @@ public class MessageConstants {
     public static final String EXCEPTION_MESSAGE = "EXCEPTION_MESSAGE";
     public static final String EXCEPTION_DEBUG_ID = "EXCEPTION_DEBUG_ID";
     public static final String CUSTOM_FIELD = "custom_field";
-    public static final String TRANSACTION_STATUS="TRANSACTION_STATUS";
+    public static final String TRANSACTION_STATUS = "TRANSACTION_STATUS";
     public static final String PAYMENT_SUBMITTED_TIME = "PAYMENT_SUBMITTED_TIME";
 
 }
