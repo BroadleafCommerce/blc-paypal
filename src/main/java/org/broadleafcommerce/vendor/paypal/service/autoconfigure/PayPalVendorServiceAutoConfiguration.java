@@ -1,6 +1,6 @@
 package org.broadleafcommerce.vendor.paypal.service.autoconfigure;
 
-import org.broadleafcommerce.payment.service.gateway.ExternalCallPayPalCheckoutService;
+import org.broadleafcommerce.payment.service.gateway.PayPalExternalCallService;
 import org.broadleafcommerce.vendor.paypal.service.DefaultPayPalAgreementTokenService;
 import org.broadleafcommerce.vendor.paypal.service.DefaultPayPalBillingAgreementService;
 import org.broadleafcommerce.vendor.paypal.service.DefaultPayPalPaymentService;
@@ -22,21 +22,21 @@ public class PayPalVendorServiceAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public PayPalAgreementTokenService payPalAgreementTokenService(
-            ExternalCallPayPalCheckoutService externalCallService) {
+            PayPalExternalCallService externalCallService) {
         return new DefaultPayPalAgreementTokenService(externalCallService);
     }
 
     @Bean
     @ConditionalOnMissingBean
     public PayPalBillingAgreementService payPalBillingAgreementService(
-            ExternalCallPayPalCheckoutService externalCallService) {
+            PayPalExternalCallService externalCallService) {
         return new DefaultPayPalBillingAgreementService(externalCallService);
     }
 
     @Bean
     @ConditionalOnMissingBean
     public PayPalPaymentService payPalPaymentService(
-            ExternalCallPayPalCheckoutService externalCallService,
+            PayPalExternalCallService externalCallService,
             PayPalWebProfileService webProfileService) {
         return new DefaultPayPalPaymentService(externalCallService, webProfileService);
     }
@@ -44,7 +44,7 @@ public class PayPalVendorServiceAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public PayPalWebProfileService payPalWebProfileService(
-            ExternalCallPayPalCheckoutService externalCallService,
+            PayPalExternalCallService externalCallService,
             @Autowired(required = false) WebProfile webProfile) {
         return new DefaultPayPalWebProfileService(externalCallService, webProfile);
     }

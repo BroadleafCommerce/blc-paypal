@@ -28,7 +28,7 @@ import com.paypal.base.rest.APIContext;
 /**
  * @author Elbert Bautista (elbertbautista)
  */
-public interface ExternalCallPayPalCheckoutService {
+public interface PayPalExternalCallService {
 
     PayPalCheckoutConfiguration getConfiguration();
 

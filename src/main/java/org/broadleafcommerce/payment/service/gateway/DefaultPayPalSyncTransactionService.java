@@ -45,7 +45,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class DefaultPayPalSyncTransactionService implements PayPalSyncTransactionService {
 
-    private final ExternalCallPayPalCheckoutService payPalCheckoutService;
+    private final PayPalExternalCallService payPalCheckoutService;
 
     @Override
     public ReportingTransactionResponse lookupTransactionsByQueryParams(

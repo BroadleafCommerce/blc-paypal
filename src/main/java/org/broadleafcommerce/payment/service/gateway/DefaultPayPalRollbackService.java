@@ -13,7 +13,7 @@ import lombok.RequiredArgsConstructor;
  * @author Elbert Bautista (elbertbautista)
  */
 @RequiredArgsConstructor
-public class DefaultPayPalCheckoutRollbackService extends AbstractPaymentGatewayRollbackService
+public class DefaultPayPalRollbackService extends AbstractPaymentGatewayRollbackService
         implements PaymentGatewayRollbackService {
 
     private final PaymentGatewayTransactionService transactionService;

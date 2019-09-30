@@ -1,6 +1,6 @@
 package org.broadleafcommerce.vendor.paypal.service;
 
-import org.broadleafcommerce.payment.service.gateway.ExternalCallPayPalCheckoutService;
+import org.broadleafcommerce.payment.service.gateway.PayPalExternalCallService;
 import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCreateBillingAgreementRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCreateBillingAgreementResponse;
@@ -37,7 +37,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class DefaultPayPalBillingAgreementService implements PayPalBillingAgreementService {
 
-    private final ExternalCallPayPalCheckoutService externalCallService;
+    private final PayPalExternalCallService externalCallService;
 
     @Override
     public Agreement createPayPalBillingAgreement(PaymentRequest paymentRequest,

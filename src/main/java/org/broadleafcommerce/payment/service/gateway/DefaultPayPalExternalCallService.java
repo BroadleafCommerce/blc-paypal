@@ -39,9 +39,9 @@ import lombok.RequiredArgsConstructor;
  * @author Elbert Bautista (elbertbautista)
  */
 @RequiredArgsConstructor
-public class DefaultExternalCallPayPalCheckoutService
+public class DefaultPayPalExternalCallService
         extends AbstractExternalPaymentGatewayCall<PayPalRequest, PayPalResponse>
-        implements ExternalCallPayPalCheckoutService {
+        implements PayPalExternalCallService {
 
     private final PayPalCheckoutConfiguration configuration;
 

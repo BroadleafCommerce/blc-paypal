@@ -16,7 +16,7 @@ import lombok.RequiredArgsConstructor;
  * @author Elbert Bautista (elbertbautista)
  */
 @RequiredArgsConstructor
-public class DefaultPayPalCheckoutConfigurationService extends
+public class DefaultPayPalConfigurationService extends
         AbstractPaymentGatewayConfigurationService implements PaymentGatewayConfigurationService {
 
     private final PayPalCheckoutConfiguration configuration;

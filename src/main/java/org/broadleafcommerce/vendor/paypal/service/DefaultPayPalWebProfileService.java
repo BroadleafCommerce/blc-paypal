@@ -3,7 +3,7 @@ package org.broadleafcommerce.vendor.paypal.service;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.broadleafcommerce.payment.service.gateway.ExternalCallPayPalCheckoutService;
+import org.broadleafcommerce.payment.service.gateway.PayPalExternalCallService;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCreateWebProfileRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCreateWebProfileResponse;
 
@@ -15,13 +15,13 @@ public class DefaultPayPalWebProfileService implements PayPalWebProfileService {
 
     private static final Log LOG = LogFactory.getLog(DefaultPayPalWebProfileService.class);
 
-    private final ExternalCallPayPalCheckoutService externalCallService;
+    private final PayPalExternalCallService externalCallService;
     private final WebProfile webProfile;
 
     private String beanProfileId;
 
-    public DefaultPayPalWebProfileService(ExternalCallPayPalCheckoutService externalCallService,
-            WebProfile webProfile) {
+    public DefaultPayPalWebProfileService(PayPalExternalCallService externalCallService,
+                                          WebProfile webProfile) {
         super();
         this.externalCallService = externalCallService;
         this.webProfile = webProfile;

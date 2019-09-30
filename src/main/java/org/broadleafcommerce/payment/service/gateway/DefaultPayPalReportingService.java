@@ -24,12 +24,12 @@ import lombok.RequiredArgsConstructor;
  * @author Elbert Bautista (elbertbautista)
  */
 @RequiredArgsConstructor
-public class DefaultPayPalCheckoutReportingService extends AbstractPaymentGatewayReportingService
+public class DefaultPayPalReportingService extends AbstractPaymentGatewayReportingService
         implements PaymentGatewayReportingService {
 
-    private static final Log LOG = LogFactory.getLog(DefaultPayPalCheckoutReportingService.class);
+    private static final Log LOG = LogFactory.getLog(DefaultPayPalReportingService.class);
 
-    private final ExternalCallPayPalCheckoutService payPalCheckoutService;
+    private final PayPalExternalCallService payPalCheckoutService;
 
     @Override
     public PaymentResponse findDetailsByTransaction(PaymentRequest paymentRequest)
