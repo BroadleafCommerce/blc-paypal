@@ -1,16 +1,16 @@
 package org.broadleafcommerce.payment.service.gateway.autoconfigure;
 
 import org.broadleafcommerce.payment.service.gateway.DefaultPayPalCheckoutConfiguration;
-import org.broadleafcommerce.payment.service.gateway.DefaultPayPalConfigurationService;
-import org.broadleafcommerce.payment.service.gateway.DefaultPayPalExternalCallService;
-import org.broadleafcommerce.payment.service.gateway.DefaultPayPalHostedService;
-import org.broadleafcommerce.payment.service.gateway.DefaultPayPalReportingService;
-import org.broadleafcommerce.payment.service.gateway.DefaultPayPalRollbackService;
+import org.broadleafcommerce.payment.service.gateway.DefaultPayPalCheckoutConfigurationService;
+import org.broadleafcommerce.payment.service.gateway.DefaultPayPalCheckoutExternalCallService;
+import org.broadleafcommerce.payment.service.gateway.DefaultPayPalCheckoutHostedService;
+import org.broadleafcommerce.payment.service.gateway.DefaultPayPalCheckoutReportingService;
+import org.broadleafcommerce.payment.service.gateway.DefaultPayPalCheckoutRollbackService;
+import org.broadleafcommerce.payment.service.gateway.DefaultPayPalCheckoutTransactionConfirmationService;
+import org.broadleafcommerce.payment.service.gateway.DefaultPayPalCheckoutTransactionService;
 import org.broadleafcommerce.payment.service.gateway.DefaultPayPalSyncTransactionService;
-import org.broadleafcommerce.payment.service.gateway.DefaultPayPalTransactionConfirmationService;
-import org.broadleafcommerce.payment.service.gateway.DefaultPayPalTransactionService;
 import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutConfiguration;
-import org.broadleafcommerce.payment.service.gateway.PayPalExternalCallService;
+import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutExternalCallService;
 import org.broadleafcommerce.payment.service.gateway.PayPalSyncTransactionService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -29,9 +29,9 @@ public class PayPalServiceAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public PayPalExternalCallService externalCallPayPalCheckoutService(
+    public PayPalCheckoutExternalCallService externalCallPayPalCheckoutService(
             PayPalCheckoutConfiguration configuration) {
-        return new DefaultPayPalExternalCallService(configuration);
+        return new DefaultPayPalCheckoutExternalCallService(configuration);
     }
 
     @Bean
@@ -49,7 +49,7 @@ public class PayPalServiceAutoConfiguration {
             PaymentGatewayReportingService reportingService,
             PaymentGatewayRollbackService rollbackService,
             PaymentGatewayHostedService hostedService) {
-        return new DefaultPayPalConfigurationService(configuration,
+        return new DefaultPayPalCheckoutConfigurationService(configuration,
                 transactionService,
                 transactionConfirmationService,
                 reportingService,
@@ -63,21 +63,21 @@ public class PayPalServiceAutoConfiguration {
     public PaymentGatewayHostedService paymentGatewayHostedService(
             PayPalCheckoutConfiguration configuration,
             PaymentGatewayTransactionService transactionService) {
-        return new DefaultPayPalHostedService(configuration, transactionService);
+        return new DefaultPayPalCheckoutHostedService(configuration, transactionService);
     }
 
     @Bean
     @ConditionalOnMissingBean
     public PaymentGatewayReportingService paymentGatewayReportingService(
-            PayPalExternalCallService payPalCheckoutService) {
-        return new DefaultPayPalReportingService(payPalCheckoutService);
+            PayPalCheckoutExternalCallService payPalCheckoutService) {
+        return new DefaultPayPalCheckoutReportingService(payPalCheckoutService);
     }
 
     @Bean
     @ConditionalOnMissingBean
     public PaymentGatewayRollbackService paymentGatewayRollbackService(
             PaymentGatewayTransactionService transactionService) {
-        return new DefaultPayPalRollbackService(transactionService);
+        return new DefaultPayPalCheckoutRollbackService(transactionService);
     }
 
     @Bean
@@ -85,21 +85,21 @@ public class PayPalServiceAutoConfiguration {
     public PaymentGatewayTransactionConfirmationService paymentGatewayTransactionConfirmationService(
             PayPalCheckoutConfiguration configuration,
             PaymentGatewayTransactionService transactionService) {
-        return new DefaultPayPalTransactionConfirmationService(configuration,
+        return new DefaultPayPalCheckoutTransactionConfirmationService(configuration,
                 transactionService);
     }
 
     @Bean
     @ConditionalOnMissingBean
     public PaymentGatewayTransactionService paymentGatewayTransactionService(
-            PayPalExternalCallService payPalCheckoutService) {
-        return new DefaultPayPalTransactionService(payPalCheckoutService);
+            PayPalCheckoutExternalCallService payPalCheckoutService) {
+        return new DefaultPayPalCheckoutTransactionService(payPalCheckoutService);
     }
 
     @Bean
     @ConditionalOnMissingBean
     public PayPalSyncTransactionService payPalSyncTransactionService(
-            PayPalExternalCallService payPalCheckoutService) {
+            PayPalCheckoutExternalCallService payPalCheckoutService) {
         return new DefaultPayPalSyncTransactionService(payPalCheckoutService);
     }
 

@@ -23,7 +23,7 @@ public interface PayPalCheckoutConfiguration extends PaymentGatewayConfiguration
      * 
      * @return String
      */
-    String getReturnUrl();
+    public String getReturnUrl();
 
     /**
      * URL to which the buyer is returned if the buyer does not approve the use of PayPal to pay
@@ -35,19 +35,19 @@ public interface PayPalCheckoutConfiguration extends PaymentGatewayConfiguration
      * 
      * @return
      */
-    String getCancelUrl();
+    public String getCancelUrl();
 
     /**
      * Gets the the property driven id of the WebProfile to be used when creating payments. For more
      * information on WebProfiles go to
-     * {@link "https://developer.paypal.com/docs/integration/direct/payment-experience/"}
+     * {@link https://developer.paypal.com/docs/integration/direct/payment-experience/}
      * {@link PayPalWebProfileService#getWebProfileId(PaymentRequest)} should be used instead if you
      * want to find the web profile id to create a payment since it has the ability to create new
      * WebProfiles based on injected beans along with using this method
      * 
      * @return
      */
-    String getWebProfileId();
+    public String getWebProfileId();
 
     String getSmartPaymentEnvironment();
 
@@ -58,7 +58,7 @@ public interface PayPalCheckoutConfiguration extends PaymentGatewayConfiguration
      *
      * @return PayPalShippingDisplayType
      */
-    PayPalShippingDisplayType getShippingDisplayType();
+    public PayPalShippingDisplayType getShippingDisplayType();
 
     /**
      * Type declaration for the label to be displayed in MiniCart for UX. It is one of the following
@@ -66,7 +66,7 @@ public interface PayPalCheckoutConfiguration extends PaymentGatewayConfiguration
      *
      * @return String
      */
-    String getTotalType();
+    public String getTotalType();
 
     /**
      * <p>
@@ -85,7 +85,7 @@ public interface PayPalCheckoutConfiguration extends PaymentGatewayConfiguration
      *
      * @return Map
      */
-    Map<String, String> getAdditionalConfig();
+    public Map<String, String> getAdditionalConfig();
 
     /**
      * <p>
@@ -108,7 +108,7 @@ public interface PayPalCheckoutConfiguration extends PaymentGatewayConfiguration
      * Also note that the entire custom field string after serialization is 256 characters. An
      * IllegalArgumentException will be thrown otherwise.
      */
-    Map<String, String> getAdditionalCustomFields();
+    public Map<String, String> getAdditionalCustomFields();
 
     String getPaymentDescription();
 

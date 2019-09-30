@@ -59,14 +59,14 @@ import lombok.RequiredArgsConstructor;
  * @author Elbert Bautista (elbertbautista)
  */
 @RequiredArgsConstructor
-public class DefaultPayPalTransactionService
+public class DefaultPayPalCheckoutTransactionService
         extends AbstractPaymentGatewayTransactionService
         implements PaymentGatewayTransactionService {
 
     protected static final Log LOG =
-            LogFactory.getLog(DefaultPayPalTransactionService.class);
+            LogFactory.getLog(DefaultPayPalCheckoutTransactionService.class);
 
-    private final PayPalExternalCallService payPalCheckoutService;
+    private final PayPalCheckoutExternalCallService payPalCheckoutService;
 
     @Override
     public PaymentResponse authorize(PaymentRequest paymentRequest) throws PaymentException {

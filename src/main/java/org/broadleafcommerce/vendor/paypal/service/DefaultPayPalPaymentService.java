@@ -1,7 +1,7 @@
 package org.broadleafcommerce.vendor.paypal.service;
 
 import org.apache.commons.lang3.StringUtils;
-import org.broadleafcommerce.payment.service.gateway.PayPalExternalCallService;
+import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutExternalCallService;
 import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCreatePaymentRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCreatePaymentResponse;
@@ -27,7 +27,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class DefaultPayPalPaymentService implements PayPalPaymentService {
 
-    private final PayPalExternalCallService externalCallService;
+    private final PayPalCheckoutExternalCallService externalCallService;
     private final PayPalWebProfileService webProfileService;
 
     @Value("${gateway.paypal.checkout.rest.populate.shipping.create.payment:true}")

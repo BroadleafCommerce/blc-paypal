@@ -1,6 +1,6 @@
 package org.broadleafcommerce.vendor.paypal.service;
 
-import org.broadleafcommerce.payment.service.gateway.PayPalExternalCallService;
+import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutExternalCallService;
 import org.broadleafcommerce.vendor.paypal.api.AgreementToken;
 import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCreateAgreementTokenRequest;
@@ -17,7 +17,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class DefaultPayPalAgreementTokenService implements PayPalAgreementTokenService {
 
-    private final PayPalExternalCallService externalCallService;
+    private final PayPalCheckoutExternalCallService externalCallService;
 
     /**
      * To support PayPal Reference Transactions and Billing Agreement Tokens
