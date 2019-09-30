@@ -21,7 +21,7 @@ public class DefaultPayPalWebProfileService implements PayPalWebProfileService {
     private String beanProfileId;
 
     public DefaultPayPalWebProfileService(PayPalExternalCallService externalCallService,
-                                          WebProfile webProfile) {
+            WebProfile webProfile) {
         super();
         this.externalCallService = externalCallService;
         this.webProfile = webProfile;

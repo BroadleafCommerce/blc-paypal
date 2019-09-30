@@ -1,16 +1,16 @@
 package org.broadleafcommerce.payment.service.gateway.autoconfigure;
 
-import org.broadleafcommerce.payment.service.gateway.DefaultPayPalExternalCallService;
 import org.broadleafcommerce.payment.service.gateway.DefaultPayPalCheckoutConfiguration;
 import org.broadleafcommerce.payment.service.gateway.DefaultPayPalConfigurationService;
+import org.broadleafcommerce.payment.service.gateway.DefaultPayPalExternalCallService;
 import org.broadleafcommerce.payment.service.gateway.DefaultPayPalHostedService;
 import org.broadleafcommerce.payment.service.gateway.DefaultPayPalReportingService;
 import org.broadleafcommerce.payment.service.gateway.DefaultPayPalRollbackService;
+import org.broadleafcommerce.payment.service.gateway.DefaultPayPalSyncTransactionService;
 import org.broadleafcommerce.payment.service.gateway.DefaultPayPalTransactionConfirmationService;
 import org.broadleafcommerce.payment.service.gateway.DefaultPayPalTransactionService;
-import org.broadleafcommerce.payment.service.gateway.DefaultPayPalSyncTransactionService;
-import org.broadleafcommerce.payment.service.gateway.PayPalExternalCallService;
 import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutConfiguration;
+import org.broadleafcommerce.payment.service.gateway.PayPalExternalCallService;
 import org.broadleafcommerce.payment.service.gateway.PayPalSyncTransactionService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
