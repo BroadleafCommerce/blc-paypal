@@ -8,7 +8,6 @@ import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCheckoutPaymentGatewayType;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalPaymentRetrievalRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalPaymentRetrievalResponse;
-import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import com.broadleafcommerce.paymentgateway.domain.PaymentRequest;
@@ -19,19 +18,18 @@ import com.broadleafcommerce.paymentgateway.service.reporting.AbstractPaymentGat
 import com.broadleafcommerce.paymentgateway.service.reporting.PaymentGatewayReportingService;
 import com.paypal.api.payments.Payment;
 
-import javax.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 
 /**
  * @author Elbert Bautista (elbertbautista)
  */
-@Service("blPayPalCheckoutReportingService")
-public class PayPalCheckoutReportingServiceImpl extends AbstractPaymentGatewayReportingService
+@RequiredArgsConstructor
+public class DefaultPayPalCheckoutReportingService extends AbstractPaymentGatewayReportingService
         implements PaymentGatewayReportingService {
 
-    private static final Log LOG = LogFactory.getLog(PayPalCheckoutReportingServiceImpl.class);
+    private static final Log LOG = LogFactory.getLog(DefaultPayPalCheckoutReportingService.class);
 
-    @Resource(name = "blExternalCallPayPalCheckoutService")
-    protected ExternalCallPayPalCheckoutService payPalCheckoutService;
+    private final ExternalCallPayPalCheckoutService payPalCheckoutService;
 
     @Override
     public PaymentResponse findDetailsByTransaction(PaymentRequest paymentRequest)

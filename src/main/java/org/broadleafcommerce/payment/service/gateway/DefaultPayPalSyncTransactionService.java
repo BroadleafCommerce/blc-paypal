@@ -27,7 +27,7 @@ import com.paypal.base.rest.PayPalRESTException;
 
 import java.util.Map;
 
-import javax.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 
 /**
  * This takes the {@link PaymentRequest} and calls the
@@ -42,10 +42,10 @@ import javax.annotation.Resource;
  * @author venkat
  *
  */
-public class PayPalSyncTransactionServiceImpl implements PayPalSyncTransactionService {
+@RequiredArgsConstructor
+public class DefaultPayPalSyncTransactionService implements PayPalSyncTransactionService {
 
-    @Resource(name = "blExternalCallPayPalCheckoutService")
-    protected ExternalCallPayPalCheckoutService payPalCheckoutService;
+    private final ExternalCallPayPalCheckoutService payPalCheckoutService;
 
     @Override
     public ReportingTransactionResponse lookupTransactionsByQueryParams(

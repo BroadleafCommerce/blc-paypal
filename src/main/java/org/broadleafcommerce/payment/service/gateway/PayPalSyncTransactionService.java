@@ -25,7 +25,6 @@ import java.util.Map;
 
 public interface PayPalSyncTransactionService {
 
-
     /**
      * <p>
      * This returns all the matching transactions wrapped in the
@@ -55,6 +54,5 @@ public interface PayPalSyncTransactionService {
      */
     ReportingTransactionResponse lookupTransactionsByQueryParams(Map<String, String> queryFilter)
             throws PayPalRESTException;
-
 
 }

@@ -1,7 +1,5 @@
 package org.broadleafcommerce.payment.service.gateway;
 
-import org.springframework.stereotype.Service;
-
 import com.broadleafcommerce.paymentgateway.service.configuration.AbstractPaymentGatewayConfigurationService;
 import com.broadleafcommerce.paymentgateway.service.configuration.PaymentGatewayConfiguration;
 import com.broadleafcommerce.paymentgateway.service.configuration.PaymentGatewayConfigurationService;
@@ -12,35 +10,22 @@ import com.broadleafcommerce.paymentgateway.service.transaction.PaymentGatewayTr
 import com.broadleafcommerce.paymentgateway.service.transaction.PaymentGatewayTransactionService;
 import com.broadleafcommerce.paymentgateway.service.webresponse.PaymentGatewayWebResponseService;
 
-import javax.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 
 /**
  * @author Elbert Bautista (elbertbautista)
  */
-@Service("blPayPalCheckoutConfigurationService")
-public class PayPalCheckoutConfigurationServiceImpl extends
+@RequiredArgsConstructor
+public class DefaultPayPalCheckoutConfigurationService extends
         AbstractPaymentGatewayConfigurationService implements PaymentGatewayConfigurationService {
 
-    @Resource(name = "blPayPalCheckoutConfiguration")
-    protected PayPalCheckoutConfiguration configuration;
-
-    @Resource(name = "blPayPalCheckoutTransactionService")
-    protected PaymentGatewayTransactionService transactionService;
-
-    @Resource(name = "blPayPalCheckoutTransactionConfirmationService")
-    protected PaymentGatewayTransactionConfirmationService transactionConfirmationService;
-
-    @Resource(name = "blPayPalCheckoutReportingService")
-    protected PaymentGatewayReportingService reportingService;
-
-    @Resource(name = "blPayPalCheckoutRollbackService")
-    protected PaymentGatewayRollbackService rollbackService;
-
-    @Resource(name = "blPayPalCheckoutWebResponseService")
-    protected PaymentGatewayWebResponseService webResponseService;
-
-    @Resource(name = "blPayPalCheckoutHostedService")
-    protected PaymentGatewayHostedService hostedService;
+    private final PayPalCheckoutConfiguration configuration;
+    private final PaymentGatewayTransactionService transactionService;
+    private final PaymentGatewayTransactionConfirmationService transactionConfirmationService;
+    private final PaymentGatewayReportingService reportingService;
+    private final PaymentGatewayRollbackService rollbackService;
+    private final PaymentGatewayWebResponseService webResponseService;
+    private final PaymentGatewayHostedService hostedService;
 
     @Override
     public PaymentGatewayConfiguration getConfiguration() {

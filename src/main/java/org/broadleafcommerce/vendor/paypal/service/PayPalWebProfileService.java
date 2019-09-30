@@ -12,4 +12,5 @@ public interface PayPalWebProfileService {
      * @throws PaymentException
      */
     public String getWebProfileId(PaymentRequest paymentRequest) throws PaymentException;
+
 }

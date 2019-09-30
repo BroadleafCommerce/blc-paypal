@@ -2,7 +2,6 @@ package org.broadleafcommerce.payment.service.gateway;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.stereotype.Service;
 
 import com.broadleafcommerce.paymentgateway.domain.PaymentRequest;
 import com.broadleafcommerce.paymentgateway.domain.PaymentResponse;
@@ -12,29 +11,26 @@ import com.broadleafcommerce.paymentgateway.service.hosted.AbstractPaymentGatewa
 import com.broadleafcommerce.paymentgateway.service.hosted.PaymentGatewayHostedService;
 import com.broadleafcommerce.paymentgateway.service.transaction.PaymentGatewayTransactionService;
 
-import javax.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 
 /**
  * @author Elbert Bautista (elbertbautista)
  */
-@Service("blPayPalCheckoutHostedService")
-public class PayPalCheckoutHostedServiceImpl extends AbstractPaymentGatewayHostedService
+@RequiredArgsConstructor
+public class DefaultPayPalCheckoutHostedService extends AbstractPaymentGatewayHostedService
         implements PaymentGatewayHostedService {
 
-    protected static final Log LOG = LogFactory.getLog(PayPalCheckoutHostedServiceImpl.class);
+    protected static final Log LOG = LogFactory.getLog(DefaultPayPalCheckoutHostedService.class);
 
-    @Resource(name = "blExternalCallPayPalCheckoutService")
-    protected ExternalCallPayPalCheckoutService payPalCheckoutService;
-
-    @Resource(name = "blPayPalCheckoutTransactionService")
-    protected PaymentGatewayTransactionService transactionService;
+    private final PayPalCheckoutConfiguration configuration;
+    private final PaymentGatewayTransactionService transactionService;
 
     @Override
     public PaymentResponse requestHostedEndpoint(PaymentRequest paymentRequest)
             throws PaymentException {
 
         PaymentResponse responseDTO;
-        if (payPalCheckoutService.getConfiguration().isPerformAuthorizeAndCapture()) {
+        if (configuration.isPerformAuthorizeAndCapture()) {
             responseDTO = transactionService.authorizeAndCapture(paymentRequest);
             responseDTO.transactionType(DefaultTransactionTypes.AUTHORIZE_AND_CAPTURE);
         } else {

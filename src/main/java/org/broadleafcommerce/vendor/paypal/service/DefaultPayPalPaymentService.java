@@ -6,12 +6,9 @@ import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCreatePaymentRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCreatePaymentResponse;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalUpdatePaymentRequest;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 
 import com.broadleafcommerce.paymentgateway.domain.PaymentRequest;
-import com.broadleafcommerce.paymentgateway.service.CurrentOrderPaymentRequestService;
 import com.broadleafcommerce.paymentgateway.service.exception.PaymentException;
 import com.paypal.api.payments.Amount;
 import com.paypal.api.payments.ItemList;
@@ -24,28 +21,22 @@ import com.paypal.api.payments.Transaction;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.Resource;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
-@Service("blPayPalPaymentService")
-public class PayPalPaymentServiceImpl implements PayPalPaymentService {
+@RequiredArgsConstructor
+public class DefaultPayPalPaymentService implements PayPalPaymentService {
 
-    @Resource(name = "blExternalCallPayPalCheckoutService")
-    protected ExternalCallPayPalCheckoutService externalCallService;
-
-    @Resource(name = "blPayPalWebProfileService")
-    protected PayPalWebProfileService webProfileService;
-
-    @Autowired(required = false)
-    protected CurrentOrderPaymentRequestService currentOrderPaymentRequestService;
+    private final ExternalCallPayPalCheckoutService externalCallService;
+    private final PayPalWebProfileService webProfileService;
 
     @Value("${gateway.paypal.checkout.rest.populate.shipping.create.payment:true}")
     protected boolean shouldPopulateShippingOnPaymentCreation;
 
     @Override
-    public Payment createPayPalPaymentForCurrentOrder(boolean performCheckoutOnReturn)
+    public Payment createPayPalPayment(@NonNull PaymentRequest paymentRequest,
+            boolean performCheckoutOnReturn)
             throws PaymentException {
-        PaymentRequest paymentRequest = getPaymentRequestForCurrentOrder();
-
         // Set payer details
         Payer payer = constructPayer(paymentRequest);
 
@@ -93,13 +84,9 @@ public class PayPalPaymentServiceImpl implements PayPalPaymentService {
     }
 
     @Override
-    public void updatePayPalPaymentForFulfillment() throws PaymentException {
-        PaymentRequest paymentRequest = getPaymentRequestForCurrentOrder();
-        String paymentId = getPayPalPaymentIdFromCurrentOrder();
-        if (paymentRequest == null) {
-            throw new PaymentException(
-                    "Unable to update the current PayPal payment because the PaymentRequestDTO was null");
-        }
+    public void updatePayPalPaymentForFulfillment(@NonNull PaymentRequest paymentRequest)
+            throws PaymentException {
+        String paymentId = (String) paymentRequest.getAdditionalField(MessageConstants.PAYMENTID);
         if (StringUtils.isBlank(paymentId)) {
             throw new PaymentException(
                     "Unable to update the current PayPal payment because no PayPal payment id was found on the order");
@@ -150,54 +137,6 @@ public class PayPalPaymentServiceImpl implements PayPalPaymentService {
                 new PayPalUpdatePaymentRequest(payment,
                         patches,
                         externalCallService.constructAPIContext(paymentRequest)));
-    }
-
-    protected PaymentRequest getPaymentRequestForCurrentOrder() throws PaymentException {
-        if (currentOrderPaymentRequestService != null) {
-            return currentOrderPaymentRequestService.getPaymentRequestFromCurrentOrder();
-        } else {
-            throw new PaymentException("Unable to get PaymentRequestDTO for current order");
-        }
-    }
-
-    @Override
-    public String getPayPalPaymentIdFromCurrentOrder() throws PaymentException {
-        if (currentOrderPaymentRequestService != null) {
-            return currentOrderPaymentRequestService
-                    .retrieveOrderAttributeFromCurrentOrder(MessageConstants.PAYMENTID);
-        } else {
-            throw new PaymentException("Unable to retrieve PayPal payment id for current order");
-        }
-    }
-
-    @Override
-    public String getPayPalPayerIdFromCurrentOrder() throws PaymentException {
-        if (currentOrderPaymentRequestService != null) {
-            return currentOrderPaymentRequestService
-                    .retrieveOrderAttributeFromCurrentOrder(MessageConstants.PAYERID);
-        } else {
-            throw new PaymentException("Unable to retrieve PayPal payer id for current order");
-        }
-    }
-
-    @Override
-    public void setPayPalPaymentIdOnCurrentOrder(String paymentId) throws PaymentException {
-        if (currentOrderPaymentRequestService != null) {
-            currentOrderPaymentRequestService
-                    .addOrderAttributeToCurrentOrder(MessageConstants.PAYMENTID, paymentId);
-        } else {
-            throw new PaymentException("Unable to set PayPal payment id on current order");
-        }
-    }
-
-    @Override
-    public void setPayPalPayerIdOnCurrentOrder(String payerId) throws PaymentException {
-        if (currentOrderPaymentRequestService != null) {
-            currentOrderPaymentRequestService
-                    .addOrderAttributeToCurrentOrder(MessageConstants.PAYERID, payerId);
-        } else {
-            throw new PaymentException("Unable to set PayPal payer id on current order");
-        }
     }
 
     public String getIntent(boolean performCheckoutOnReturn) {

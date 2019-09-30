@@ -1,7 +1,5 @@
 package org.broadleafcommerce.payment.service.gateway;
 
-import org.springframework.stereotype.Service;
-
 import com.broadleafcommerce.paymentgateway.domain.PaymentRequest;
 import com.broadleafcommerce.paymentgateway.domain.PaymentResponse;
 import com.broadleafcommerce.paymentgateway.service.exception.PaymentException;
@@ -9,17 +7,16 @@ import com.broadleafcommerce.paymentgateway.service.rollback.AbstractPaymentGate
 import com.broadleafcommerce.paymentgateway.service.rollback.PaymentGatewayRollbackService;
 import com.broadleafcommerce.paymentgateway.service.transaction.PaymentGatewayTransactionService;
 
-import javax.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 
 /**
  * @author Elbert Bautista (elbertbautista)
  */
-@Service("blPayPalCheckoutRollbackService")
-public class PayPalCheckoutRollbackServiceImpl extends AbstractPaymentGatewayRollbackService
+@RequiredArgsConstructor
+public class DefaultPayPalCheckoutRollbackService extends AbstractPaymentGatewayRollbackService
         implements PaymentGatewayRollbackService {
 
-    @Resource(name = "blPayPalCheckoutTransactionService")
-    protected PaymentGatewayTransactionService transactionService;
+    private final PaymentGatewayTransactionService transactionService;
 
     @Override
     public PaymentResponse rollbackAuthorize(PaymentRequest transactionToBeRolledBack)

@@ -41,9 +41,9 @@ public interface PayPalCheckoutConfiguration extends PaymentGatewayConfiguration
      * Gets the the property driven id of the WebProfile to be used when creating payments. For more
      * information on WebProfiles go to
      * {@link https://developer.paypal.com/docs/integration/direct/payment-experience/}
-     * {@link PayPalWebProfileService#getWebProfileId()} should be used instead if you want to find
-     * the web profile id to create a payment since it has the ability to create new WebProfiles
-     * based on injected beans along with using this method
+     * {@link PayPalWebProfileService#getWebProfileId(PaymentRequest)} should be used instead if you
+     * want to find the web profile id to create a payment since it has the ability to create new
+     * WebProfiles based on injected beans along with using this method
      * 
      * @return
      */

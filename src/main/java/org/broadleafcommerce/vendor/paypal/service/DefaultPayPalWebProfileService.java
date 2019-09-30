@@ -6,30 +6,24 @@ import org.apache.commons.logging.LogFactory;
 import org.broadleafcommerce.payment.service.gateway.ExternalCallPayPalCheckoutService;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCreateWebProfileRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCreateWebProfileResponse;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import com.broadleafcommerce.paymentgateway.domain.PaymentRequest;
 import com.broadleafcommerce.paymentgateway.service.exception.PaymentException;
 import com.paypal.api.payments.WebProfile;
 
-import javax.annotation.Resource;
+public class DefaultPayPalWebProfileService implements PayPalWebProfileService {
 
-@Service("blPayPalWebProfileService")
-public class PayPalWebProfileServiceImpl implements PayPalWebProfileService {
+    private static final Log LOG = LogFactory.getLog(DefaultPayPalWebProfileService.class);
 
-    private static final Log LOG = LogFactory.getLog(PayPalWebProfileServiceImpl.class);
+    private final ExternalCallPayPalCheckoutService externalCallService;
+    private final WebProfile webProfile;
 
-    protected WebProfile webProfile;
+    private String beanProfileId;
 
-    protected String beanProfileId;
-
-    @Resource(name = "blExternalCallPayPalCheckoutService")
-    protected ExternalCallPayPalCheckoutService externalCallService;
-
-    @Autowired(required = false)
-    public PayPalWebProfileServiceImpl(WebProfile webProfile) {
+    public DefaultPayPalWebProfileService(ExternalCallPayPalCheckoutService externalCallService,
+            WebProfile webProfile) {
         super();
+        this.externalCallService = externalCallService;
         this.webProfile = webProfile;
         if (webProfile != null && StringUtils.isBlank(webProfile.getId()) && LOG.isWarnEnabled()) {
             LOG.warn(
@@ -37,10 +31,6 @@ public class PayPalWebProfileServiceImpl implements PayPalWebProfileService {
                             + "To avoid this either set an id on the provided WebProfile bean or set the property gateway.paypal.checkout.rest.webProfileId."
                             + "To obtain a WebProfile id either create a WebProfile or select an existing an id from you PayPal account following the instructions here https://developer.paypal.com/docs/api/payment-experience/v1/#web-profiles");
         }
-    }
-
-    public PayPalWebProfileServiceImpl() {
-        super();
     }
 
     @Override

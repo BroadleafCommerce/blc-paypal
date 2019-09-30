@@ -3,9 +3,7 @@ package org.broadleafcommerce.payment.service.gateway;
 import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCheckoutPaymentGatewayType;
 import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalShippingDisplayType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
-import org.springframework.stereotype.Service;
 
 import com.broadleafcommerce.paymentgateway.domain.enums.PaymentGatewayType;
 import com.broadleafcommerce.paymentgateway.service.configuration.AbstractPaymentGatewayConfiguration;
@@ -15,15 +13,16 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
+import lombok.RequiredArgsConstructor;
+
 /**
  * @author Elbert Bautista (elbertbautista)
  */
-@Service("blPayPalCheckoutConfiguration")
-public class PayPalCheckoutConfigurationImpl extends AbstractPaymentGatewayConfiguration
+@RequiredArgsConstructor
+public class DefaultPayPalCheckoutConfiguration extends AbstractPaymentGatewayConfiguration
         implements PayPalCheckoutConfiguration {
 
-    @Autowired
-    protected Environment env;
+    private final Environment env;
 
     protected int failureReportingThreshold = 1;
     protected boolean performAuthorizeAndCapture = false;

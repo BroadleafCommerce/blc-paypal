@@ -6,7 +6,6 @@ import org.broadleafcommerce.vendor.paypal.api.AgreementToken;
 import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalResponse;
-import org.springframework.stereotype.Service;
 
 import com.broadleafcommerce.money.CurrencyContext;
 import com.broadleafcommerce.money.SimpleCurrencyContext;
@@ -32,19 +31,19 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import javax.annotation.Resource;
 import javax.money.Monetary;
+
+import lombok.RequiredArgsConstructor;
 
 /**
  * @author Elbert Bautista (elbertbautista)
  */
-@Service("blExternalCallPayPalCheckoutService")
-public class ExternalCallPayPalCheckoutServiceImpl
+@RequiredArgsConstructor
+public class DefaultExternalCallPayPalCheckoutService
         extends AbstractExternalPaymentGatewayCall<PayPalRequest, PayPalResponse>
         implements ExternalCallPayPalCheckoutService {
 
-    @Resource(name = "blPayPalCheckoutConfiguration")
-    protected PayPalCheckoutConfiguration configuration;
+    private final PayPalCheckoutConfiguration configuration;
 
     @Override
     public PayPalCheckoutConfiguration getConfiguration() {

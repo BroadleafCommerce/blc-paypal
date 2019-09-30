@@ -81,7 +81,7 @@ public class AgreementToken extends PayPalResource {
      * URI.
      * 
      * @param apiContext {@link APIContext} used for the API call.
-     * @param tokenId payment tokenId (e.g., BA-8A802366G0648845Y)
+     * @param agreementToken payment tokenId (e.g., BA-8A802366G0648845Y)
      * @return AgreementToken
      * @throws PayPalRESTException
      */

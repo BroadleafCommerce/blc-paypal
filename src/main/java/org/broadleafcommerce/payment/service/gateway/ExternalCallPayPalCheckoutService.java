@@ -38,10 +38,9 @@ public interface ExternalCallPayPalCheckoutService {
             boolean checkoutComplete);
 
     /**
-     * Converts a PayPal payment into a PaymentResponseDTO
+     * Converts a PayPal payment into a PaymentResponse
      * 
-     * @param response A PayPal payment that should be used to be converted into a
-     *        PaymentResponseDTO
+     * @param response A PayPal payment that should be used to be converted into a PaymentResponse
      * @param responseDTO The response dto that should be used to copy information from the PayPal
      *        payment
      */
