@@ -12,10 +12,10 @@ import org.springframework.util.Assert;
 
 import com.broadleafcommerce.paymentgateway.domain.PaymentRequest;
 import com.broadleafcommerce.paymentgateway.domain.PaymentResponse;
+import com.broadleafcommerce.paymentgateway.domain.enums.PaymentGatewayType;
 import com.broadleafcommerce.paymentgateway.domain.enums.PaymentType;
 import com.broadleafcommerce.paymentgateway.service.exception.PaymentException;
 import com.broadleafcommerce.paymentgateway.service.reporting.AbstractPaymentGatewayReportingService;
-import com.broadleafcommerce.paymentgateway.service.reporting.PaymentGatewayReportingService;
 import com.paypal.api.payments.Payment;
 
 import lombok.RequiredArgsConstructor;
@@ -25,7 +25,7 @@ import lombok.RequiredArgsConstructor;
  */
 @RequiredArgsConstructor
 public class DefaultPayPalCheckoutReportingService extends AbstractPaymentGatewayReportingService
-        implements PaymentGatewayReportingService {
+        implements PayPalCheckoutReportingService {
 
     private static final Log LOG = LogFactory.getLog(DefaultPayPalCheckoutReportingService.class);
 
@@ -60,6 +60,11 @@ public class DefaultPayPalCheckoutReportingService extends AbstractPaymentGatewa
         LOG.info("ResponseDTO created: "
                 + ToStringBuilder.reflectionToString(responseDTO, ToStringStyle.MULTI_LINE_STYLE));
         return responseDTO;
+    }
+
+    @Override
+    public PaymentGatewayType getGatewayType() {
+        return PayPalCheckoutPaymentGatewayType.PAYPAL_CHECKOUT;
     }
 
 }

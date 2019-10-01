@@ -1,10 +1,12 @@
 package org.broadleafcommerce.payment.service.gateway;
 
+import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCheckoutPaymentGatewayType;
+
 import com.broadleafcommerce.paymentgateway.domain.PaymentRequest;
 import com.broadleafcommerce.paymentgateway.domain.PaymentResponse;
+import com.broadleafcommerce.paymentgateway.domain.enums.PaymentGatewayType;
 import com.broadleafcommerce.paymentgateway.service.exception.PaymentException;
 import com.broadleafcommerce.paymentgateway.service.rollback.AbstractPaymentGatewayRollbackService;
-import com.broadleafcommerce.paymentgateway.service.rollback.PaymentGatewayRollbackService;
 import com.broadleafcommerce.paymentgateway.service.transaction.PaymentGatewayTransactionService;
 
 import lombok.RequiredArgsConstructor;
@@ -14,7 +16,7 @@ import lombok.RequiredArgsConstructor;
  */
 @RequiredArgsConstructor
 public class DefaultPayPalCheckoutRollbackService extends AbstractPaymentGatewayRollbackService
-        implements PaymentGatewayRollbackService {
+        implements PayPalCheckoutRollbackService {
 
     private final PaymentGatewayTransactionService transactionService;
 
@@ -40,6 +42,11 @@ public class DefaultPayPalCheckoutRollbackService extends AbstractPaymentGateway
     public PaymentResponse rollbackRefund(PaymentRequest transactionToBeRolledBack)
             throws PaymentException {
         throw new PaymentException("The Rollback Refund method is not supported for this module");
+    }
+
+    @Override
+    public PaymentGatewayType getGatewayType() {
+        return PayPalCheckoutPaymentGatewayType.PAYPAL_CHECKOUT;
     }
 
 }

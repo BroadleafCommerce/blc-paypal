@@ -1,11 +1,13 @@
 package org.broadleafcommerce.payment.service.gateway;
 
+import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCheckoutPaymentGatewayType;
+
 import com.broadleafcommerce.paymentgateway.domain.PaymentRequest;
 import com.broadleafcommerce.paymentgateway.domain.PaymentResponse;
 import com.broadleafcommerce.paymentgateway.domain.enums.DefaultTransactionTypes;
+import com.broadleafcommerce.paymentgateway.domain.enums.PaymentGatewayType;
 import com.broadleafcommerce.paymentgateway.service.exception.PaymentException;
 import com.broadleafcommerce.paymentgateway.service.transaction.AbstractPaymentGatewayTransactionConfirmationService;
-import com.broadleafcommerce.paymentgateway.service.transaction.PaymentGatewayTransactionConfirmationService;
 import com.broadleafcommerce.paymentgateway.service.transaction.PaymentGatewayTransactionService;
 
 import lombok.RequiredArgsConstructor;
@@ -16,7 +18,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class DefaultPayPalCheckoutTransactionConfirmationService
         extends AbstractPaymentGatewayTransactionConfirmationService
-        implements PaymentGatewayTransactionConfirmationService {
+        implements PayPalCheckoutTransactionConfirmationService {
 
     private final PayPalCheckoutConfiguration configuration;
     private final PaymentGatewayTransactionService transactionService;
@@ -35,6 +37,11 @@ public class DefaultPayPalCheckoutTransactionConfirmationService
 
         return responseDTO;
 
+    }
+
+    @Override
+    public PaymentGatewayType getGatewayType() {
+        return PayPalCheckoutPaymentGatewayType.PAYPAL_CHECKOUT;
     }
 
 }

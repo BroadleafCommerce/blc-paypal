@@ -26,10 +26,10 @@ import org.broadleafcommerce.vendor.paypal.service.payment.PayPalVoidResponse;
 import com.broadleafcommerce.paymentgateway.domain.PaymentRequest;
 import com.broadleafcommerce.paymentgateway.domain.PaymentResponse;
 import com.broadleafcommerce.paymentgateway.domain.enums.DefaultTransactionTypes;
+import com.broadleafcommerce.paymentgateway.domain.enums.PaymentGatewayType;
 import com.broadleafcommerce.paymentgateway.domain.enums.PaymentType;
 import com.broadleafcommerce.paymentgateway.service.exception.PaymentException;
 import com.broadleafcommerce.paymentgateway.service.transaction.AbstractPaymentGatewayTransactionService;
-import com.broadleafcommerce.paymentgateway.service.transaction.PaymentGatewayTransactionService;
 import com.paypal.api.payments.Amount;
 import com.paypal.api.payments.Authorization;
 import com.paypal.api.payments.Billing;
@@ -61,7 +61,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class DefaultPayPalCheckoutTransactionService
         extends AbstractPaymentGatewayTransactionService
-        implements PaymentGatewayTransactionService {
+        implements PayPalCheckoutTransactionService {
 
     protected static final Log LOG =
             LogFactory.getLog(DefaultPayPalCheckoutTransactionService.class);
@@ -570,6 +570,11 @@ public class DefaultPayPalCheckoutTransactionService
                     .responseMap(MessageConstants.EXCEPTION_MESSAGE, error.getMessage())
                     .responseMap(MessageConstants.EXCEPTION_DEBUG_ID, error.getDebugId());
         }
+    }
+
+    @Override
+    public PaymentGatewayType getGatewayType() {
+        return PayPalCheckoutPaymentGatewayType.PAYPAL_CHECKOUT;
     }
 
 }
