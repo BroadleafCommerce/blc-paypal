@@ -8,10 +8,11 @@
         <relativePath />
     </parent>
 
-    <artifactId>broadleaf-paypal</artifactId>
-    <name>BroadleafCommerce PayPal</name>
-    <description>BroadleafCommerce PayPal</description>
+    <artifactId>broadleaf-paypal-parent</artifactId>
     <version>1.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>BroadleafCommerce PayPal Parent</name>
+    <description>BroadleafCommerce PayPal Parent</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -39,27 +40,6 @@
         </repository>
     </distributionManagement>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-failsafe-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <showWarnings>true</showWarnings>
-                    <compilerArgs>
-                        <arg>-Xlint:-options</arg>
-                        <arg>-Xlint:deprecation</arg>
-                        <arg>-Werror</arg>
-                        <arg>-parameters</arg>
-                    </compilerArgs>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
-
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -70,29 +50,9 @@
         </dependencies>
     </dependencyManagement>
 
-    <dependencies>
-        <dependency>
-            <groupId>com.broadleafcommerce.microservices</groupId>
-            <artifactId>broadleaf-payment-gateway-common</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
-        </dependency>
+    <modules>
+        <module>services</module>
+        <module>docs</module>
+    </modules>
 
-        <dependency>
-            <groupId>com.paypal.sdk</groupId>
-            <artifactId>rest-api-sdk</artifactId>
-            <version>1.14.0</version>
-        </dependency>
-
-        <!-- Non-transitive (runtime/provided/optional) -->
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <scope>provided</scope>
-        </dependency>
-    </dependencies>
 </project>
