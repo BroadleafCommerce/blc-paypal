@@ -7,7 +7,6 @@ import com.broadleafcommerce.paymentgateway.domain.PaymentResponse;
 import com.broadleafcommerce.paymentgateway.domain.enums.DefaultTransactionTypes;
 import com.broadleafcommerce.paymentgateway.domain.enums.PaymentGatewayType;
 import com.broadleafcommerce.paymentgateway.service.exception.PaymentException;
-import com.broadleafcommerce.paymentgateway.service.transaction.AbstractPaymentGatewayTransactionConfirmationService;
 import com.broadleafcommerce.paymentgateway.service.transaction.PaymentGatewayTransactionService;
 
 import lombok.RequiredArgsConstructor;
@@ -17,7 +16,6 @@ import lombok.RequiredArgsConstructor;
  */
 @RequiredArgsConstructor
 public class DefaultPayPalCheckoutTransactionConfirmationService
-        extends AbstractPaymentGatewayTransactionConfirmationService
         implements PayPalCheckoutTransactionConfirmationService {
 
     private final PayPalCheckoutConfiguration configuration;

@@ -15,7 +15,6 @@ import com.broadleafcommerce.paymentgateway.domain.PaymentResponse;
 import com.broadleafcommerce.paymentgateway.domain.enums.PaymentGatewayType;
 import com.broadleafcommerce.paymentgateway.domain.enums.PaymentType;
 import com.broadleafcommerce.paymentgateway.service.exception.PaymentException;
-import com.broadleafcommerce.paymentgateway.service.reporting.AbstractPaymentGatewayReportingService;
 import com.paypal.api.payments.Payment;
 
 import lombok.RequiredArgsConstructor;
@@ -24,8 +23,7 @@ import lombok.RequiredArgsConstructor;
  * @author Elbert Bautista (elbertbautista)
  */
 @RequiredArgsConstructor
-public class DefaultPayPalCheckoutReportingService extends AbstractPaymentGatewayReportingService
-        implements PayPalCheckoutReportingService {
+public class DefaultPayPalCheckoutReportingService implements PayPalCheckoutReportingService {
 
     private static final Log LOG = LogFactory.getLog(DefaultPayPalCheckoutReportingService.class);
 

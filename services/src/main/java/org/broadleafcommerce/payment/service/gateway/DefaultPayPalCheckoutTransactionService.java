@@ -29,7 +29,6 @@ import com.broadleafcommerce.paymentgateway.domain.enums.DefaultTransactionTypes
 import com.broadleafcommerce.paymentgateway.domain.enums.PaymentGatewayType;
 import com.broadleafcommerce.paymentgateway.domain.enums.PaymentType;
 import com.broadleafcommerce.paymentgateway.service.exception.PaymentException;
-import com.broadleafcommerce.paymentgateway.service.transaction.AbstractPaymentGatewayTransactionService;
 import com.paypal.api.payments.Amount;
 import com.paypal.api.payments.Authorization;
 import com.paypal.api.payments.Billing;
@@ -59,9 +58,7 @@ import lombok.RequiredArgsConstructor;
  * @author Elbert Bautista (elbertbautista)
  */
 @RequiredArgsConstructor
-public class DefaultPayPalCheckoutTransactionService
-        extends AbstractPaymentGatewayTransactionService
-        implements PayPalCheckoutTransactionService {
+public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTransactionService {
 
     protected static final Log LOG =
             LogFactory.getLog(DefaultPayPalCheckoutTransactionService.class);

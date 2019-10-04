@@ -6,7 +6,6 @@ import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalShippingDi
 import org.springframework.core.env.Environment;
 
 import com.broadleafcommerce.paymentgateway.domain.enums.PaymentGatewayType;
-import com.broadleafcommerce.paymentgateway.service.configuration.AbstractPaymentGatewayConfiguration;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -19,8 +18,7 @@ import lombok.RequiredArgsConstructor;
  * @author Elbert Bautista (elbertbautista)
  */
 @RequiredArgsConstructor
-public class DefaultPayPalCheckoutConfiguration extends AbstractPaymentGatewayConfiguration
-        implements PayPalCheckoutConfiguration {
+public class DefaultPayPalCheckoutConfiguration implements PayPalCheckoutConfiguration {
 
     private final Environment env;
 
