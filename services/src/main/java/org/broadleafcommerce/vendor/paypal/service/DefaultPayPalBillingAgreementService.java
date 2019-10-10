@@ -1,7 +1,7 @@
 package org.broadleafcommerce.vendor.paypal.service;
 
 import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutExternalCallService;
-import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutRestConfiguration;
+import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutRestConfigurationProperties;
 import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCreateBillingAgreementRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCreateBillingAgreementResponse;
@@ -95,12 +95,13 @@ public class DefaultPayPalBillingAgreementService implements PayPalBillingAgreem
     }
 
     protected Plan constructPlan(PaymentRequest paymentRequest) throws PaymentException {
-        PayPalCheckoutRestConfiguration configuration = externalCallService.getConfiguration();
+        PayPalCheckoutRestConfigurationProperties configProperties =
+                externalCallService.getConfigProperties();
 
         // Set up merchant preferences
         MerchantPreferences merchantPreferences = new MerchantPreferences();
-        merchantPreferences.setCancelUrl(configuration.getCancelUrl(paymentRequest));
-        merchantPreferences.setReturnUrl(configuration.getReturnUrl(paymentRequest));
+        merchantPreferences.setCancelUrl(configProperties.getCancelUrl(paymentRequest));
+        merchantPreferences.setReturnUrl(configProperties.getReturnUrl(paymentRequest));
 
         // 1. Set up a plan
         Plan plan = new Plan();

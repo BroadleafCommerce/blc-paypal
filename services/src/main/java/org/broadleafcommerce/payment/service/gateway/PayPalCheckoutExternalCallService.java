@@ -30,7 +30,7 @@ import com.paypal.base.rest.APIContext;
  */
 public interface PayPalCheckoutExternalCallService {
 
-    PayPalCheckoutRestConfiguration getConfiguration();
+    PayPalCheckoutRestConfigurationProperties getConfigProperties();
 
     void setCommonDetailsResponse(AgreementToken response,
             PaymentResponse paymentResponse,

@@ -1,7 +1,7 @@
 package org.broadleafcommerce.vendor.paypal.service;
 
 import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutExternalCallService;
-import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutRestConfiguration;
+import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutRestConfigurationProperties;
 import org.broadleafcommerce.vendor.paypal.api.AgreementToken;
 import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCreateAgreementTokenRequest;
@@ -45,12 +45,13 @@ public class DefaultPayPalAgreementTokenService implements PayPalAgreementTokenS
         Plan plan = new Plan();
         plan.setType(MessageConstants.PLAN_TYPE_MERCHANTINITIATEDBILLING);
 
-        PayPalCheckoutRestConfiguration configuration = externalCallService.getConfiguration();
+        PayPalCheckoutRestConfigurationProperties configProperties =
+                externalCallService.getConfigProperties();
 
         // Set up merchant preferences
         MerchantPreferences merchantPreferences = new MerchantPreferences();
-        merchantPreferences.setCancelUrl(configuration.getCancelUrl(paymentRequest));
-        String returnUrl = configuration.getReturnUrl(paymentRequest);
+        merchantPreferences.setCancelUrl(configProperties.getCancelUrl(paymentRequest));
+        String returnUrl = configProperties.getReturnUrl(paymentRequest);
         if (performCheckoutOnReturn) {
             returnUrl += "?" + MessageConstants.CHECKOUT_COMPLETE + "=true";
         }
@@ -77,7 +78,7 @@ public class DefaultPayPalAgreementTokenService implements PayPalAgreementTokenS
     }
 
     protected String constructAgreementDescription(PaymentRequest paymentRequest) {
-        return externalCallService.getConfiguration().getPaymentDescription();
+        return externalCallService.getConfigProperties().getPaymentDescription();
     }
 
 }

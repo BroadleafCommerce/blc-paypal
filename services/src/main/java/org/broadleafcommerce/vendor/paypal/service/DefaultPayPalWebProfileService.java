@@ -73,6 +73,6 @@ public class DefaultPayPalWebProfileService implements PayPalWebProfileService {
     }
 
     protected String getPropertyWebProfileId() {
-        return externalCallService.getConfiguration().getWebProfileId();
+        return externalCallService.getConfigProperties().getWebProfileId();
     }
 }

@@ -11,7 +11,7 @@ import org.broadleafcommerce.payment.service.gateway.DefaultPayPalSyncTransactio
 import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutExternalCallService;
 import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutHostedService;
 import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutReportingService;
-import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutRestConfiguration;
+import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutRestConfigurationProperties;
 import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutRollbackService;
 import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutTransactionConfirmationService;
 import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutTransactionService;
@@ -25,15 +25,15 @@ import org.springframework.context.annotation.Configuration;
 import com.broadleafcommerce.paymentgateway.service.transaction.PaymentGatewayTransactionService;
 
 @Configuration
-@EnableConfigurationProperties(PayPalCheckoutRestConfiguration.class)
+@EnableConfigurationProperties({PayPalCheckoutRestConfigurationProperties.class})
 public class PayPalServiceAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
     public PayPalCheckoutExternalCallService payPalCheckoutExternalCallService(
-            PayPalCheckoutRestConfiguration checkoutRestConfiguration,
+            PayPalCheckoutRestConfigurationProperties configProperties,
             PayPalGatewayConfiguration gatewayConfiguration) {
-        return new DefaultPayPalCheckoutExternalCallService(checkoutRestConfiguration,
+        return new DefaultPayPalCheckoutExternalCallService(configProperties,
                 gatewayConfiguration);
     }
 

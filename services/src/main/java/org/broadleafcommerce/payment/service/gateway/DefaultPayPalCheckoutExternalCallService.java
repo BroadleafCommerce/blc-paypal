@@ -45,7 +45,7 @@ public class DefaultPayPalCheckoutExternalCallService
         implements PayPalCheckoutExternalCallService {
 
     @Getter
-    private final PayPalCheckoutRestConfiguration configuration;
+    private final PayPalCheckoutRestConfigurationProperties configProperties;
 
     private final PayPalGatewayConfiguration gatewayConfiguration;
 
@@ -320,9 +320,9 @@ public class DefaultPayPalCheckoutExternalCallService
     }
 
     private APIContext initializeAPIContext() {
-        APIContext context = new APIContext(configuration.getClientId(),
-                configuration.getClientSecret(),
-                configuration.getMode());
+        APIContext context = new APIContext(configProperties.getClientId(),
+                configProperties.getClientSecret(),
+                configProperties.getMode());
         context.addHTTPHeader(MessageConstants.BN, MessageConstants.BNCODE);
         return context;
     }

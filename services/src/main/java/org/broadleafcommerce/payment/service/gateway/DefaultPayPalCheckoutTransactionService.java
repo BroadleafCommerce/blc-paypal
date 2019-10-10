@@ -413,7 +413,8 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
         Transaction transaction = new Transaction();
         transaction.setAmount(amount);
         transaction
-                .setDescription(payPalCheckoutService.getConfiguration().getPaymentDescription());
+                .setDescription(
+                        payPalCheckoutService.getConfigProperties().getPaymentDescription());
         transaction.setCustom(paymentRequest.getOrderId());
 
         ItemList itemList = payPalCheckoutService.getPayPalItemListFromOrder(paymentRequest, true);

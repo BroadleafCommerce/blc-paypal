@@ -22,9 +22,9 @@ import lombok.Setter;
  * @author Elbert Bautista (elbertbautista)
  * @author Chris Kittrell
  */
-@ConfigurationProperties("broadleaf.paypal.checkout.rest")
 @Data
-public class PayPalCheckoutRestConfiguration {
+@ConfigurationProperties("broadleaf.paypal.checkout.rest")
+public class PayPalCheckoutRestConfigurationProperties {
 
     /**
      * URL to which the buyer's browser is returned after choosing to pay with PayPal. For digital
@@ -107,23 +107,18 @@ public class PayPalCheckoutRestConfiguration {
     private String totalType = MessageConstants.TOTAL;
 
     /**
-     * <p>
      * The Paypal NVP API only allows a single field with custom logic in it:
      * PAYMENTREQUEST_n_CUSTOM. Because of this, all of the fields returned here are serialized
      * together like so:
      *
-     * <pre>
      * {@code ccoc=true_12345|key1=value1|key2=value2|key3=value3}
-     * </pre>
      *
-     * <p>
      * Note that Broadleaf uses a piece of this to determine if we should complete checkout on
      * callback or not. This is done as "ccoc=true_12345" where {@code true} is the value of
      * {@link PaymentRequest#isCompleteCheckoutOnCallback()}. So, the minimum string that will be
      * contained in the custom field is {@code ccoc=true_12345}, plus whatever other fields you
      * have.
      *
-     * <p>
      * Also note that the entire custom field string after serialization is 256 characters. An
      * IllegalArgumentException will be thrown otherwise.
      */
