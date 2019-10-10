@@ -33,7 +33,7 @@ public class DefaultPayPalPaymentService implements PayPalPaymentService {
     private final PayPalGatewayConfiguration gatewayConfiguration;
     private final PayPalWebProfileService webProfileService;
 
-    @Value("${gateway.paypal.checkout.rest.populate.shipping.create.payment:true}")
+    @Value("${broadleaf.paypal.checkout.rest.populate.shipping.create.payment:true}")
     protected boolean shouldPopulateShippingOnPaymentCreation;
 
     @Override

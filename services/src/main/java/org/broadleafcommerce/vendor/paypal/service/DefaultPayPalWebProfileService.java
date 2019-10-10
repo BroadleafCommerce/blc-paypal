@@ -28,7 +28,7 @@ public class DefaultPayPalWebProfileService implements PayPalWebProfileService {
         if (webProfile != null && StringUtils.isBlank(webProfile.getId()) && LOG.isWarnEnabled()) {
             LOG.warn(
                     "The WebProfile provided did not specify an id. Beware that this will result in creating new WebProfiles linked to your PayPal account on every server startup."
-                            + "To avoid this either set an id on the provided WebProfile bean or set the property gateway.paypal.checkout.rest.webProfileId."
+                            + "To avoid this either set an id on the provided WebProfile bean or set the property broadleaf.paypal.checkout.rest.webProfileId."
                             + "To obtain a WebProfile id either create a WebProfile or select an existing an id from you PayPal account following the instructions here https://developer.paypal.com/docs/api/payment-experience/v1/#web-profiles");
         }
     }

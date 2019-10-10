@@ -22,7 +22,7 @@ import lombok.Setter;
  * @author Elbert Bautista (elbertbautista)
  * @author Chris Kittrell
  */
-@ConfigurationProperties("gateway.paypal.checkout.rest")
+@ConfigurationProperties("broadleaf.paypal.checkout.rest")
 @Data
 public class PayPalCheckoutRestConfiguration {
 
@@ -140,7 +140,7 @@ public class PayPalCheckoutRestConfiguration {
                 return siteBaseUrl + returnUrl;
             } else {
                 throw new IllegalArgumentException(
-                        "Since the value provided for 'gateway.paypal.checkout.rest.returnUrl' is a relative url, a siteBaseUrl must be provided on the PaymentRequest.");
+                        "Since the value provided for 'broadleaf.paypal.checkout.rest.returnUrl' is a relative url, a siteBaseUrl must be provided on the PaymentRequest.");
             }
         }
     }
@@ -155,7 +155,7 @@ public class PayPalCheckoutRestConfiguration {
                 return siteBaseUrl + cancelUrl;
             } else {
                 throw new IllegalArgumentException(
-                        "Since the value provided for 'gateway.paypal.checkout.rest.cancelUrl' is a relative url, a siteBaseUrl must be provided on the PaymentRequest.");
+                        "Since the value provided for 'broadleaf.paypal.checkout.rest.cancelUrl' is a relative url, a siteBaseUrl must be provided on the PaymentRequest.");
             }
         }
     }
