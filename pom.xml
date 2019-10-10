@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.broadleafcommerce</groupId>
         <artifactId>broadleaf-module-parent</artifactId>
-        <version>3.0.0-GA</version>
+        <version>3.0.2-GA</version>
     </parent>
 
     <artifactId>broadleaf-paypal</artifactId>
