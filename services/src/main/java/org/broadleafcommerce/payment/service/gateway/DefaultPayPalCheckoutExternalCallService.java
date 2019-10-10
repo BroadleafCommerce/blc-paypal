@@ -33,6 +33,7 @@ import java.util.Optional;
 
 import javax.money.Monetary;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -43,12 +44,10 @@ public class DefaultPayPalCheckoutExternalCallService
         extends AbstractExternalPaymentGatewayCall<PayPalRequest, PayPalResponse>
         implements PayPalCheckoutExternalCallService {
 
-    private final PayPalCheckoutConfiguration configuration;
+    @Getter
+    private final PayPalCheckoutRestConfiguration configuration;
 
-    @Override
-    public PayPalCheckoutConfiguration getConfiguration() {
-        return configuration;
-    }
+    private final PayPalGatewayConfiguration gatewayConfiguration;
 
     @Override
     public void setCommonDetailsResponse(AgreementToken agreementToken,
@@ -288,7 +287,7 @@ public class DefaultPayPalCheckoutExternalCallService
 
     @Override
     public Integer getFailureReportingThreshold() {
-        return configuration.getFailureReportingThreshold();
+        return gatewayConfiguration.getFailureReportingThreshold();
     }
 
     @Override
@@ -321,9 +320,9 @@ public class DefaultPayPalCheckoutExternalCallService
     }
 
     private APIContext initializeAPIContext() {
-        APIContext context = new APIContext(configuration.getCheckoutRestClientId(),
-                configuration.getCheckoutRestSecret(),
-                configuration.getCheckoutRestMode());
+        APIContext context = new APIContext(configuration.getClientId(),
+                configuration.getClientSecret(),
+                configuration.getMode());
         context.addHTTPHeader(MessageConstants.BN, MessageConstants.BNCODE);
         return context;
     }

@@ -1,6 +1,7 @@
 package org.broadleafcommerce.vendor.paypal.service.autoconfigure;
 
 import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutExternalCallService;
+import org.broadleafcommerce.payment.service.gateway.PayPalGatewayConfiguration;
 import org.broadleafcommerce.vendor.paypal.service.DefaultPayPalAgreementTokenService;
 import org.broadleafcommerce.vendor.paypal.service.DefaultPayPalBillingAgreementService;
 import org.broadleafcommerce.vendor.paypal.service.DefaultPayPalPaymentService;
@@ -37,8 +38,11 @@ public class PayPalVendorServiceAutoConfiguration {
     @ConditionalOnMissingBean
     public PayPalPaymentService payPalPaymentService(
             PayPalCheckoutExternalCallService externalCallService,
+            PayPalGatewayConfiguration gatewayConfiguration,
             PayPalWebProfileService webProfileService) {
-        return new DefaultPayPalPaymentService(externalCallService, webProfileService);
+        return new DefaultPayPalPaymentService(externalCallService,
+                gatewayConfiguration,
+                webProfileService);
     }
 
     @Bean

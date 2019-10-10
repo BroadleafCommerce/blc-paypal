@@ -18,14 +18,14 @@ import lombok.RequiredArgsConstructor;
 public class DefaultPayPalCheckoutTransactionConfirmationService
         implements PayPalCheckoutTransactionConfirmationService {
 
-    private final PayPalCheckoutConfiguration configuration;
+    private final PayPalGatewayConfiguration gatewayConfiguration;
     private final PaymentGatewayTransactionService transactionService;
 
     @Override
     public PaymentResponse confirmTransaction(PaymentRequest paymentRequest)
             throws PaymentException {
         PaymentResponse responseDTO = null;
-        if (configuration.isPerformAuthorizeAndCapture()) {
+        if (gatewayConfiguration.isPerformAuthorizeAndCapture()) {
             responseDTO = transactionService.authorizeAndCapture(paymentRequest);
             responseDTO.transactionType(DefaultTransactionTypes.AUTHORIZE_AND_CAPTURE);
         } else {

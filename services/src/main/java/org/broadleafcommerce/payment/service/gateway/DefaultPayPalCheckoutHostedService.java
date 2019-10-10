@@ -21,7 +21,7 @@ public class DefaultPayPalCheckoutHostedService implements PayPalCheckoutHostedS
 
     protected static final Log LOG = LogFactory.getLog(DefaultPayPalCheckoutHostedService.class);
 
-    private final PayPalCheckoutConfiguration configuration;
+    private final PayPalGatewayConfiguration configuration;
     private final PaymentGatewayTransactionService transactionService;
 
     @Override

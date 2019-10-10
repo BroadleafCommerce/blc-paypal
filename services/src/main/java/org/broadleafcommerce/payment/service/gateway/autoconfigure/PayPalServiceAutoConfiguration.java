@@ -1,42 +1,46 @@
 package org.broadleafcommerce.payment.service.gateway.autoconfigure;
 
-import org.broadleafcommerce.payment.service.gateway.DefaultPayPalCheckoutConfiguration;
 import org.broadleafcommerce.payment.service.gateway.DefaultPayPalCheckoutExternalCallService;
 import org.broadleafcommerce.payment.service.gateway.DefaultPayPalCheckoutHostedService;
 import org.broadleafcommerce.payment.service.gateway.DefaultPayPalCheckoutReportingService;
 import org.broadleafcommerce.payment.service.gateway.DefaultPayPalCheckoutRollbackService;
 import org.broadleafcommerce.payment.service.gateway.DefaultPayPalCheckoutTransactionConfirmationService;
 import org.broadleafcommerce.payment.service.gateway.DefaultPayPalCheckoutTransactionService;
+import org.broadleafcommerce.payment.service.gateway.DefaultPayPalGatewayConfiguration;
 import org.broadleafcommerce.payment.service.gateway.DefaultPayPalSyncTransactionService;
-import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutConfiguration;
 import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutExternalCallService;
 import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutHostedService;
 import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutReportingService;
+import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutRestConfiguration;
 import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutRollbackService;
 import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutTransactionConfirmationService;
 import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutTransactionService;
+import org.broadleafcommerce.payment.service.gateway.PayPalGatewayConfiguration;
 import org.broadleafcommerce.payment.service.gateway.PayPalSyncTransactionService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
 
 import com.broadleafcommerce.paymentgateway.service.transaction.PaymentGatewayTransactionService;
 
 @Configuration
+@EnableConfigurationProperties(PayPalCheckoutRestConfiguration.class)
 public class PayPalServiceAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
     public PayPalCheckoutExternalCallService payPalCheckoutExternalCallService(
-            PayPalCheckoutConfiguration configuration) {
-        return new DefaultPayPalCheckoutExternalCallService(configuration);
+            PayPalCheckoutRestConfiguration checkoutRestConfiguration,
+            PayPalGatewayConfiguration gatewayConfiguration) {
+        return new DefaultPayPalCheckoutExternalCallService(checkoutRestConfiguration,
+                gatewayConfiguration);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public PayPalCheckoutConfiguration payPalCheckoutConfiguration(Environment env) {
-        return new DefaultPayPalCheckoutConfiguration(env);
+    public PayPalGatewayConfiguration payPalGatewayConfiguration() {
+        return new DefaultPayPalGatewayConfiguration();
     }
 
     @Bean
@@ -63,18 +67,18 @@ public class PayPalServiceAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public PayPalCheckoutTransactionConfirmationService payPalCheckoutTransactionConfirmationService(
-            PayPalCheckoutConfiguration configuration,
+            PayPalGatewayConfiguration gatewayConfiguration,
             PaymentGatewayTransactionService transactionService) {
-        return new DefaultPayPalCheckoutTransactionConfirmationService(configuration,
+        return new DefaultPayPalCheckoutTransactionConfirmationService(gatewayConfiguration,
                 transactionService);
     }
 
     @Bean
     @ConditionalOnMissingBean
     public PayPalCheckoutHostedService payPalCheckoutHostedService(
-            PayPalCheckoutConfiguration configuration,
+            PayPalGatewayConfiguration gatewayConfiguration,
             PaymentGatewayTransactionService transactionService) {
-        return new DefaultPayPalCheckoutHostedService(configuration, transactionService);
+        return new DefaultPayPalCheckoutHostedService(gatewayConfiguration, transactionService);
     }
 
     @Bean

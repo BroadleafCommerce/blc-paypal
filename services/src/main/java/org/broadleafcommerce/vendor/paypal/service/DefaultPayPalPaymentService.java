@@ -2,6 +2,8 @@ package org.broadleafcommerce.vendor.paypal.service;
 
 import org.apache.commons.lang3.StringUtils;
 import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutExternalCallService;
+import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutRestConfiguration;
+import org.broadleafcommerce.payment.service.gateway.PayPalGatewayConfiguration;
 import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCreatePaymentRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCreatePaymentResponse;
@@ -28,6 +30,7 @@ import lombok.RequiredArgsConstructor;
 public class DefaultPayPalPaymentService implements PayPalPaymentService {
 
     private final PayPalCheckoutExternalCallService externalCallService;
+    private final PayPalGatewayConfiguration gatewayConfiguration;
     private final PayPalWebProfileService webProfileService;
 
     @Value("${gateway.paypal.checkout.rest.populate.shipping.create.payment:true}")
@@ -40,17 +43,19 @@ public class DefaultPayPalPaymentService implements PayPalPaymentService {
         // Set payer details
         Payer payer = constructPayer(paymentRequest);
 
+        PayPalCheckoutRestConfiguration configuration = externalCallService.getConfiguration();
+
         // Set redirect URLs
         RedirectUrls redirectUrls = new RedirectUrls();
-        redirectUrls.setCancelUrl(externalCallService.getConfiguration().getCancelUrl());
-        redirectUrls.setReturnUrl(externalCallService.getConfiguration().getReturnUrl());
+        redirectUrls.setCancelUrl(configuration.getCancelUrl(paymentRequest));
+        redirectUrls.setReturnUrl(configuration.getReturnUrl(paymentRequest));
 
         Amount amount = externalCallService.getPayPalAmountFromOrder(paymentRequest);
 
         // Transaction information
         Transaction transaction = new Transaction();
         transaction.setAmount(amount);
-        transaction.setDescription(externalCallService.getConfiguration().getPaymentDescription());
+        transaction.setDescription(configuration.getPaymentDescription());
         transaction.setCustom(paymentRequest.getOrderId() + "|" + performCheckoutOnReturn);
 
         ItemList itemList = externalCallService.getPayPalItemListFromOrder(paymentRequest,
@@ -140,7 +145,7 @@ public class DefaultPayPalPaymentService implements PayPalPaymentService {
     }
 
     public String getIntent(boolean performCheckoutOnReturn) {
-        if (externalCallService.getConfiguration().isPerformAuthorizeAndCapture()) {
+        if (gatewayConfiguration.isPerformAuthorizeAndCapture()) {
             return "sale";
         }
 
