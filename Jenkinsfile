@@ -1,4 +1,4 @@
 mavenBuild {
-  javadocsDirectories = ['broadleaf-paypal/target']
+  javadocsDirectories = ['services/target']
   referenceDocsDirectories = ['docs/target']
 }
