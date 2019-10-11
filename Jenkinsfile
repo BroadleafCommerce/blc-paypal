@@ -1,2 +1,4 @@
-properties(commonModuleJobProps())
-buildBroadleafModule(params)
+mavenBuild {
+  javadocsDirectories = ['broadleaf-paypal/target']
+  referenceDocsDirectories = ['docs/target']
+}

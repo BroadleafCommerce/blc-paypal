@@ -1,4 +1,0 @@
-- [[Home | .]]
-- [[Release Notes]]
-- [[PayPal Environment Setup]]
-- [[PayPal Quick Start]]
