@@ -12,7 +12,6 @@ import org.springframework.util.Assert;
 
 import com.broadleafcommerce.paymentgateway.domain.PaymentRequest;
 import com.broadleafcommerce.paymentgateway.domain.PaymentResponse;
-import com.broadleafcommerce.paymentgateway.domain.enums.PaymentGatewayType;
 import com.broadleafcommerce.paymentgateway.domain.enums.PaymentType;
 import com.broadleafcommerce.paymentgateway.service.exception.PaymentException;
 import com.paypal.api.payments.Payment;
@@ -61,8 +60,8 @@ public class DefaultPayPalCheckoutReportingService implements PayPalCheckoutRepo
     }
 
     @Override
-    public PaymentGatewayType getGatewayType() {
-        return PayPalCheckoutPaymentGatewayType.PAYPAL_CHECKOUT;
+    public String getGatewayType() {
+        return PayPalCheckoutPaymentGatewayType.PAYPAL_CHECKOUT.name();
     }
 
 }

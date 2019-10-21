@@ -5,7 +5,6 @@ import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCheckoutPayment
 import com.broadleafcommerce.paymentgateway.domain.PaymentRequest;
 import com.broadleafcommerce.paymentgateway.domain.PaymentResponse;
 import com.broadleafcommerce.paymentgateway.domain.enums.DefaultTransactionTypes;
-import com.broadleafcommerce.paymentgateway.domain.enums.PaymentGatewayType;
 import com.broadleafcommerce.paymentgateway.service.exception.PaymentException;
 import com.broadleafcommerce.paymentgateway.service.transaction.PaymentGatewayTransactionService;
 
@@ -38,8 +37,8 @@ public class DefaultPayPalCheckoutTransactionConfirmationService
     }
 
     @Override
-    public PaymentGatewayType getGatewayType() {
-        return PayPalCheckoutPaymentGatewayType.PAYPAL_CHECKOUT;
+    public String getGatewayType() {
+        return PayPalCheckoutPaymentGatewayType.PAYPAL_CHECKOUT.name();
     }
 
 }
