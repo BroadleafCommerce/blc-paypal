@@ -48,7 +48,7 @@ public interface PayPalCheckoutExternalCallService {
 
     ShippingAddress getPayPalShippingAddress(PaymentRequest paymentRequest);
 
-    ItemList getPayPalItemListFromOrder(PaymentRequest paymentRequest,
+    ItemList getPayPalItemList(PaymentRequest paymentRequest,
             boolean shouldPopulateShipping);
 
     Amount getPayPalAmountFromOrder(PaymentRequest paymentRequest);

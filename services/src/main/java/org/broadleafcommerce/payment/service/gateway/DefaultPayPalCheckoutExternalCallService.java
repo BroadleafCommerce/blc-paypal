@@ -225,7 +225,7 @@ public class DefaultPayPalCheckoutExternalCallService
     }
 
     @Override
-    public ItemList getPayPalItemListFromOrder(PaymentRequest paymentRequest,
+    public ItemList getPayPalItemList(PaymentRequest paymentRequest,
             boolean shouldPopulateShipping) {
         ItemList itemList = new ItemList();
         boolean returnItemList = false;

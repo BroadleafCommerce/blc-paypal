@@ -66,7 +66,7 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
 
     @Override
     public PaymentResponse authorize(PaymentRequest paymentRequest) throws PaymentException {
-        PaymentResponse responseDTO = new PaymentResponse(PaymentType.THIRD_PARTY_ACCOUNT,
+        PaymentResponse paymentResponse = new PaymentResponse(PaymentType.THIRD_PARTY_ACCOUNT,
                 PayPalCheckoutPaymentGatewayType.PAYPAL_CHECKOUT);
 
         try {
@@ -76,7 +76,7 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
                 Transaction transaction = payment.getTransactions().get(0);
                 if (transaction != null) {
                     Amount amount = transaction.getAmount();
-                    responseDTO
+                    paymentResponse
                             .successful(true)
                             .rawResponse(payment.toJSON())
                             .transactionType(DefaultTransactionTypes.AUTHORIZE)
@@ -87,7 +87,7 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
             } else {
                 Authorization authorization = (Authorization) auth;
                 Amount amount = authorization.getAmount();
-                responseDTO
+                paymentResponse
                         .successful(true)
                         .rawResponse(authorization.toJSON())
                         .transactionType(DefaultTransactionTypes.AUTHORIZE)
@@ -98,16 +98,16 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
         } catch (PaymentException ex) {
             if (ex.getCause() instanceof PayPalRESTException) {
                 PayPalRESTException restException = (PayPalRESTException) ex.getCause();
-                responseDTO
+                paymentResponse
                         .successful(false)
                         .rawResponse(restException.toString())
                         .transactionType(DefaultTransactionTypes.AUTHORIZE);
-                populateErrorResponseMap(responseDTO, restException);
-                return responseDTO;
+                populateErrorResponseMap(paymentResponse, restException);
+                return paymentResponse;
             }
             throw ex;
         }
-        return responseDTO;
+        return paymentResponse;
     }
 
     @Override
@@ -416,7 +416,7 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
                         payPalCheckoutService.getConfigProperties().getPaymentDescription());
         transaction.setCustom(paymentRequest.getOrderId());
 
-        ItemList itemList = payPalCheckoutService.getPayPalItemListFromOrder(paymentRequest, true);
+        ItemList itemList = payPalCheckoutService.getPayPalItemList(paymentRequest, true);
         if (itemList != null) {
             transaction.setItemList(itemList);
         }

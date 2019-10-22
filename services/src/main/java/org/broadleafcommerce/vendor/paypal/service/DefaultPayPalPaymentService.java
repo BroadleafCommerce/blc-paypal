@@ -59,7 +59,7 @@ public class DefaultPayPalPaymentService implements PayPalPaymentService {
         transaction.setDescription(configProperties.getPaymentDescription());
         transaction.setCustom(paymentRequest.getOrderId() + "|" + performCheckoutOnReturn);
 
-        ItemList itemList = externalCallService.getPayPalItemListFromOrder(paymentRequest,
+        ItemList itemList = externalCallService.getPayPalItemList(paymentRequest,
                 shouldPopulateShippingOnPaymentCreation);
         if (itemList != null) {
             transaction.setItemList(itemList);
@@ -106,7 +106,7 @@ public class DefaultPayPalPaymentService implements PayPalPaymentService {
         amountPatch.setValue(amount);
         patches.add(amountPatch);
 
-        ItemList itemList = externalCallService.getPayPalItemListFromOrder(paymentRequest, true);
+        ItemList itemList = externalCallService.getPayPalItemList(paymentRequest, true);
         if (itemList != null) {
             Patch shipToPatch = new Patch();
             shipToPatch.setOp("replace");
