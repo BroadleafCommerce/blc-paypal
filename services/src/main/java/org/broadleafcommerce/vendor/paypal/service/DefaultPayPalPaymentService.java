@@ -8,7 +8,6 @@ import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCreatePaymentRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCreatePaymentResponse;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalUpdatePaymentRequest;
-import org.springframework.beans.factory.annotation.Value;
 
 import com.broadleafcommerce.paymentgateway.domain.PaymentRequest;
 import com.broadleafcommerce.paymentgateway.service.exception.PaymentException;
@@ -31,10 +30,8 @@ public class DefaultPayPalPaymentService implements PayPalPaymentService {
 
     private final PayPalCheckoutExternalCallService externalCallService;
     private final PayPalGatewayConfiguration gatewayConfiguration;
-    private final PayPalWebProfileService webProfileService;
-
-    @Value("${broadleaf.paypal.checkout.rest.populate.shipping.create.payment:true}")
-    protected boolean shouldPopulateShippingOnPaymentCreation;
+    private final PayPalWebExperienceProfileService webExperienceProfileService;
+    private final boolean shouldPopulateShippingOnPaymentCreation;
 
     @Override
     public Payment createPayPalPayment(@NonNull PaymentRequest paymentRequest,
@@ -76,9 +73,10 @@ public class DefaultPayPalPaymentService implements PayPalPaymentService {
         payment.setRedirectUrls(redirectUrls);
         payment.setTransactions(transactions);
 
-        String profileId = webProfileService.getWebProfileId(paymentRequest);
-        if (StringUtils.isNotBlank(profileId)) {
-            payment.setExperienceProfileId(profileId);
+        String webExperienceProfileId =
+                webExperienceProfileService.getWebExperienceProfileId(paymentRequest);
+        if (StringUtils.isNotBlank(webExperienceProfileId)) {
+            payment.setExperienceProfileId(webExperienceProfileId);
         }
         return createPayment(payment, paymentRequest);
     }

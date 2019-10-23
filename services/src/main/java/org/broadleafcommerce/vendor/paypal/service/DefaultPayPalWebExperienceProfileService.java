@@ -11,16 +11,18 @@ import com.broadleafcommerce.paymentgateway.domain.PaymentRequest;
 import com.broadleafcommerce.paymentgateway.service.exception.PaymentException;
 import com.paypal.api.payments.WebProfile;
 
-public class DefaultPayPalWebProfileService implements PayPalWebProfileService {
+public class DefaultPayPalWebExperienceProfileService implements PayPalWebExperienceProfileService {
 
-    private static final Log LOG = LogFactory.getLog(DefaultPayPalWebProfileService.class);
+    private static final Log LOG =
+            LogFactory.getLog(DefaultPayPalWebExperienceProfileService.class);
 
     private final PayPalCheckoutExternalCallService externalCallService;
     private final WebProfile webProfile;
 
     private String beanProfileId;
 
-    public DefaultPayPalWebProfileService(PayPalCheckoutExternalCallService externalCallService,
+    public DefaultPayPalWebExperienceProfileService(
+            PayPalCheckoutExternalCallService externalCallService,
             WebProfile webProfile) {
         super();
         this.externalCallService = externalCallService;
@@ -34,7 +36,7 @@ public class DefaultPayPalWebProfileService implements PayPalWebProfileService {
     }
 
     @Override
-    public String getWebProfileId(PaymentRequest paymentRequest) {
+    public String getWebExperienceProfileId(PaymentRequest paymentRequest) {
         String profileId = getPropertyWebProfileId();
         if (StringUtils.isNotBlank(profileId)) {
             return profileId;

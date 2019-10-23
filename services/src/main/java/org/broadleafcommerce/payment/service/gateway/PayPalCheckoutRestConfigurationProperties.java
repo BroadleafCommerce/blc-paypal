@@ -1,7 +1,7 @@
 package org.broadleafcommerce.payment.service.gateway;
 
 import org.apache.commons.lang3.StringUtils;
-import org.broadleafcommerce.vendor.paypal.service.PayPalWebProfileService;
+import org.broadleafcommerce.vendor.paypal.service.PayPalWebExperienceProfileService;
 import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
@@ -61,9 +61,9 @@ public class PayPalCheckoutRestConfigurationProperties {
     /**
      * The WebProfile to be used when creating payments. For more information on WebProfiles go to
      * {@link https://developer.paypal.com/docs/integration/direct/payment-experience/}.
-     * {@link PayPalWebProfileService#getWebProfileId(PaymentRequest)} should be used instead if you
-     * want to find the web profile id to create a payment since it has the ability to create new
-     * WebProfiles based on injected beans along with using this method
+     * {@link PayPalWebExperienceProfileService#getWebExperienceProfileId(PaymentRequest)} should be
+     * used instead if you want to find the web profile id to create a payment since it has the
+     * ability to create new WebProfiles based on injected beans along with using this method
      *
      * @return The WebProfile to be used when creating payments
      */
@@ -105,6 +105,15 @@ public class PayPalCheckoutRestConfigurationProperties {
      * @return String
      */
     private String totalType = MessageConstants.TOTAL;
+
+    /**
+     * Whether or not we should populate each cart item's shipping address if it's already known
+     * when we initially create the PayPal Payment.
+     *
+     * @return boolean
+     */
+    @Getter(AccessLevel.NONE)
+    private boolean shouldPopulateShippingOnCreatePayment = true;
 
     /**
      * The Paypal NVP API only allows a single field with custom logic in it:
@@ -163,6 +172,10 @@ public class PayPalCheckoutRestConfigurationProperties {
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException("The provided url (" + url + ") is not valid.", e);
         }
+    }
+
+    public boolean shouldPopulateShippingOnCreatePayment() {
+        return shouldPopulateShippingOnCreatePayment;
     }
 
 }
