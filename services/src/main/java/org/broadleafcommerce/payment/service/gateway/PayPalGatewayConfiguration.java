@@ -1,6 +1,6 @@
 package org.broadleafcommerce.payment.service.gateway;
 
-import com.broadleafcommerce.paymentgateway.service.configuration.PaymentGatewayConfiguration;
+import com.broadleafcommerce.paymentgateway.service.PaymentGatewayConfiguration;
 
 /**
  * @author Chris Kittrell

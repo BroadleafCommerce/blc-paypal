@@ -3,8 +3,8 @@ package org.broadleafcommerce.payment.service.gateway;
 import com.broadleafcommerce.paymentgateway.domain.PaymentRequest;
 import com.broadleafcommerce.paymentgateway.domain.PaymentResponse;
 import com.broadleafcommerce.paymentgateway.domain.enums.DefaultTransactionTypes;
+import com.broadleafcommerce.paymentgateway.service.PaymentGatewayTransactionService;
 import com.broadleafcommerce.paymentgateway.service.exception.PaymentException;
-import com.broadleafcommerce.paymentgateway.service.transaction.PaymentGatewayTransactionService;
 
 import lombok.RequiredArgsConstructor;
 

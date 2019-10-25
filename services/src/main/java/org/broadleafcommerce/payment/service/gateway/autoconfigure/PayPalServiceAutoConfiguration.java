@@ -22,7 +22,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.broadleafcommerce.paymentgateway.service.transaction.PaymentGatewayTransactionService;
+import com.broadleafcommerce.paymentgateway.service.PaymentGatewayTransactionService;
 
 @Configuration
 @EnableConfigurationProperties({PayPalCheckoutRestConfigurationProperties.class})
