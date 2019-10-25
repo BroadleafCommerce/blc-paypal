@@ -1,7 +1,5 @@
 package org.broadleafcommerce.payment.service.gateway;
 
-import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCheckoutPaymentGatewayType;
-
 import lombok.RequiredArgsConstructor;
 
 /**

@@ -11,7 +11,6 @@ import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCaptureRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCaptureResponse;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCaptureRetrievalRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCaptureRetrievalResponse;
-import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCheckoutPaymentGatewayType;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCreatePaymentRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCreatePaymentResponse;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalRefundRequest;
@@ -25,8 +24,8 @@ import org.broadleafcommerce.vendor.paypal.service.payment.PayPalVoidResponse;
 
 import com.broadleafcommerce.paymentgateway.domain.PaymentRequest;
 import com.broadleafcommerce.paymentgateway.domain.PaymentResponse;
+import com.broadleafcommerce.paymentgateway.domain.enums.DefaultPaymentTypes;
 import com.broadleafcommerce.paymentgateway.domain.enums.DefaultTransactionTypes;
-import com.broadleafcommerce.paymentgateway.domain.enums.PaymentType;
 import com.broadleafcommerce.paymentgateway.service.exception.PaymentException;
 import com.paypal.api.payments.Amount;
 import com.paypal.api.payments.Authorization;
@@ -62,12 +61,13 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
     protected static final Log LOG =
             LogFactory.getLog(DefaultPayPalCheckoutTransactionService.class);
 
-    private final PayPalCheckoutExternalCallService payPalCheckoutService;
+    private final PayPalCheckoutExternalCallService paypalCheckoutService;
 
     @Override
     public PaymentResponse authorize(PaymentRequest paymentRequest) throws PaymentException {
-        PaymentResponse paymentResponse = new PaymentResponse(PaymentType.THIRD_PARTY_ACCOUNT,
-                PayPalCheckoutPaymentGatewayType.PAYPAL_CHECKOUT);
+        PaymentResponse paymentResponse =
+                new PaymentResponse(DefaultPaymentTypes.THIRD_PARTY_ACCOUNT,
+                        PayPalCheckoutPaymentGatewayType.PAYPAL_CHECKOUT);
 
         try {
             PayPalResource auth = authorizePayment(paymentRequest);
@@ -112,7 +112,7 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
 
     @Override
     public PaymentResponse capture(PaymentRequest paymentRequest) throws PaymentException {
-        PaymentResponse responseDTO = new PaymentResponse(PaymentType.THIRD_PARTY_ACCOUNT,
+        PaymentResponse responseDTO = new PaymentResponse(DefaultPaymentTypes.THIRD_PARTY_ACCOUNT,
                 PayPalCheckoutPaymentGatewayType.PAYPAL_CHECKOUT);
 
         try {
@@ -145,7 +145,7 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
     @Override
     public PaymentResponse authorizeAndCapture(PaymentRequest paymentRequest)
             throws PaymentException {
-        PaymentResponse responseDTO = new PaymentResponse(PaymentType.THIRD_PARTY_ACCOUNT,
+        PaymentResponse responseDTO = new PaymentResponse(DefaultPaymentTypes.THIRD_PARTY_ACCOUNT,
                 PayPalCheckoutPaymentGatewayType.PAYPAL_CHECKOUT);
 
         try {
@@ -233,7 +233,7 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
 
     @Override
     public PaymentResponse reverseAuthorize(PaymentRequest paymentRequest) throws PaymentException {
-        PaymentResponse responseDTO = new PaymentResponse(PaymentType.THIRD_PARTY_ACCOUNT,
+        PaymentResponse responseDTO = new PaymentResponse(DefaultPaymentTypes.THIRD_PARTY_ACCOUNT,
                 PayPalCheckoutPaymentGatewayType.PAYPAL_CHECKOUT);
 
         try {
@@ -264,7 +264,7 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
 
     @Override
     public PaymentResponse refund(PaymentRequest paymentRequest) throws PaymentException {
-        PaymentResponse responseDTO = new PaymentResponse(PaymentType.THIRD_PARTY_ACCOUNT,
+        PaymentResponse responseDTO = new PaymentResponse(DefaultPaymentTypes.THIRD_PARTY_ACCOUNT,
                 PayPalCheckoutPaymentGatewayType.PAYPAL_CHECKOUT);
 
         try {
@@ -320,7 +320,7 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
 
     @Override
     public PaymentResponse voidPayment(PaymentRequest paymentRequest) throws PaymentException {
-        PaymentResponse responseDTO = new PaymentResponse(PaymentType.THIRD_PARTY_ACCOUNT,
+        PaymentResponse responseDTO = new PaymentResponse(DefaultPaymentTypes.THIRD_PARTY_ACCOUNT,
                 PayPalCheckoutPaymentGatewayType.PAYPAL_CHECKOUT);
 
         try {
@@ -356,10 +356,10 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
         amount.setCurrency(paymentRequest.getCurrencyCode());
         amount.setTotal(Objects.toString(paymentRequest.getTransactionTotal(), null));
         capture.setAmount(amount);
-        PayPalCaptureResponse captureResponse = (PayPalCaptureResponse) payPalCheckoutService.call(
+        PayPalCaptureResponse captureResponse = (PayPalCaptureResponse) paypalCheckoutService.call(
                 new PayPalCaptureRequest(auth,
                         capture,
-                        payPalCheckoutService.constructAPIContext(paymentRequest)));
+                        paypalCheckoutService.constructAPIContext(paymentRequest)));
         return captureResponse.getCapture();
     }
 
@@ -375,16 +375,16 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
             payment.setIntent("authorize");
             payment.setPayer(generateAuthorizePayer(paymentRequest));
             PayPalCreatePaymentResponse response =
-                    (PayPalCreatePaymentResponse) payPalCheckoutService.call(
+                    (PayPalCreatePaymentResponse) paypalCheckoutService.call(
                             new PayPalCreatePaymentRequest(payment,
-                                    payPalCheckoutService.constructAPIContext(paymentRequest)));
+                                    paypalCheckoutService.constructAPIContext(paymentRequest)));
             return response.getPayment();
         }
 
-        PayPalAuthorizeResponse response = (PayPalAuthorizeResponse) payPalCheckoutService.call(
+        PayPalAuthorizeResponse response = (PayPalAuthorizeResponse) paypalCheckoutService.call(
                 new PayPalAuthorizeRequest(payment,
                         paymentExecution,
-                        payPalCheckoutService.constructAPIContext(paymentRequest)));
+                        paypalCheckoutService.constructAPIContext(paymentRequest)));
         return response.getAuthorization();
     }
 
@@ -406,17 +406,17 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
     }
 
     private final List<Transaction> generateTransactions(PaymentRequest paymentRequest) {
-        Amount amount = payPalCheckoutService.getPayPalAmountFromOrder(paymentRequest);
+        Amount amount = paypalCheckoutService.getPayPalAmountFromOrder(paymentRequest);
 
         // Transaction information
         Transaction transaction = new Transaction();
         transaction.setAmount(amount);
         transaction
                 .setDescription(
-                        payPalCheckoutService.getConfigProperties().getPaymentDescription());
+                        paypalCheckoutService.getConfigProperties().getPaymentDescription());
         transaction.setCustom(paymentRequest.getOrderId());
 
-        ItemList itemList = payPalCheckoutService.getPayPalItemList(paymentRequest, true);
+        ItemList itemList = paypalCheckoutService.getPayPalItemList(paymentRequest, true);
         if (itemList != null) {
             transaction.setItemList(itemList);
         }
@@ -439,16 +439,16 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
             payment.setIntent("sale");
             payment.setPayer(generateSalePayer(paymentRequest));
             PayPalCreatePaymentResponse response =
-                    (PayPalCreatePaymentResponse) payPalCheckoutService.call(
+                    (PayPalCreatePaymentResponse) paypalCheckoutService.call(
                             new PayPalCreatePaymentRequest(payment,
-                                    payPalCheckoutService.constructAPIContext(paymentRequest)));
+                                    paypalCheckoutService.constructAPIContext(paymentRequest)));
             return response.getPayment();
         }
 
-        PayPalSaleResponse response = (PayPalSaleResponse) payPalCheckoutService.call(
+        PayPalSaleResponse response = (PayPalSaleResponse) paypalCheckoutService.call(
                 new PayPalSaleRequest(payment,
                         paymentExecution,
-                        payPalCheckoutService.constructAPIContext(paymentRequest)));
+                        paypalCheckoutService.constructAPIContext(paymentRequest)));
         return response.getSale();
     }
 
@@ -480,9 +480,9 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
 
     private final Authorization voidAuthorization(Authorization auth, PaymentRequest paymentRequest)
             throws PaymentException {
-        PayPalVoidResponse response = (PayPalVoidResponse) payPalCheckoutService.call(
+        PayPalVoidResponse response = (PayPalVoidResponse) paypalCheckoutService.call(
                 new PayPalVoidRequest(auth,
-                        payPalCheckoutService.constructAPIContext(paymentRequest)));
+                        paypalCheckoutService.constructAPIContext(paymentRequest)));
         return response.getVoidedAuthorization();
     }
 
@@ -493,10 +493,10 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
         amount.setCurrency(paymentRequest.getCurrencyCode());
         amount.setTotal(Objects.toString(paymentRequest.getTransactionTotal(), null));
         refund.setAmount(amount);
-        PayPalRefundResponse response = (PayPalRefundResponse) payPalCheckoutService.call(
+        PayPalRefundResponse response = (PayPalRefundResponse) paypalCheckoutService.call(
                 new PayPalRefundRequest(refund,
                         capture,
-                        payPalCheckoutService.constructAPIContext(paymentRequest)));
+                        paypalCheckoutService.constructAPIContext(paymentRequest)));
         return response.getDetailedRefund();
     }
 
@@ -507,35 +507,35 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
         amount.setCurrency(paymentRequest.getCurrencyCode());
         amount.setTotal(Objects.toString(paymentRequest.getTransactionTotal(), null));
         refund.setAmount(amount);
-        PayPalRefundResponse response = (PayPalRefundResponse) payPalCheckoutService.call(
+        PayPalRefundResponse response = (PayPalRefundResponse) paypalCheckoutService.call(
                 new PayPalRefundRequest(refund,
                         sale,
-                        payPalCheckoutService.constructAPIContext(paymentRequest)));
+                        paypalCheckoutService.constructAPIContext(paymentRequest)));
         return response.getDetailedRefund();
     }
 
     private final Authorization getAuthorization(PaymentRequest paymentRequest)
             throws PaymentException {
         PayPalAuthorizationRetrievalResponse authResponse =
-                (PayPalAuthorizationRetrievalResponse) payPalCheckoutService.call(
+                (PayPalAuthorizationRetrievalResponse) paypalCheckoutService.call(
                         new PayPalAuthorizationRetrievalRequest(getAuthorizationId(paymentRequest),
-                                payPalCheckoutService.constructAPIContext(paymentRequest)));
+                                paypalCheckoutService.constructAPIContext(paymentRequest)));
         return authResponse.getAuthorization();
     }
 
     private final Sale getSale(PaymentRequest paymentRequest) throws PaymentException {
         PayPalSaleRetrievalResponse saleResponse =
-                (PayPalSaleRetrievalResponse) payPalCheckoutService.call(
+                (PayPalSaleRetrievalResponse) paypalCheckoutService.call(
                         new PayPalSaleRetrievalRequest(getSaleId(paymentRequest),
-                                payPalCheckoutService.constructAPIContext(paymentRequest)));
+                                paypalCheckoutService.constructAPIContext(paymentRequest)));
         return saleResponse.getSale();
     }
 
     private final Capture getCapture(PaymentRequest paymentRequest) throws PaymentException {
         PayPalCaptureRetrievalResponse response =
-                (PayPalCaptureRetrievalResponse) payPalCheckoutService
+                (PayPalCaptureRetrievalResponse) paypalCheckoutService
                         .call((new PayPalCaptureRetrievalRequest(getCaptureId(paymentRequest),
-                                payPalCheckoutService.constructAPIContext(paymentRequest))));
+                                paypalCheckoutService.constructAPIContext(paymentRequest))));
         return response.getCapture();
     }
 

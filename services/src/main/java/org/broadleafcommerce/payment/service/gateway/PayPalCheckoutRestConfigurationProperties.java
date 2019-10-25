@@ -13,7 +13,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import lombok.AccessLevel;
-import lombok.Data;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
@@ -22,8 +21,9 @@ import lombok.Setter;
  * @author Elbert Bautista (elbertbautista)
  * @author Chris Kittrell
  */
-@Data
-@ConfigurationProperties("broadleaf.paypal.checkout.rest")
+@Getter
+@Setter
+@ConfigurationProperties("broadleaf.paypalcheckout.rest")
 public class PayPalCheckoutRestConfigurationProperties {
 
     /**
@@ -144,7 +144,7 @@ public class PayPalCheckoutRestConfigurationProperties {
                 return siteBaseUrl + returnUrl;
             } else {
                 throw new IllegalArgumentException(
-                        "Since the value provided for 'broadleaf.paypal.checkout.rest.returnUrl' is a relative url, a siteBaseUrl must be provided on the PaymentRequest.");
+                        "Since the value provided for 'broadleaf.paypalcheckout.rest.returnUrl' is a relative url, a siteBaseUrl must be provided on the PaymentRequest.");
             }
         }
     }
@@ -159,7 +159,7 @@ public class PayPalCheckoutRestConfigurationProperties {
                 return siteBaseUrl + cancelUrl;
             } else {
                 throw new IllegalArgumentException(
-                        "Since the value provided for 'broadleaf.paypal.checkout.rest.cancelUrl' is a relative url, a siteBaseUrl must be provided on the PaymentRequest.");
+                        "Since the value provided for 'broadleaf.paypalcheckout.rest.cancelUrl' is a relative url, a siteBaseUrl must be provided on the PaymentRequest.");
             }
         }
     }

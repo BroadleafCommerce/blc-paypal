@@ -24,25 +24,25 @@ public class PayPalVendorServiceAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public PayPalAgreementTokenService payPalAgreementTokenService(
-            PayPalCheckoutExternalCallService externalCallService) {
-        return new DefaultPayPalAgreementTokenService(externalCallService);
+            PayPalCheckoutExternalCallService paypalCheckoutService) {
+        return new DefaultPayPalAgreementTokenService(paypalCheckoutService);
     }
 
     @Bean
     @ConditionalOnMissingBean
     public PayPalBillingAgreementService payPalBillingAgreementService(
-            PayPalCheckoutExternalCallService externalCallService) {
-        return new DefaultPayPalBillingAgreementService(externalCallService);
+            PayPalCheckoutExternalCallService paypalCheckoutService) {
+        return new DefaultPayPalBillingAgreementService(paypalCheckoutService);
     }
 
     @Bean
     @ConditionalOnMissingBean
     public PayPalPaymentService payPalPaymentService(
-            PayPalCheckoutExternalCallService externalCallService,
+            PayPalCheckoutExternalCallService paypalCheckoutService,
             PayPalGatewayConfiguration gatewayConfiguration,
             PayPalWebExperienceProfileService webExperienceProfileService,
             PayPalCheckoutRestConfigurationProperties properties) {
-        return new DefaultPayPalPaymentService(externalCallService,
+        return new DefaultPayPalPaymentService(paypalCheckoutService,
                 gatewayConfiguration,
                 webExperienceProfileService,
                 properties.shouldPopulateShippingOnCreatePayment());
@@ -51,9 +51,9 @@ public class PayPalVendorServiceAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public PayPalWebExperienceProfileService payPalWebProfileService(
-            PayPalCheckoutExternalCallService externalCallService,
+            PayPalCheckoutExternalCallService paypalCheckoutService,
             @Autowired(required = false) WebProfile webProfile) {
-        return new DefaultPayPalWebExperienceProfileService(externalCallService, webProfile);
+        return new DefaultPayPalWebExperienceProfileService(paypalCheckoutService, webProfile);
     }
 
 }

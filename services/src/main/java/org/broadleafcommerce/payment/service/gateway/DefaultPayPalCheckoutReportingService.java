@@ -5,14 +5,13 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
-import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCheckoutPaymentGatewayType;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalPaymentRetrievalRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalPaymentRetrievalResponse;
 import org.springframework.util.Assert;
 
 import com.broadleafcommerce.paymentgateway.domain.PaymentRequest;
 import com.broadleafcommerce.paymentgateway.domain.PaymentResponse;
-import com.broadleafcommerce.paymentgateway.domain.enums.PaymentType;
+import com.broadleafcommerce.paymentgateway.domain.enums.DefaultPaymentTypes;
 import com.broadleafcommerce.paymentgateway.service.exception.PaymentException;
 import com.paypal.api.payments.Payment;
 
@@ -26,7 +25,7 @@ public class DefaultPayPalCheckoutReportingService implements PayPalCheckoutRepo
 
     private static final Log LOG = LogFactory.getLog(DefaultPayPalCheckoutReportingService.class);
 
-    private final PayPalCheckoutExternalCallService payPalCheckoutService;
+    private final PayPalCheckoutExternalCallService paypalCheckoutService;
 
     @Override
     public PaymentResponse findDetailsByTransaction(PaymentRequest paymentRequest)
@@ -39,15 +38,15 @@ public class DefaultPayPalCheckoutReportingService implements PayPalCheckoutRepo
                 "The RequestDTO must contain a paymentID");
 
         PayPalPaymentRetrievalResponse response =
-                (PayPalPaymentRetrievalResponse) payPalCheckoutService.call(
+                (PayPalPaymentRetrievalResponse) paypalCheckoutService.call(
                         new PayPalPaymentRetrievalRequest(
                                 (String) paymentRequest.getAdditionalFields()
                                         .get(MessageConstants.HTTP_PAYMENTID),
-                                payPalCheckoutService.constructAPIContext(paymentRequest)));
+                                paypalCheckoutService.constructAPIContext(paymentRequest)));
         Payment payment = response.getPayment();
-        PaymentResponse responseDTO = new PaymentResponse(PaymentType.THIRD_PARTY_ACCOUNT,
+        PaymentResponse responseDTO = new PaymentResponse(DefaultPaymentTypes.THIRD_PARTY_ACCOUNT,
                 PayPalCheckoutPaymentGatewayType.PAYPAL_CHECKOUT);
-        payPalCheckoutService.setCommonDetailsResponse(payment, responseDTO);
+        paypalCheckoutService.setCommonDetailsResponse(payment, responseDTO);
         responseDTO
                 .responseMap(MessageConstants.PAYERID,
                         (String) paymentRequest.getAdditionalFields()

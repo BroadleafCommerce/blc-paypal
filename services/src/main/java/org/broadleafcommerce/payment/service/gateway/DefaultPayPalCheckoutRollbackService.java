@@ -1,7 +1,5 @@
 package org.broadleafcommerce.payment.service.gateway;
 
-import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCheckoutPaymentGatewayType;
-
 import com.broadleafcommerce.paymentgateway.domain.PaymentRequest;
 import com.broadleafcommerce.paymentgateway.domain.PaymentResponse;
 import com.broadleafcommerce.paymentgateway.service.exception.PaymentException;

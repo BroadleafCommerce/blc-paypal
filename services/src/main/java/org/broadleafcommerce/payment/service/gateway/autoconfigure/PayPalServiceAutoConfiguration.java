@@ -30,7 +30,7 @@ public class PayPalServiceAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public PayPalCheckoutExternalCallService payPalCheckoutExternalCallService(
+    public PayPalCheckoutExternalCallService paypalCheckoutService(
             PayPalCheckoutRestConfigurationProperties configProperties,
             PayPalGatewayConfiguration gatewayConfiguration) {
         return new DefaultPayPalCheckoutExternalCallService(configProperties,
@@ -46,15 +46,15 @@ public class PayPalServiceAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public PayPalSyncTransactionService payPalSyncTransactionService(
-            PayPalCheckoutExternalCallService externalCallService) {
-        return new DefaultPayPalSyncTransactionService(externalCallService);
+            PayPalCheckoutExternalCallService paypalCheckoutService) {
+        return new DefaultPayPalSyncTransactionService(paypalCheckoutService);
     }
 
     @Bean
     @ConditionalOnMissingBean
     public PayPalCheckoutTransactionService payPalCheckoutTransactionService(
-            PayPalCheckoutExternalCallService externalCallService) {
-        return new DefaultPayPalCheckoutTransactionService(externalCallService);
+            PayPalCheckoutExternalCallService paypalCheckoutService) {
+        return new DefaultPayPalCheckoutTransactionService(paypalCheckoutService);
     }
 
     @Bean
@@ -84,8 +84,8 @@ public class PayPalServiceAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public PayPalCheckoutReportingService payPalCheckoutReportingService(
-            PayPalCheckoutExternalCallService externalCallService) {
-        return new DefaultPayPalCheckoutReportingService(externalCallService);
+            PayPalCheckoutExternalCallService paypalCheckoutService) {
+        return new DefaultPayPalCheckoutReportingService(paypalCheckoutService);
     }
 
 }
