@@ -22,8 +22,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.broadleafcommerce.paymentgateway.service.PaymentGatewayTransactionService;
-
 @Configuration
 @EnableConfigurationProperties({PayPalCheckoutRestConfigurationProperties.class})
 public class PayPalServiceAutoConfiguration {
@@ -60,7 +58,7 @@ public class PayPalServiceAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public PayPalCheckoutRollbackService payPalCheckoutRollbackService(
-            PaymentGatewayTransactionService transactionService) {
+            PayPalCheckoutTransactionService transactionService) {
         return new DefaultPayPalCheckoutRollbackService(transactionService);
     }
 
@@ -68,7 +66,7 @@ public class PayPalServiceAutoConfiguration {
     @ConditionalOnMissingBean
     public PayPalCheckoutTransactionConfirmationService payPalCheckoutTransactionConfirmationService(
             PayPalGatewayConfiguration gatewayConfiguration,
-            PaymentGatewayTransactionService transactionService) {
+            PayPalCheckoutTransactionService transactionService) {
         return new DefaultPayPalCheckoutTransactionConfirmationService(gatewayConfiguration,
                 transactionService);
     }
@@ -77,7 +75,7 @@ public class PayPalServiceAutoConfiguration {
     @ConditionalOnMissingBean
     public PayPalCheckoutHostedService payPalCheckoutHostedService(
             PayPalGatewayConfiguration gatewayConfiguration,
-            PaymentGatewayTransactionService transactionService) {
+            PayPalCheckoutTransactionService transactionService) {
         return new DefaultPayPalCheckoutHostedService(gatewayConfiguration, transactionService);
     }
 
