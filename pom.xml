@@ -9,7 +9,7 @@
     </parent>
 
     <artifactId>broadleaf-paypal-parent</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>0.9.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>BroadleafCommerce PayPal Parent</name>
     <description>BroadleafCommerce PayPal Parent</description>
