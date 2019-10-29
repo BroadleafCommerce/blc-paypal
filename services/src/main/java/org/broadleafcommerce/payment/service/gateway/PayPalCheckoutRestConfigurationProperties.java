@@ -4,7 +4,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.broadleafcommerce.vendor.paypal.service.PayPalWebExperienceProfileService;
 import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.validation.annotation.Validated;
 
 import com.broadleafcommerce.paymentgateway.domain.PaymentRequest;
 
@@ -13,12 +12,13 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.validation.constraints.NotEmpty;
+import javax.annotation.PostConstruct;
 
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
+import lombok.extern.apachecommons.CommonsLog;
 
 /**
  * @author Elbert Bautista (elbertbautista)
@@ -26,9 +26,25 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-@Validated
+@CommonsLog
 @ConfigurationProperties("broadleaf.paypalcheckout.rest")
 public class PayPalCheckoutRestConfigurationProperties {
+
+    @PostConstruct
+    public void init() {
+        if (StringUtils.isBlank(mode)) {
+            log.error(
+                    "The PayPal mode (live vs sandbox) must be provided via the 'broadleaf.paypalcheckout.rest.mode' property.");
+        }
+        if (StringUtils.isBlank(clientId)) {
+            log.error(
+                    "The PayPal client id must be provided via the 'broadleaf.paypalcheckout.rest.client-id' property.");
+        }
+        if (StringUtils.isBlank(clientSecret)) {
+            log.error(
+                    "The PayPal client secret must be provided via the 'broadleaf.paypalcheckout.rest.client-secret' property.");
+        }
+    }
 
     /**
      * URL to which the buyer's browser is returned after choosing to pay with PayPal. For digital
@@ -60,7 +76,6 @@ public class PayPalCheckoutRestConfigurationProperties {
      *
      * @return the execution mode (sandbox vs live) of transactions through the PayPal API
      */
-    @NotEmpty
     private String mode = "sandbox";
 
     /**
@@ -81,7 +96,6 @@ public class PayPalCheckoutRestConfigurationProperties {
      * @return The client id provided by PayPal that is used in API calls to identify the charging
      *         company/entity.
      */
-    @NotEmpty
     private String clientId;
 
     /**
@@ -91,7 +105,6 @@ public class PayPalCheckoutRestConfigurationProperties {
      * @return The client secret provided by PayPal that is used in API calls to verify the
      *         applications usage of the client id.
      */
-    @NotEmpty
     private String clientSecret;
 
     /**
