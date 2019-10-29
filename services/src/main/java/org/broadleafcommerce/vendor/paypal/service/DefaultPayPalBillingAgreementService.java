@@ -38,7 +38,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class DefaultPayPalBillingAgreementService implements PayPalBillingAgreementService {
 
-    private final PayPalCheckoutExternalCallService externalCallService;
+    private final PayPalCheckoutExternalCallService paypalCheckoutService;
 
     @Override
     public Agreement createPayPalBillingAgreement(PaymentRequest paymentRequest,
@@ -81,7 +81,8 @@ public class DefaultPayPalBillingAgreementService implements PayPalBillingAgreem
         agreement.setStartDate("2018-12-22T09:13:49Z");
 
         if (paymentRequest.shipToPopulated()) {
-            ShippingAddress address = externalCallService.getPayPalShippingAddress(paymentRequest);
+            ShippingAddress address =
+                    paypalCheckoutService.getPayPalShippingAddress(paymentRequest);
             agreement.setShippingAddress(address);
         }
         return agreement;
@@ -96,7 +97,7 @@ public class DefaultPayPalBillingAgreementService implements PayPalBillingAgreem
 
     protected Plan constructPlan(PaymentRequest paymentRequest) throws PaymentException {
         PayPalCheckoutRestConfigurationProperties configProperties =
-                externalCallService.getConfigProperties();
+                paypalCheckoutService.getConfigProperties();
 
         // Set up merchant preferences
         MerchantPreferences merchantPreferences = new MerchantPreferences();
@@ -116,7 +117,7 @@ public class DefaultPayPalBillingAgreementService implements PayPalBillingAgreem
         paymentDefinition.setFrequencyInterval("1");
         paymentDefinition.setFrequency("YEAR");
         paymentDefinition.setCycles("0");
-        Amount amt = externalCallService.getPayPalAmountFromOrder(paymentRequest);
+        Amount amt = paypalCheckoutService.getPayPalAmountFromOrder(paymentRequest);
         paymentDefinition.setAmount(new Currency(amt.getCurrency(), amt.getTotal()));
         paymentDefinitions.add(paymentDefinition);
         plan.setPaymentDefinitions(paymentDefinitions);
@@ -125,25 +126,25 @@ public class DefaultPayPalBillingAgreementService implements PayPalBillingAgreem
     }
 
     protected Plan createPlan(Plan plan, PaymentRequest paymentRequest) throws PaymentException {
-        PayPalCreatePlanResponse response = (PayPalCreatePlanResponse) externalCallService.call(
+        PayPalCreatePlanResponse response = (PayPalCreatePlanResponse) paypalCheckoutService.call(
                 new PayPalCreatePlanRequest(plan,
-                        externalCallService.constructAPIContext(paymentRequest)));
+                        paypalCheckoutService.constructAPIContext(paymentRequest)));
         return response.getPlan();
     }
 
     protected void updatePlan(Plan plan, List<Patch> patches, PaymentRequest paymentRequest)
             throws PaymentException {
-        externalCallService.call(new PayPalUpdatePlanRequest(plan,
+        paypalCheckoutService.call(new PayPalUpdatePlanRequest(plan,
                 patches,
-                externalCallService.constructAPIContext(paymentRequest)));
+                paypalCheckoutService.constructAPIContext(paymentRequest)));
     }
 
     protected Agreement createAgreement(Agreement agreement, PaymentRequest paymentRequest)
             throws PaymentException {
         PayPalCreateBillingAgreementResponse response =
-                (PayPalCreateBillingAgreementResponse) externalCallService.call(
+                (PayPalCreateBillingAgreementResponse) paypalCheckoutService.call(
                         new PayPalCreateBillingAgreementRequest(agreement,
-                                externalCallService.constructAPIContext(paymentRequest)));
+                                paypalCheckoutService.constructAPIContext(paymentRequest)));
         return response.getAgreement();
     }
 

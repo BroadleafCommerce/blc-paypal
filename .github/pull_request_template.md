@@ -8,7 +8,7 @@ Do not include issue number on title. State the purpose of this Pull Request. Fo
 **A Brief Overview**
 Add a short description explaining why the work is taking place.
 
-**Link to QA issue**
+**Link to GitHub issue**
 Link
 
 **Add Labels to the right panel and delete this list:**

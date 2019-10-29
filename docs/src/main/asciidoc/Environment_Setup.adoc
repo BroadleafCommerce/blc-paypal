@@ -9,15 +9,12 @@ You will need to provide the following system properties to configure your PayPa
 [source,properties]
 ----
 #PayPal Client Side REST Checkout
-broadleaf.paypal.checkout.rest.clientId=?
-broadleaf.paypal.checkout.rest.secret=?
-broadleaf.paypal.checkout.rest.mode=? (e.g. sandbox or live)
-broadleaf.paypal.checkout.rest.returnUrl=? (e.g. https://test.blc.localhost:8443/paypal-checkout/return)
-broadleaf.paypal.checkout.rest.cancelUrl=? (e.g. https://test.blc.localhost:8443/paypal-checkout/cancel)
-broadleaf.paypal.checkout.rest.description=? (e.g. My Test Store)
-gateway.paypal.smart.button.env=? (e.g. sandbox or production)
-gateway.paypal.smart.button.payment.url=? (e.g. /paypal-checkout/create-payment or /paypal-checkout/create-billing-agreement-token)
-gateway.paypal.smart.button.authorize.url=? (e.g. /paypal-checkout/return)
+broadleaf.paypalcheckout.rest.client-id=?
+broadleaf.paypalcheckout.rest.secret=?
+broadleaf.paypalcheckout.rest.mode=? (e.g. sandbox or live)
+broadleaf.paypalcheckout.rest.return-url=? (e.g. https://test.blc.localhost:8443/paypal-checkout/return)
+broadleaf.paypalcheckout.rest.cancel-url=? (e.g. https://test.blc.localhost:8443/paypal-checkout/cancel)
+broadleaf.paypalcheckout.rest.description=? (e.g. My Test Store)
 ----
 
 ==== Logging

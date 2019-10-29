@@ -1,9 +1,5 @@
 package org.broadleafcommerce.payment.service.gateway;
 
-import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCheckoutPaymentGatewayType;
-
-import com.broadleafcommerce.paymentgateway.domain.enums.PaymentGatewayType;
-
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -92,8 +88,8 @@ public class DefaultPayPalGatewayConfiguration implements PayPalGatewayConfigura
     }
 
     @Override
-    public PaymentGatewayType getGatewayType() {
-        return PayPalCheckoutPaymentGatewayType.PAYPAL_CHECKOUT;
+    public String getGatewayType() {
+        return PayPalCheckoutPaymentGatewayType.PAYPAL_CHECKOUT.name();
     }
 
 }

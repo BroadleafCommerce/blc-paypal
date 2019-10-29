@@ -1,4 +1,4 @@
-package org.broadleafcommerce.vendor.paypal.service.payment;
+package org.broadleafcommerce.payment.service.gateway;
 
 import com.broadleafcommerce.paymentgateway.domain.enums.PaymentGatewayType;
 

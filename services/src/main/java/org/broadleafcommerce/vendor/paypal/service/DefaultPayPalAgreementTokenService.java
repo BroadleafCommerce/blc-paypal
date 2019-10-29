@@ -18,7 +18,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class DefaultPayPalAgreementTokenService implements PayPalAgreementTokenService {
 
-    private final PayPalCheckoutExternalCallService externalCallService;
+    private final PayPalCheckoutExternalCallService paypalCheckoutService;
 
     /**
      * To support PayPal Reference Transactions and Billing Agreement Tokens
@@ -46,7 +46,7 @@ public class DefaultPayPalAgreementTokenService implements PayPalAgreementTokenS
         plan.setType(MessageConstants.PLAN_TYPE_MERCHANTINITIATEDBILLING);
 
         PayPalCheckoutRestConfigurationProperties configProperties =
-                externalCallService.getConfigProperties();
+                paypalCheckoutService.getConfigProperties();
 
         // Set up merchant preferences
         MerchantPreferences merchantPreferences = new MerchantPreferences();
@@ -71,14 +71,14 @@ public class DefaultPayPalAgreementTokenService implements PayPalAgreementTokenS
     protected AgreementToken createAgreementToken(AgreementToken agreementToken,
             PaymentRequest paymentRequest) throws PaymentException {
         PayPalCreateAgreementTokenResponse response =
-                (PayPalCreateAgreementTokenResponse) externalCallService.call(
+                (PayPalCreateAgreementTokenResponse) paypalCheckoutService.call(
                         new PayPalCreateAgreementTokenRequest(agreementToken,
-                                externalCallService.constructAPIContext(paymentRequest)));
+                                paypalCheckoutService.constructAPIContext(paymentRequest)));
         return response.getAgreementToken();
     }
 
     protected String constructAgreementDescription(PaymentRequest paymentRequest) {
-        return externalCallService.getConfigProperties().getPaymentDescription();
+        return paypalCheckoutService.getConfigProperties().getPaymentDescription();
     }
 
 }

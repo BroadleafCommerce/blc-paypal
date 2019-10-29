@@ -1,15 +1,16 @@
 package org.broadleafcommerce.vendor.paypal.service.autoconfigure;
 
 import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutExternalCallService;
+import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutRestConfigurationProperties;
 import org.broadleafcommerce.payment.service.gateway.PayPalGatewayConfiguration;
 import org.broadleafcommerce.vendor.paypal.service.DefaultPayPalAgreementTokenService;
 import org.broadleafcommerce.vendor.paypal.service.DefaultPayPalBillingAgreementService;
 import org.broadleafcommerce.vendor.paypal.service.DefaultPayPalPaymentService;
-import org.broadleafcommerce.vendor.paypal.service.DefaultPayPalWebProfileService;
+import org.broadleafcommerce.vendor.paypal.service.DefaultPayPalWebExperienceProfileService;
 import org.broadleafcommerce.vendor.paypal.service.PayPalAgreementTokenService;
 import org.broadleafcommerce.vendor.paypal.service.PayPalBillingAgreementService;
 import org.broadleafcommerce.vendor.paypal.service.PayPalPaymentService;
-import org.broadleafcommerce.vendor.paypal.service.PayPalWebProfileService;
+import org.broadleafcommerce.vendor.paypal.service.PayPalWebExperienceProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -23,34 +24,36 @@ public class PayPalVendorServiceAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public PayPalAgreementTokenService payPalAgreementTokenService(
-            PayPalCheckoutExternalCallService externalCallService) {
-        return new DefaultPayPalAgreementTokenService(externalCallService);
+            PayPalCheckoutExternalCallService paypalCheckoutService) {
+        return new DefaultPayPalAgreementTokenService(paypalCheckoutService);
     }
 
     @Bean
     @ConditionalOnMissingBean
     public PayPalBillingAgreementService payPalBillingAgreementService(
-            PayPalCheckoutExternalCallService externalCallService) {
-        return new DefaultPayPalBillingAgreementService(externalCallService);
+            PayPalCheckoutExternalCallService paypalCheckoutService) {
+        return new DefaultPayPalBillingAgreementService(paypalCheckoutService);
     }
 
     @Bean
     @ConditionalOnMissingBean
     public PayPalPaymentService payPalPaymentService(
-            PayPalCheckoutExternalCallService externalCallService,
+            PayPalCheckoutExternalCallService paypalCheckoutService,
             PayPalGatewayConfiguration gatewayConfiguration,
-            PayPalWebProfileService webProfileService) {
-        return new DefaultPayPalPaymentService(externalCallService,
+            PayPalWebExperienceProfileService webExperienceProfileService,
+            PayPalCheckoutRestConfigurationProperties properties) {
+        return new DefaultPayPalPaymentService(paypalCheckoutService,
                 gatewayConfiguration,
-                webProfileService);
+                webExperienceProfileService,
+                properties.shouldPopulateShippingOnCreatePayment());
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public PayPalWebProfileService payPalWebProfileService(
-            PayPalCheckoutExternalCallService externalCallService,
+    public PayPalWebExperienceProfileService payPalWebProfileService(
+            PayPalCheckoutExternalCallService paypalCheckoutService,
             @Autowired(required = false) WebProfile webProfile) {
-        return new DefaultPayPalWebProfileService(externalCallService, webProfile);
+        return new DefaultPayPalWebExperienceProfileService(paypalCheckoutService, webProfile);
     }
 
 }

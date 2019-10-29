@@ -11,30 +11,32 @@ import com.broadleafcommerce.paymentgateway.domain.PaymentRequest;
 import com.broadleafcommerce.paymentgateway.service.exception.PaymentException;
 import com.paypal.api.payments.WebProfile;
 
-public class DefaultPayPalWebProfileService implements PayPalWebProfileService {
+public class DefaultPayPalWebExperienceProfileService implements PayPalWebExperienceProfileService {
 
-    private static final Log LOG = LogFactory.getLog(DefaultPayPalWebProfileService.class);
+    private static final Log LOG =
+            LogFactory.getLog(DefaultPayPalWebExperienceProfileService.class);
 
-    private final PayPalCheckoutExternalCallService externalCallService;
+    private final PayPalCheckoutExternalCallService paypalCheckoutService;
     private final WebProfile webProfile;
 
     private String beanProfileId;
 
-    public DefaultPayPalWebProfileService(PayPalCheckoutExternalCallService externalCallService,
+    public DefaultPayPalWebExperienceProfileService(
+            PayPalCheckoutExternalCallService paypalCheckoutService,
             WebProfile webProfile) {
         super();
-        this.externalCallService = externalCallService;
+        this.paypalCheckoutService = paypalCheckoutService;
         this.webProfile = webProfile;
         if (webProfile != null && StringUtils.isBlank(webProfile.getId()) && LOG.isWarnEnabled()) {
             LOG.warn(
                     "The WebProfile provided did not specify an id. Beware that this will result in creating new WebProfiles linked to your PayPal account on every server startup."
-                            + "To avoid this either set an id on the provided WebProfile bean or set the property broadleaf.paypal.checkout.rest.webProfileId."
+                            + "To avoid this either set an id on the provided WebProfile bean or set the property broadleaf.paypalcheckout.rest.webProfileId."
                             + "To obtain a WebProfile id either create a WebProfile or select an existing an id from you PayPal account following the instructions here https://developer.paypal.com/docs/api/payment-experience/v1/#web-profiles");
         }
     }
 
     @Override
-    public String getWebProfileId(PaymentRequest paymentRequest) {
+    public String getWebExperienceProfileId(PaymentRequest paymentRequest) {
         String profileId = getPropertyWebProfileId();
         if (StringUtils.isNotBlank(profileId)) {
             return profileId;
@@ -62,9 +64,9 @@ public class DefaultPayPalWebProfileService implements PayPalWebProfileService {
     protected WebProfile createWebProfile(WebProfile profile, PaymentRequest paymentRequest) {
         try {
             PayPalCreateWebProfileResponse response =
-                    (PayPalCreateWebProfileResponse) externalCallService.call(
+                    (PayPalCreateWebProfileResponse) paypalCheckoutService.call(
                             new PayPalCreateWebProfileRequest(profile,
-                                    externalCallService.constructAPIContext(paymentRequest)));
+                                    paypalCheckoutService.constructAPIContext(paymentRequest)));
             return response.getWebProfile();
         } catch (PaymentException e) {
             LOG.error("Error retrieving WebProfile from PayPal", e);
@@ -73,6 +75,6 @@ public class DefaultPayPalWebProfileService implements PayPalWebProfileService {
     }
 
     protected String getPropertyWebProfileId() {
-        return externalCallService.getConfigProperties().getWebProfileId();
+        return paypalCheckoutService.getConfigProperties().getWebProfileId();
     }
 }

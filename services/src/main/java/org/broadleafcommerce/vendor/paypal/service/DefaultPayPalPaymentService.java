@@ -8,7 +8,6 @@ import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCreatePaymentRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCreatePaymentResponse;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalUpdatePaymentRequest;
-import org.springframework.beans.factory.annotation.Value;
 
 import com.broadleafcommerce.paymentgateway.domain.PaymentRequest;
 import com.broadleafcommerce.paymentgateway.service.exception.PaymentException;
@@ -29,12 +28,10 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class DefaultPayPalPaymentService implements PayPalPaymentService {
 
-    private final PayPalCheckoutExternalCallService externalCallService;
+    private final PayPalCheckoutExternalCallService paypalCheckoutService;
     private final PayPalGatewayConfiguration gatewayConfiguration;
-    private final PayPalWebProfileService webProfileService;
-
-    @Value("${broadleaf.paypal.checkout.rest.populate.shipping.create.payment:true}")
-    protected boolean shouldPopulateShippingOnPaymentCreation;
+    private final PayPalWebExperienceProfileService webExperienceProfileService;
+    private final boolean shouldPopulateShippingOnPaymentCreation;
 
     @Override
     public Payment createPayPalPayment(@NonNull PaymentRequest paymentRequest,
@@ -44,14 +41,14 @@ public class DefaultPayPalPaymentService implements PayPalPaymentService {
         Payer payer = constructPayer(paymentRequest);
 
         PayPalCheckoutRestConfigurationProperties configProperties =
-                externalCallService.getConfigProperties();
+                paypalCheckoutService.getConfigProperties();
 
         // Set redirect URLs
         RedirectUrls redirectUrls = new RedirectUrls();
         redirectUrls.setCancelUrl(configProperties.getCancelUrl(paymentRequest));
         redirectUrls.setReturnUrl(configProperties.getReturnUrl(paymentRequest));
 
-        Amount amount = externalCallService.getPayPalAmountFromOrder(paymentRequest);
+        Amount amount = paypalCheckoutService.getPayPalAmountFromOrder(paymentRequest);
 
         // Transaction information
         Transaction transaction = new Transaction();
@@ -59,7 +56,7 @@ public class DefaultPayPalPaymentService implements PayPalPaymentService {
         transaction.setDescription(configProperties.getPaymentDescription());
         transaction.setCustom(paymentRequest.getOrderId() + "|" + performCheckoutOnReturn);
 
-        ItemList itemList = externalCallService.getPayPalItemListFromOrder(paymentRequest,
+        ItemList itemList = paypalCheckoutService.getPayPalItemList(paymentRequest,
                 shouldPopulateShippingOnPaymentCreation);
         if (itemList != null) {
             transaction.setItemList(itemList);
@@ -76,9 +73,10 @@ public class DefaultPayPalPaymentService implements PayPalPaymentService {
         payment.setRedirectUrls(redirectUrls);
         payment.setTransactions(transactions);
 
-        String profileId = webProfileService.getWebProfileId(paymentRequest);
-        if (StringUtils.isNotBlank(profileId)) {
-            payment.setExperienceProfileId(profileId);
+        String webExperienceProfileId =
+                webExperienceProfileService.getWebExperienceProfileId(paymentRequest);
+        if (StringUtils.isNotBlank(webExperienceProfileId)) {
+            payment.setExperienceProfileId(webExperienceProfileId);
         }
         return createPayment(payment, paymentRequest);
     }
@@ -102,11 +100,11 @@ public class DefaultPayPalPaymentService implements PayPalPaymentService {
         Patch amountPatch = new Patch();
         amountPatch.setOp("replace");
         amountPatch.setPath("/transactions/0/amount");
-        Amount amount = externalCallService.getPayPalAmountFromOrder(paymentRequest);
+        Amount amount = paypalCheckoutService.getPayPalAmountFromOrder(paymentRequest);
         amountPatch.setValue(amount);
         patches.add(amountPatch);
 
-        ItemList itemList = externalCallService.getPayPalItemListFromOrder(paymentRequest, true);
+        ItemList itemList = paypalCheckoutService.getPayPalItemList(paymentRequest, true);
         if (itemList != null) {
             Patch shipToPatch = new Patch();
             shipToPatch.setOp("replace");
@@ -130,19 +128,19 @@ public class DefaultPayPalPaymentService implements PayPalPaymentService {
     protected Payment createPayment(Payment payment, PaymentRequest paymentRequest)
             throws PaymentException {
         PayPalCreatePaymentResponse response =
-                (PayPalCreatePaymentResponse) externalCallService.call(
+                (PayPalCreatePaymentResponse) paypalCheckoutService.call(
                         new PayPalCreatePaymentRequest(payment,
-                                externalCallService.constructAPIContext(paymentRequest)));
+                                paypalCheckoutService.constructAPIContext(paymentRequest)));
         return response.getPayment();
     }
 
     protected void updatePayment(Payment payment,
             List<Patch> patches,
             PaymentRequest paymentRequest) throws PaymentException {
-        externalCallService.call(
+        paypalCheckoutService.call(
                 new PayPalUpdatePaymentRequest(payment,
                         patches,
-                        externalCallService.constructAPIContext(paymentRequest)));
+                        paypalCheckoutService.constructAPIContext(paymentRequest)));
     }
 
     public String getIntent(boolean performCheckoutOnReturn) {

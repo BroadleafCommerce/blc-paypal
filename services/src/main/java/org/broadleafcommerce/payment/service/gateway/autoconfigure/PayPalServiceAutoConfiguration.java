@@ -22,15 +22,13 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.broadleafcommerce.paymentgateway.service.transaction.PaymentGatewayTransactionService;
-
 @Configuration
 @EnableConfigurationProperties({PayPalCheckoutRestConfigurationProperties.class})
 public class PayPalServiceAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public PayPalCheckoutExternalCallService payPalCheckoutExternalCallService(
+    public PayPalCheckoutExternalCallService paypalCheckoutService(
             PayPalCheckoutRestConfigurationProperties configProperties,
             PayPalGatewayConfiguration gatewayConfiguration) {
         return new DefaultPayPalCheckoutExternalCallService(configProperties,
@@ -46,21 +44,21 @@ public class PayPalServiceAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public PayPalSyncTransactionService payPalSyncTransactionService(
-            PayPalCheckoutExternalCallService externalCallService) {
-        return new DefaultPayPalSyncTransactionService(externalCallService);
+            PayPalCheckoutExternalCallService paypalCheckoutService) {
+        return new DefaultPayPalSyncTransactionService(paypalCheckoutService);
     }
 
     @Bean
     @ConditionalOnMissingBean
     public PayPalCheckoutTransactionService payPalCheckoutTransactionService(
-            PayPalCheckoutExternalCallService externalCallService) {
-        return new DefaultPayPalCheckoutTransactionService(externalCallService);
+            PayPalCheckoutExternalCallService paypalCheckoutService) {
+        return new DefaultPayPalCheckoutTransactionService(paypalCheckoutService);
     }
 
     @Bean
     @ConditionalOnMissingBean
     public PayPalCheckoutRollbackService payPalCheckoutRollbackService(
-            PaymentGatewayTransactionService transactionService) {
+            PayPalCheckoutTransactionService transactionService) {
         return new DefaultPayPalCheckoutRollbackService(transactionService);
     }
 
@@ -68,7 +66,7 @@ public class PayPalServiceAutoConfiguration {
     @ConditionalOnMissingBean
     public PayPalCheckoutTransactionConfirmationService payPalCheckoutTransactionConfirmationService(
             PayPalGatewayConfiguration gatewayConfiguration,
-            PaymentGatewayTransactionService transactionService) {
+            PayPalCheckoutTransactionService transactionService) {
         return new DefaultPayPalCheckoutTransactionConfirmationService(gatewayConfiguration,
                 transactionService);
     }
@@ -77,15 +75,15 @@ public class PayPalServiceAutoConfiguration {
     @ConditionalOnMissingBean
     public PayPalCheckoutHostedService payPalCheckoutHostedService(
             PayPalGatewayConfiguration gatewayConfiguration,
-            PaymentGatewayTransactionService transactionService) {
+            PayPalCheckoutTransactionService transactionService) {
         return new DefaultPayPalCheckoutHostedService(gatewayConfiguration, transactionService);
     }
 
     @Bean
     @ConditionalOnMissingBean
     public PayPalCheckoutReportingService payPalCheckoutReportingService(
-            PayPalCheckoutExternalCallService externalCallService) {
-        return new DefaultPayPalCheckoutReportingService(externalCallService);
+            PayPalCheckoutExternalCallService paypalCheckoutService) {
+        return new DefaultPayPalCheckoutReportingService(paypalCheckoutService);
     }
 
 }

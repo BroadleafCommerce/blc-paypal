@@ -45,13 +45,13 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class DefaultPayPalSyncTransactionService implements PayPalSyncTransactionService {
 
-    private final PayPalCheckoutExternalCallService payPalCheckoutService;
+    private final PayPalCheckoutExternalCallService paypalCheckoutService;
 
     @Override
     public ReportingTransactionResponse lookupTransactionsByQueryParams(
             Map<String, String> queryFilter) throws PayPalRESTException {
         PaymentRequest paymentRequest = new PaymentRequest();
-        APIContext apiContext = payPalCheckoutService.constructAPIContext(paymentRequest);
+        APIContext apiContext = paypalCheckoutService.constructAPIContext(paymentRequest);
         return executeTransactionSearch(apiContext, queryFilter);
     }
 

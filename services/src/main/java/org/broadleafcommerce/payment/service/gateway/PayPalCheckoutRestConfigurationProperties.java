@@ -1,7 +1,7 @@
 package org.broadleafcommerce.payment.service.gateway;
 
 import org.apache.commons.lang3.StringUtils;
-import org.broadleafcommerce.vendor.paypal.service.PayPalWebProfileService;
+import org.broadleafcommerce.vendor.paypal.service.PayPalWebExperienceProfileService;
 import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
@@ -12,19 +12,39 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
+
 import lombok.AccessLevel;
-import lombok.Data;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
+import lombok.extern.apachecommons.CommonsLog;
 
 /**
  * @author Elbert Bautista (elbertbautista)
  * @author Chris Kittrell
  */
-@Data
-@ConfigurationProperties("broadleaf.paypal.checkout.rest")
+@Getter
+@Setter
+@CommonsLog
+@ConfigurationProperties("broadleaf.paypalcheckout.rest")
 public class PayPalCheckoutRestConfigurationProperties {
+
+    @PostConstruct
+    public void init() {
+        if (StringUtils.isBlank(mode)) {
+            log.error(
+                    "The PayPal mode (live vs sandbox) must be provided via the 'broadleaf.paypalcheckout.rest.mode' property.");
+        }
+        if (StringUtils.isBlank(clientId)) {
+            log.error(
+                    "The PayPal client id must be provided via the 'broadleaf.paypalcheckout.rest.client-id' property.");
+        }
+        if (StringUtils.isBlank(clientSecret)) {
+            log.error(
+                    "The PayPal client secret must be provided via the 'broadleaf.paypalcheckout.rest.client-secret' property.");
+        }
+    }
 
     /**
      * URL to which the buyer's browser is returned after choosing to pay with PayPal. For digital
@@ -61,9 +81,9 @@ public class PayPalCheckoutRestConfigurationProperties {
     /**
      * The WebProfile to be used when creating payments. For more information on WebProfiles go to
      * {@link https://developer.paypal.com/docs/integration/direct/payment-experience/}.
-     * {@link PayPalWebProfileService#getWebProfileId(PaymentRequest)} should be used instead if you
-     * want to find the web profile id to create a payment since it has the ability to create new
-     * WebProfiles based on injected beans along with using this method
+     * {@link PayPalWebExperienceProfileService#getWebExperienceProfileId(PaymentRequest)} should be
+     * used instead if you want to find the web profile id to create a payment since it has the
+     * ability to create new WebProfiles based on injected beans along with using this method
      *
      * @return The WebProfile to be used when creating payments
      */
@@ -107,6 +127,15 @@ public class PayPalCheckoutRestConfigurationProperties {
     private String totalType = MessageConstants.TOTAL;
 
     /**
+     * Whether or not we should populate each cart item's shipping address if it's already known
+     * when we initially create the PayPal Payment.
+     *
+     * @return boolean
+     */
+    @Getter(AccessLevel.NONE)
+    private boolean shouldPopulateShippingOnCreatePayment = true;
+
+    /**
      * The Paypal NVP API only allows a single field with custom logic in it:
      * PAYMENTREQUEST_n_CUSTOM. Because of this, all of the fields returned here are serialized
      * together like so:
@@ -135,7 +164,7 @@ public class PayPalCheckoutRestConfigurationProperties {
                 return siteBaseUrl + returnUrl;
             } else {
                 throw new IllegalArgumentException(
-                        "Since the value provided for 'broadleaf.paypal.checkout.rest.returnUrl' is a relative url, a siteBaseUrl must be provided on the PaymentRequest.");
+                        "Since the value provided for 'broadleaf.paypalcheckout.rest.returnUrl' is a relative url, a siteBaseUrl must be provided on the PaymentRequest.");
             }
         }
     }
@@ -150,7 +179,7 @@ public class PayPalCheckoutRestConfigurationProperties {
                 return siteBaseUrl + cancelUrl;
             } else {
                 throw new IllegalArgumentException(
-                        "Since the value provided for 'broadleaf.paypal.checkout.rest.cancelUrl' is a relative url, a siteBaseUrl must be provided on the PaymentRequest.");
+                        "Since the value provided for 'broadleaf.paypalcheckout.rest.cancelUrl' is a relative url, a siteBaseUrl must be provided on the PaymentRequest.");
             }
         }
     }
@@ -163,6 +192,10 @@ public class PayPalCheckoutRestConfigurationProperties {
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException("The provided url (" + url + ") is not valid.", e);
         }
+    }
+
+    public boolean shouldPopulateShippingOnCreatePayment() {
+        return shouldPopulateShippingOnCreatePayment;
     }
 
 }
