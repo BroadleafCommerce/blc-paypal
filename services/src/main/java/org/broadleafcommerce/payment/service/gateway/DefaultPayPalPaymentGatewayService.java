@@ -1,5 +1,7 @@
 package org.broadleafcommerce.payment.service.gateway;
 
+import lombok.AccessLevel;
+import lombok.Getter;
 import org.broadleafcommerce.vendor.paypal.service.PayPalPaymentService;
 
 import com.broadleafcommerce.paymentgateway.domain.PaymentRequest;
@@ -11,6 +13,7 @@ import lombok.RequiredArgsConstructor;
  */
 @RequiredArgsConstructor
 public class DefaultPayPalPaymentGatewayService implements PayPalPaymentGatewayService {
+    @Getter(AccessLevel.PROTECTED)
     private final PayPalPaymentService payPalPaymentService;
 
     @Override
