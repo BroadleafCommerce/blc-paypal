@@ -7,7 +7,6 @@ import org.broadleafcommerce.payment.service.gateway.DefaultPayPalCheckoutRollba
 import org.broadleafcommerce.payment.service.gateway.DefaultPayPalCheckoutTransactionConfirmationService;
 import org.broadleafcommerce.payment.service.gateway.DefaultPayPalCheckoutTransactionService;
 import org.broadleafcommerce.payment.service.gateway.DefaultPayPalGatewayConfiguration;
-import org.broadleafcommerce.payment.service.gateway.DefaultPayPalPaymentGatewayService;
 import org.broadleafcommerce.payment.service.gateway.DefaultPayPalSyncTransactionService;
 import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutExternalCallService;
 import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutHostedService;
@@ -17,7 +16,6 @@ import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutRollbackServi
 import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutTransactionConfirmationService;
 import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutTransactionService;
 import org.broadleafcommerce.payment.service.gateway.PayPalGatewayConfiguration;
-import org.broadleafcommerce.payment.service.gateway.PayPalPaymentGatewayService;
 import org.broadleafcommerce.payment.service.gateway.PayPalSyncTransactionService;
 import org.broadleafcommerce.vendor.paypal.service.PayPalPaymentService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -53,16 +51,11 @@ public class PayPalServiceAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public PayPalPaymentGatewayService payPalPaymentGatewayService(
-            PayPalPaymentService payPalPaymentService) {
-        return new DefaultPayPalPaymentGatewayService(payPalPaymentService);
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
     public PayPalCheckoutTransactionService payPalCheckoutTransactionService(
-            PayPalCheckoutExternalCallService paypalCheckoutService) {
-        return new DefaultPayPalCheckoutTransactionService(paypalCheckoutService);
+            PayPalCheckoutExternalCallService paypalCheckoutService,
+            PayPalPaymentService payPalPaymentService) {
+        return new DefaultPayPalCheckoutTransactionService(paypalCheckoutService,
+                payPalPaymentService);
     }
 
     @Bean
