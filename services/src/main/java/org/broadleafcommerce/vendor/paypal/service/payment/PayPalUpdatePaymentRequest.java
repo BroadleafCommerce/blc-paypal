@@ -36,7 +36,7 @@ public class PayPalUpdatePaymentRequest extends PayPalRequest {
                         || StringUtils.isBlank(patch.getOp())) {
                     return false;
                 }
-                if (patch.getOp() != "remove" && patch.getValue() == null) {
+                if (!"remove".equals(patch.getOp()) && patch.getValue() == null) {
                     return false;
                 }
             }

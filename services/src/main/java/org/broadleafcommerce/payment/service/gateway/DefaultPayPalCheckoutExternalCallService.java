@@ -26,6 +26,7 @@ import com.paypal.api.payments.Transaction;
 import com.paypal.base.rest.APIContext;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -215,13 +216,26 @@ public class DefaultPayPalCheckoutExternalCallService
         shipAddress.setLine1(address.getAddressLine1());
         shipAddress.setLine2(address.getAddressLine2());
         shipAddress.setCity(address.getCity());
-        shipAddress.setState(address.getStateRegion());
+        shipAddress.setState(getShortStateCode(address));
         shipAddress.setPostalCode(address.getPostalCode());
         shipAddress.setCountryCode(address.getCountryCode());
         if (StringUtils.isNotBlank(address.getPhoneNumber())) {
             shipAddress.setPhone(address.getPhoneNumber());
         }
         return shipAddress;
+    }
+
+    private String getShortStateCode(Address<PaymentRequest> address) {
+        String countryCode = address.getCountryCode();
+        String stateRegion = address.getStateRegion();
+
+        if (countryCode == null || stateRegion == null) {
+            return stateRegion;
+        }
+
+        // PayPal supports only the State code with a short form, e.g. "AL" instead of "US-AL".
+        String[] splitState = stateRegion.split(countryCode + "-");
+        return splitState.length == 2 ? splitState[1] : splitState[0];
     }
 
     @Override
@@ -258,15 +272,27 @@ public class DefaultPayPalCheckoutExternalCallService
     public Amount getPayPalAmountFromOrder(PaymentRequest paymentRequest) {
         Details details = new Details();
 
-        details.setShipping(Objects.toString(paymentRequest.getShippingTotal(), null));
-        details.setSubtotal(Objects.toString(paymentRequest.getOrderSubtotal(), null));
-        details.setTax(Objects.toString(paymentRequest.getTaxTotal(), null));
+        details.setShipping(getStringAmount(paymentRequest.getShippingTotal()));
+        details.setSubtotal(getStringAmount(paymentRequest.getOrderSubtotal()));
+        details.setTax(getStringAmount(paymentRequest.getTaxTotal()));
 
         Amount amount = new Amount();
         amount.setCurrency(paymentRequest.getCurrencyCode());
-        amount.setTotal(Objects.toString(paymentRequest.getTransactionTotal(), null));
+        amount.setTotal(getStringAmount(paymentRequest.getTransactionTotal()));
         amount.setDetails(details);
         return amount;
+    }
+
+    private String getStringAmount(BigDecimal amount) {
+        return Objects.toString(normalizePrice(amount), null);
+    }
+
+    private BigDecimal normalizePrice(BigDecimal amount) {
+        if (amount == null) {
+            return null;
+        }
+
+        return amount.setScale(2, RoundingMode.HALF_EVEN);
     }
 
     @Override

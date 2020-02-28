@@ -2,6 +2,7 @@ package org.broadleafcommerce.payment.service.gateway;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.broadleafcommerce.vendor.paypal.service.PayPalPaymentService;
 import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalAuthorizationRetrievalRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalAuthorizationRetrievalResponse;
@@ -62,6 +63,7 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
             LogFactory.getLog(DefaultPayPalCheckoutTransactionService.class);
 
     private final PayPalCheckoutExternalCallService paypalCheckoutService;
+    private final PayPalPaymentService payPalPaymentService;
 
     @Override
     public PaymentResponse authorize(PaymentRequest paymentRequest) throws PaymentException {
@@ -380,6 +382,9 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
                                     paypalCheckoutService.constructAPIContext(paymentRequest)));
             return response.getPayment();
         }
+
+
+        payPalPaymentService.updatePayPalPaymentForFulfillment(paymentRequest);
 
         PayPalAuthorizeResponse response = (PayPalAuthorizeResponse) paypalCheckoutService.call(
                 new PayPalAuthorizeRequest(payment,

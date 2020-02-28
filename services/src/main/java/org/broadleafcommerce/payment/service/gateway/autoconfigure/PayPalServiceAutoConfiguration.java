@@ -17,6 +17,7 @@ import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutTransactionCo
 import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutTransactionService;
 import org.broadleafcommerce.payment.service.gateway.PayPalGatewayConfiguration;
 import org.broadleafcommerce.payment.service.gateway.PayPalSyncTransactionService;
+import org.broadleafcommerce.vendor.paypal.service.PayPalPaymentService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -51,8 +52,10 @@ public class PayPalServiceAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public PayPalCheckoutTransactionService payPalCheckoutTransactionService(
-            PayPalCheckoutExternalCallService paypalCheckoutService) {
-        return new DefaultPayPalCheckoutTransactionService(paypalCheckoutService);
+            PayPalCheckoutExternalCallService paypalCheckoutService,
+            PayPalPaymentService payPalPaymentService) {
+        return new DefaultPayPalCheckoutTransactionService(paypalCheckoutService,
+                payPalPaymentService);
     }
 
     @Bean

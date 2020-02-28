@@ -27,6 +27,7 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class DefaultPayPalPaymentService implements PayPalPaymentService {
+    private static final String REPLACE_OP_TYPE = "replace";
 
     private final PayPalCheckoutExternalCallService paypalCheckoutService;
     private final PayPalGatewayConfiguration gatewayConfiguration;
@@ -97,25 +98,19 @@ public class DefaultPayPalPaymentService implements PayPalPaymentService {
         }
         List<Patch> patches = new ArrayList<>();
 
-        Patch amountPatch = new Patch();
-        amountPatch.setOp("replace");
-        amountPatch.setPath("/transactions/0/amount");
+        Patch amountPatch = new Patch(REPLACE_OP_TYPE, "/transactions/0/amount");
         Amount amount = paypalCheckoutService.getPayPalAmountFromOrder(paymentRequest);
         amountPatch.setValue(amount);
         patches.add(amountPatch);
 
         ItemList itemList = paypalCheckoutService.getPayPalItemList(paymentRequest, true);
         if (itemList != null) {
-            Patch shipToPatch = new Patch();
-            shipToPatch.setOp("replace");
-            shipToPatch.setPath("/transactions/0/item_list");
+            Patch shipToPatch = new Patch(REPLACE_OP_TYPE, "/transactions/0/item_list");
             shipToPatch.setValue(itemList);
             patches.add(shipToPatch);
         }
 
-        Patch customPatch = new Patch();
-        customPatch.setPath("/transactions/0/custom");
-        customPatch.setOp("replace");
+        Patch customPatch = new Patch(REPLACE_OP_TYPE, "/transactions/0/custom");
         customPatch.setValue(paymentRequest.getOrderId() + "|" + true);
         patches.add(customPatch);
 
