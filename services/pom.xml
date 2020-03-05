@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.broadleafcommerce.microservices</groupId>
         <artifactId>broadleaf-paypal-parent</artifactId>
-        <version>0.9.0-SNAPSHOT</version>
+        <version>0.11.0-SNAPSHOT</version>
         <relativePath>..</relativePath>
     </parent>
 
@@ -28,7 +28,7 @@
         <dependency>
             <groupId>com.broadleafcommerce.microservices</groupId>
             <artifactId>broadleaf-payment-gateway-common</artifactId>
-            <version>0.9.0-SNAPSHOT</version>
+            <version>0.11.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.paypal.sdk</groupId>

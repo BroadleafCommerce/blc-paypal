@@ -6,12 +6,12 @@
     <parent>
         <groupId>com.broadleafcommerce.microservices</groupId>
         <artifactId>broadleaf-microservices-build-parent</artifactId>
-        <version>0.9.0-SNAPSHOT</version>
+        <version>1.0.0-GA</version>
         <relativePath />
     </parent>
 
     <artifactId>broadleaf-paypal-parent</artifactId>
-    <version>0.9.0-SNAPSHOT</version>
+    <version>0.11.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>BroadleafCommerce PayPal Parent</name>
     <description>BroadleafCommerce PayPal Parent</description>
