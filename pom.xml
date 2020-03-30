@@ -5,18 +5,19 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.broadleafcommerce.microservices</groupId>
-        <artifactId>broadleaf-microservices-build-parent</artifactId>
-        <version>1.0.0-GA</version>
+        <artifactId>broadleaf-common-parent</artifactId>
+        <version>1.0.2-SNAPSHOT</version>
         <relativePath />
     </parent>
 
     <artifactId>broadleaf-paypal-parent</artifactId>
-    <version>0.11.0-SNAPSHOT</version>
+    <version>${revision}</version>
     <packaging>pom</packaging>
     <name>BroadleafCommerce PayPal Parent</name>
     <description>BroadleafCommerce PayPal Parent</description>
 
     <properties>
+        <revision>1.0.0-SNAPSHOT</revision>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.uri>${user.dir}</project.uri>
     </properties>
@@ -51,6 +52,15 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 
     <modules>
         <module>services</module>
