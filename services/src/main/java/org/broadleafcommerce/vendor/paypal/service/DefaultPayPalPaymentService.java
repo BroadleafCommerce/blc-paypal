@@ -36,13 +36,15 @@ import com.paypal.api.payments.RedirectUrls;
 import com.paypal.api.payments.Transaction;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class DefaultPayPalPaymentService implements PayPalPaymentService {
+
+    private static final String ADD_OP_TYPE = "add";
     private static final String REPLACE_OP_TYPE = "replace";
 
     private final PayPalCheckoutExternalCallService paypalCheckoutService;
@@ -51,7 +53,7 @@ public class DefaultPayPalPaymentService implements PayPalPaymentService {
     private final boolean shouldPopulateShippingOnPaymentCreation;
 
     @Override
-    public Payment createPayPalPayment(@NonNull PaymentRequest paymentRequest,
+    public Payment createPayPalPayment(@lombok.NonNull PaymentRequest paymentRequest,
             boolean performCheckoutOnReturn)
             throws PaymentException {
         // Set payer details
@@ -71,7 +73,8 @@ public class DefaultPayPalPaymentService implements PayPalPaymentService {
         Transaction transaction = new Transaction();
         transaction.setAmount(amount);
         transaction.setDescription(configProperties.getPaymentDescription());
-        transaction.setCustom(paymentRequest.getOrderId() + "|" + performCheckoutOnReturn);
+        transaction.setCustom(
+                paymentRequest.getTransactionReferenceId() + "|" + performCheckoutOnReturn);
 
         ItemList itemList = paypalCheckoutService.getPayPalItemList(paymentRequest,
                 shouldPopulateShippingOnPaymentCreation);
@@ -105,7 +108,7 @@ public class DefaultPayPalPaymentService implements PayPalPaymentService {
     }
 
     @Override
-    public void updatePayPalPaymentForFulfillment(@NonNull PaymentRequest paymentRequest)
+    public void updatePayPalPaymentForFulfillment(@lombok.NonNull PaymentRequest paymentRequest)
             throws PaymentException {
         String paymentId = (String) paymentRequest.getAdditionalField(MessageConstants.PAYMENTID);
         if (StringUtils.isBlank(paymentId)) {
@@ -114,19 +117,19 @@ public class DefaultPayPalPaymentService implements PayPalPaymentService {
         }
         List<Patch> patches = new ArrayList<>();
 
-        Patch amountPatch = new Patch(REPLACE_OP_TYPE, "/transactions/0/amount");
+        Patch amountPatch = new Patch(ADD_OP_TYPE, "/transactions/0/amount");
         Amount amount = paypalCheckoutService.getPayPalAmountFromOrder(paymentRequest);
         amountPatch.setValue(amount);
         patches.add(amountPatch);
 
         ItemList itemList = paypalCheckoutService.getPayPalItemList(paymentRequest, true);
         if (itemList != null) {
-            Patch shipToPatch = new Patch(REPLACE_OP_TYPE, "/transactions/0/item_list");
-            shipToPatch.setValue(itemList);
-            patches.add(shipToPatch);
+            Patch itemListPatch = new Patch(ADD_OP_TYPE, "/transactions/0/item_list");
+            itemListPatch.setValue(itemList);
+            patches.add(itemListPatch);
         }
 
-        Patch customPatch = new Patch(REPLACE_OP_TYPE, "/transactions/0/custom");
+        Patch customPatch = new Patch(ADD_OP_TYPE, "/transactions/0/custom");
         customPatch.setValue(paymentRequest.getOrderId() + "|" + true);
         patches.add(customPatch);
 
@@ -134,6 +137,25 @@ public class DefaultPayPalPaymentService implements PayPalPaymentService {
         paypalPayment.setId(paymentId);
         updatePayment(paypalPayment, patches, paymentRequest);
 
+    }
+
+    @Override
+    public void updatePaymentCustom(@lombok.NonNull String paymentId, @lombok.NonNull String custom)
+            throws PaymentException {
+        if (StringUtils.isBlank(paymentId)) {
+            throw new PaymentException(
+                    "Unable to update the current PayPal payment because no PayPal payment id was found on the order");
+        }
+
+        Patch customPatch = new Patch(ADD_OP_TYPE, "/transactions/0/custom");
+        customPatch.setValue(custom);
+
+        Payment payment = new Payment();
+        payment.setId(paymentId);
+        List<Patch> patches = Collections.singletonList(customPatch);
+
+        PaymentRequest paymentRequest = new PaymentRequest();
+        updatePayment(payment, patches, paymentRequest);
     }
 
     protected Payment createPayment(Payment payment, PaymentRequest paymentRequest)

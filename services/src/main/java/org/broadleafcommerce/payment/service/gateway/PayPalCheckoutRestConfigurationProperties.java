@@ -25,7 +25,9 @@ import com.broadleafcommerce.paymentgateway.domain.PaymentRequest;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
@@ -150,6 +152,26 @@ public class PayPalCheckoutRestConfigurationProperties {
      */
     @Getter(AccessLevel.NONE)
     private boolean shouldPopulateShippingOnCreatePayment = true;
+
+    /**
+     * The list of transaction failure codes that should be considered a form of payment decline.
+     *
+     * Note: Some failure codes are unclear whether they should be in this list or not. Our
+     * intention is that this list represents payment processing failures (ie the transaction was
+     * declined by the bank, credit card company, etc.) instead of PayPal's validation errors which
+     * would represent a malformed request.
+     */
+    private List<String> paymentDeclineCodes = Arrays.asList(
+            "COMPLIANCE_VIOLATION",
+            "CREDIT_CARD_CVV_CHECK_FAILED",
+            "CREDIT_CARD_REFUSED",
+            "INSTRUMENT_DECLINED",
+            "INSUFFICIENT_FUNDS",
+            "PAYMENT_DENIED",
+            "REFUND_FAILED_INSUFFICIENT_FUNDS",
+            "TRANSACTION_LIMIT_EXCEEDED",
+            "TRANSACTION_REFUSED",
+            "TRANSACTION_REFUSED_BY_PAYPAL_RISK");
 
     /**
      * The Paypal NVP API only allows a single field with custom logic in it:
