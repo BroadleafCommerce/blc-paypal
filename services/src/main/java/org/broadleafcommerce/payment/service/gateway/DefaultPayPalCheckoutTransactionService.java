@@ -98,13 +98,7 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
                         PayPalCheckoutPaymentGatewayType.PAYPAL_CHECKOUT);
 
         try {
-            String transactionReferenceId = paymentRequest.getTransactionReferenceId();
-            if (StringUtils.isNotBlank(transactionReferenceId)) {
-                String paymentId =
-                        (String) paymentRequest.getAdditionalField(MessageConstants.PAYMENTID);
-
-                payPalPaymentService.updatePaymentCustom(paymentId, transactionReferenceId);
-            }
+            recordTransactionReferenceIdOnPayment(paymentRequest);
 
             PayPalResource auth = authorizePayment(paymentRequest);
             if (auth instanceof Payment) {
@@ -173,13 +167,7 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
                         PayPalCheckoutPaymentGatewayType.PAYPAL_CHECKOUT);
 
         try {
-            String transactionReferenceId = paymentRequest.getTransactionReferenceId();
-            if (StringUtils.isNotBlank(transactionReferenceId)) {
-                String paymentId =
-                        (String) paymentRequest.getAdditionalField(MessageConstants.PAYMENTID);
-
-                payPalPaymentService.updatePaymentCustom(paymentId, transactionReferenceId);
-            }
+            recordTransactionReferenceIdOnPayment(paymentRequest);
 
             PayPalResource salePayment = salePayment(paymentRequest);
             if (salePayment instanceof Payment) {
@@ -362,6 +350,25 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
                         capture,
                         paypalCheckoutService.constructAPIContext(paymentRequest)));
         return captureResponse.getCapture();
+    }
+
+    /**
+     * Saves the {@link PaymentRequest#getTransactionReferenceId()} on the {@link Payment}
+     *
+     * @param paymentRequest the object that holds the transactionReferenceId & a reference to the
+     *        Payment
+     * @throws PaymentException thrown if the Payment update fails
+     */
+    protected void recordTransactionReferenceIdOnPayment(
+            @lombok.NonNull PaymentRequest paymentRequest) {
+        String transactionReferenceId = paymentRequest.getTransactionReferenceId();
+
+        if (StringUtils.isNotBlank(transactionReferenceId)) {
+            String paymentId =
+                    (String) paymentRequest.getAdditionalField(MessageConstants.PAYMENTID);
+
+            payPalPaymentService.updatePaymentCustom(paymentId, transactionReferenceId);
+        }
     }
 
     protected PayPalResource authorizePayment(PaymentRequest paymentRequest)
