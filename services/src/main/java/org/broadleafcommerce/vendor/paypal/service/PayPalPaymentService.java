@@ -20,6 +20,8 @@ import com.broadleafcommerce.paymentgateway.domain.PaymentRequest;
 import com.broadleafcommerce.paymentgateway.service.exception.PaymentException;
 import com.paypal.api.payments.Payment;
 
+import lombok.NonNull;
+
 public interface PayPalPaymentService {
 
     /**
@@ -43,6 +45,16 @@ public interface PayPalPaymentService {
      * @throws PaymentException
      * @param paymentRequest
      */
-    void updatePayPalPaymentForFulfillment(PaymentRequest paymentRequest) throws PaymentException;
+    void updatePayPalPaymentForFulfillment(@NonNull PaymentRequest paymentRequest)
+            throws PaymentException;
+
+    /**
+     * Updates the PayPal payment to include the provided custom value.
+     *
+     * @param paymentId the primary identifier of the PayPal Payment
+     * @param custom the value that is to be stored on the PayPal Payment object
+     * @throws PaymentException thrown if the request to update the Payment fails
+     */
+    void updatePaymentCustom(String paymentId, String custom) throws PaymentException;
 
 }

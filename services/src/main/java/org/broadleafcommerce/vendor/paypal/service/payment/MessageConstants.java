@@ -51,6 +51,7 @@ public class MessageConstants {
     public static final String MERCHANTPREF_ACCEPTEDPAYMENTTYPE_INSTANT = "INSTANT";
     public static final String HTTP_HEADER_AUTH_ASSERTION = "PayPal-Auth-Assertion";
     public static final String HTTP_HEADER_CLIENT_METADATA_ID = "PayPal-Client-Metadata-Id";
+    public static final String IDEMPOTENCY_KEY = "idempotency_key";
     public static final String HTTP_HEADER_REQUEST_ID = "PayPal-Request-Id";
     public static final String HTTP_HEADER_MOCK_RESPONSE = "PayPal-Mock-Response";
     public static final String BN = "PayPal-Partner-Attribution-Id";
@@ -60,9 +61,9 @@ public class MessageConstants {
     public static final String HTTP_TOKEN = "token";
     public static final String HTTP_BILLINGTOKEN = "billingToken";
     public static final String HTTP_REQUEST = "HTTP_REQUEST";
-    public static final String EXCEPTION_NAME = "EXCEPTION_NAME";
-    public static final String EXCEPTION_MESSAGE = "EXCEPTION_MESSAGE";
-    public static final String EXCEPTION_DEBUG_ID = "EXCEPTION_DEBUG_ID";
+    public static final String ERROR_NAME = "errorName";
+    public static final String ERROR_MESSAGE = "errorMessage";
+    public static final String ERROR_DEBUG_ID = "errorDebugId";
     public static final String CUSTOM_FIELD = "custom_field";
     public static final String TRANSACTION_STATUS = "TRANSACTION_STATUS";
     public static final String PAYMENT_SUBMITTED_TIME = "PAYMENT_SUBMITTED_TIME";

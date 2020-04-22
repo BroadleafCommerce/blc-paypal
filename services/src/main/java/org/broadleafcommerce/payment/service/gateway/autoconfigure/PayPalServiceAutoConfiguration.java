@@ -69,9 +69,11 @@ public class PayPalServiceAutoConfiguration {
     @ConditionalOnMissingBean
     public PayPalCheckoutTransactionService payPalCheckoutTransactionService(
             PayPalCheckoutExternalCallService paypalCheckoutService,
-            PayPalPaymentService payPalPaymentService) {
+            PayPalPaymentService payPalPaymentService,
+            PayPalCheckoutRestConfigurationProperties configProperties) {
         return new DefaultPayPalCheckoutTransactionService(paypalCheckoutService,
-                payPalPaymentService);
+                payPalPaymentService,
+                configProperties);
     }
 
     @Bean

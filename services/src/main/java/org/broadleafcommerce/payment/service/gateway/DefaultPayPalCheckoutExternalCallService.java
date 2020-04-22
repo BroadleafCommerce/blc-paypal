@@ -29,6 +29,7 @@ import com.broadleafcommerce.paymentgateway.domain.Address;
 import com.broadleafcommerce.paymentgateway.domain.LineItem;
 import com.broadleafcommerce.paymentgateway.domain.PaymentRequest;
 import com.broadleafcommerce.paymentgateway.domain.PaymentResponse;
+import com.broadleafcommerce.paymentgateway.domain.enums.TransactionType;
 import com.broadleafcommerce.paymentgateway.service.AbstractExternalPaymentGatewayCall;
 import com.broadleafcommerce.paymentgateway.service.exception.PaymentException;
 import com.paypal.api.payments.Amount;
@@ -45,6 +46,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -93,6 +95,7 @@ public class DefaultPayPalCheckoutExternalCallService
         paymentResponse.amount(paymentRequest.getTransactionTotal())
                 .currencyContext(paymentRequest.getCurrencyContext())
                 .orderId(paymentRequest.getOrderId())
+                .transactionReferenceId(paymentRequest.getTransactionReferenceId())
                 .successful(true)
                 .valid(true)
                 .completeCheckoutOnCallback(checkoutComplete);
@@ -148,7 +151,6 @@ public class DefaultPayPalCheckoutExternalCallService
             String[] customFields = transaction.getCustom().split("\\|");
             responseDTO.amount(total)
                     .currencyContext(currencyContext)
-                    .orderId(customFields[0])
                     .successful(true)
                     .valid(true)
                     .completeCheckoutOnCallback(Boolean.parseBoolean(customFields[1]))
@@ -288,8 +290,8 @@ public class DefaultPayPalCheckoutExternalCallService
     public Amount getPayPalAmountFromOrder(PaymentRequest paymentRequest) {
         Details details = new Details();
 
-        details.setShipping(getStringAmount(paymentRequest.getShippingTotal()));
         details.setSubtotal(getStringAmount(paymentRequest.getOrderSubtotal()));
+        details.setShipping(getStringAmount(paymentRequest.getShippingTotal()));
         details.setTax(getStringAmount(paymentRequest.getTaxTotal()));
 
         Amount amount = new Amount();
@@ -333,13 +335,13 @@ public class DefaultPayPalCheckoutExternalCallService
     }
 
     @Override
-    public APIContext constructAPIContext(PaymentRequest paymentRequest) {
-        APIContext context = initializeAPIContext();
-        if (paymentRequest.getAdditionalFields()
-                .containsKey(MessageConstants.HTTP_HEADER_REQUEST_ID)) {
-            context.setRequestId((String) paymentRequest.getAdditionalFields()
-                    .get(MessageConstants.HTTP_HEADER_REQUEST_ID));
-        }
+    public APIContext constructAPIContext(@lombok.NonNull PaymentRequest paymentRequest) {
+        APIContext context = new APIContext(configProperties.getClientId(),
+                configProperties.getClientSecret(),
+                configProperties.getMode());
+        context.setRequestId(buildIdempotencyKey(paymentRequest));
+        context.addHTTPHeader(MessageConstants.BN, MessageConstants.BNCODE);
+
         if (paymentRequest.getAdditionalFields()
                 .containsKey(MessageConstants.HTTP_HEADER_AUTH_ASSERTION)) {
             context.addHTTPHeader(MessageConstants.HTTP_HEADER_AUTH_ASSERTION,
@@ -361,12 +363,26 @@ public class DefaultPayPalCheckoutExternalCallService
         return context;
     }
 
-    private APIContext initializeAPIContext() {
-        APIContext context = new APIContext(configProperties.getClientId(),
-                configProperties.getClientSecret(),
-                configProperties.getMode());
-        context.addHTTPHeader(MessageConstants.BN, MessageConstants.BNCODE);
-        return context;
+    /**
+     * Builds or gathers the idempotencyKey for the request. This value will guarantee that the
+     * request cannot be processed twice & that if the request is made twice, that the second
+     * response will be the same as the first response.
+     *
+     * Note: this value must be unique for each {@link TransactionType}. For example, if we want to
+     * authorize & later capture a Stripe Payment, the capture request's idempotencyKey must be
+     * different than the authorization request's idempotencyKey.
+     *
+     * @param paymentRequest the request that will be sent to PayPal
+     * @return the idempotencyKey
+     */
+    protected String buildIdempotencyKey(@lombok.NonNull PaymentRequest paymentRequest) {
+        Map<String, Object> additionalFields = paymentRequest.getAdditionalFields();
+
+        if (additionalFields.containsKey(MessageConstants.IDEMPOTENCY_KEY)) {
+            return (String) additionalFields.get(MessageConstants.IDEMPOTENCY_KEY);
+        } else {
+            return paymentRequest.getTransactionReferenceId();
+        }
     }
 
 }
