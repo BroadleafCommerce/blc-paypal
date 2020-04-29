@@ -32,26 +32,22 @@ public class DefaultPayPalCheckoutRollbackService implements PayPalCheckoutRollb
     private final PaymentGatewayTransactionService transactionService;
 
     @Override
-    public PaymentResponse rollbackAuthorize(PaymentRequest transactionToBeRolledBack)
-            throws PaymentException {
+    public PaymentResponse rollbackAuthorize(PaymentRequest transactionToBeRolledBack) {
+        return transactionService.reverseAuthorize(transactionToBeRolledBack);
+    }
+
+    @Override
+    public PaymentResponse rollbackCapture(PaymentRequest transactionToBeRolledBack) {
         return transactionService.refund(transactionToBeRolledBack);
     }
 
     @Override
-    public PaymentResponse rollbackCapture(PaymentRequest transactionToBeRolledBack)
-            throws PaymentException {
+    public PaymentResponse rollbackAuthorizeAndCapture(PaymentRequest transactionToBeRolledBack) {
         return transactionService.refund(transactionToBeRolledBack);
     }
 
     @Override
-    public PaymentResponse rollbackAuthorizeAndCapture(PaymentRequest transactionToBeRolledBack)
-            throws PaymentException {
-        return transactionService.refund(transactionToBeRolledBack);
-    }
-
-    @Override
-    public PaymentResponse rollbackRefund(PaymentRequest transactionToBeRolledBack)
-            throws PaymentException {
+    public PaymentResponse rollbackRefund(PaymentRequest transactionToBeRolledBack) {
         throw new PaymentException("The Rollback Refund method is not supported for this module");
     }
 

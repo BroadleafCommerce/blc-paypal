@@ -67,6 +67,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 
 import lombok.AccessLevel;
@@ -103,18 +104,18 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
             PayPalResource auth = authorizePayment(paymentRequest);
             if (auth instanceof Payment) {
                 Payment payment = (Payment) auth;
-                Transaction transaction = payment.getTransactions().get(0);
-                if (transaction != null) {
-                    Amount amount = transaction.getAmount();
-                    paymentResponse
-                            .successful(true)
-                            .amount(new BigDecimal(amount.getTotal()))
-                            .currencyContext(amount.getCurrency())
-                            .dateRecorded(Instant.parse(payment.getCreateTime()))
-                            .transactionReferenceId(transaction.getCustom())
-                            .responseMap(MessageConstants.AUTHORIZATONID, payment.getId())
-                            .rawResponse(payment.toJSON());
-                }
+                Transaction transaction = getTransaction(payment);
+                Amount amount = transaction.getAmount();
+                Authorization authorization = getAuthorization(transaction);
+
+                paymentResponse
+                        .successful(true)
+                        .amount(new BigDecimal(amount.getTotal()))
+                        .currencyContext(amount.getCurrency())
+                        .dateRecorded(Instant.parse(payment.getCreateTime()))
+                        .transactionReferenceId(transaction.getCustom())
+                        .responseMap(MessageConstants.AUTHORIZATONID, authorization.getId())
+                        .rawResponse(payment.toJSON());
             } else {
                 Authorization authorization = (Authorization) auth;
                 Amount amount = authorization.getAmount();
@@ -251,9 +252,10 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
             Amount amount = auth.getAmount();
             paymentResponse
                     .successful(true)
-                    .rawResponse(auth.toJSON())
                     .amount(new BigDecimal(amount.getTotal()))
-                    .currencyContext(amount.getCurrency());
+                    .currencyContext(amount.getCurrency())
+                    .dateRecorded(Instant.parse(auth.getUpdateTime()))
+                    .rawResponse(auth.toJSON());
         } catch (PaymentException e) {
             processException(e, paymentResponse, paymentRequest);
         }
@@ -412,6 +414,19 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
         transaction.setAmount(amount);
 
         return Collections.singletonList(transaction);
+    }
+
+    private Transaction getTransaction(Payment payment) {
+        return payment.getTransactions().stream()
+                .findFirst()
+                .orElseThrow(NoSuchElementException::new);
+    }
+
+    private Authorization getAuthorization(Transaction transaction) {
+        return transaction.getRelatedResources().stream()
+                .map(RelatedResources::getAuthorization)
+                .findFirst()
+                .orElseThrow(NoSuchElementException::new);
     }
 
     protected PayPalResource salePayment(PaymentRequest paymentRequest) {
