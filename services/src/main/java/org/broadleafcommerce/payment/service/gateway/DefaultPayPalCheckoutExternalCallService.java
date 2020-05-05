@@ -22,6 +22,7 @@ import org.broadleafcommerce.vendor.paypal.api.AgreementToken;
 import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalResponse;
+import org.springframework.retry.support.RetryTemplate;
 
 import com.broadleafcommerce.money.CurrencyContext;
 import com.broadleafcommerce.money.SimpleCurrencyContext;
@@ -52,6 +53,7 @@ import java.util.Optional;
 
 import javax.money.Monetary;
 
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -63,10 +65,24 @@ public class DefaultPayPalCheckoutExternalCallService
         extends AbstractExternalPaymentGatewayCall<PayPalRequest, PayPalResponse>
         implements PayPalCheckoutExternalCallService {
 
-    @Getter
+    @Getter(AccessLevel.PROTECTED)
     private final PayPalCheckoutRestConfigurationProperties configProperties;
 
+    @Getter(AccessLevel.PROTECTED)
     private final PayPalGatewayConfiguration gatewayConfiguration;
+
+    @Getter(AccessLevel.PROTECTED)
+    private final RetryTemplate retryTemplate;
+
+    @Override
+    public PayPalResponse call(PayPalRequest paymentRequest) throws PaymentException {
+        return super.process(paymentRequest);
+    }
+
+    @Override
+    public PayPalResponse communicateWithVendor(PayPalRequest paymentRequest) throws Exception {
+        return retryTemplate.execute(context -> paymentRequest.execute());
+    }
 
     @Override
     public void setCommonDetailsResponse(AgreementToken agreementToken,
@@ -316,17 +332,6 @@ public class DefaultPayPalCheckoutExternalCallService
     @Override
     public String getServiceName() {
         return getClass().getName();
-    }
-
-    @Override
-    public PayPalResponse call(PayPalRequest paymentRequest) throws PaymentException {
-        return super.process(paymentRequest);
-    }
-
-
-    @Override
-    public PayPalResponse communicateWithVendor(PayPalRequest paymentRequest) throws Exception {
-        return paymentRequest.execute();
     }
 
     @Override

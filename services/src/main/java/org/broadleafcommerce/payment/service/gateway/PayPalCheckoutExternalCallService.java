@@ -34,7 +34,17 @@ import com.paypal.base.rest.APIContext;
  */
 public interface PayPalCheckoutExternalCallService {
 
-    PayPalCheckoutRestConfigurationProperties getConfigProperties();
+    /**
+     * Makes a request to PayPal
+     *
+     * @param paymentRequest The payment request that should be executed. The operation that is
+     *        executed is depedent on which implementation of {@link PayPalRequest} is sent
+     * @return the respective PayPalResponse that corresponds to the given PayPalRequest
+     * @throws PaymentException
+     */
+    PayPalResponse call(PayPalRequest paymentRequest) throws PaymentException;
+
+    APIContext constructAPIContext(PaymentRequest paymentRequest);
 
     void setCommonDetailsResponse(AgreementToken response,
             PaymentResponse paymentResponse,
@@ -57,15 +67,4 @@ public interface PayPalCheckoutExternalCallService {
 
     Amount getPayPalAmountFromOrder(PaymentRequest paymentRequest);
 
-    /**
-     * Makes a request to PayPal
-     * 
-     * @param paymentRequest The payment request that should be executed. The operation that is
-     *        executed is depedent on which implementation of {@link PayPalRequest} is sent
-     * @return the respective PayPalResponse that corresponds to the given PayPalRequest
-     * @throws PaymentException
-     */
-    PayPalResponse call(PayPalRequest paymentRequest) throws PaymentException;
-
-    APIContext constructAPIContext(PaymentRequest paymentRequest);
 }

@@ -586,9 +586,6 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
                 if (isPaymentDecline(errorCode)) {
                     paymentResponse
                             .failureType(DefaultTransactionFailureTypes.PROCESSING_FAILURE.name());
-                } else if ("INTERNAL_SERVICE_ERROR".equals(errorCode)) {
-                    paymentResponse
-                            .failureType(DefaultTransactionFailureTypes.GATEWAY_ERROR.name());
                 } else {
                     paymentResponse
                             .failureType(DefaultTransactionFailureTypes.INVALID_REQUEST.name());

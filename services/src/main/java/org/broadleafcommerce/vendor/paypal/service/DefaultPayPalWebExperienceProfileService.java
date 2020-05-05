@@ -20,6 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutExternalCallService;
+import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutRestConfigurationProperties;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCreateWebProfileRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCreateWebProfileResponse;
 
@@ -27,21 +28,32 @@ import com.broadleafcommerce.paymentgateway.domain.PaymentRequest;
 import com.broadleafcommerce.paymentgateway.service.exception.PaymentException;
 import com.paypal.api.payments.WebProfile;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+
 public class DefaultPayPalWebExperienceProfileService implements PayPalWebExperienceProfileService {
 
     private static final Log LOG =
             LogFactory.getLog(DefaultPayPalWebExperienceProfileService.class);
 
+    @Getter(AccessLevel.PROTECTED)
     private final PayPalCheckoutExternalCallService paypalCheckoutService;
+
+    @Getter(AccessLevel.PROTECTED)
+    private final PayPalCheckoutRestConfigurationProperties configProperties;
+
+    @Getter(AccessLevel.PROTECTED)
     private final WebProfile webProfile;
 
     private String beanProfileId;
 
     public DefaultPayPalWebExperienceProfileService(
             PayPalCheckoutExternalCallService paypalCheckoutService,
+            PayPalCheckoutRestConfigurationProperties configProperties,
             WebProfile webProfile) {
         super();
         this.paypalCheckoutService = paypalCheckoutService;
+        this.configProperties = configProperties;
         this.webProfile = webProfile;
         if (webProfile != null && StringUtils.isBlank(webProfile.getId()) && LOG.isWarnEnabled()) {
             LOG.warn(
@@ -91,6 +103,6 @@ public class DefaultPayPalWebExperienceProfileService implements PayPalWebExperi
     }
 
     protected String getPropertyWebProfileId() {
-        return paypalCheckoutService.getConfigProperties().getWebProfileId();
+        return configProperties.getWebProfileId();
     }
 }

@@ -39,6 +39,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -47,9 +49,19 @@ public class DefaultPayPalPaymentService implements PayPalPaymentService {
     private static final String ADD_OP_TYPE = "add";
     private static final String REPLACE_OP_TYPE = "replace";
 
+    @Getter(AccessLevel.PROTECTED)
     private final PayPalCheckoutExternalCallService paypalCheckoutService;
+
+    @Getter(AccessLevel.PROTECTED)
+    private final PayPalCheckoutRestConfigurationProperties configProperties;
+
+    @Getter(AccessLevel.PROTECTED)
     private final PayPalGatewayConfiguration gatewayConfiguration;
+
+    @Getter(AccessLevel.PROTECTED)
     private final PayPalWebExperienceProfileService webExperienceProfileService;
+
+    @Getter(AccessLevel.PROTECTED)
     private final boolean shouldPopulateShippingOnPaymentCreation;
 
     @Override
@@ -58,9 +70,6 @@ public class DefaultPayPalPaymentService implements PayPalPaymentService {
             throws PaymentException {
         // Set payer details
         Payer payer = constructPayer(paymentRequest);
-
-        PayPalCheckoutRestConfigurationProperties configProperties =
-                paypalCheckoutService.getConfigProperties();
 
         // Set redirect URLs
         RedirectUrls redirectUrls = new RedirectUrls();
