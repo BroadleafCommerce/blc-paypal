@@ -22,6 +22,7 @@ import org.broadleafcommerce.vendor.paypal.api.AgreementToken;
 import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalResponse;
+import org.springframework.lang.Nullable;
 import org.springframework.retry.support.RetryTemplate;
 
 import com.broadleafcommerce.money.CurrencyContext;
@@ -32,7 +33,6 @@ import com.broadleafcommerce.paymentgateway.domain.PaymentRequest;
 import com.broadleafcommerce.paymentgateway.domain.PaymentResponse;
 import com.broadleafcommerce.paymentgateway.domain.enums.TransactionType;
 import com.broadleafcommerce.paymentgateway.service.AbstractExternalPaymentGatewayCall;
-import com.broadleafcommerce.paymentgateway.service.exception.PaymentException;
 import com.paypal.api.payments.Amount;
 import com.paypal.api.payments.CartBase;
 import com.paypal.api.payments.Details;
@@ -85,7 +85,7 @@ public class DefaultPayPalCheckoutExternalCallService
     }
 
     @Override
-    public void setCommonDetailsResponse(AgreementToken agreementToken,
+    public void setCommonDetailsResponse(@Nullable AgreementToken agreementToken,
             PaymentResponse paymentResponse,
             PaymentRequest paymentRequest,
             boolean checkoutComplete) {
@@ -192,7 +192,8 @@ public class DefaultPayPalCheckoutExternalCallService
 
     }
 
-    private String getItemTotal(Transaction transaction) {
+    @Nullable
+    private String getItemTotal(@Nullable Transaction transaction) {
         return Optional.ofNullable(transaction)
                 .map(CartBase::getAmount)
                 .map(Amount::getDetails)
@@ -200,7 +201,8 @@ public class DefaultPayPalCheckoutExternalCallService
                 .orElse(null);
     }
 
-    private String getShippingDiscount(Transaction transaction) {
+    @Nullable
+    private String getShippingDiscount(@Nullable Transaction transaction) {
         return Optional.ofNullable(transaction)
                 .map(CartBase::getAmount)
                 .map(Amount::getDetails)
@@ -208,7 +210,8 @@ public class DefaultPayPalCheckoutExternalCallService
                 .orElse(null);
     }
 
-    private String getShippingTotal(Transaction transaction) {
+    @Nullable
+    private String getShippingTotal(@Nullable Transaction transaction) {
         return Optional.ofNullable(transaction)
                 .map(CartBase::getAmount)
                 .map(Amount::getDetails)
@@ -216,7 +219,8 @@ public class DefaultPayPalCheckoutExternalCallService
                 .orElse(null);
     }
 
-    private String getTotalTax(Transaction transaction) {
+    @Nullable
+    private String getTotalTax(@Nullable Transaction transaction) {
         return Optional.ofNullable(transaction)
                 .map(CartBase::getAmount)
                 .map(Amount::getDetails)
@@ -224,7 +228,7 @@ public class DefaultPayPalCheckoutExternalCallService
                 .orElse(null);
     }
 
-    private BigDecimal getTotal(Transaction transaction) {
+    private BigDecimal getTotal(@Nullable Transaction transaction) {
         return Optional.ofNullable(transaction)
                 .map(CartBase::getAmount)
                 .map(Amount::getTotal)
@@ -232,13 +236,12 @@ public class DefaultPayPalCheckoutExternalCallService
                 .orElse(BigDecimal.ZERO);
     }
 
-    private CurrencyContext getCurrency(Transaction transaction) {
+    @Nullable
+    private CurrencyContext getCurrency(@Nullable Transaction transaction) {
         return Optional.ofNullable(transaction)
                 .map(CartBase::getAmount)
                 .map(Amount::getCurrency)
-                .map(currencyCode -> {
-                    return new SimpleCurrencyContext(Monetary.getCurrency(currencyCode));
-                })
+                .map(currencyCode -> new SimpleCurrencyContext(Monetary.getCurrency(currencyCode)))
                 .orElse(null);
     }
 
@@ -259,6 +262,7 @@ public class DefaultPayPalCheckoutExternalCallService
         return shipAddress;
     }
 
+    @Nullable
     private String getShortStateCode(Address<PaymentRequest> address) {
         String countryCode = address.getCountryCode();
         String stateRegion = address.getStateRegion();
@@ -273,6 +277,7 @@ public class DefaultPayPalCheckoutExternalCallService
     }
 
     @Override
+    @Nullable
     public ItemList getPayPalItemList(PaymentRequest paymentRequest,
             boolean shouldPopulateShipping) {
         ItemList itemList = new ItemList();
@@ -317,11 +322,13 @@ public class DefaultPayPalCheckoutExternalCallService
         return amount;
     }
 
-    private String getStringAmount(BigDecimal amount) {
+    @Nullable
+    private String getStringAmount(@Nullable BigDecimal amount) {
         return Objects.toString(normalizePrice(amount), null);
     }
 
-    private BigDecimal normalizePrice(BigDecimal amount) {
+    @Nullable
+    private BigDecimal normalizePrice(@Nullable BigDecimal amount) {
         if (amount == null) {
             return null;
         }

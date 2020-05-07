@@ -37,6 +37,7 @@ import org.broadleafcommerce.vendor.paypal.service.payment.PayPalSaleRetrievalRe
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalSaleRetrievalResponse;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalVoidRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalVoidResponse;
+import org.springframework.lang.Nullable;
 
 import com.broadleafcommerce.paymentgateway.domain.PaymentRequest;
 import com.broadleafcommerce.paymentgateway.domain.PaymentResponse;
@@ -389,6 +390,7 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
         return response.getAuthorizedPayment();
     }
 
+    @Nullable
     protected Payer generateAuthorizePayer(PaymentRequest paymentRequest) {
         if (isBillingAgreementRequest(paymentRequest)) {
             return generateBillingAgreementPayer(paymentRequest);
@@ -453,12 +455,9 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
         return response.getSale();
     }
 
+    @Nullable
     protected Payer generateSalePayer(PaymentRequest paymentRequest) {
-        if (isBillingAgreementRequest(paymentRequest)) {
-            return generateBillingAgreementPayer(paymentRequest);
-        }
-
-        return null;
+        return generateAuthorizePayer(paymentRequest);
     }
 
     protected List<Transactions> generateSaleTransactions(PaymentRequest paymentRequest) {
@@ -520,7 +519,7 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
         return authResponse.getAuthorization();
     }
 
-    private Sale getSale(PaymentRequest paymentRequest) throws PaymentException {
+    private Sale getSale(PaymentRequest paymentRequest) {
         PayPalSaleRetrievalResponse saleResponse =
                 (PayPalSaleRetrievalResponse) paypalCheckoutService.call(
                         new PayPalSaleRetrievalRequest(getSaleId(paymentRequest),
@@ -528,7 +527,7 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
         return saleResponse.getSale();
     }
 
-    private Capture getCapture(PaymentRequest paymentRequest) throws PaymentException {
+    private Capture getCapture(PaymentRequest paymentRequest) {
         PayPalCaptureRetrievalResponse response =
                 (PayPalCaptureRetrievalResponse) paypalCheckoutService
                         .call((new PayPalCaptureRetrievalRequest(getCaptureId(paymentRequest),
@@ -548,10 +547,12 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
         return (String) paymentRequest.getAdditionalFields().get(MessageConstants.AUTHORIZATONID);
     }
 
+    @Nullable
     private String getSaleId(PaymentRequest paymentRequest) {
         return (String) paymentRequest.getAdditionalFields().get(MessageConstants.SALEID);
     }
 
+    @Nullable
     private String getCaptureId(PaymentRequest paymentRequest) {
         return (String) paymentRequest.getAdditionalFields().get(MessageConstants.CAPTUREID);
     }

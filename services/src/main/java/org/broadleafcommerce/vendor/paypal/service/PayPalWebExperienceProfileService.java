@@ -16,6 +16,8 @@
  */
 package org.broadleafcommerce.vendor.paypal.service;
 
+import org.springframework.lang.Nullable;
+
 import com.broadleafcommerce.paymentgateway.domain.PaymentRequest;
 import com.broadleafcommerce.paymentgateway.service.exception.PaymentException;
 
@@ -27,6 +29,7 @@ public interface PayPalWebExperienceProfileService {
      * @return
      * @throws PaymentException
      */
-    public String getWebExperienceProfileId(PaymentRequest paymentRequest) throws PaymentException;
+    @Nullable
+    String getWebExperienceProfileId(PaymentRequest paymentRequest);
 
 }

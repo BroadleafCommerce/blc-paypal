@@ -23,6 +23,7 @@ import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutExternalCallS
 import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutRestConfigurationProperties;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCreateWebProfileRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCreateWebProfileResponse;
+import org.springframework.lang.Nullable;
 
 import com.broadleafcommerce.paymentgateway.domain.PaymentRequest;
 import com.broadleafcommerce.paymentgateway.service.exception.PaymentException;
@@ -50,7 +51,7 @@ public class DefaultPayPalWebExperienceProfileService implements PayPalWebExperi
     public DefaultPayPalWebExperienceProfileService(
             PayPalCheckoutExternalCallService paypalCheckoutService,
             PayPalCheckoutRestConfigurationProperties configProperties,
-            WebProfile webProfile) {
+            @Nullable WebProfile webProfile) {
         super();
         this.paypalCheckoutService = paypalCheckoutService;
         this.configProperties = configProperties;
@@ -64,6 +65,7 @@ public class DefaultPayPalWebExperienceProfileService implements PayPalWebExperi
     }
 
     @Override
+    @Nullable
     public String getWebExperienceProfileId(PaymentRequest paymentRequest) {
         String profileId = getPropertyWebProfileId();
         if (StringUtils.isNotBlank(profileId)) {
@@ -72,6 +74,7 @@ public class DefaultPayPalWebExperienceProfileService implements PayPalWebExperi
         return getBeanWebProfileId(paymentRequest);
     }
 
+    @Nullable
     protected String getBeanWebProfileId(PaymentRequest paymentRequest) {
         if (StringUtils.isNotBlank(beanProfileId)) {
             return beanProfileId;
@@ -89,6 +92,7 @@ public class DefaultPayPalWebExperienceProfileService implements PayPalWebExperi
         return beanProfileId;
     }
 
+    @Nullable
     protected WebProfile createWebProfile(WebProfile profile, PaymentRequest paymentRequest) {
         try {
             PayPalCreateWebProfileResponse response =

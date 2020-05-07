@@ -19,6 +19,7 @@ package org.broadleafcommerce.payment.service.gateway;
 import org.broadleafcommerce.vendor.paypal.api.AgreementToken;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalResponse;
+import org.springframework.lang.Nullable;
 
 import com.broadleafcommerce.paymentgateway.domain.PaymentRequest;
 import com.broadleafcommerce.paymentgateway.domain.PaymentResponse;
@@ -46,7 +47,7 @@ public interface PayPalCheckoutExternalCallService {
 
     APIContext constructAPIContext(PaymentRequest paymentRequest);
 
-    void setCommonDetailsResponse(AgreementToken response,
+    void setCommonDetailsResponse(@Nullable AgreementToken response,
             PaymentResponse paymentResponse,
             PaymentRequest paymentRequest,
             boolean checkoutComplete);
@@ -62,6 +63,7 @@ public interface PayPalCheckoutExternalCallService {
 
     ShippingAddress getPayPalShippingAddress(PaymentRequest paymentRequest);
 
+    @Nullable
     ItemList getPayPalItemList(PaymentRequest paymentRequest,
             boolean shouldPopulateShipping);
 

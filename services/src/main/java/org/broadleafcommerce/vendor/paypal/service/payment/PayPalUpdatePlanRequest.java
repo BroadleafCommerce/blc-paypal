@@ -52,7 +52,7 @@ public class PayPalUpdatePlanRequest extends PayPalRequest {
                         || StringUtils.isBlank(patch.getOp())) {
                     return false;
                 }
-                if (patch.getOp() != "remove" && patch.getValue() == null) {
+                if (!patch.getOp().equals("remove") && patch.getValue() == null) {
                     return false;
                 }
             }
