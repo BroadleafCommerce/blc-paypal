@@ -29,12 +29,18 @@ import com.paypal.api.payments.MerchantPreferences;
 import com.paypal.api.payments.Payer;
 import com.paypal.api.payments.Plan;
 
+import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class DefaultPayPalAgreementTokenService implements PayPalAgreementTokenService {
 
+    @Getter(AccessLevel.PROTECTED)
     private final PayPalCheckoutExternalCallService paypalCheckoutService;
+
+    @Getter(AccessLevel.PROTECTED)
+    private final PayPalCheckoutRestConfigurationProperties configProperties;
 
     /**
      * To support PayPal Reference Transactions and Billing Agreement Tokens
@@ -60,9 +66,6 @@ public class DefaultPayPalAgreementTokenService implements PayPalAgreementTokenS
     protected Plan constructPlan(PaymentRequest paymentRequest, boolean performCheckoutOnReturn) {
         Plan plan = new Plan();
         plan.setType(MessageConstants.PLAN_TYPE_MERCHANTINITIATEDBILLING);
-
-        PayPalCheckoutRestConfigurationProperties configProperties =
-                paypalCheckoutService.getConfigProperties();
 
         // Set up merchant preferences
         MerchantPreferences merchantPreferences = new MerchantPreferences();
@@ -94,7 +97,7 @@ public class DefaultPayPalAgreementTokenService implements PayPalAgreementTokenS
     }
 
     protected String constructAgreementDescription(PaymentRequest paymentRequest) {
-        return paypalCheckoutService.getConfigProperties().getPaymentDescription();
+        return configProperties.getPaymentDescription();
     }
 
 }

@@ -19,6 +19,7 @@ package org.broadleafcommerce.payment.service.gateway.autoconfigure;
 import org.broadleafcommerce.payment.service.gateway.DefaultPayPalCheckoutExternalCallService;
 import org.broadleafcommerce.payment.service.gateway.DefaultPayPalCheckoutHostedService;
 import org.broadleafcommerce.payment.service.gateway.DefaultPayPalCheckoutReportingService;
+import org.broadleafcommerce.payment.service.gateway.DefaultPayPalCheckoutRetryPolicyClassifier;
 import org.broadleafcommerce.payment.service.gateway.DefaultPayPalCheckoutRollbackService;
 import org.broadleafcommerce.payment.service.gateway.DefaultPayPalCheckoutTransactionConfirmationService;
 import org.broadleafcommerce.payment.service.gateway.DefaultPayPalCheckoutTransactionService;
@@ -34,10 +35,17 @@ import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutTransactionSe
 import org.broadleafcommerce.payment.service.gateway.PayPalGatewayConfiguration;
 import org.broadleafcommerce.payment.service.gateway.PayPalSyncTransactionService;
 import org.broadleafcommerce.vendor.paypal.service.PayPalPaymentService;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.classify.Classifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.retry.RetryPolicy;
+import org.springframework.retry.backoff.FixedBackOffPolicy;
+import org.springframework.retry.policy.ExceptionClassifierRetryPolicy;
+import org.springframework.retry.policy.SimpleRetryPolicy;
+import org.springframework.retry.support.RetryTemplate;
 
 @Configuration
 @EnableConfigurationProperties({PayPalCheckoutRestConfigurationProperties.class})
@@ -45,17 +53,39 @@ public class PayPalServiceAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public PayPalCheckoutExternalCallService paypalCheckoutService(
-            PayPalCheckoutRestConfigurationProperties configProperties,
-            PayPalGatewayConfiguration gatewayConfiguration) {
-        return new DefaultPayPalCheckoutExternalCallService(configProperties,
-                gatewayConfiguration);
+    public PayPalGatewayConfiguration payPalGatewayConfiguration() {
+        return new DefaultPayPalGatewayConfiguration();
+    }
+
+    /**
+     * Retries 3 times with a second between each attempt when a network or 5xx error is encountered
+     */
+    @Bean
+    @ConditionalOnMissingBean(name = "payPalCheckoutExternalCallRetryTemplate")
+    public RetryTemplate payPalCheckoutExternalCallRetryTemplate() {
+        RetryTemplate retryTemplate = new RetryTemplate();
+
+        ExceptionClassifierRetryPolicy retryPolicy = new ExceptionClassifierRetryPolicy();
+        Classifier<Throwable, RetryPolicy> classifier =
+                new DefaultPayPalCheckoutRetryPolicyClassifier(new SimpleRetryPolicy());
+        retryPolicy.setExceptionClassifier(classifier);
+        retryTemplate.setRetryPolicy(retryPolicy);
+
+        FixedBackOffPolicy backOffPolicy = new FixedBackOffPolicy();
+        retryTemplate.setBackOffPolicy(backOffPolicy);
+
+        return retryTemplate;
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public PayPalGatewayConfiguration payPalGatewayConfiguration() {
-        return new DefaultPayPalGatewayConfiguration();
+    public PayPalCheckoutExternalCallService payPalCheckoutExternalCallService(
+            PayPalCheckoutRestConfigurationProperties configProperties,
+            PayPalGatewayConfiguration gatewayConfiguration,
+            @Qualifier("payPalCheckoutExternalCallRetryTemplate") RetryTemplate retryTemplate) {
+        return new DefaultPayPalCheckoutExternalCallService(configProperties,
+                gatewayConfiguration,
+                retryTemplate);
     }
 
     @Bean

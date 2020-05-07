@@ -42,6 +42,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -54,7 +56,11 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class DefaultPayPalBillingAgreementService implements PayPalBillingAgreementService {
 
+    @Getter(AccessLevel.PROTECTED)
     private final PayPalCheckoutExternalCallService paypalCheckoutService;
+
+    @Getter(AccessLevel.PROTECTED)
+    private final PayPalCheckoutRestConfigurationProperties configProperties;
 
     @Override
     public Agreement createPayPalBillingAgreement(PaymentRequest paymentRequest,
@@ -112,9 +118,6 @@ public class DefaultPayPalBillingAgreementService implements PayPalBillingAgreem
     }
 
     protected Plan constructPlan(PaymentRequest paymentRequest) throws PaymentException {
-        PayPalCheckoutRestConfigurationProperties configProperties =
-                paypalCheckoutService.getConfigProperties();
-
         // Set up merchant preferences
         MerchantPreferences merchantPreferences = new MerchantPreferences();
         merchantPreferences.setCancelUrl(configProperties.getCancelUrl(paymentRequest));
