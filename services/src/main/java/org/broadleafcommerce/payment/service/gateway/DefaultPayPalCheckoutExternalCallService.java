@@ -75,7 +75,7 @@ public class DefaultPayPalCheckoutExternalCallService
     private final RetryTemplate retryTemplate;
 
     @Override
-    public PayPalResponse call(PayPalRequest paymentRequest) throws PaymentException {
+    public PayPalResponse call(PayPalRequest paymentRequest) {
         return super.process(paymentRequest);
     }
 
