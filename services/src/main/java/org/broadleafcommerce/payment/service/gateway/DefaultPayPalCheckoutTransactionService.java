@@ -38,6 +38,7 @@ import org.broadleafcommerce.vendor.paypal.service.payment.PayPalSaleRetrievalRe
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalVoidRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalVoidResponse;
 import org.springframework.lang.Nullable;
+import org.springframework.retry.support.RetryTemplate;
 
 import com.broadleafcommerce.paymentgateway.domain.PaymentRequest;
 import com.broadleafcommerce.paymentgateway.domain.PaymentResponse;
@@ -60,6 +61,7 @@ import com.paypal.api.payments.RelatedResources;
 import com.paypal.api.payments.Sale;
 import com.paypal.api.payments.Transaction;
 import com.paypal.api.payments.Transactions;
+import com.paypal.base.rest.APIContext;
 import com.paypal.base.rest.PayPalRESTException;
 import com.paypal.base.rest.PayPalResource;
 
@@ -91,6 +93,9 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
 
     @Getter(AccessLevel.PROTECTED)
     private final PayPalCheckoutRestConfigurationProperties configProperties;
+
+    @Getter(AccessLevel.PROTECTED)
+    private final RetryTemplate retryTemplate;
 
     @Override
     public PaymentResponse authorize(PaymentRequest paymentRequest) {
@@ -144,7 +149,7 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
 
         try {
             Authorization auth = getAuthorization(paymentRequest);
-            Capture capture = capturePayment(paymentRequest, auth);
+            Capture capture = capturePayment(auth, paymentRequest);
             Amount amount = capture.getAmount();
 
             paymentResponse
@@ -281,7 +286,7 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
             }
 
             if (capture != null) {
-                DetailedRefund detailRefund = refundPayment(paymentRequest, capture);
+                DetailedRefund detailRefund = refundPayment(capture, paymentRequest);
                 Amount amount = detailRefund.getAmount();
                 paymentResponse
                         .successful(true)
@@ -292,7 +297,7 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
                         .currencyContext(amount.getCurrency());
                 return paymentResponse;
             } else if (sale != null) {
-                DetailedRefund detailRefund = refundPayment(paymentRequest, sale);
+                DetailedRefund detailRefund = refundPayment(sale, paymentRequest);
                 Amount amount = detailRefund.getAmount();
                 paymentResponse
                         .successful(true)
@@ -333,18 +338,30 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
         return paymentResponse;
     }
 
-    protected Capture capturePayment(PaymentRequest paymentRequest, Authorization auth) {
+    /**
+     * Executes a {@link DefaultTransactionTypes#CAPTURE} for the provided {@link Authorization}
+     * object
+     *
+     * @param auth The authorization that should be captured
+     * @param paymentRequest The request payload that should be used to form the transaction
+     * @return a {@link Capture} object representing the final state of the transaction
+     */
+    protected Capture capturePayment(Authorization auth, PaymentRequest paymentRequest) {
+        APIContext apiContext = paypalCheckoutService.constructAPIContext(paymentRequest);
+
         Capture capture = new Capture();
         capture.setIsFinalCapture(true);
         Amount amount = new Amount();
         amount.setCurrency(paymentRequest.getCurrencyCode());
         amount.setTotal(Objects.toString(paymentRequest.getTransactionTotal(), null));
         capture.setAmount(amount);
-        PayPalCaptureResponse captureResponse = (PayPalCaptureResponse) paypalCheckoutService.call(
-                new PayPalCaptureRequest(auth,
-                        capture,
-                        paypalCheckoutService.constructAPIContext(paymentRequest)));
-        return captureResponse.getCapture();
+
+        PayPalCaptureResponse response = retryTemplate.execute(context -> {
+            PayPalCaptureRequest captureRequest =
+                    new PayPalCaptureRequest(auth, capture, apiContext);
+            return (PayPalCaptureResponse) paypalCheckoutService.call(captureRequest);
+        });
+        return response.getCapture();
     }
 
     /**
@@ -366,6 +383,13 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
         }
     }
 
+    /**
+     * Executes an {@link DefaultTransactionTypes#AUTHORIZE} transaction based on the provided
+     * {@link PaymentRequest}
+     *
+     * @param paymentRequest The request payload that should be used to form the transaction
+     * @return a {@link PayPalResource} representing the final state of the transaction
+     */
     protected PayPalResource authorizePayment(PaymentRequest paymentRequest) {
         Payment payment = new Payment();
         payment.setId(getPaymentId(paymentRequest));
@@ -373,23 +397,36 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
         paymentExecution.setPayerId(getPayerId(paymentRequest));
         paymentExecution.setTransactions(generateAuthorizeTransactions(paymentRequest));
 
+        APIContext apiContext = paypalCheckoutService.constructAPIContext(paymentRequest);
+
         if (isBillingAgreementRequest(paymentRequest)) {
             payment.setIntent("authorize");
             payment.setPayer(generateAuthorizePayer(paymentRequest));
-            PayPalCreatePaymentResponse response =
-                    (PayPalCreatePaymentResponse) paypalCheckoutService.call(
-                            new PayPalCreatePaymentRequest(payment,
-                                    paypalCheckoutService.constructAPIContext(paymentRequest)));
+
+            PayPalCreatePaymentResponse response = retryTemplate.execute(context -> {
+                PayPalCreatePaymentRequest createPaymentRequest =
+                        new PayPalCreatePaymentRequest(payment, apiContext);
+                return (PayPalCreatePaymentResponse) paypalCheckoutService
+                        .call(createPaymentRequest);
+            });
             return response.getPayment();
         }
 
-        PayPalAuthorizeResponse response = (PayPalAuthorizeResponse) paypalCheckoutService.call(
-                new PayPalAuthorizeRequest(payment,
-                        paymentExecution,
-                        paypalCheckoutService.constructAPIContext(paymentRequest)));
+        PayPalAuthorizeResponse response = retryTemplate.execute(context -> {
+            PayPalAuthorizeRequest authorizeRequest =
+                    new PayPalAuthorizeRequest(payment, paymentExecution, apiContext);
+            return (PayPalAuthorizeResponse) paypalCheckoutService.call(authorizeRequest);
+        });
         return response.getAuthorizedPayment();
     }
 
+    /**
+     * Generates a {@link Payer} for an {@link DefaultTransactionTypes#AUTHORIZE} transaction based
+     * on the provided {@link PaymentRequest}
+     *
+     * @param paymentRequest The request payload that should be used to form the payer
+     * @return a payer based on the payment request
+     */
     @Nullable
     protected Payer generateAuthorizePayer(PaymentRequest paymentRequest) {
         if (isBillingAgreementRequest(paymentRequest)) {
@@ -404,10 +441,23 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
                 .containsKey(MessageConstants.BILLINGAGREEMENTID);
     }
 
+    /**
+     * Generates a list of {@link Transactions} for an {@link DefaultTransactionTypes#AUTHORIZE}
+     * transaction based on the provided {@link PaymentRequest}
+     *
+     * @param paymentRequest The request payload that should be used to form the transactions
+     * @return a list of transactions based on the payment request
+     */
     protected List<Transactions> generateAuthorizeTransactions(PaymentRequest paymentRequest) {
         return generateTransactions(paymentRequest);
     }
 
+    /**
+     * Generates a list of {@link Transactions} based on the provided {@link PaymentRequest}
+     *
+     * @param paymentRequest The request payload that should be used to form the transactions
+     * @return a list of transactions based on the payment request
+     */
     protected List<Transactions> generateTransactions(PaymentRequest paymentRequest) {
 
         // Transaction information
@@ -431,6 +481,13 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
                 .orElseThrow(NoSuchElementException::new);
     }
 
+    /**
+     * Executes an {@link DefaultTransactionTypes#AUTHORIZE_AND_CAPTURE} transaction based on the
+     * provided {@link PaymentRequest}
+     *
+     * @param paymentRequest The request payload that should be used to form the transaction
+     * @return a {@link PayPalResource} representing the final state of the transaction
+     */
     protected PayPalResource salePayment(PaymentRequest paymentRequest) {
         Payment payment = new Payment();
         payment.setId(getPaymentId(paymentRequest));
@@ -438,32 +495,59 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
         paymentExecution.setPayerId(getPayerId(paymentRequest));
         paymentExecution.setTransactions(generateSaleTransactions(paymentRequest));
 
+        APIContext apiContext = paypalCheckoutService.constructAPIContext(paymentRequest);
+
         if (isBillingAgreementRequest(paymentRequest)) {
             payment.setIntent("sale");
             payment.setPayer(generateSalePayer(paymentRequest));
-            PayPalCreatePaymentResponse response =
-                    (PayPalCreatePaymentResponse) paypalCheckoutService.call(
-                            new PayPalCreatePaymentRequest(payment,
-                                    paypalCheckoutService.constructAPIContext(paymentRequest)));
+
+            PayPalCreatePaymentResponse response = retryTemplate.execute(context -> {
+                PayPalCreatePaymentRequest createPaymentRequest =
+                        new PayPalCreatePaymentRequest(payment, apiContext);
+                return (PayPalCreatePaymentResponse) paypalCheckoutService
+                        .call(createPaymentRequest);
+            });
             return response.getPayment();
         }
 
-        PayPalSaleResponse response = (PayPalSaleResponse) paypalCheckoutService.call(
-                new PayPalSaleRequest(payment,
-                        paymentExecution,
-                        paypalCheckoutService.constructAPIContext(paymentRequest)));
+        PayPalSaleResponse response = retryTemplate.execute(context -> {
+            PayPalSaleRequest saleRequest =
+                    new PayPalSaleRequest(payment, paymentExecution, apiContext);
+            return (PayPalSaleResponse) paypalCheckoutService.call(saleRequest);
+        });
         return response.getSale();
     }
 
+    /**
+     * Generates a {@link Payer} for an {@link DefaultTransactionTypes#AUTHORIZE_AND_CAPTURE}
+     * transaction based on the provided {@link PaymentRequest}
+     *
+     * @param paymentRequest The request payload that should be used to form the payer
+     * @return a payer based on the payment request
+     */
     @Nullable
     protected Payer generateSalePayer(PaymentRequest paymentRequest) {
         return generateAuthorizePayer(paymentRequest);
     }
 
+    /**
+     * Generates a list of {@link Transactions} for an
+     * {@link DefaultTransactionTypes#AUTHORIZE_AND_CAPTURE} transaction based on the provided
+     * {@link PaymentRequest}
+     *
+     * @param paymentRequest The request payload that should be used to form the transactions
+     * @return a list of transactions based on the payment request
+     */
     protected List<Transactions> generateSaleTransactions(PaymentRequest paymentRequest) {
         return generateTransactions(paymentRequest);
     }
 
+    /**
+     * Generates a {@link Payer} based on the provided {@link PaymentRequest}
+     *
+     * @param paymentRequest The request payload that should be used to form the payer
+     * @return a payer based on the payment request
+     */
     protected Payer generateBillingAgreementPayer(PaymentRequest paymentRequest) {
         Payer payer = new Payer();
         payer.setPaymentMethod(MessageConstants.PAYER_PAYMENTMETHOD_PAYPAL);
@@ -478,60 +562,106 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
         return payer;
     }
 
+    /**
+     * Executes a {@link DefaultTransactionTypes#REVERSE_AUTH} for the provided
+     * {@link Authorization} object
+     *
+     * @param auth The authorization that should be reversed
+     * @param paymentRequest The request payload that should be used to form the transaction
+     * @return an updated {@link Authorization} representing the final state of the transaction
+     */
     protected Authorization voidAuthorization(Authorization auth, PaymentRequest paymentRequest) {
-        PayPalVoidResponse response = (PayPalVoidResponse) paypalCheckoutService.call(
-                new PayPalVoidRequest(auth,
-                        paypalCheckoutService.constructAPIContext(paymentRequest)));
+        APIContext apiContext = paypalCheckoutService.constructAPIContext(paymentRequest);
+
+        PayPalVoidResponse response = retryTemplate.execute(context -> {
+            PayPalVoidRequest voidRequest = new PayPalVoidRequest(auth, apiContext);
+            return (PayPalVoidResponse) paypalCheckoutService.call(voidRequest);
+        });
         return response.getVoidedAuthorization();
     }
 
-    protected DetailedRefund refundPayment(PaymentRequest paymentRequest, Capture capture) {
+    /**
+     * Executes a {@link DefaultTransactionTypes#REFUND} for the provided {@link Capture} object
+     *
+     * @param capture The capture that should be refunded
+     * @param paymentRequest The request payload that should be used to form the transaction
+     * @return a {@link DetailedRefund} representing the final state of the transaction
+     */
+    protected DetailedRefund refundPayment(Capture capture, PaymentRequest paymentRequest) {
+        APIContext apiContext = paypalCheckoutService.constructAPIContext(paymentRequest);
+
         RefundRequest refund = new RefundRequest();
         Amount amount = new Amount();
         amount.setCurrency(paymentRequest.getCurrencyCode());
         amount.setTotal(Objects.toString(paymentRequest.getTransactionTotal(), null));
         refund.setAmount(amount);
-        PayPalRefundResponse response = (PayPalRefundResponse) paypalCheckoutService.call(
-                new PayPalRefundRequest(refund,
-                        capture,
-                        paypalCheckoutService.constructAPIContext(paymentRequest)));
+
+        PayPalRefundResponse response = retryTemplate.execute(context -> {
+            PayPalRefundRequest refundRequest =
+                    new PayPalRefundRequest(refund, capture, apiContext);
+            return (PayPalRefundResponse) paypalCheckoutService.call(refundRequest);
+        });
         return response.getDetailedRefund();
     }
 
-    protected DetailedRefund refundPayment(PaymentRequest paymentRequest, Sale sale) {
+    /**
+     * Executes a {@link DefaultTransactionTypes#REFUND} for the provided {@link Sale} object
+     *
+     * @param sale The sale that should be refunded
+     * @param paymentRequest The request payload that should be used to form the transaction
+     * @return a {@link DetailedRefund} representing the final state of the transaction
+     */
+    protected DetailedRefund refundPayment(Sale sale, PaymentRequest paymentRequest) {
+        APIContext apiContext = paypalCheckoutService.constructAPIContext(paymentRequest);
+
         RefundRequest refund = new RefundRequest();
         Amount amount = new Amount();
         amount.setCurrency(paymentRequest.getCurrencyCode());
         amount.setTotal(Objects.toString(paymentRequest.getTransactionTotal(), null));
         refund.setAmount(amount);
-        PayPalRefundResponse response = (PayPalRefundResponse) paypalCheckoutService.call(
-                new PayPalRefundRequest(refund,
-                        sale,
-                        paypalCheckoutService.constructAPIContext(paymentRequest)));
+
+        PayPalRefundResponse response = retryTemplate.execute(context -> {
+            PayPalRefundRequest refundRequest = new PayPalRefundRequest(refund, sale, apiContext);
+            return (PayPalRefundResponse) paypalCheckoutService.call(refundRequest);
+        });
         return response.getDetailedRefund();
     }
 
     private Authorization getAuthorization(PaymentRequest paymentRequest) {
-        PayPalAuthorizationRetrievalResponse authResponse =
-                (PayPalAuthorizationRetrievalResponse) paypalCheckoutService.call(
-                        new PayPalAuthorizationRetrievalRequest(getAuthorizationId(paymentRequest),
-                                paypalCheckoutService.constructAPIContext(paymentRequest)));
-        return authResponse.getAuthorization();
+        APIContext apiContext = paypalCheckoutService.constructAPIContext(paymentRequest);
+        String authorizationId = getAuthorizationId(paymentRequest);
+
+        PayPalAuthorizationRetrievalResponse response = retryTemplate.execute(context -> {
+            PayPalAuthorizationRetrievalRequest authorizationRetrievalRequest =
+                    new PayPalAuthorizationRetrievalRequest(authorizationId, apiContext);
+            return (PayPalAuthorizationRetrievalResponse) paypalCheckoutService
+                    .call(authorizationRetrievalRequest);
+        });
+        return response.getAuthorization();
     }
 
     private Sale getSale(PaymentRequest paymentRequest) {
-        PayPalSaleRetrievalResponse saleResponse =
-                (PayPalSaleRetrievalResponse) paypalCheckoutService.call(
-                        new PayPalSaleRetrievalRequest(getSaleId(paymentRequest),
-                                paypalCheckoutService.constructAPIContext(paymentRequest)));
-        return saleResponse.getSale();
+        APIContext apiContext = paypalCheckoutService.constructAPIContext(paymentRequest);
+        String saleId = getSaleId(paymentRequest);
+
+        PayPalSaleRetrievalResponse response = retryTemplate.execute(context -> {
+            PayPalSaleRetrievalRequest saleRetrievalRequest =
+                    new PayPalSaleRetrievalRequest(saleId, apiContext);
+            return (PayPalSaleRetrievalResponse) paypalCheckoutService.call(saleRetrievalRequest);
+        });
+        return response.getSale();
     }
 
     private Capture getCapture(PaymentRequest paymentRequest) {
-        PayPalCaptureRetrievalResponse response =
-                (PayPalCaptureRetrievalResponse) paypalCheckoutService
-                        .call((new PayPalCaptureRetrievalRequest(getCaptureId(paymentRequest),
-                                paypalCheckoutService.constructAPIContext(paymentRequest))));
+        APIContext apiContext = paypalCheckoutService.constructAPIContext(paymentRequest);
+        String captureId = getCaptureId(paymentRequest);
+
+        PayPalCaptureRetrievalResponse response = retryTemplate.execute(context -> {
+            PayPalCaptureRetrievalRequest captureRetrievalRequest =
+                    new PayPalCaptureRetrievalRequest(captureId, apiContext);
+            return (PayPalCaptureRetrievalResponse) paypalCheckoutService
+                    .call(captureRetrievalRequest);
+        });
         return response.getCapture();
     }
 
@@ -671,7 +801,7 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
         return paymentDeclineCodes.contains(errorCode);
     }
 
-    protected void populateErrorResponseMap(PaymentResponse responseDTO,
+    private void populateErrorResponseMap(PaymentResponse responseDTO,
             PayPalRESTException restException) {
         Error error = restException.getDetails();
         if (error != null) {

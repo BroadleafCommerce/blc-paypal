@@ -23,7 +23,6 @@ import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalResponse;
 import org.springframework.lang.Nullable;
-import org.springframework.retry.support.RetryTemplate;
 
 import com.broadleafcommerce.money.CurrencyContext;
 import com.broadleafcommerce.money.SimpleCurrencyContext;
@@ -71,9 +70,6 @@ public class DefaultPayPalCheckoutExternalCallService
     @Getter(AccessLevel.PROTECTED)
     private final PayPalGatewayConfiguration gatewayConfiguration;
 
-    @Getter(AccessLevel.PROTECTED)
-    private final RetryTemplate retryTemplate;
-
     @Override
     public PayPalResponse call(PayPalRequest paymentRequest) {
         return super.process(paymentRequest);
@@ -81,7 +77,7 @@ public class DefaultPayPalCheckoutExternalCallService
 
     @Override
     public PayPalResponse communicateWithVendor(PayPalRequest paymentRequest) throws Exception {
-        return retryTemplate.execute(context -> paymentRequest.execute());
+        return paymentRequest.execute();
     }
 
     @Override
