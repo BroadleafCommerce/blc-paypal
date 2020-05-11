@@ -57,6 +57,22 @@ public class PayPalServiceAutoConfiguration {
         return new DefaultPayPalGatewayConfiguration();
     }
 
+    @Bean
+    @ConditionalOnMissingBean
+    public PayPalCheckoutExternalCallService payPalCheckoutExternalCallService(
+            PayPalCheckoutRestConfigurationProperties configProperties,
+            PayPalGatewayConfiguration gatewayConfiguration) {
+        return new DefaultPayPalCheckoutExternalCallService(configProperties,
+                gatewayConfiguration);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public PayPalSyncTransactionService payPalSyncTransactionService(
+            PayPalCheckoutExternalCallService paypalCheckoutService) {
+        return new DefaultPayPalSyncTransactionService(paypalCheckoutService);
+    }
+
     /**
      * Retries 3 times with a second between each attempt when a network or 5xx error is encountered
      */
@@ -79,31 +95,15 @@ public class PayPalServiceAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public PayPalCheckoutExternalCallService payPalCheckoutExternalCallService(
-            PayPalCheckoutRestConfigurationProperties configProperties,
-            PayPalGatewayConfiguration gatewayConfiguration,
-            @Qualifier("payPalCheckoutExternalCallRetryTemplate") RetryTemplate retryTemplate) {
-        return new DefaultPayPalCheckoutExternalCallService(configProperties,
-                gatewayConfiguration,
-                retryTemplate);
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public PayPalSyncTransactionService payPalSyncTransactionService(
-            PayPalCheckoutExternalCallService paypalCheckoutService) {
-        return new DefaultPayPalSyncTransactionService(paypalCheckoutService);
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
     public PayPalCheckoutTransactionService payPalCheckoutTransactionService(
             PayPalCheckoutExternalCallService paypalCheckoutService,
             PayPalPaymentService payPalPaymentService,
-            PayPalCheckoutRestConfigurationProperties configProperties) {
+            PayPalCheckoutRestConfigurationProperties configProperties,
+            @Qualifier("payPalCheckoutExternalCallRetryTemplate") RetryTemplate retryTemplate) {
         return new DefaultPayPalCheckoutTransactionService(paypalCheckoutService,
                 payPalPaymentService,
-                configProperties);
+                configProperties,
+                retryTemplate);
     }
 
     @Bean

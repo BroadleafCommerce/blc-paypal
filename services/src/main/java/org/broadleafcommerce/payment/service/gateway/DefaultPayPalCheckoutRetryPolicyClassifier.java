@@ -57,8 +57,9 @@ public class DefaultPayPalCheckoutRetryPolicyClassifier
      * @return whether or not the given throwable represents a network error
      */
     protected boolean isNetworkError(Throwable throwable) {
-        if (throwable instanceof PayPalRESTException) {
-            PayPalRESTException restException = (PayPalRESTException) throwable;
+        Throwable cause = throwable.getCause();
+        if (cause instanceof PayPalRESTException) {
+            PayPalRESTException restException = (PayPalRESTException) cause;
             int httpResponseCode = restException.getResponsecode();
 
             return (408 == httpResponseCode);
@@ -75,8 +76,9 @@ public class DefaultPayPalCheckoutRetryPolicyClassifier
      * @return whether or not the given throwable represents a 5xx error
      */
     protected boolean is5xxError(Throwable throwable) {
-        if (throwable instanceof PayPalRESTException) {
-            PayPalRESTException restException = (PayPalRESTException) throwable;
+        Throwable cause = throwable.getCause();
+        if (cause instanceof PayPalRESTException) {
+            PayPalRESTException restException = (PayPalRESTException) cause;
             int httpResponseCode = restException.getResponsecode();
 
             return is5xxError(httpResponseCode);
