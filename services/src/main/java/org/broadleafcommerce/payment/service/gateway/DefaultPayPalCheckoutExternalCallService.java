@@ -220,14 +220,18 @@ public class DefaultPayPalCheckoutExternalCallService
     }
 
     private MonetaryAmount getTotal(@Nullable Transaction transaction) {
-        if (transaction != null && transaction.getAmount() != null
-                && transaction.getAmount().getTotal() != null) {
-            return Objects.requireNonNull(
-                    MonetaryUtils.toAmount(new BigDecimal(transaction.getAmount().getTotal()),
-                            transaction.getAmount().getCurrency()));
-        }
-
-        return MonetaryUtils.zero();
+        return Objects.requireNonNull(
+                MonetaryUtils.toAmount(
+                        Optional.ofNullable(transaction)
+                                .map(CartBase::getAmount)
+                                .map(Amount::getTotal)
+                                .map(BigDecimal::new)
+                                .orElse(BigDecimal.ZERO),
+                        Optional.ofNullable(transaction)
+                                .map(CartBase::getAmount)
+                                .map(Amount::getCurrency)
+                                .map(MonetaryUtils::getCurrency)
+                                .orElse(MonetaryUtils.defaultCurrency())));
     }
 
     @Override
