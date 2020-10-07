@@ -325,7 +325,7 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
                     .successful(true)
                     .rawResponse(auth.toJSON())
                     .amount(MonetaryUtils.toAmount(amount.getTotal(),
-                            auth.getAmount().getCurrency()));
+                            amount.getCurrency()));
         } catch (PaymentException e) {
             processException(e, paymentResponse, paymentRequest);
         }
