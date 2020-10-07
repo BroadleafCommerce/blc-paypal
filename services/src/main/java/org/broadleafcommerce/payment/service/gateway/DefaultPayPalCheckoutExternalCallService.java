@@ -24,8 +24,7 @@ import org.broadleafcommerce.vendor.paypal.service.payment.PayPalRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalResponse;
 import org.springframework.lang.Nullable;
 
-import com.broadleafcommerce.money.CurrencyContext;
-import com.broadleafcommerce.money.SimpleCurrencyContext;
+import com.broadleafcommerce.money.util.MonetaryUtils;
 import com.broadleafcommerce.paymentgateway.domain.Address;
 import com.broadleafcommerce.paymentgateway.domain.LineItem;
 import com.broadleafcommerce.paymentgateway.domain.PaymentRequest;
@@ -43,14 +42,13 @@ import com.paypal.api.payments.Transaction;
 import com.paypal.base.rest.APIContext;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-import javax.money.Monetary;
+import javax.money.MonetaryAmount;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -105,7 +103,6 @@ public class DefaultPayPalCheckoutExternalCallService
         }
 
         paymentResponse.amount(paymentRequest.getTransactionTotal())
-                .currencyContext(paymentRequest.getCurrencyContext())
                 .orderId(paymentRequest.getOrderId())
                 .transactionReferenceId(paymentRequest.getTransactionReferenceId())
                 .successful(true)
@@ -157,12 +154,10 @@ public class DefaultPayPalCheckoutExternalCallService
             String shippingDiscount = getShippingDiscount(transaction);
             String shippingTotal = getShippingTotal(transaction);
             String totalTax = getTotalTax(transaction);
-            BigDecimal total = getTotal(transaction);
-            CurrencyContext currencyContext = getCurrency(transaction);
+            MonetaryAmount total = getTotal(transaction);
 
             String[] customFields = transaction.getCustom().split("\\|");
             responseDTO.amount(total)
-                    .currencyContext(currencyContext)
                     .successful(true)
                     .valid(true)
                     .completeCheckoutOnCallback(Boolean.parseBoolean(customFields[1]))
@@ -224,21 +219,19 @@ public class DefaultPayPalCheckoutExternalCallService
                 .orElse(null);
     }
 
-    private BigDecimal getTotal(@Nullable Transaction transaction) {
-        return Optional.ofNullable(transaction)
-                .map(CartBase::getAmount)
-                .map(Amount::getTotal)
-                .map(BigDecimal::new)
-                .orElse(BigDecimal.ZERO);
-    }
-
-    @Nullable
-    private CurrencyContext getCurrency(@Nullable Transaction transaction) {
-        return Optional.ofNullable(transaction)
-                .map(CartBase::getAmount)
-                .map(Amount::getCurrency)
-                .map(currencyCode -> new SimpleCurrencyContext(Monetary.getCurrency(currencyCode)))
-                .orElse(null);
+    private MonetaryAmount getTotal(@Nullable Transaction transaction) {
+        return Objects.requireNonNull(
+                MonetaryUtils.toAmount(
+                        Optional.ofNullable(transaction)
+                                .map(CartBase::getAmount)
+                                .map(Amount::getTotal)
+                                .map(BigDecimal::new)
+                                .orElse(BigDecimal.ZERO),
+                        Optional.ofNullable(transaction)
+                                .map(CartBase::getAmount)
+                                .map(Amount::getCurrency)
+                                .map(MonetaryUtils::getCurrency)
+                                .orElse(MonetaryUtils.defaultCurrency())));
     }
 
     @Override
@@ -293,7 +286,7 @@ public class DefaultPayPalCheckoutExternalCallService
                 item.setQuantity(Objects.toString(lineItem.getQuantity(), null));
                 item.setPrice(Objects.toString(lineItem.getTotal(), null));
                 item.setTax(Objects.toString(lineItem.getTax(), null));
-                item.setCurrency(paymentRequest.getCurrencyCode());
+                item.setCurrency(paymentRequest.getOrderSubtotal().getCurrency().getCurrencyCode());
                 item.setName(lineItem.getName());
                 items.add(item);
             }
@@ -312,24 +305,24 @@ public class DefaultPayPalCheckoutExternalCallService
         details.setTax(getStringAmount(paymentRequest.getTaxTotal()));
 
         Amount amount = new Amount();
-        amount.setCurrency(paymentRequest.getCurrencyCode());
+        amount.setCurrency(paymentRequest.getOrderSubtotal().getCurrency().getCurrencyCode());
         amount.setTotal(getStringAmount(paymentRequest.getTransactionTotal()));
         amount.setDetails(details);
         return amount;
     }
 
     @Nullable
-    private String getStringAmount(@Nullable BigDecimal amount) {
+    private String getStringAmount(@Nullable MonetaryAmount amount) {
         return Objects.toString(normalizePrice(amount), null);
     }
 
     @Nullable
-    private BigDecimal normalizePrice(@Nullable BigDecimal amount) {
+    private BigDecimal normalizePrice(@Nullable MonetaryAmount amount) {
         if (amount == null) {
             return null;
         }
 
-        return amount.setScale(2, RoundingMode.HALF_EVEN);
+        return MonetaryUtils.toValue(amount);
     }
 
     @Override
