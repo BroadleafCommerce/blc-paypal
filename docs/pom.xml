@@ -10,7 +10,7 @@
     </parent>
 
     <artifactId>broadleaf-paypal-docs</artifactId>
-    <name>BroadleafCommerce PayPal Integration Docs</name>
+    <name>Broadleaf PayPal Integration Docs</name>
     <description>PayPal Integration Docs</description>
 
     <properties>
