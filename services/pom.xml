@@ -11,7 +11,7 @@
     </parent>
 
     <artifactId>broadleaf-paypal</artifactId>
-    <name>Broadleaf PayPal</name>
+    <name>Broadleaf PayPal Integration</name>
     <description>BroadleafCommerce PayPal</description>
 
     <build>

@@ -13,7 +13,7 @@
     <artifactId>broadleaf-paypal-parent</artifactId>
     <version>${revision}</version>
     <packaging>pom</packaging>
-    <name>Broadleaf PayPal Parent</name>
+    <name>Broadleaf PayPal Integration Parent</name>
     <description>BroadleafCommerce PayPal Parent</description>
 
     <properties>
