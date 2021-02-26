@@ -17,34 +17,36 @@
  */
 package org.broadleafcommerce.vendor.paypal.service;
 
+import com.paypal.orders.Order;
+import org.broadleafcommerce.common.payment.dto.PaymentRequestDTO;
 import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
-
-import com.paypal.api.payments.Payment;
 
 public interface PayPalPaymentService {
 
     /**
-     * Creates a PayPal payment
+     * Creates a PayPal {@link Order}
      * @param performCheckoutOnReturn Indicates if we should start checkout after the user has authorized the payment
      * 
-     * @return The new payment
+     * @return The new {@link Order}
      * @throws PaymentException
      */
-    Payment createPayPalPaymentForCurrentOrder(boolean performCheckoutOnReturn) throws PaymentException;
+    Order createPayPalOrderForCurrentOrder(boolean performCheckoutOnReturn) throws PaymentException;
 
     /**
-     * Updates the PayPal payment to be in sync with the order. This method should be used when fulfillment or pricing information changes
-     * after Payment creation. For creating payment use {@link #createPayPalPaymentForCurrentOrder(boolean)}
+     * Updates the PayPal {@link Order} to be in sync with the Broadleaf order. This method should be used when fulfillment or pricing information changes
+     * after {@link Order} creation. For creating payment use {@link #createPayPalOrderForCurrentOrder(boolean)}
      * 
      * @throws PaymentException
      */
-    void updatePayPalPaymentForFulfillment() throws PaymentException;
+    void updatePayPalOrderForFulfillment() throws PaymentException;
 
-    String getPayPalPaymentIdFromCurrentOrder() throws PaymentException;
+    PaymentRequestDTO getPaymentRequestForCurrentOrder() throws PaymentException;
+
+    String getPayPalOrderIdFromCurrentOrder() throws PaymentException;
 
     String getPayPalPayerIdFromCurrentOrder() throws PaymentException;
 
-    void setPayPalPaymentIdOnCurrentOrder(String paymentId) throws PaymentException;
+    void setPayPalOrderIdOnCurrentOrder(String orderId) throws PaymentException;
 
     void setPayPalPayerIdOnCurrentOrder(String payerId) throws PaymentException;
 

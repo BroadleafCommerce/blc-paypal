@@ -18,26 +18,15 @@
 package org.broadleafcommerce.vendor.paypal.service.payment;
 
 import com.paypal.http.HttpResponse;
-import com.paypal.orders.Authorization;
-import com.paypal.orders.Order;
+import com.paypal.payments.Authorization;
 
-public class PayPalAuthorizeResponse extends AbstractPayPalResponse<Order> {
+/**
+ * @author Nathan Moore (nathandmoore)
+ */
+public class PayPalReAuthorizeResponse extends AbstractPayPalResponse<Authorization> {
 
-    private final Authorization authorization;
-
-    public PayPalAuthorizeResponse(HttpResponse<Order> response) {
+    public PayPalReAuthorizeResponse(HttpResponse<Authorization> response) {
         super(response);
-
-        this.authorization = getContent()
-                .purchaseUnits()
-                .stream()
-                .findFirst()
-                .map(purchaseUnit -> purchaseUnit.payments().authorizations())
-                .map(auths -> auths.get(Math.max(0, auths.size() - 1)))
-                .orElse(null);
     }
 
-    public Authorization getAuthorization() {
-        return this.authorization;
-    }
 }

@@ -19,33 +19,32 @@ package org.broadleafcommerce.vendor.paypal.service.payment;
 
 import com.paypal.http.HttpResponse;
 import com.paypal.orders.Order;
-import com.paypal.orders.OrdersAuthorizeRequest;
+import com.paypal.orders.OrdersGetRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.broadleafcommerce.common.payment.dto.PaymentRequestDTO;
 import org.broadleafcommerce.vendor.paypal.service.PayPalClientProvider;
 
 import java.io.IOException;
 
-public class PayPalAuthorizeRequest extends
-        AbstractPayPalRequest<Order, OrdersAuthorizeRequest> {
+public class PayPalOrderRetrievalRequest extends AbstractPayPalRequest<Order, OrdersGetRequest> {
 
     private final String orderId;
 
-    public PayPalAuthorizeRequest(PayPalClientProvider clientProvider,
-                                  PaymentRequestDTO paymentRequest, String orderId) {
+    public PayPalOrderRetrievalRequest(PayPalClientProvider clientProvider,
+                                       PaymentRequestDTO paymentRequest, String orderId) {
         super(clientProvider, paymentRequest);
         this.orderId = orderId;
     }
 
     @Override
-    protected OrdersAuthorizeRequest buildRequest() {
-        return new OrdersAuthorizeRequest(getOrderId());
+    protected OrdersGetRequest buildRequest() {
+        return new OrdersGetRequest(getOrderId());
     }
 
     @Override
-    public AbstractPayPalResponse<Order> executeInternal() throws IOException {
+    protected AbstractPayPalResponse<Order> executeInternal() throws IOException {
         HttpResponse<Order> response = getClient().execute(getRequest());
-        return new PayPalAuthorizeResponse(response);
+        return new PayPalOrderRetrievalResponse(response);
     }
 
     @Override

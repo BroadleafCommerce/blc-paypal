@@ -15,29 +15,25 @@
  * between you and Broadleaf Commerce. You may not use this file except in compliance with the applicable license.
  * #L%
  */
-package org.broadleafcommerce.vendor.paypal.service.payment;
+package org.broadleafcommerce.vendor.paypal.service.payment.type;
 
-import com.paypal.http.HttpResponse;
-import com.paypal.orders.Authorization;
-import com.paypal.orders.Order;
+/**
+ * Defines the possible environments within which to make transactions. PayPal offers 2 sets of REST
+ * APIs, one for development and test: {@link #SANDBOX}. One for production: {@link #PRODUCTION}.
+ *
+ * @author Nathan Moore (nathandmoore)
+ */
+public enum PayPalCheckoutEnvironmentType {
+    SANDBOX("sandbox"), PRODUCTION("production");
 
-public class PayPalAuthorizeResponse extends AbstractPayPalResponse<Order> {
+    private final String type;
 
-    private final Authorization authorization;
-
-    public PayPalAuthorizeResponse(HttpResponse<Order> response) {
-        super(response);
-
-        this.authorization = getContent()
-                .purchaseUnits()
-                .stream()
-                .findFirst()
-                .map(purchaseUnit -> purchaseUnit.payments().authorizations())
-                .map(auths -> auths.get(Math.max(0, auths.size() - 1)))
-                .orElse(null);
+    PayPalCheckoutEnvironmentType(final String type) {
+        this.type = type;
     }
 
-    public Authorization getAuthorization() {
-        return this.authorization;
+    public String type() {
+        return this.type;
     }
+
 }

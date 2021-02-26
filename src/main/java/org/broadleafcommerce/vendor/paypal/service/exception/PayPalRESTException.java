@@ -15,29 +15,30 @@
  * between you and Broadleaf Commerce. You may not use this file except in compliance with the applicable license.
  * #L%
  */
-package org.broadleafcommerce.vendor.paypal.service.payment;
+package org.broadleafcommerce.vendor.paypal.service.exception;
 
-import com.paypal.http.HttpResponse;
-import com.paypal.orders.Authorization;
-import com.paypal.orders.Order;
+/**
+ * Represents an error response from a request against the PayPal REST APIs. The
+ * {@link #getMessage()} will be a JSON string.
+ *
+ * @author Nathan Moore (nathandmoore)
+ */
+public class PayPalRESTException extends RuntimeException {
 
-public class PayPalAuthorizeResponse extends AbstractPayPalResponse<Order> {
-
-    private final Authorization authorization;
-
-    public PayPalAuthorizeResponse(HttpResponse<Order> response) {
-        super(response);
-
-        this.authorization = getContent()
-                .purchaseUnits()
-                .stream()
-                .findFirst()
-                .map(purchaseUnit -> purchaseUnit.payments().authorizations())
-                .map(auths -> auths.get(Math.max(0, auths.size() - 1)))
-                .orElse(null);
+    public PayPalRESTException() {
+        super();
     }
 
-    public Authorization getAuthorization() {
-        return this.authorization;
+    public PayPalRESTException(String message) {
+        super(message);
     }
+
+    public PayPalRESTException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public PayPalRESTException(Throwable cause) {
+        super(cause);
+    }
+
 }

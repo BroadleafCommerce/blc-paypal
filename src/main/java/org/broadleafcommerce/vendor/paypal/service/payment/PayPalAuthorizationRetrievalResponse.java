@@ -1,8 +1,8 @@
-/*
+/*-
  * #%L
  * BroadleafCommerce PayPal
  * %%
- * Copyright (C) 2009 - 2018 Broadleaf Commerce
+ * Copyright (C) 2009 - 2021 Broadleaf Commerce
  * %%
  * Licensed under the Broadleaf Fair Use License Agreement, Version 1.0
  * (the "Fair Use License" located  at http://license.broadleafcommerce.org/fair_use_license-1.0.txt)
@@ -17,17 +17,13 @@
  */
 package org.broadleafcommerce.vendor.paypal.service.payment;
 
-import com.paypal.api.payments.Authorization;
+import com.paypal.http.HttpResponse;
+import com.paypal.payments.Authorization;
 
-public class PayPalAuthorizationRetrievalResponse implements PayPalResponse {
+public class PayPalAuthorizationRetrievalResponse extends AbstractPayPalResponse<Authorization> {
 
-    protected Authorization authorization;
-
-    public PayPalAuthorizationRetrievalResponse(Authorization authorization) {
-        this.authorization = authorization;
+    public PayPalAuthorizationRetrievalResponse(HttpResponse<Authorization> response) {
+        super(response);
     }
 
-    public Authorization getAuthorization() {
-        return authorization;
-    }
 }
