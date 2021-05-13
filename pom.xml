@@ -15,7 +15,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <blc.version>6.0.0-GA</blc.version>
         <project.uri>${user.dir}</project.uri>
-        <paypal.sdk.version>1.0.2</paypal.sdk.version>
+        <paypal.sdk.version>1.0.3</paypal.sdk.version>
     </properties>
     <scm>
         <connection>scm:git:git@github.com:BroadleafCommerce/blc-paypal.git</connection>

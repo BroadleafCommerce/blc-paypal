@@ -52,7 +52,6 @@ PayPal's `Smart Checkout` button:
         src="https://www.paypal.com/sdk/js?client-id=<YOUR CLIENT ID">
 </script>
 <script>
-    $(document).ready(function() {
         paypal.Buttons({
             createOrder : function(data, actions) {
                 return BLC.post({
@@ -75,7 +74,6 @@ PayPal's `Smart Checkout` button:
                 });
             }
         }).render('#paypal-button-container');
-    });
 </script>
 ```
 
