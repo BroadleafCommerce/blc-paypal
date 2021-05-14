@@ -10,16 +10,17 @@
     <artifactId>broadleaf-paypal</artifactId>
     <name>BroadleafCommerce PayPal</name>
     <description>BroadleafCommerce PayPal</description>
-    <version>3.0.3-SNAPSHOT</version>
+    <version>3.1.0-SNAPSHOT</version>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <blc.version>6.0.0-GA</blc.version>
         <project.uri>${user.dir}</project.uri>
+        <paypal.sdk.version>1.0.3</paypal.sdk.version>
     </properties>
     <scm>
         <connection>scm:git:git@github.com:BroadleafCommerce/blc-paypal.git</connection>
         <developerConnection>scm:git:git@github.com:BroadleafCommerce/blc-paypal.git</developerConnection>
-        <url>https://github.com/BroadleafCommerce/BroadleafCommerce</url>
+        <url>https://github.com/BroadleafCommerce/blc-paypal</url>
         <tag>HEAD</tag>
     </scm>
 
@@ -100,15 +101,15 @@
         </repository>
     </distributionManagement>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.apache.httpcomponents</groupId>
-                <artifactId>httpclient</artifactId>
-                <version>4.5.6</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
+<!--    <dependencyManagement>-->
+<!--        <dependencies>-->
+<!--            <dependency>-->
+<!--                <groupId>org.apache.httpcomponents</groupId>-->
+<!--                <artifactId>httpclient</artifactId>-->
+<!--                <version>4.5.6</version>-->
+<!--            </dependency>-->
+<!--        </dependencies>-->
+<!--    </dependencyManagement>-->
     <dependencies>
         <dependency>
             <groupId>org.broadleafcommerce</groupId>
@@ -124,8 +125,18 @@
         </dependency>
         <dependency>
             <groupId>com.paypal.sdk</groupId>
-            <artifactId>rest-api-sdk</artifactId>
-            <version>1.14.0</version>
+            <artifactId>checkout-sdk</artifactId>
+            <version>${paypal.sdk.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.6</version>
+        </dependency>
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20180813</version>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
@@ -134,6 +145,5 @@
             <type>jar</type>
             <scope>provided</scope>
         </dependency>
-
     </dependencies>
 </project>

@@ -18,42 +18,41 @@
 package org.broadleafcommerce.vendor.paypal.service.payment;
 
 import com.paypal.http.HttpResponse;
-import com.paypal.orders.Order;
-import com.paypal.orders.OrdersAuthorizeRequest;
+import com.paypal.payments.AuthorizationsVoidRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.broadleafcommerce.common.payment.dto.PaymentRequestDTO;
 import org.broadleafcommerce.vendor.paypal.service.PayPalClientProvider;
 
 import java.io.IOException;
 
-public class PayPalAuthorizeRequest extends
-        AbstractPayPalRequest<Order, OrdersAuthorizeRequest> {
+public class PayPalVoidAuthRequest
+        extends AbstractPayPalRequest<Void, AuthorizationsVoidRequest> {
 
-    private final String orderId;
+    private final String authId;
 
-    public PayPalAuthorizeRequest(PayPalClientProvider clientProvider,
-                                  PaymentRequestDTO paymentRequest, String orderId) {
+    public PayPalVoidAuthRequest(PayPalClientProvider clientProvider,
+                                 PaymentRequestDTO paymentRequest, String authId) {
         super(clientProvider, paymentRequest);
-        this.orderId = orderId;
+        this.authId = authId;
     }
 
     @Override
-    protected OrdersAuthorizeRequest buildRequest() {
-        return new OrdersAuthorizeRequest(getOrderId());
+    protected AuthorizationsVoidRequest buildRequest() {
+        return new AuthorizationsVoidRequest(getAuthId());
     }
 
     @Override
-    public AbstractPayPalResponse<Order> executeInternal() throws IOException {
-        HttpResponse<Order> response = getClient().execute(getRequest());
-        return new PayPalAuthorizeResponse(response);
+    protected AbstractPayPalResponse<Void> executeInternal() throws IOException {
+        HttpResponse<Void> response = getClient().execute(getRequest());
+        return new PayPalVoidAuthResponse(response);
     }
 
     @Override
     protected boolean isValidInternal() {
-        return StringUtils.isNotBlank(getOrderId());
+        return StringUtils.isNotBlank(getAuthId());
     }
 
-    protected String getOrderId() {
-        return this.orderId;
+    protected String getAuthId() {
+        return this.authId;
     }
 }

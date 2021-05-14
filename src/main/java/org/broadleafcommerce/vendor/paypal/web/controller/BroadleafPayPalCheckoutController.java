@@ -17,6 +17,8 @@
  */
 package org.broadleafcommerce.vendor.paypal.web.controller;
 
+import com.paypal.orders.LinkDescription;
+import com.paypal.orders.Order;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,8 +28,6 @@ import org.broadleafcommerce.common.payment.service.PaymentGatewayHostedService;
 import org.broadleafcommerce.common.payment.service.PaymentGatewayWebResponseService;
 import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
 import org.broadleafcommerce.common.web.payment.controller.PaymentGatewayAbstractController;
-import org.broadleafcommerce.vendor.paypal.api.AgreementToken;
-import org.broadleafcommerce.vendor.paypal.service.PayPalAgreementTokenService;
 import org.broadleafcommerce.vendor.paypal.service.PayPalPaymentService;
 import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
 import org.springframework.stereotype.Controller;
@@ -38,9 +38,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import com.paypal.api.payments.Links;
-import com.paypal.api.payments.Payment;
-import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Resource;
@@ -67,9 +64,6 @@ public class BroadleafPayPalCheckoutController extends PaymentGatewayAbstractCon
 
     @Resource(name = "blPayPalPaymentService")
     protected PayPalPaymentService paymentService;
-
-    @Resource(name = "blPayPalAgreementTokenService")
-    protected PayPalAgreementTokenService agreementTokenService;
 
     @Override
     public void handleProcessingException(Exception e, final RedirectAttributes redirectAttributes)
@@ -151,91 +145,55 @@ public class BroadleafPayPalCheckoutController extends PaymentGatewayAbstractCon
     // ***********************************************
 
     /**
-     * Completes checkout for a PayPal payment. If there's already a PayPal payment we go ahead and make sure the details
-     * of the payment are updated to all of the forms filled out by the customer since they could've updated shipping
+     * Completes checkout for a PayPal {@link Order}. If there's already a PayPal {@link Order} we go ahead and make sure the details
+     * of the {@link Order} are updated to all of the forms filled out by the customer since they could've updated shipping
      * information, added a promotion, or other various things to the order.
      * 
-     * @return Redirect URL to either add the payment and checkout or just checkout
+     * @return Redirect URL to either add the order and checkout or just checkout
      * @throws PaymentException 
      */
     @RequestMapping(value = "/checkout/complete", method = RequestMethod.POST)
     public String completeCheckout() throws PaymentException {
-        paymentService.updatePayPalPaymentForFulfillment();
-        String paymentId = paymentService.getPayPalPaymentIdFromCurrentOrder();
+        paymentService.updatePayPalOrderForFulfillment();
+        String orderId = paymentService.getPayPalOrderIdFromCurrentOrder();
         String payerId = paymentService.getPayPalPayerIdFromCurrentOrder();
-        if (StringUtils.isBlank(paymentId)) {
-            throw new PaymentException("Unable to complete checkout because no PayPal payment id was found on the current order");
+        if (StringUtils.isBlank(orderId)) {
+            throw new PaymentException("Unable to complete checkout because no PayPal order id was found on the current order");
         }
         if (StringUtils.isBlank(payerId)) {
             throw new PaymentException("Unable to complete checkout because no PayPal payer id was found on the current order");
         }
-        return "redirect:/paypal-checkout/return?" + MessageConstants.HTTP_PAYMENTID + "=" + paymentId + "&" + MessageConstants.HTTP_PAYERID + "=" + payerId;
-    }
-
-    @RequestMapping(value = "/billing-agreement-token/complete", method = RequestMethod.POST)
-    public String completeBillingAgreementTokenCheckout() throws PaymentException {
-        String billingToken = agreementTokenService.getPayPalAgreementTokenFromCurrentOrder();
-        if (StringUtils.isBlank(billingToken)) {
-            throw new PaymentException("Unable to complete checkout because no PayPal Billing Token was found on the current order");
-        }
-        return "redirect:/paypal-checkout/return?" + MessageConstants.HTTP_BILLINGTOKEN + "=" + billingToken + "&" + MessageConstants.CHECKOUT_COMPLETE + "=true";
+        return "redirect:/paypal-checkout/return?" + MessageConstants.HTTP_ORDER_ID + "=" + orderId + "&" + MessageConstants.HTTP_PAYERID + "=" + payerId;
     }
 
     // ***********************************************
     // PayPal Client side REST checkout (iframe)
     // ***********************************************
-    @RequestMapping(value = "/create-payment", method = RequestMethod.POST)
-    public @ResponseBody Map<String, String> createPayment(@RequestParam("performCheckout") Boolean performCheckout) throws PaymentException {
+    @RequestMapping(value = "/create-order", method = RequestMethod.POST)
+    public @ResponseBody Map<String, String> createOrder(@RequestParam("performCheckout") Boolean performCheckout) throws PaymentException {
         Map<String, String> response = new HashMap<>();
-        Payment createdPayment = paymentService.createPayPalPaymentForCurrentOrder(performCheckout);
-        response.put("id", createdPayment.getId());
-        return response;
-    }
-
-    @RequestMapping(value = "/create-billing-agreement-token", method = RequestMethod.POST)
-    public @ResponseBody Map<String, String> createBillingAgreementToken(@RequestParam("performCheckout") Boolean performCheckout) throws PaymentException, URISyntaxException {
-        Map<String, String> response = new HashMap<>();
-        AgreementToken agreementToken = agreementTokenService.createPayPalAgreementTokenForCurrentOrder(performCheckout);
-        response.put("id", agreementToken.getTokenId());
+        Order createdOrder = paymentService.createPayPalOrderForCurrentOrder(performCheckout);
+        response.put("id", createdOrder.id());
         return response;
     }
     
     // ***********************************************
     // PayPal Client side REST checkout (hosted page)
     // ***********************************************
-    @RequestMapping(value = "/hosted/create-payment", method = RequestMethod.POST)
-    public String createPaymentHostedJson(HttpServletRequest request, @RequestParam("performCheckout") Boolean performCheckout) throws PaymentException {
-        Payment createdPayment = paymentService.createPayPalPaymentForCurrentOrder(performCheckout);
-        String redirect = getApprovalLink(createdPayment);
+    @RequestMapping(value = "/hosted/create-order", method = RequestMethod.POST)
+    public String createOrderHostedJson(HttpServletRequest request, @RequestParam("performCheckout") Boolean performCheckout) throws PaymentException {
+        Order createdOrder = paymentService.createPayPalOrderForCurrentOrder(performCheckout);
+        String redirect = getApprovalLink(createdOrder);
         if (isAjaxRequest(request)) {
             return "ajaxredirect:" + redirect;
         }
         return "redirect:" + redirect;
     }
 
-    @RequestMapping(value = "/hosted/create-billing-agreement-token", method = RequestMethod.POST)
-    public String createBillingAgreementTokenHostedJson(HttpServletRequest request, @RequestParam("performCheckout") Boolean performCheckout) throws PaymentException {
-        AgreementToken agreementToken = agreementTokenService.createPayPalAgreementTokenForCurrentOrder(performCheckout);
-        String redirect = getApprovalLink(agreementToken);
-        if (isAjaxRequest(request)) {
-            return "ajaxredirect:" + redirect;
-        }
-        return "redirect:" + redirect;
-    }
-
-    protected String getApprovalLink(Payment payment) {
-        for (Links links : payment.getLinks()) {
-            if (links.getRel().equals("approval_url")) {
-                return links.getHref();
-            }
-        }
-        return null;
-    }
-
-    protected String getApprovalLink(AgreementToken agreementToken) {
-        for (Links links : agreementToken.getLinks()) {
-            if (links.getRel().equals("approval_url")) {
-                return links.getHref();
+    protected String getApprovalLink(Order order) {
+        for (LinkDescription links : order.links()) {
+            if (links.rel().equals("approve")) {
+                return links.href();
             }
         }
         return null;

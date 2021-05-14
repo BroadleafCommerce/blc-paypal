@@ -17,19 +17,9 @@
  */
 package org.broadleafcommerce.payment.service.gateway;
 
-import org.broadleafcommerce.common.money.Money;
-import org.broadleafcommerce.common.payment.dto.PaymentRequestDTO;
-import org.broadleafcommerce.common.payment.dto.PaymentResponseDTO;
 import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
-import org.broadleafcommerce.vendor.paypal.api.AgreementToken;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalResponse;
-
-import com.paypal.api.payments.Amount;
-import com.paypal.api.payments.ItemList;
-import com.paypal.api.payments.Payment;
-import com.paypal.api.payments.ShippingAddress;
-import com.paypal.base.rest.APIContext;
 
 /**
  * @author Elbert Bautista (elbertbautista)
@@ -38,31 +28,19 @@ public interface ExternalCallPayPalCheckoutService {
 
     PayPalCheckoutConfiguration getConfiguration();
 
-    void setCommonDetailsResponse(AgreementToken response, PaymentResponseDTO responseDTO, Money amount,
-                                  String orderId, boolean checkoutComplete);
-
-    /**
-     * Converts a PayPal payment into a PaymentResponseDTO
-     * 
-     * @param response A PayPal payment that should be used to be converted into a PaymentResponseDTO
-     * @param responseDTO The response dto that should be used to copy information from the PayPal payment
-     */
-    void setCommonDetailsResponse(Payment response, PaymentResponseDTO responseDTO);
-
-    ShippingAddress getPayPalShippingAddress(PaymentRequestDTO paymentRequestDTO);
-
-    ItemList getPayPalItemListFromOrder(PaymentRequestDTO paymentRequestDTO, boolean shouldPopulateShipping);
-
-    Amount getPayPalAmountFromOrder(PaymentRequestDTO paymentRequestDTO);
-
     /**
      * Makes a request to PayPal
-     * 
-     * @param paymentRequest The payment request that should be executed. The operation that is executed is depedent on which implementation of {@link PayPalRequest} is sent
-     * @return the respective PayPalResponse that corresponds to the given PayPalRequest
-     * @throws PaymentException
+     *
+     * @param paymentRequest The payment request that should be executed. The operation that is
+     *        executed is dependent on which implementation of {@link PayPalRequest} is sent
+     * @param responseType The type of the response expected
+     *
+     * @return the respective {@link PayPalResponse} that corresponds to the given
+     *         {@code responseType}
+     *
+     * @throws PaymentException if the {@link PayPalRequest} returns an exception once executed.
+     *         This could be because the initial request is configured invalidly or because the
+     *         PayPal APIs responded with an error.
      */
-    PayPalResponse call(PayPalRequest paymentRequest) throws PaymentException;
-
-    APIContext constructAPIContext(PaymentRequestDTO paymentRequestDTO);
+    <T extends PayPalResponse> T call(PayPalRequest paymentRequest, Class<T> responseType) throws PaymentException;
 }

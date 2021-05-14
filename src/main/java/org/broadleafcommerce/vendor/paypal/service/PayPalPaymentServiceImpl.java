@@ -17,145 +17,233 @@
  */
 package org.broadleafcommerce.vendor.paypal.service;
 
+import com.paypal.orders.AddressPortable;
+import com.paypal.orders.AmountBreakdown;
+import com.paypal.orders.AmountWithBreakdown;
+import com.paypal.orders.ApplicationContext;
+import com.paypal.orders.Item;
+import com.paypal.orders.Money;
+import com.paypal.orders.Name;
+import com.paypal.orders.Order;
+import com.paypal.orders.OrderRequest;
+import com.paypal.orders.Patch;
+import com.paypal.orders.Payee;
+import com.paypal.orders.Payer;
+import com.paypal.orders.PurchaseUnitRequest;
+import com.paypal.orders.ShippingDetail;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.broadleafcommerce.common.payment.dto.AddressDTO;
+import org.broadleafcommerce.common.payment.dto.GatewayCustomerDTO;
 import org.broadleafcommerce.common.payment.dto.PaymentRequestDTO;
 import org.broadleafcommerce.common.payment.service.CurrentOrderPaymentRequestService;
 import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
 import org.broadleafcommerce.payment.service.gateway.ExternalCallPayPalCheckoutService;
 import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
-import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCreatePaymentRequest;
-import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCreatePaymentResponse;
-import org.broadleafcommerce.vendor.paypal.service.payment.PayPalUpdatePaymentRequest;
+import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCreateOrderRequest;
+import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCreateOrderResponse;
+import org.broadleafcommerce.vendor.paypal.service.payment.PayPalUpdateOrderRequest;
+import org.broadleafcommerce.vendor.paypal.service.payment.PayPalUpdateOrderResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import com.paypal.api.payments.Amount;
-import com.paypal.api.payments.ItemList;
-import com.paypal.api.payments.Patch;
-import com.paypal.api.payments.Payer;
-import com.paypal.api.payments.Payment;
-import com.paypal.api.payments.RedirectUrls;
-import com.paypal.api.payments.Transaction;
-import java.util.ArrayList;
+import org.springframework.util.Assert;
+
+import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import javax.annotation.Resource;
 
 @Service("blPayPalPaymentService")
 public class PayPalPaymentServiceImpl implements PayPalPaymentService {
 
+    protected static final String REPLACE_OP_TYPE = "replace";
+
     @Resource(name = "blExternalCallPayPalCheckoutService")
     protected ExternalCallPayPalCheckoutService externalCallService;
-
-    @Resource(name = "blPayPalWebProfileService")
-    protected PayPalWebProfileService webProfileService;
 
     @Autowired(required = false)
     protected CurrentOrderPaymentRequestService currentOrderPaymentRequestService;
 
-    @Value("${gateway.paypal.checkout.rest.populate.shipping.create.payment:true}")
-    protected boolean shouldPopulateShippingOnPaymentCreation;
+    @Resource(name = "blPayPalClientProvider")
+    protected PayPalClientProvider clientProvider;
+
+    @Value("${gateway.paypal.checkout.rest.populate.shipping.create.order:true}")
+    protected boolean shouldPopulateShippingOnOrderCreation;
 
     @Override
-    public Payment createPayPalPaymentForCurrentOrder(boolean performCheckoutOnReturn) throws PaymentException {
-        PaymentRequestDTO paymentRequestDTO = getPaymentRequestForCurrentOrder();
+    public Order createPayPalOrderForCurrentOrder(boolean performCheckoutOnReturn) throws PaymentException {
+        PaymentRequestDTO paymentRequest = getPaymentRequestForCurrentOrder();
 
-        // Set payer details
-        Payer payer = constructPayer(paymentRequestDTO);
+        PurchaseUnitRequest purchaseUnitRequest = new PurchaseUnitRequest()
+                .amountWithBreakdown(constructAmountWithBreakdown(paymentRequest))
+                .payee(constructPayee(paymentRequest))
+                .description(externalCallService.getConfiguration().getPaymentDescription())
+                .customId(String.format("%s|%s", paymentRequest.getOrderId(),
+                        performCheckoutOnReturn));
 
-        // Set redirect URLs
-        RedirectUrls redirectUrls = new RedirectUrls();
-        redirectUrls.setCancelUrl(externalCallService.getConfiguration().getCancelUrl());
-        redirectUrls.setReturnUrl(externalCallService.getConfiguration().getReturnUrl());
+        purchaseUnitRequest.items(constructItems(paymentRequest));
 
-        Amount amount = externalCallService.getPayPalAmountFromOrder(paymentRequestDTO);
-
-        // Transaction information
-        Transaction transaction = new Transaction();
-        transaction.setAmount(amount);
-        transaction.setDescription(externalCallService.getConfiguration().getPaymentDescription());
-        transaction.setCustom(paymentRequestDTO.getOrderId() + "|" + performCheckoutOnReturn);
-
-        ItemList itemList = externalCallService.getPayPalItemListFromOrder(paymentRequestDTO, shouldPopulateShippingOnPaymentCreation);
-        if (itemList != null) {
-            transaction.setItemList(itemList);
+        if (shouldPopulateShippingOnOrderCreation) {
+            purchaseUnitRequest.shippingDetail(constructShippingDetail(paymentRequest));
         }
 
-        // Add transaction to a list
-        List<Transaction> transactions = new ArrayList<>();
-        transactions.add(transaction);
+        String shippingPreference = (String) paymentRequest
+                .getAdditionalFields().get(MessageConstants.SHIPPING_PREFERENCE);
+        String locale = Optional
+                .ofNullable((Locale) paymentRequest.getAdditionalFields().get(MessageConstants.LOCALE))
+                .map(Locale::toLanguageTag)
+                .map(loc -> loc.replace("_", "-"))
+                .orElse(null);
+        OrderRequest order = new OrderRequest()
+                .checkoutPaymentIntent(getIntent(performCheckoutOnReturn))
+                .payer(constructPayer(paymentRequest))
+                .purchaseUnits(Collections.singletonList(purchaseUnitRequest))
+                .applicationContext(new ApplicationContext()
+                        .shippingPreference(shippingPreference)
+                        .locale(locale));
 
-        // Add payment details
-        Payment payment = new Payment();
-        payment.setIntent(getIntent(performCheckoutOnReturn));
-        payment.setPayer(payer);
-        payment.setRedirectUrls(redirectUrls);
-        payment.setTransactions(transactions);
+        return createOrder(order, paymentRequest);
+    }
 
-        String profileId = webProfileService.getWebProfileId(paymentRequestDTO);
-        if (StringUtils.isNotBlank(profileId)) {
-            payment.setExperienceProfileId(profileId);
+    @Override
+    public void updatePayPalOrderForFulfillment() throws PaymentException {
+        PaymentRequestDTO paymentRequest = getPaymentRequestForCurrentOrder();
+
+        String orderId = getPayPalOrderIdFromCurrentOrder();
+
+        if (StringUtils.isBlank(orderId)) {
+            throw new PaymentException(
+                    "Unable to update the current PayPal payment because no PayPal payment id was found on the order");
         }
-        return createPayment(payment, paymentRequestDTO);
+
+        PurchaseUnitRequest purchaseUnitRequest = new PurchaseUnitRequest()
+                .amountWithBreakdown(constructAmountWithBreakdown(paymentRequest))
+                .payee(constructPayee(paymentRequest))
+                .description(externalCallService.getConfiguration().getPaymentDescription())
+                .customId(paymentRequest.getOrderId() + "|" + true);
+
+        purchaseUnitRequest.items(constructItems(paymentRequest));
+
+        if (shouldPopulateShippingOnOrderCreation) {
+            purchaseUnitRequest.shippingDetail(constructShippingDetail(paymentRequest));
+        }
+
+        Patch amountPatch = new Patch()
+                .op(REPLACE_OP_TYPE)
+                .path("/purchase_units/@reference_id=='default'")
+                .value(purchaseUnitRequest);
+
+        updateOrder(orderId, Collections.singletonList(amountPatch), paymentRequest);
+    }
+
+    protected Order createOrder(OrderRequest orderRequest,
+                                PaymentRequestDTO paymentRequest) throws PaymentException {
+        PayPalCreateOrderRequest request = new PayPalCreateOrderRequest(
+                clientProvider,
+                paymentRequest,
+                orderRequest);
+        PayPalCreateOrderResponse response =
+                externalCallService.call(request, PayPalCreateOrderResponse.class);
+        return response.getContent();
+    }
+
+    protected void updateOrder(String orderId,
+                               List<Patch> patches,
+                               PaymentRequestDTO paymentRequest) throws PaymentException {
+        Assert.hasText(orderId, "OrderId cannot be blank");
+        Assert.notEmpty(patches, "Patches cannot be empty");
+        PayPalUpdateOrderRequest request = new PayPalUpdateOrderRequest(
+                clientProvider,
+                paymentRequest,
+                orderId,
+                patches);
+        externalCallService.call(request, PayPalUpdateOrderResponse.class);
+    }
+
+    protected Payee constructPayee(PaymentRequestDTO paymentRequest) {
+        String merchantId =
+                (String) paymentRequest.getAdditionalFields().get(MessageConstants.PAYEE_MERCHANT_ID);
+
+        if (StringUtils.isBlank(merchantId)) {
+            return null;
+        }
+
+        String merchantEmail =
+                (String) paymentRequest.getAdditionalFields().get(MessageConstants.PAYEE_MERCHANT_EMAIL);
+
+        return new Payee().merchantId(merchantId).email(merchantEmail);
     }
 
     protected Payer constructPayer(PaymentRequestDTO paymentRequestDTO) {
-        Payer payer = new Payer();
-        payer.setPaymentMethod(MessageConstants.PAYER_PAYMENTMETHOD_PAYPAL);
-        return payer;
+        return new Payer().email(getPayerEmail(paymentRequestDTO));
+    }
+
+    protected String getPayerEmail(PaymentRequestDTO paymentRequestDTO) {
+        return Optional.ofNullable(paymentRequestDTO.getCustomer())
+                .map(GatewayCustomerDTO::getEmail)
+                .orElse(null);
+    }
+
+    protected List<Item> constructItems(PaymentRequestDTO paymentRequest) {
+        if (!CollectionUtils.isNotEmpty(paymentRequest.getLineItems())) {
+            return Collections.emptyList();
+        }
+
+        return paymentRequest.getLineItems()
+                .stream()
+                .map(lineItem -> new Item()
+                        .category(lineItem.getCategory())
+                        .description(lineItem.getDescription())
+                        .name(lineItem.getName())
+                        .quantity(Objects.toString(lineItem.getQuantity(), null))
+                        .sku(lineItem.getSystemId())
+                        .tax(convertToMoney(lineItem.getTax(), paymentRequest.getOrderCurrencyCode()))
+                        .unitAmount(convertToMoney(lineItem.getAmount(), paymentRequest.getOrderCurrencyCode())))
+                .collect(Collectors.toList());
+    }
+
+    protected ShippingDetail constructShippingDetail(
+            PaymentRequestDTO paymentRequest) {
+        AddressDTO<PaymentRequestDTO> address = paymentRequest.getShipTo();
+
+        if (address == null) {
+            return null;
+        }
+
+        return new ShippingDetail()
+                .name(new Name().fullName(address.getAddressFullName()))
+                .addressPortable(new AddressPortable()
+                        .addressLine1(address.getAddressLine1())
+                        .addressLine2(address.getAddressLine2())
+                        .adminArea2(address.getAddressCityLocality())
+                        .adminArea1(address.getAddressStateRegion())
+                        .postalCode(address.getAddressPostalCode())
+                        .countryCode(address.getAddressCountryCode()));
+    }
+
+    protected AmountWithBreakdown constructAmountWithBreakdown(
+            PaymentRequestDTO paymentRequest) {
+        AmountBreakdown details = new AmountBreakdown()
+                .itemTotal(convertToMoney(paymentRequest.getOrderSubtotal(), paymentRequest.getOrderCurrencyCode()))
+                .shipping(convertToMoney(paymentRequest.getShippingTotal(), paymentRequest.getOrderCurrencyCode()))
+                .taxTotal(convertToMoney(paymentRequest.getTaxTotal(), paymentRequest.getOrderCurrencyCode()));
+
+        return new AmountWithBreakdown()
+                .currencyCode(paymentRequest.getOrderCurrencyCode())
+                .value(paymentRequest.getTransactionTotal())
+                .amountBreakdown(details);
+    }
+
+    protected Money convertToMoney(String value, String currencyCode) {
+        return new Money().value(value).currencyCode(currencyCode);
     }
 
     @Override
-    public void updatePayPalPaymentForFulfillment() throws PaymentException {
-        PaymentRequestDTO paymentRequestDTO = getPaymentRequestForCurrentOrder();
-        String paymentId = getPayPalPaymentIdFromCurrentOrder();
-        if (paymentRequestDTO == null) {
-            throw new PaymentException("Unable to update the current PayPal payment because the PaymentRequestDTO was null");
-        }
-        if (StringUtils.isBlank(paymentId)) {
-            throw new PaymentException("Unable to update the current PayPal payment because no PayPal payment id was found on the order");
-        }
-        List<Patch> patches = new ArrayList<>();
-
-        Patch amountPatch = new Patch();
-        amountPatch.setOp("replace");
-        amountPatch.setPath("/transactions/0/amount");
-        Amount amount = externalCallService.getPayPalAmountFromOrder(paymentRequestDTO);
-        amountPatch.setValue(amount);
-        patches.add(amountPatch);
-
-        ItemList itemList = externalCallService.getPayPalItemListFromOrder(paymentRequestDTO, true);
-        if (itemList != null) {
-            Patch shipToPatch = new Patch();
-            shipToPatch.setOp("replace");
-            shipToPatch.setPath("/transactions/0/item_list");
-            shipToPatch.setValue(itemList);
-            patches.add(shipToPatch);
-        }
-
-        Patch customPatch = new Patch();
-        customPatch.setPath("/transactions/0/custom");
-        customPatch.setOp("replace");
-        customPatch.setValue(paymentRequestDTO.getOrderId() + "|" + true);
-        patches.add(customPatch);
-
-        Payment paypalPayment = new Payment();
-        paypalPayment.setId(paymentId);
-        updatePayment(paypalPayment, patches, paymentRequestDTO);
-
-    }
-
-    protected Payment createPayment(Payment payment, PaymentRequestDTO paymentRequestDTO) throws PaymentException {
-        PayPalCreatePaymentResponse response = (PayPalCreatePaymentResponse) externalCallService.call(
-                new PayPalCreatePaymentRequest(payment, externalCallService.constructAPIContext(paymentRequestDTO)));
-        return response.getPayment();
-    }
-
-    protected void updatePayment(Payment payment, List<Patch> patches, PaymentRequestDTO paymentRequestDTO) throws PaymentException {
-        externalCallService.call(
-                new PayPalUpdatePaymentRequest(payment, patches, externalCallService.constructAPIContext(paymentRequestDTO)));
-    }
-
-    protected PaymentRequestDTO getPaymentRequestForCurrentOrder() throws PaymentException {
+    public PaymentRequestDTO getPaymentRequestForCurrentOrder() throws PaymentException {
         if (currentOrderPaymentRequestService != null) {
             return currentOrderPaymentRequestService.getPaymentRequestFromCurrentOrder();
         } else {
@@ -164,9 +252,9 @@ public class PayPalPaymentServiceImpl implements PayPalPaymentService {
     }
 
     @Override
-    public String getPayPalPaymentIdFromCurrentOrder() throws PaymentException {
+    public String getPayPalOrderIdFromCurrentOrder() throws PaymentException {
         if (currentOrderPaymentRequestService != null) {
-            return currentOrderPaymentRequestService.retrieveOrderAttributeFromCurrentOrder(MessageConstants.PAYMENTID);
+            return currentOrderPaymentRequestService.retrieveOrderAttributeFromCurrentOrder(MessageConstants.ORDER_ID);
         } else {
             throw new PaymentException("Unable to retrieve PayPal payment id for current order");
         }
@@ -182,9 +270,9 @@ public class PayPalPaymentServiceImpl implements PayPalPaymentService {
     }
 
     @Override
-    public void setPayPalPaymentIdOnCurrentOrder(String paymentId) throws PaymentException {
+    public void setPayPalOrderIdOnCurrentOrder(String orderId) throws PaymentException {
         if (currentOrderPaymentRequestService != null) {
-            currentOrderPaymentRequestService.addOrderAttributeToCurrentOrder(MessageConstants.PAYMENTID, paymentId);
+            currentOrderPaymentRequestService.addOrderAttributeToCurrentOrder(MessageConstants.ORDER_ID, orderId);
         } else {
             throw new PaymentException("Unable to set PayPal payment id on current order");
         }
@@ -201,10 +289,8 @@ public class PayPalPaymentServiceImpl implements PayPalPaymentService {
 
     public String getIntent(boolean performCheckoutOnReturn) {
         if (externalCallService.getConfiguration().isPerformAuthorizeAndCapture()) {
-            return "sale";
+            return "CAPTURE";
         }
-
-        return "authorize";
+        return "AUTHORIZE";
     }
-
 }

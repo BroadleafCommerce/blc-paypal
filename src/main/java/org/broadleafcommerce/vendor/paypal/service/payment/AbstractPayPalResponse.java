@@ -18,26 +18,36 @@
 package org.broadleafcommerce.vendor.paypal.service.payment;
 
 import com.paypal.http.HttpResponse;
-import com.paypal.orders.Authorization;
-import com.paypal.orders.Order;
 
-public class PayPalAuthorizeResponse extends AbstractPayPalResponse<Order> {
+/**
+ * Represents a wrapper around the {@link HttpResponse} that results from an executed
+ * {@link AbstractPayPalRequest}.
+ *
+ * @param <T> The type of the response body
+ */
+public abstract class AbstractPayPalResponse<T> implements PayPalResponse {
 
-    private final Authorization authorization;
+    /**
+     * The {@link HttpResponse} provided by the PayPal APIs.
+     */
+    private final HttpResponse<T> response;
 
-    public PayPalAuthorizeResponse(HttpResponse<Order> response) {
-        super(response);
+    /**
+     * The content of {@link #response} for convenience.
+     */
+    private final T content;
 
-        this.authorization = getContent()
-                .purchaseUnits()
-                .stream()
-                .findFirst()
-                .map(purchaseUnit -> purchaseUnit.payments().authorizations())
-                .map(auths -> auths.get(Math.max(0, auths.size() - 1)))
-                .orElse(null);
+    public AbstractPayPalResponse(HttpResponse<T> response) {
+        this.response = response;
+        this.content = response.result();
     }
 
-    public Authorization getAuthorization() {
-        return this.authorization;
+
+    public HttpResponse<T> getResponse() {
+        return response;
+    }
+
+    public T getContent() {
+        return content;
     }
 }

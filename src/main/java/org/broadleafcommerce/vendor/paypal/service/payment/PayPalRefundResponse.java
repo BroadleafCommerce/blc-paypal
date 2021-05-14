@@ -1,8 +1,8 @@
-/*
+/*-
  * #%L
  * BroadleafCommerce PayPal
  * %%
- * Copyright (C) 2009 - 2018 Broadleaf Commerce
+ * Copyright (C) 2009 - 2021 Broadleaf Commerce
  * %%
  * Licensed under the Broadleaf Fair Use License Agreement, Version 1.0
  * (the "Fair Use License" located  at http://license.broadleafcommerce.org/fair_use_license-1.0.txt)
@@ -17,17 +17,13 @@
  */
 package org.broadleafcommerce.vendor.paypal.service.payment;
 
-import com.paypal.api.payments.DetailedRefund;
+import com.paypal.http.HttpResponse;
+import com.paypal.payments.Refund;
 
-public class PayPalRefundResponse implements PayPalResponse {
+public class PayPalRefundResponse extends AbstractPayPalResponse<Refund> {
 
-    protected DetailedRefund detailedRefund;
-
-    public PayPalRefundResponse(DetailedRefund detailedRefund) {
-        this.detailedRefund = detailedRefund;
+    public PayPalRefundResponse(HttpResponse<Refund> response) {
+        super(response);
     }
 
-    public DetailedRefund getDetailedRefund() {
-        return detailedRefund;
-    }
 }

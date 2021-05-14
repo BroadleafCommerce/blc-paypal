@@ -15,29 +15,31 @@
  * between you and Broadleaf Commerce. You may not use this file except in compliance with the applicable license.
  * #L%
  */
-package org.broadleafcommerce.vendor.paypal.service.payment;
+package org.broadleafcommerce.vendor.paypal.service.exception;
 
-import com.paypal.http.HttpResponse;
-import com.paypal.orders.Authorization;
-import com.paypal.orders.Order;
+import org.broadleafcommerce.vendor.paypal.service.payment.AbstractPayPalRequest;
 
-public class PayPalAuthorizeResponse extends AbstractPayPalResponse<Order> {
+/**
+ * Represents an exception that occurs because a {@link AbstractPayPalRequest PayPalRequest's} state
+ * was invalid prior to sending the request.
+ *
+ * @author Nathan Moore (nathandmoore)
+ */
+public class PayPalInvalidRequestStateException extends RuntimeException {
 
-    private final Authorization authorization;
-
-    public PayPalAuthorizeResponse(HttpResponse<Order> response) {
-        super(response);
-
-        this.authorization = getContent()
-                .purchaseUnits()
-                .stream()
-                .findFirst()
-                .map(purchaseUnit -> purchaseUnit.payments().authorizations())
-                .map(auths -> auths.get(Math.max(0, auths.size() - 1)))
-                .orElse(null);
+    public PayPalInvalidRequestStateException() {
+        super();
     }
 
-    public Authorization getAuthorization() {
-        return this.authorization;
+    public PayPalInvalidRequestStateException(String message) {
+        super(message);
+    }
+
+    public PayPalInvalidRequestStateException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public PayPalInvalidRequestStateException(Throwable cause) {
+        super(cause);
     }
 }

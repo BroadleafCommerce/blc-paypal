@@ -17,22 +17,16 @@
  */
 package org.broadleafcommerce.payment.service.gateway;
 
-import org.broadleafcommerce.common.config.service.SystemPropertiesService;
 import org.broadleafcommerce.common.payment.PaymentGatewayType;
 import org.broadleafcommerce.common.payment.service.AbstractPaymentGatewayConfiguration;
-import org.broadleafcommerce.common.web.BaseUrlResolver;
 import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalCheckoutPaymentGatewayType;
-import org.broadleafcommerce.vendor.paypal.service.payment.type.PayPalShippingDisplayType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.annotation.Resource;
 
 /**
  * @author Elbert Bautista (elbertbautista)
@@ -40,73 +34,21 @@ import javax.annotation.Resource;
 @Service("blPayPalCheckoutConfiguration")
 public class PayPalCheckoutConfigurationImpl extends AbstractPaymentGatewayConfiguration implements PayPalCheckoutConfiguration {
 
-    @Resource(name = "blBaseUrlResolver")
-    protected BaseUrlResolver urlResolver;
-
     @Autowired
-    protected SystemPropertiesService propertiesService;
+    protected Environment env;
 
     protected int failureReportingThreshold = 1;
 
     protected boolean performAuthorizeAndCapture = true;
 
     @Override
-    public String getReturnUrl() {
-        String url = propertiesService.resolveSystemProperty("gateway.paypal.checkout.rest.returnUrl");
-        try {
-            URI u = new URI(url);
-            if (u.isAbsolute()) {
-                return url;
-            } else {
-                String baseUrl = urlResolver.getSiteBaseUrl();
-                return baseUrl + url;
-            }
-        } catch (URISyntaxException e) {
-            throw new IllegalArgumentException("The value for 'gateway.paypal.checkout.rest.returnUrl' is not valid.", e);
-        }
-    }
-
-    @Override
-    public String getCancelUrl() {
-        String url = propertiesService.resolveSystemProperty("gateway.paypal.checkout.rest.cancelUrl");
-        try {
-            URI u = new URI(url);
-            if (u.isAbsolute()) {
-                return url;
-            } else {
-                String baseUrl = urlResolver.getSiteBaseUrl();
-                return baseUrl + url;
-            }
-        } catch (URISyntaxException e) {
-            throw new IllegalArgumentException("The value for 'gateway.paypal.checkout.rest.cancelUrl' is not valid.", e);
-        }
-    }
-
-    @Override
-    public String getWebProfileId() {
-        return propertiesService.resolveSystemProperty("gateway.paypal.checkout.rest.webProfileId");
-    }
-
-    @Override
     public String getPaymentDescription() {
-        return propertiesService.resolveSystemProperty("gateway.paypal.checkout.rest.description");
+        return env.getProperty("gateway.paypal.checkout.api.description");
     }
 
     @Override
-    public String getSmartPaymentEnvironment() {
-        return propertiesService.resolveSystemProperty("gateway.paypal.smart.button.env");
-    }
-
-    @Override
-    public PayPalShippingDisplayType getShippingDisplayType() {
-        String shippingType = propertiesService.resolveSystemProperty("gateway.paypal.expressCheckout.shippingDisplayType");
-
-        PayPalShippingDisplayType displayType = PayPalShippingDisplayType.getInstance(shippingType);
-        if (displayType != null) {
-            return displayType;
-        }
-
-        return PayPalShippingDisplayType.NO_DISPLAY;
+    public String getEnvironment() {
+        return env.getProperty("gateway.paypal.checkout.api.environment");
     }
 
     @Override
@@ -130,18 +72,13 @@ public class PayPalCheckoutConfigurationImpl extends AbstractPaymentGatewayConfi
     }
 
     @Override
-    public String getCheckoutRestClientId() {
-        return propertiesService.resolveSystemProperty("gateway.paypal.checkout.rest.clientId");
+    public String getClientId() {
+        return env.getProperty("gateway.paypal.checkout.api.clientId");
     }
 
     @Override
-    public String getCheckoutRestSecret() {
-        return propertiesService.resolveSystemProperty("gateway.paypal.checkout.rest.secret");
-    }
-
-    @Override
-    public String getCheckoutRestMode() {
-        return propertiesService.resolveSystemProperty("gateway.paypal.checkout.rest.mode");
+    public String getClientSecret() {
+        return env.getProperty("gateway.paypal.checkout.api.secret");
     }
 
     @Override
@@ -221,7 +158,7 @@ public class PayPalCheckoutConfigurationImpl extends AbstractPaymentGatewayConfi
 
     @Override
     public PaymentGatewayType getGatewayType() {
-        return PayPalCheckoutPaymentGatewayType.PAYPAL_CHECKOUT;
+        return PayPalCheckoutPaymentGatewayType.PAYPAL_CHECKOUT_V2;
     }
 
 }

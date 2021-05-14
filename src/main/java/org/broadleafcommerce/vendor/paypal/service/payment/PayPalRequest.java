@@ -1,8 +1,8 @@
-/*
+/*-
  * #%L
  * BroadleafCommerce PayPal
  * %%
- * Copyright (C) 2009 - 2018 Broadleaf Commerce
+ * Copyright (C) 2009 - 2021 Broadleaf Commerce
  * %%
  * Licensed under the Broadleaf Fair Use License Agreement, Version 1.0
  * (the "Fair Use License" located  at http://license.broadleafcommerce.org/fair_use_license-1.0.txt)
@@ -17,31 +17,23 @@
  */
 package org.broadleafcommerce.vendor.paypal.service.payment;
 
-import com.paypal.base.rest.APIContext;
-import com.paypal.base.rest.PayPalRESTException;
+import org.broadleafcommerce.vendor.paypal.service.exception.PayPalInvalidRequestStateException;
+import org.broadleafcommerce.vendor.paypal.service.exception.PayPalRESTException;
 
-public abstract class PayPalRequest {
+/**
+ * @author Nathan Moore (nathandmoore)
+ */
+public interface PayPalRequest {
 
-    protected Boolean executed = false;
-    protected APIContext apiContext;
+    /**
+     * Executes this request if valid.
+     *
+     * @return The {@link AbstractPayPalResponse} wrapper around the response from PayPal.
+     *
+     * @throws PayPalRESTException if the PayPal REST APIs return an error response
+     * @throws PayPalInvalidRequestStateException if the request could not be made because of
+     *         invalid state.
+     */
+    PayPalResponse execute();
 
-    public PayPalRequest(APIContext apiContext) {
-        this.apiContext = apiContext;
-    }
-
-    public PayPalResponse execute() throws PayPalRESTException {
-        if (isValid()) {
-            executed = true;
-            return executeInternal();
-        }
-        throw new RuntimeException();
-    }
-
-    protected boolean isValid() {
-        return apiContext != null && isRequestValid() && !executed;
-    }
-
-    protected abstract PayPalResponse executeInternal() throws PayPalRESTException;
-
-    protected abstract boolean isRequestValid();
 }

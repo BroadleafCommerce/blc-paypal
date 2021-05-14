@@ -24,6 +24,6 @@ import org.broadleafcommerce.common.payment.PaymentGatewayType;
  */
 public class PayPalCheckoutPaymentGatewayType extends PaymentGatewayType {
 
-    public static final PaymentGatewayType PAYPAL_CHECKOUT  = new PaymentGatewayType("PayPal_Checkout", "PayPal Checkout");
+    public static final PaymentGatewayType PAYPAL_CHECKOUT_V2 = new PaymentGatewayType("PayPal_Checkout_V2", "PayPal Checkout V2");
 
 }
