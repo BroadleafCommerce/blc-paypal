@@ -9,9 +9,10 @@ PayPal's REST API.
 
 ## Broadleaf Core Compatibility
 
-| `broadleaf-paypal` Version | Broadleaf Core Version           |
+| Broadleaf Paypal Version | Broadleaf Core Version           |
 | :------------------------: | :-------------------------------:|
 | 2.7.0-GA                   | 5.0.0-GA+, not 5.2.0-GA+         |
 | 2.7.1-GA                   | 5.0.12-GA+, 5.1.5-GA+, 5.2.0-GA+ |
-| 2.8.0-GA                   | 5.2.0-GA+                        |
-| 3.0.0-GA                   | 6.0.0-GA+                        |
+| 2.8.x-GA                   | 5.2.0-GA+                        |
+| 3.0.x-GA                   | 6.0.0-GA+                        |
+| 3.1.x-GA                   | 6.1.0-GA+                        |
