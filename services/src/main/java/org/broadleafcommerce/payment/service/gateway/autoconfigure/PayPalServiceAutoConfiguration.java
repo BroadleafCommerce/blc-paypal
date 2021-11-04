@@ -48,14 +48,9 @@ import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
 
 @Configuration
-@EnableConfigurationProperties({PayPalCheckoutRestConfigurationProperties.class})
+@EnableConfigurationProperties({PayPalCheckoutRestConfigurationProperties.class,
+        DefaultPayPalGatewayConfiguration.class})
 public class PayPalServiceAutoConfiguration {
-
-    @Bean
-    @ConditionalOnMissingBean
-    public PayPalGatewayConfiguration payPalGatewayConfiguration() {
-        return new DefaultPayPalGatewayConfiguration();
-    }
 
     @Bean
     @ConditionalOnMissingBean

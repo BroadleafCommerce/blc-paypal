@@ -16,96 +16,62 @@
  */
 package org.broadleafcommerce.payment.service.gateway;
 
-import lombok.RequiredArgsConstructor;
+import static com.broadleafcommerce.paymentgateway.domain.enums.DefaultGatewayFeatureType.MULTI_USE_PAYMENT_METHODS;
+import static com.broadleafcommerce.paymentgateway.domain.enums.DefaultTransactionTypes.AUTHORIZE;
+import static com.broadleafcommerce.paymentgateway.domain.enums.DefaultTransactionTypes.AUTHORIZE_AND_CAPTURE;
+import static com.broadleafcommerce.paymentgateway.domain.enums.DefaultTransactionTypes.CAPTURE;
+import static com.broadleafcommerce.paymentgateway.domain.enums.DefaultTransactionTypes.REFUND;
+import static com.broadleafcommerce.paymentgateway.domain.enums.DefaultTransactionTypes.REVERSE_AUTH;
+import static com.broadleafcommerce.paymentgateway.domain.enums.DefaultTransactionTypes.VOID;
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
+
+import com.broadleafcommerce.paymentgateway.domain.enums.DefaultTransactionTypes;
+import com.broadleafcommerce.paymentgateway.domain.enums.TransactionType;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * @author Elbert Bautista (elbertbautista)
  * @author Chris Kittrell (ckittrell)
  */
-@RequiredArgsConstructor
+@ConfigurationProperties("broadleaf.paypal-checkout.gateway.v1")
 public class DefaultPayPalGatewayConfiguration implements PayPalGatewayConfiguration {
 
-    protected int failureReportingThreshold = 1;
-    protected boolean performAuthorizeAndCapture = false;
+    /**
+     * Determines how many times a transaction failure is reported. Default is once.
+     */
+    @Getter
+    @Setter
+    private int failureReportingThreshold = 1;
 
-    @Override
-    public boolean handlesAuthorize() {
-        return true;
-    }
+    /**
+     * Set the {@link TransactionType} that should be performed during checkout. Typically this will
+     * be {@link DefaultTransactionTypes#AUTHORIZE_AND_CAPTURE} or
+     * {@link DefaultTransactionTypes#AUTHORIZE}.
+     */
+    @Getter
+    @Setter
+    private String checkoutTransactionType = AUTHORIZE.name();
 
-    @Override
-    public boolean handlesCapture() {
-        return true;
-    }
+    @Getter
+    private final Set<String> supportedTransactionTypes =
+            new HashSet<>(Arrays.asList(AUTHORIZE.name(), CAPTURE.name(),
+                    AUTHORIZE_AND_CAPTURE.name(), REFUND.name(), REVERSE_AUTH.name(), VOID.name()));
 
-    @Override
-    public boolean handlesAuthorizeAndCapture() {
-        return true;
-    }
+    @Getter
+    private final Set<String> supportedFeatures =
+            new HashSet<>(Arrays.asList(MULTI_USE_PAYMENT_METHODS.name()));
 
-    @Override
-    public boolean handlesReverseAuthorize() {
-        return true;
-    }
+    @Getter
+    private final boolean checkoutTransactionExternal = false;
 
-    @Override
-    public boolean handlesVoid() {
-        return true;
-    }
-
-    @Override
-    public boolean handlesRefund() {
-        return true;
-    }
-
-    @Override
-    public boolean handlesPartialCapture() {
-        return false;
-    }
-
-    @Override
-    public boolean handlesMultipleShipment() {
-        return false;
-    }
-
-    @Override
-    public boolean handlesRecurringPayment() {
-        return false;
-    }
-
-    @Override
-    public boolean handlesSavedCustomerPayment() {
-        return false;
-    }
-
-    @Override
-    public boolean isPerformAuthorizeAndCapture() {
-        return performAuthorizeAndCapture;
-    }
-
-    @Override
-    public void setPerformAuthorizeAndCapture(boolean performAuthorizeAndCapture) {
-        this.performAuthorizeAndCapture = performAuthorizeAndCapture;
-    }
-
-    @Override
-    public int getFailureReportingThreshold() {
-        return failureReportingThreshold;
-    }
-
-    @Override
-    public void setFailureReportingThreshold(int failureReportingThreshold) {
-        this.failureReportingThreshold = failureReportingThreshold;
-    }
-
-    @Override
-    public boolean handlesMultiplePayments() {
-        return false;
-    }
-
-    @Override
-    public String getGatewayType() {
-        return PayPalCheckoutPaymentGatewayType.PAYPAL_CHECKOUT.name();
-    }
+    @Getter
+    private final String gatewayType = PayPalCheckoutPaymentGatewayType.PAYPAL_CHECKOUT.name();
 
 }

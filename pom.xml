@@ -23,6 +23,7 @@
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.uri>${user.dir}</project.uri>
+        <paypal.sdk.version>1.14.0</paypal.sdk.version>
     </properties>
 
     <repositories>
@@ -49,11 +50,6 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>org.apache.httpcomponents</groupId>
-                <artifactId>httpclient</artifactId>
-                <version>4.5.6</version>
-            </dependency>
-            <dependency>
                 <groupId>com.broadleafcommerce.microservices</groupId>
                 <artifactId>broadleaf-payment-gateway-common</artifactId>
                 <version>${broadleaf.payment.gateway.common}</version>
@@ -62,6 +58,16 @@
                 <groupId>com.broadleafcommerce.microservices</groupId>
                 <artifactId>broadleaf-common-money</artifactId>
                 <version>${broadleaf.common.money.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.paypal.sdk</groupId>
+                <artifactId>rest-api-sdk</artifactId>
+                <version>${paypal.sdk.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpclient</artifactId>
+                <version>4.5.6</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
