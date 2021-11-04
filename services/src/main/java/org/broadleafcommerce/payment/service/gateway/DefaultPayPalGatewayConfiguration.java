@@ -59,18 +59,30 @@ public class DefaultPayPalGatewayConfiguration implements PayPalGatewayConfigura
     @Setter
     private String checkoutTransactionType = AUTHORIZE.name();
 
+    /**
+     * @see #getSupportedTransactionTypes()
+     */
     @Getter
     private final Set<String> supportedTransactionTypes =
             new HashSet<>(Arrays.asList(AUTHORIZE.name(), CAPTURE.name(),
                     AUTHORIZE_AND_CAPTURE.name(), REFUND.name(), REVERSE_AUTH.name(), VOID.name()));
 
+    /**
+     * @see #getSupportedFeatures()
+     */
     @Getter
     private final Set<String> supportedFeatures =
             new HashSet<>(Arrays.asList(MULTI_USE_PAYMENT_METHODS.name()));
 
+    /**
+     * @see #isCheckoutTransactionExternal()
+     */
     @Getter
     private final boolean checkoutTransactionExternal = false;
 
+    /**
+     * @see #getGatewayType()
+     */
     @Getter
     private final String gatewayType = PayPalCheckoutPaymentGatewayType.PAYPAL_CHECKOUT.name();
 
