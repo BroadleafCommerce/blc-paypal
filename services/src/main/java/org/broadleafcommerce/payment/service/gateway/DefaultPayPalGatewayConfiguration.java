@@ -16,16 +16,9 @@
  */
 package org.broadleafcommerce.payment.service.gateway;
 
-import static com.broadleafcommerce.paymentgateway.domain.enums.DefaultGatewayFeatureType.MULTI_USE_PAYMENT_METHODS;
-import static com.broadleafcommerce.paymentgateway.domain.enums.DefaultTransactionTypes.AUTHORIZE;
-import static com.broadleafcommerce.paymentgateway.domain.enums.DefaultTransactionTypes.AUTHORIZE_AND_CAPTURE;
-import static com.broadleafcommerce.paymentgateway.domain.enums.DefaultTransactionTypes.CAPTURE;
-import static com.broadleafcommerce.paymentgateway.domain.enums.DefaultTransactionTypes.REFUND;
-import static com.broadleafcommerce.paymentgateway.domain.enums.DefaultTransactionTypes.REVERSE_AUTH;
-import static com.broadleafcommerce.paymentgateway.domain.enums.DefaultTransactionTypes.VOID;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import com.broadleafcommerce.paymentgateway.domain.enums.DefaultGatewayFeatureType;
 import com.broadleafcommerce.paymentgateway.domain.enums.DefaultTransactionTypes;
 import com.broadleafcommerce.paymentgateway.domain.enums.TransactionType;
 
@@ -57,22 +50,27 @@ public class DefaultPayPalGatewayConfiguration implements PayPalGatewayConfigura
      */
     @Getter
     @Setter
-    private String checkoutTransactionType = AUTHORIZE.name();
+    private String checkoutTransactionType = DefaultTransactionTypes.AUTHORIZE.name();
 
     /**
      * @see #getSupportedTransactionTypes()
      */
     @Getter
     private final Set<String> supportedTransactionTypes =
-            new HashSet<>(Arrays.asList(AUTHORIZE.name(), CAPTURE.name(),
-                    AUTHORIZE_AND_CAPTURE.name(), REFUND.name(), REVERSE_AUTH.name(), VOID.name()));
+            new HashSet<>(Arrays.asList(DefaultTransactionTypes.AUTHORIZE.name(),
+                    DefaultTransactionTypes.CAPTURE.name(),
+                    DefaultTransactionTypes.AUTHORIZE_AND_CAPTURE.name(),
+                    DefaultTransactionTypes.REFUND.name(),
+                    DefaultTransactionTypes.REVERSE_AUTH.name(),
+                    DefaultTransactionTypes.VOID.name()));
 
     /**
      * @see #getSupportedFeatures()
      */
     @Getter
     private final Set<String> supportedFeatures =
-            new HashSet<>(Arrays.asList(MULTI_USE_PAYMENT_METHODS.name()));
+            new HashSet<>(
+                    Arrays.asList(DefaultGatewayFeatureType.MULTI_USE_PAYMENT_METHODS.name()));
 
     /**
      * @see #isCheckoutTransactionExternal()
