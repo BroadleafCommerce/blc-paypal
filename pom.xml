@@ -10,7 +10,7 @@
     <artifactId>broadleaf-paypal</artifactId>
     <name>BroadleafCommerce PayPal</name>
     <description>BroadleafCommerce PayPal</description>
-    <version>3.1.1-GA</version>
+    <version>3.1.2-SNAPSHOT</version>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <blc.version>6.1.7-GA</blc.version>
@@ -21,7 +21,7 @@
         <connection>scm:git:git@github.com:BroadleafCommerce/blc-paypal.git</connection>
         <developerConnection>scm:git:git@github.com:BroadleafCommerce/blc-paypal.git</developerConnection>
         <url>https://github.com/BroadleafCommerce/blc-paypal</url>
-        <tag>broadleaf-paypal-3.1.1-GA</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <url>https://www.broadleafcommerce.com</url>
