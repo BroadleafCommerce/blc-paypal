@@ -81,6 +81,21 @@
         </plugins>
     </build>
 
+    <profiles>
+        <profile>
+            <id>deptrack</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.cyclonedx</groupId>
+                        <artifactId>cyclonedx-maven-plugin</artifactId>
+                        <inherited>false</inherited>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
     <modules>
         <module>services</module>
         <module>docs</module>
