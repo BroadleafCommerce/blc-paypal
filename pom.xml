@@ -52,14 +52,25 @@
     </developers>
     <repositories>
         <repository>
-            <id>releases</id>
+            <id>public releases</id>
             <name>public releases</name>
             <url>https://nexus2.broadleafcommerce.org/nexus/content/groups/community-releases/</url>
         </repository>
         <repository>
-            <id>snapshots</id>
+            <id>public snapshots</id>
             <name>public snapshots</name>
             <url>https://nexus2.broadleafcommerce.org/nexus/content/groups/community-snapshots/</url>
+        </repository>
+        <!--For third party config -->
+        <repository>
+            <id>releases</id>
+            <name>private-releases</name>
+            <url>https://nexus2.broadleafcommerce.org/nexus/content/repositories/private-releases/</url>
+        </repository>
+        <repository>
+            <id>snapshots</id>
+            <name>private-snapshots</name>
+            <url>https://nexus2.broadleafcommerce.org/nexus/content/repositories/private-snapshots/</url>
         </repository>
     </repositories>
     <build>
@@ -87,9 +98,10 @@
         <dependency>
             <groupId>org.broadleafcommerce</groupId>
             <artifactId>broadleaf-third-party-integration-config</artifactId>
-            <version>default</version>
-            <scope>compile</scope>
+            <version>1.0.0-GA</version>
+            <scope>test</scope>
             <type>jar</type>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.broadleafcommerce</groupId>
