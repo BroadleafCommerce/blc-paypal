@@ -24,6 +24,7 @@ import org.broadleafcommerce.payment.service.gateway.DefaultPayPalCheckoutRollba
 import org.broadleafcommerce.payment.service.gateway.DefaultPayPalCheckoutTransactionConfirmationService;
 import org.broadleafcommerce.payment.service.gateway.DefaultPayPalCheckoutTransactionService;
 import org.broadleafcommerce.payment.service.gateway.DefaultPayPalGatewayConfiguration;
+import org.broadleafcommerce.payment.service.gateway.DefaultPayPalPaymentGatewayPaymentValidator;
 import org.broadleafcommerce.payment.service.gateway.DefaultPayPalSyncTransactionService;
 import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutExternalCallService;
 import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutHostedService;
@@ -33,6 +34,7 @@ import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutRollbackServi
 import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutTransactionConfirmationService;
 import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutTransactionService;
 import org.broadleafcommerce.payment.service.gateway.PayPalGatewayConfiguration;
+import org.broadleafcommerce.payment.service.gateway.PayPalPaymentGatewayPaymentValidator;
 import org.broadleafcommerce.payment.service.gateway.PayPalSyncTransactionService;
 import org.broadleafcommerce.vendor.paypal.service.PayPalPaymentService;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -113,16 +115,14 @@ public class PayPalServiceAutoConfiguration {
     public PayPalCheckoutTransactionConfirmationService payPalCheckoutTransactionConfirmationService(
             PayPalGatewayConfiguration gatewayConfiguration,
             PayPalCheckoutTransactionService transactionService) {
-        return new DefaultPayPalCheckoutTransactionConfirmationService(gatewayConfiguration,
-                transactionService);
+        return new DefaultPayPalCheckoutTransactionConfirmationService(transactionService);
     }
 
     @Bean
     @ConditionalOnMissingBean
     public PayPalCheckoutHostedService payPalCheckoutHostedService(
-            PayPalGatewayConfiguration gatewayConfiguration,
             PayPalCheckoutTransactionService transactionService) {
-        return new DefaultPayPalCheckoutHostedService(gatewayConfiguration, transactionService);
+        return new DefaultPayPalCheckoutHostedService(transactionService);
     }
 
     @Bean
@@ -130,6 +130,13 @@ public class PayPalServiceAutoConfiguration {
     public PayPalCheckoutReportingService payPalCheckoutReportingService(
             PayPalCheckoutExternalCallService paypalCheckoutService) {
         return new DefaultPayPalCheckoutReportingService(paypalCheckoutService);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public PayPalPaymentGatewayPaymentValidator payPalPaymentGatewayPaymentValidator(
+            PayPalGatewayConfiguration gatewayConfiguration) {
+        return new DefaultPayPalPaymentGatewayPaymentValidator(gatewayConfiguration);
     }
 
 }

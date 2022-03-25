@@ -35,15 +35,14 @@ public class DefaultPayPalCheckoutHostedService implements PayPalCheckoutHostedS
 
     protected static final Log LOG = LogFactory.getLog(DefaultPayPalCheckoutHostedService.class);
 
-    private final PayPalGatewayConfiguration configuration;
     private final PaymentGatewayTransactionService transactionService;
 
     @Override
-    public PaymentResponse requestHostedEndpoint(PaymentRequest paymentRequest)
+    public PaymentResponse requestHostedEndpoint(PaymentRequest paymentRequest, boolean capture)
             throws PaymentException {
 
         PaymentResponse responseDTO;
-        if (configuration.isPerformAuthorizeAndCapture()) {
+        if (capture) {
             responseDTO = transactionService.authorizeAndCapture(paymentRequest);
             responseDTO.transactionType(DefaultTransactionTypes.AUTHORIZE_AND_CAPTURE);
         } else {

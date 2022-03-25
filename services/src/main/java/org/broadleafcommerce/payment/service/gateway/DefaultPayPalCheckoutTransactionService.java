@@ -66,12 +66,16 @@ import com.paypal.base.rest.APIContext;
 import com.paypal.base.rest.PayPalRESTException;
 import com.paypal.base.rest.PayPalResource;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.Optional;
+
+import javax.money.MonetaryAmount;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -114,20 +118,27 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
                 Amount amount = transaction.getAmount();
                 Authorization authorization = getAuthorization(transaction);
 
+                String updateTime = authorization.getUpdateTime();
+
                 paymentResponse
                         .successful(true)
                         .amount(MonetaryUtils.toAmount(amount.getTotal(), amount.getCurrency()))
-                        .dateRecorded(Instant.parse(payment.getCreateTime()))
+                        .dateRecorded(
+                                updateTime != null ? Instant.parse(updateTime) : Instant.now())
                         .transactionReferenceId(transaction.getCustom())
+                        .gatewayTransactionId(authorization.getId())
                         .responseMap(MessageConstants.AUTHORIZATONID, authorization.getId())
                         .rawResponse(payment.toJSON());
             } else {
                 Authorization authorization = (Authorization) auth;
                 Amount amount = authorization.getAmount();
+
+                String updateTime = authorization.getUpdateTime();
                 paymentResponse
                         .successful(true)
                         .amount(MonetaryUtils.toAmount(amount.getTotal(), amount.getCurrency()))
-                        .dateRecorded(Instant.parse(authorization.getCreateTime()))
+                        .dateRecorded(
+                                updateTime != null ? Instant.parse(updateTime) : Instant.now())
                         .transactionReferenceId(authorization.getReferenceId())
                         .responseMap(MessageConstants.AUTHORIZATONID, authorization.getId())
                         .rawResponse(authorization.toJSON());
@@ -150,10 +161,14 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
             Capture capture = capturePayment(auth, paymentRequest);
             Amount amount = capture.getAmount();
 
+            String captureTime = capture.getCreateTime();
+
             paymentResponse
                     .successful(true)
                     .rawResponse(capture.toJSON())
+                    .gatewayTransactionId(capture.getId())
                     .responseMap(MessageConstants.CAPTUREID, capture.getId())
+                    .dateRecorded(captureTime != null ? Instant.parse(captureTime) : Instant.now())
                     .amount(MonetaryUtils.toAmount(amount.getTotal(), amount.getCurrency()));
         } catch (PaymentException e) {
             processException(e, paymentResponse, paymentRequest);
@@ -211,9 +226,13 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
                         payerLastName = payer.getPayerInfo().getLastName();
                     }
 
+                    String updateTime = payment.getUpdateTime();
+
                     paymentResponse
                             .successful(true)
                             .rawResponse(payment.toJSON())
+                            .dateRecorded(
+                                    updateTime != null ? Instant.parse(updateTime) : Instant.now())
                             .responseMap(MessageConstants.PAYMENTID, payment.getId())
                             .responseMap(MessageConstants.SALEID, saleId)
                             .responseMap(MessageConstants.BILLINGAGREEMENTID, billingAgreementId)
@@ -226,9 +245,13 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
             } else {
                 Sale sale = (Sale) salePayment;
                 Amount amount = sale.getAmount();
+                String updateTime = sale.getUpdateTime();
                 paymentResponse
                         .successful(true)
+                        .dateRecorded(
+                                updateTime != null ? Instant.parse(updateTime) : Instant.now())
                         .rawResponse(sale.toJSON())
+                        .gatewayTransactionId(sale.getId())
                         .responseMap(MessageConstants.SALEID, sale.getId())
                         .responseMap(MessageConstants.BILLINGAGREEMENTID,
                                 sale.getBillingAgreementId())
@@ -252,10 +275,12 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
             Authorization auth = getAuthorization(paymentRequest);
             auth = voidAuthorization(auth, paymentRequest);
             Amount amount = auth.getAmount();
+            String updateTime = auth.getUpdateTime();
             paymentResponse
                     .successful(true)
                     .amount(MonetaryUtils.toAmount(amount.getTotal(), amount.getCurrency()))
-                    .dateRecorded(Instant.parse(auth.getUpdateTime()))
+                    .dateRecorded(updateTime != null ? Instant.parse(updateTime) : Instant.now())
+                    .gatewayTransactionId(auth.getId())
                     .rawResponse(auth.toJSON());
         } catch (PaymentException e) {
             processException(e, paymentResponse, paymentRequest);
@@ -283,9 +308,13 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
             if (capture != null) {
                 DetailedRefund detailRefund = refundPayment(capture, paymentRequest);
                 Amount amount = detailRefund.getAmount();
+                String refundTime = detailRefund.getCreateTime();
                 paymentResponse
                         .successful(true)
                         .rawResponse(detailRefund.toJSON())
+                        .gatewayTransactionId(detailRefund.getId())
+                        .dateRecorded(
+                                refundTime != null ? Instant.parse(refundTime) : Instant.now())
                         .responseMap(MessageConstants.REFUNDID, detailRefund.getId())
                         .responseMap(MessageConstants.CAPTUREID, detailRefund.getCaptureId())
                         .amount(MonetaryUtils.toAmount(amount.getTotal(), amount.getCurrency()));
@@ -293,9 +322,13 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
             } else if (sale != null) {
                 DetailedRefund detailRefund = refundPayment(sale, paymentRequest);
                 Amount amount = detailRefund.getAmount();
+                String refundTime = detailRefund.getCreateTime();
                 paymentResponse
                         .successful(true)
                         .rawResponse(detailRefund.toJSON())
+                        .dateRecorded(
+                                refundTime != null ? Instant.parse(refundTime) : Instant.now())
+                        .gatewayTransactionId(detailRefund.getId())
                         .responseMap(MessageConstants.REFUNDID, detailRefund.getId())
                         .responseMap(MessageConstants.SALEID, detailRefund.getSaleId())
                         .amount(MonetaryUtils.toAmount(amount.getTotal(), amount.getCurrency()));
@@ -307,29 +340,6 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
 
         throw new PaymentException(
                 "Unable to perform refund. Unable to find corresponding capture or sale transaction.");
-    }
-
-    @Override
-    public PaymentResponse voidPayment(PaymentRequest paymentRequest) {
-        PaymentResponse paymentResponse =
-                new PaymentResponse(DefaultPaymentTypes.THIRD_PARTY_ACCOUNT,
-                        PayPalCheckoutPaymentGatewayType.PAYPAL_CHECKOUT)
-                                .transactionType(DefaultTransactionTypes.VOID);
-
-
-        try {
-            Authorization auth = getAuthorization(paymentRequest);
-            auth = voidAuthorization(auth, paymentRequest);
-            Amount amount = auth.getAmount();
-            paymentResponse
-                    .successful(true)
-                    .rawResponse(auth.toJSON())
-                    .amount(MonetaryUtils.toAmount(amount.getTotal(),
-                            amount.getCurrency()));
-        } catch (PaymentException e) {
-            processException(e, paymentResponse, paymentRequest);
-        }
-        return paymentResponse;
     }
 
     /**
@@ -347,7 +357,8 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
         capture.setIsFinalCapture(true);
         Amount amount = new Amount();
         amount.setCurrency(paymentRequest.getOrderSubtotal().getCurrency().getCurrencyCode());
-        amount.setTotal(Objects.toString(paymentRequest.getTransactionTotal(), null));
+
+        amount.setTotal(getStringAmount(paymentRequest.getTransactionTotal()));
         capture.setAmount(amount);
 
         PayPalCaptureResponse response = retryTemplate.execute(context -> {
@@ -356,6 +367,20 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
             return (PayPalCaptureResponse) paypalCheckoutService.call(captureRequest);
         });
         return response.getCapture();
+    }
+
+    @Nullable
+    private String getStringAmount(@Nullable MonetaryAmount amount) {
+        return Objects.toString(normalizePrice(amount), null);
+    }
+
+    @Nullable
+    private BigDecimal normalizePrice(@Nullable MonetaryAmount amount) {
+        if (amount == null) {
+            return null;
+        }
+
+        return MonetaryUtils.toValue(amount);
     }
 
     /**
@@ -587,7 +612,11 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
         RefundRequest refund = new RefundRequest();
         Amount amount = new Amount();
         amount.setCurrency(paymentRequest.getOrderSubtotal().getCurrency().getCurrencyCode());
-        amount.setTotal(Objects.toString(paymentRequest.getTransactionTotal(), null));
+
+        BigDecimal transactionTotal = Optional.ofNullable(paymentRequest.getTransactionTotal())
+                .map(MonetaryUtils::toValue).orElse(null);
+
+        amount.setTotal(Objects.toString(transactionTotal, null));
         refund.setAmount(amount);
 
         PayPalRefundResponse response = retryTemplate.execute(context -> {
@@ -611,7 +640,7 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
         RefundRequest refund = new RefundRequest();
         Amount amount = new Amount();
         amount.setCurrency(paymentRequest.getOrderSubtotal().getCurrency().getCurrencyCode());
-        amount.setTotal(Objects.toString(paymentRequest.getTransactionTotal(), null));
+        amount.setTotal(getStringAmount(paymentRequest.getTransactionTotal()));
         refund.setAmount(amount);
 
         PayPalRefundResponse response = retryTemplate.execute(context -> {

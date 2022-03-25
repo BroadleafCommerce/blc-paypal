@@ -20,7 +20,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import com.broadleafcommerce.paymentgateway.domain.enums.DefaultGatewayFeatureType;
 import com.broadleafcommerce.paymentgateway.domain.enums.DefaultTransactionTypes;
-import com.broadleafcommerce.paymentgateway.domain.enums.TransactionType;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -44,15 +43,6 @@ public class DefaultPayPalGatewayConfiguration implements PayPalGatewayConfigura
     private int failureReportingThreshold = 1;
 
     /**
-     * Set the {@link TransactionType} that should be performed during checkout. Typically this will
-     * be {@link DefaultTransactionTypes#AUTHORIZE_AND_CAPTURE} or
-     * {@link DefaultTransactionTypes#AUTHORIZE}.
-     */
-    @Getter
-    @Setter
-    private String checkoutTransactionType = DefaultTransactionTypes.AUTHORIZE.name();
-
-    /**
      * @see #getSupportedTransactionTypes()
      */
     @Getter
@@ -61,8 +51,7 @@ public class DefaultPayPalGatewayConfiguration implements PayPalGatewayConfigura
                     DefaultTransactionTypes.CAPTURE.name(),
                     DefaultTransactionTypes.AUTHORIZE_AND_CAPTURE.name(),
                     DefaultTransactionTypes.REFUND.name(),
-                    DefaultTransactionTypes.REVERSE_AUTH.name(),
-                    DefaultTransactionTypes.VOID.name()));
+                    DefaultTransactionTypes.REVERSE_AUTH.name()));
 
     /**
      * @see #getSupportedFeatures()
@@ -71,12 +60,6 @@ public class DefaultPayPalGatewayConfiguration implements PayPalGatewayConfigura
     private final Set<String> supportedFeatures =
             new HashSet<>(
                     Arrays.asList(DefaultGatewayFeatureType.MULTI_USE_PAYMENT_METHODS.name()));
-
-    /**
-     * @see #isCheckoutTransactionExternal()
-     */
-    @Getter
-    private final boolean checkoutTransactionExternal = false;
 
     /**
      * @see #getGatewayType()
