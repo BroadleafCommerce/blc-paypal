@@ -52,6 +52,14 @@ public class DefaultPayPalPaymentGatewayPaymentValidator
             throw new InvalidPaymentConfigurationException(
                     String.format(REQUIRED_PROPERTY_ERROR, MessageConstants.PAYMENTID));
         }
+
+        String payerId = paymentValidationRequest.getPaymentMethodProperties()
+                .get(MessageConstants.PAYERID);
+
+        if (StringUtils.isBlank(payerId)) {
+            throw new InvalidPaymentConfigurationException(
+                    String.format(REQUIRED_PROPERTY_ERROR, MessageConstants.PAYERID));
+        }
     }
 
     @Override

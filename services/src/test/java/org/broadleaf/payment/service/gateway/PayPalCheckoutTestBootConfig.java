@@ -14,9 +14,16 @@
  * trade secret or copyright law. Dissemination of this information or reproduction of this material
  * is strictly forbidden unless prior written permission is obtained from Broadleaf Commerce, LLC.
  */
-package org.broadleafcommerce.payment.service.gateway;
+package org.broadleaf.payment.service.gateway;
 
-import com.broadleafcommerce.paymentgateway.service.PaymentGatewayTransactionConfirmationService;
+import org.springframework.boot.SpringBootConfiguration;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 
-public interface PayPalCheckoutTransactionConfirmationService
-        extends PaymentGatewayTransactionConfirmationService {}
+/**
+ * @author Dima Myroniuk (dmyroniuk)
+ */
+@EnableAutoConfiguration
+@SpringBootConfiguration
+public class PayPalCheckoutTestBootConfig {
+
+}

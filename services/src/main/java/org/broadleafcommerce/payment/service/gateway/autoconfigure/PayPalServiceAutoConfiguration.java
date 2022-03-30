@@ -21,7 +21,6 @@ import org.broadleafcommerce.payment.service.gateway.DefaultPayPalCheckoutHosted
 import org.broadleafcommerce.payment.service.gateway.DefaultPayPalCheckoutReportingService;
 import org.broadleafcommerce.payment.service.gateway.DefaultPayPalCheckoutRetryPolicyClassifier;
 import org.broadleafcommerce.payment.service.gateway.DefaultPayPalCheckoutRollbackService;
-import org.broadleafcommerce.payment.service.gateway.DefaultPayPalCheckoutTransactionConfirmationService;
 import org.broadleafcommerce.payment.service.gateway.DefaultPayPalCheckoutTransactionService;
 import org.broadleafcommerce.payment.service.gateway.DefaultPayPalGatewayConfiguration;
 import org.broadleafcommerce.payment.service.gateway.DefaultPayPalPaymentGatewayPaymentValidator;
@@ -31,7 +30,6 @@ import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutHostedService
 import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutReportingService;
 import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutRestConfigurationProperties;
 import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutRollbackService;
-import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutTransactionConfirmationService;
 import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutTransactionService;
 import org.broadleafcommerce.payment.service.gateway.PayPalGatewayConfiguration;
 import org.broadleafcommerce.payment.service.gateway.PayPalPaymentGatewayPaymentValidator;
@@ -108,14 +106,6 @@ public class PayPalServiceAutoConfiguration {
     public PayPalCheckoutRollbackService payPalCheckoutRollbackService(
             PayPalCheckoutTransactionService transactionService) {
         return new DefaultPayPalCheckoutRollbackService(transactionService);
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public PayPalCheckoutTransactionConfirmationService payPalCheckoutTransactionConfirmationService(
-            PayPalGatewayConfiguration gatewayConfiguration,
-            PayPalCheckoutTransactionService transactionService) {
-        return new DefaultPayPalCheckoutTransactionConfirmationService(transactionService);
     }
 
     @Bean
