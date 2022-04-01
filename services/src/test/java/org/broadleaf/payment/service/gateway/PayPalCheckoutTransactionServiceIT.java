@@ -130,7 +130,7 @@ public class PayPalCheckoutTransactionServiceIT {
         assertThat(paymentResponse.getTransactionReferenceId()).isEqualTo(transaction.getCustom());
         assertThat(paymentResponse.getGatewayTransactionId()).isEqualTo(AUTH_ID);
         assertThat(paymentResponse.getGatewayResponseCode()).isEqualTo(REASON_CODE);
-        assertThat(paymentResponse.getResponseMap()).containsEntry(MessageConstants.AUTHORIZATONID,
+        assertThat(paymentResponse.getResponseMap()).containsEntry(MessageConstants.AUTHORIZATIONID,
                 AUTH_ID);
         assertThat(paymentResponse.getRawResponse()).isEqualTo(RAW_RESPONSE);
     }
@@ -202,6 +202,7 @@ public class PayPalCheckoutTransactionServiceIT {
         when(capture.toJSON()).thenReturn(RAW_RESPONSE);
 
         PaymentRequest paymentRequest = createBasePaymentRequest();
+        paymentRequest.additionalField(MessageConstants.AUTHORIZATIONID, AUTH_ID);
 
         PaymentResponse paymentResponse = payPalCheckoutTransactionService.capture(paymentRequest);
 
@@ -241,6 +242,7 @@ public class PayPalCheckoutTransactionServiceIT {
         when(voidedAuthorization.toJSON()).thenReturn(RAW_RESPONSE);
 
         PaymentRequest paymentRequest = createBasePaymentRequest();
+        paymentRequest.additionalField(MessageConstants.AUTHORIZATIONID, AUTH_ID);
 
         PaymentResponse paymentResponse =
                 payPalCheckoutTransactionService.reverseAuthorize(paymentRequest);

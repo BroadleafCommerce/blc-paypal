@@ -37,7 +37,6 @@ import org.broadleafcommerce.vendor.paypal.service.payment.PayPalSaleRetrievalRe
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalSaleRetrievalResponse;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalVoidRequest;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalVoidResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
 import org.springframework.retry.support.RetryTemplate;
 
@@ -74,14 +73,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
-import java.util.Optional;
 
 import javax.money.MonetaryAmount;
 
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.extern.apachecommons.CommonsLog;
 
 /**
@@ -90,6 +87,11 @@ import lombok.extern.apachecommons.CommonsLog;
 @CommonsLog
 @RequiredArgsConstructor
 public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTransactionService {
+
+    private static final String REQUIRED_ADDITIONAL_FIELD_ERROR =
+            "The extra properties \"additionalFields\" should contain \" %s \"!";
+    private static final String REQUIRED_PROPERTY_ERROR =
+            "The \" %s \" is required!";
 
     @Getter(AccessLevel.PROTECTED)
     private final PayPalCheckoutExternalCallService paypalCheckoutService;
@@ -103,17 +105,18 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
     @Getter(AccessLevel.PROTECTED)
     private final RetryTemplate retryTemplate;
 
-    @Setter(onMethod_ = {@Autowired})
     @Getter(AccessLevel.PROTECTED)
-    private PaymentResponseUtil paymentResponseUtil;
+    private final PaymentResponseUtil paymentResponseUtil;
 
     @Override
     public PaymentResponse authorize(PaymentRequest paymentRequest) {
-        PaymentResponse paymentResponse = paymentResponseUtil.buildPaymentResponse(paymentRequest,
-                PayPalCheckoutPaymentGatewayType.PAYPAL_CHECKOUT,
-                DefaultTransactionTypes.AUTHORIZE);
-
+        PaymentResponse paymentResponse = new PaymentResponse();
         try {
+            validateAuthorizeRequest(paymentRequest);
+            paymentResponse = paymentResponseUtil.buildPaymentResponse(paymentRequest,
+                    PayPalCheckoutPaymentGatewayType.PAYPAL_CHECKOUT,
+                    DefaultTransactionTypes.AUTHORIZE);
+
             recordTransactionReferenceIdOnPayment(paymentRequest);
 
             PayPalResource auth = authorizePayment(paymentRequest);
@@ -131,7 +134,7 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
                         .transactionReferenceId(transaction.getCustom())
                         .gatewayTransactionId(authorization.getId())
                         .gatewayResponseCode(authorization.getReasonCode())
-                        .responseMap(MessageConstants.AUTHORIZATONID, authorization.getId())
+                        .responseMap(MessageConstants.AUTHORIZATIONID, authorization.getId())
                         .rawResponse(payment.toJSON());
             } else {
                 Authorization authorization = (Authorization) auth;
@@ -144,21 +147,39 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
                         .transactionReferenceId(authorization.getReferenceId())
                         .gatewayTransactionId(authorization.getId())
                         .gatewayResponseCode(authorization.getReasonCode())
-                        .responseMap(MessageConstants.AUTHORIZATONID, authorization.getId())
+                        .responseMap(MessageConstants.AUTHORIZATIONID, authorization.getId())
                         .rawResponse(authorization.toJSON());
             }
         } catch (Exception e) {
-            processException(e, paymentResponse, paymentRequest);
+            paymentResponse = processException(e, paymentResponse, paymentRequest);
         }
         return paymentResponse;
     }
 
+    protected void validateAuthorizeRequest(PaymentRequest paymentRequest) {
+        Object paymentId = paymentRequest.getAdditionalField(MessageConstants.PAYMENTID);
+
+        if (paymentId == null) {
+            throw new IllegalArgumentException(
+                    String.format(REQUIRED_ADDITIONAL_FIELD_ERROR, MessageConstants.PAYMENTID));
+        }
+
+        Object payerId = paymentRequest.getAdditionalField(MessageConstants.PAYERID);
+
+        if (payerId == null) {
+            throw new IllegalArgumentException(
+                    String.format(REQUIRED_ADDITIONAL_FIELD_ERROR, MessageConstants.PAYERID));
+        }
+    }
+
     @Override
     public PaymentResponse capture(PaymentRequest paymentRequest) {
-        PaymentResponse paymentResponse = paymentResponseUtil.buildPaymentResponse(paymentRequest,
-                PayPalCheckoutPaymentGatewayType.PAYPAL_CHECKOUT, DefaultTransactionTypes.CAPTURE);
-
+        PaymentResponse paymentResponse = new PaymentResponse();
         try {
+            validateCaptureRequest(paymentRequest);
+            paymentResponse = paymentResponseUtil.buildPaymentResponse(paymentRequest,
+                    PayPalCheckoutPaymentGatewayType.PAYPAL_CHECKOUT,
+                    DefaultTransactionTypes.CAPTURE);
             Authorization auth = getAuthorization(paymentRequest);
             Capture capture = capturePayment(auth, paymentRequest);
 
@@ -171,19 +192,37 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
                     .gatewayResponseCode(capture.getReasonCode())
                     .responseMap(MessageConstants.CAPTUREID, capture.getId())
                     .dateRecorded(captureTime != null ? Instant.parse(captureTime) : Instant.now());
-        } catch (PaymentException e) {
-            processException(e, paymentResponse, paymentRequest);
+        } catch (Exception e) {
+            paymentResponse = processException(e, paymentResponse, paymentRequest);
         }
         return paymentResponse;
     }
 
+    protected void validateCaptureRequest(PaymentRequest paymentRequest) {
+        Object authorizationId =
+                paymentRequest.getAdditionalField(MessageConstants.AUTHORIZATIONID);
+
+        if (authorizationId == null) {
+            throw new IllegalArgumentException(
+                    String.format(REQUIRED_ADDITIONAL_FIELD_ERROR,
+                            MessageConstants.AUTHORIZATIONID));
+        }
+
+        if (paymentRequest.getTransactionTotal() == null) {
+            throw new IllegalArgumentException(
+                    String.format(REQUIRED_PROPERTY_ERROR, "transactionTotal"));
+        }
+    }
+
     @Override
     public PaymentResponse authorizeAndCapture(PaymentRequest paymentRequest) {
-        PaymentResponse paymentResponse = paymentResponseUtil.buildPaymentResponse(paymentRequest,
-                PayPalCheckoutPaymentGatewayType.PAYPAL_CHECKOUT,
-                DefaultTransactionTypes.AUTHORIZE_AND_CAPTURE);
+        PaymentResponse paymentResponse = new PaymentResponse();
 
         try {
+            validateAuthorizeAndCaptureRequest(paymentRequest);
+            paymentResponse = paymentResponseUtil.buildPaymentResponse(paymentRequest,
+                    PayPalCheckoutPaymentGatewayType.PAYPAL_CHECKOUT,
+                    DefaultTransactionTypes.AUTHORIZE_AND_CAPTURE);
             recordTransactionReferenceIdOnPayment(paymentRequest);
 
             PayPalResource salePayment = salePayment(paymentRequest);
@@ -253,20 +292,31 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
                         .responseMap(MessageConstants.BILLINGAGREEMENTID,
                                 sale.getBillingAgreementId());
             }
-        } catch (PaymentException e) {
-            processException(e, paymentResponse, paymentRequest);
+        } catch (Exception e) {
+            paymentResponse = processException(e, paymentResponse, paymentRequest);
         }
 
         return paymentResponse;
     }
 
+    protected void validateAuthorizeAndCaptureRequest(PaymentRequest paymentRequest) {
+        validateAuthorizeRequest(paymentRequest);
+
+        if (paymentRequest.getOrderSubtotal() == null) {
+            throw new IllegalArgumentException(
+                    String.format(REQUIRED_PROPERTY_ERROR, "orderSubtotal"));
+        }
+    }
+
     @Override
     public PaymentResponse reverseAuthorize(PaymentRequest paymentRequest) {
-        PaymentResponse paymentResponse = paymentResponseUtil.buildPaymentResponse(paymentRequest,
-                PayPalCheckoutPaymentGatewayType.PAYPAL_CHECKOUT,
-                DefaultTransactionTypes.REVERSE_AUTH);
+        PaymentResponse paymentResponse = new PaymentResponse();
 
         try {
+            validateReverseAuthorizeRequest(paymentRequest);
+            paymentResponse = paymentResponseUtil.buildPaymentResponse(paymentRequest,
+                    PayPalCheckoutPaymentGatewayType.PAYPAL_CHECKOUT,
+                    DefaultTransactionTypes.REVERSE_AUTH);
             Authorization auth = getAuthorization(paymentRequest);
             auth = voidAuthorization(auth, paymentRequest);
             String updateTime = auth.getUpdateTime();
@@ -276,19 +326,34 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
                     .gatewayTransactionId(auth.getId())
                     .gatewayResponseCode(auth.getReasonCode())
                     .rawResponse(auth.toJSON());
-        } catch (PaymentException e) {
-            processException(e, paymentResponse, paymentRequest);
+        } catch (Exception e) {
+            paymentResponse = processException(e, paymentResponse, paymentRequest);
         }
 
         return paymentResponse;
     }
 
+    protected void validateReverseAuthorizeRequest(PaymentRequest paymentRequest) {
+        Object authorizationId =
+                paymentRequest.getAdditionalField(MessageConstants.AUTHORIZATIONID);
+
+        if (authorizationId == null) {
+            throw new IllegalArgumentException(
+                    String.format(REQUIRED_ADDITIONAL_FIELD_ERROR,
+                            MessageConstants.AUTHORIZATIONID));
+        }
+    }
+
     @Override
     public PaymentResponse refund(PaymentRequest paymentRequest) {
-        PaymentResponse paymentResponse = paymentResponseUtil.buildPaymentResponse(paymentRequest,
-                PayPalCheckoutPaymentGatewayType.PAYPAL_CHECKOUT, DefaultTransactionTypes.REFUND);
+        PaymentResponse paymentResponse = new PaymentResponse();
 
         try {
+            validateRefundRequest(paymentRequest);
+            paymentResponse = paymentResponseUtil.buildPaymentResponse(paymentRequest,
+                    PayPalCheckoutPaymentGatewayType.PAYPAL_CHECKOUT,
+                    DefaultTransactionTypes.REFUND);
+
             Capture capture = null;
             Sale sale = null;
             if (getCaptureId(paymentRequest) != null) {
@@ -324,12 +389,33 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
                         .responseMap(MessageConstants.SALEID, detailRefund.getSaleId());
                 return paymentResponse;
             }
-        } catch (PaymentException e) {
-            processException(e, paymentResponse, paymentRequest);
+        } catch (Exception e) {
+            return processException(e, paymentResponse, paymentRequest);
         }
 
         throw new PaymentException(
                 "Unable to perform refund. Unable to find corresponding capture or sale transaction.");
+    }
+
+    protected void validateRefundRequest(PaymentRequest paymentRequest) {
+        Object captureId = paymentRequest.getAdditionalField(MessageConstants.CAPTUREID);
+        Object saleId = paymentRequest.getAdditionalField(MessageConstants.SALEID);
+
+        if (captureId == null && saleId == null) {
+            throw new IllegalArgumentException(
+                    String.format(REQUIRED_ADDITIONAL_FIELD_ERROR,
+                            MessageConstants.CAPTUREID + " or " + MessageConstants.SALEID));
+        }
+
+        if (captureId != null && paymentRequest.getTransactionTotal() == null) {
+            throw new IllegalArgumentException(
+                    String.format(REQUIRED_PROPERTY_ERROR, "transactionTotal"));
+        }
+
+        if (saleId != null && paymentRequest.getOrderSubtotal() == null) {
+            throw new IllegalArgumentException(
+                    String.format(REQUIRED_PROPERTY_ERROR, "orderSubtotal"));
+        }
     }
 
     /**
@@ -602,10 +688,9 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
         Amount amount = new Amount();
         amount.setCurrency(paymentRequest.getTransactionTotal().getCurrency().getCurrencyCode());
 
-        BigDecimal transactionTotal = Optional.ofNullable(paymentRequest.getTransactionTotal())
-                .map(MonetaryUtils::toValue).orElse(null);
+        String total = getStringAmount(paymentRequest.getTransactionTotal());
 
-        amount.setTotal(Objects.toString(transactionTotal, null));
+        amount.setTotal(total);
         refund.setAmount(amount);
 
         PayPalRefundResponse response = retryTemplate.execute(context -> {
@@ -686,7 +771,7 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
     }
 
     private String getAuthorizationId(PaymentRequest paymentRequest) {
-        return (String) paymentRequest.getAdditionalFields().get(MessageConstants.AUTHORIZATONID);
+        return (String) paymentRequest.getAdditionalFields().get(MessageConstants.AUTHORIZATIONID);
     }
 
     @Nullable
@@ -707,7 +792,7 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
      * @param paymentResponse the object that will hold the transaction results
      * @param paymentRequest the request that was used to execute the transaction
      */
-    protected void processException(Exception e,
+    protected PaymentResponse processException(Exception e,
             PaymentResponse paymentResponse,
             PaymentRequest paymentRequest) {
         paymentResponse.successful(false);
@@ -734,8 +819,8 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
                             .failureType(DefaultTransactionFailureTypes.INVALID_REQUEST.name());
 
                     String errorMessage = String.format(
-                            "An invalid request was supplied to PayPal's API. Exception message: %s",
-                            cause.getMessage());
+                            "An invalid request was supplied to PayPal's API. An unexpected error occurred. TransactionReferenceId: %s.",
+                            paymentResponse.getTransactionReferenceId());
 
                     paymentResponse.responseMap(MessageConstants.ERROR_MESSAGE, errorMessage);
                     paymentResponse.message(errorMessage);
@@ -747,8 +832,8 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
                                 DefaultTransactionFailureTypes.GATEWAY_CREDENTIALS_ERROR.name());
 
                 String errorMessage = String.format(
-                        "Authentication with PayPal's API failed. Maybe you changed client id or client secret recently. Exception message: %s",
-                        cause.getMessage());
+                        "Authentication with PayPal's API failed. Maybe you changed client id or client secret recently. An unexpected error occurred. TransactionReferenceId: %s.",
+                        paymentResponse.getTransactionReferenceId());
 
                 paymentResponse.responseMap(MessageConstants.ERROR_MESSAGE, errorMessage);
                 paymentResponse.message(errorMessage);
@@ -759,8 +844,8 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
                                 DefaultTransactionFailureTypes.GATEWAY_CREDENTIALS_ERROR.name());
 
                 String errorMessage = String.format(
-                        "PayPal authorization failed due to insufficient permissions.. Exception message: %s",
-                        cause.getMessage());
+                        "PayPal authorization failed due to insufficient permissions. An unexpected error occurred. TransactionReferenceId: %s.",
+                        paymentResponse.getTransactionReferenceId());
 
                 paymentResponse.responseMap(MessageConstants.ERROR_MESSAGE, errorMessage);
                 paymentResponse.message(errorMessage);
@@ -769,8 +854,8 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
                 paymentResponse.failureType(DefaultTransactionFailureTypes.NETWORK_ERROR.name());
 
                 String errorMessage = String.format(
-                        "Network communication with Stripe failed. Exception message: %s",
-                        cause.getMessage());
+                        "Network communication with Stripe failed. An unexpected error occurred. TransactionReferenceId: %s.",
+                        paymentResponse.getTransactionReferenceId());
 
                 paymentResponse.responseMap(MessageConstants.ERROR_MESSAGE, errorMessage);
                 paymentResponse.message(errorMessage);
@@ -780,8 +865,8 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
                         .failureType(DefaultTransactionFailureTypes.API_RATE_LIMIT_ERROR.name());
 
                 String errorMessage = String.format(
-                        "Too many requests made to the PayPal API too quickly. Exception message: %s",
-                        cause.getMessage());
+                        "Too many requests made to the PayPal API too quickly. An unexpected error occurred. TransactionReferenceId: %s.",
+                        paymentResponse.getTransactionReferenceId());
 
                 paymentResponse.responseMap(MessageConstants.ERROR_MESSAGE, errorMessage);
                 paymentResponse.message(errorMessage);
@@ -792,8 +877,8 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
                 paymentResponse.failureType(DefaultTransactionFailureTypes.INVALID_REQUEST.name());
 
                 String errorMessage = String.format(
-                        "An invalid request was supplied to PayPal's API. Exception message: %s",
-                        cause.getMessage());
+                        "An invalid request was supplied to PayPal's API. An unexpected error occurred. TransactionReferenceId: %s.",
+                        paymentResponse.getTransactionReferenceId());
 
                 paymentResponse.responseMap(MessageConstants.ERROR_MESSAGE, errorMessage);
                 paymentResponse.message(errorMessage);
@@ -803,6 +888,8 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
             paymentResponse.failureType(DefaultTransactionFailureTypes.INTERNAL_ERROR.name());
             log.error(e.getMessage(), e);
         }
+
+        return paymentResponse;
     }
 
     /**

@@ -28,6 +28,7 @@ import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutExternalCallS
 import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutPaymentGatewayType;
 import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutRestConfigurationProperties;
 import org.broadleafcommerce.vendor.paypal.service.PayPalPaymentService;
+import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -85,9 +86,8 @@ public class PayPalCheckoutTransactionServiceTest {
                     externalCallService,
                     payPalPaymentService,
                     configProperties,
-                    retryTemplate);
-
-            transactionService.setPaymentResponseUtil(paymentResponseUtil);
+                    retryTemplate,
+                    paymentResponseUtil);
 
             PayPalRESTException payPalRESTException =
                     new PayPalRESTException("Network error!");
@@ -101,6 +101,9 @@ public class PayPalCheckoutTransactionServiceTest {
     @Test
     void testTransactionRetryForNetworkError() {
         PaymentRequest paymentRequest = new PaymentRequest();
+
+        paymentRequest.additionalField(MessageConstants.PAYMENTID, "paymentId");
+        paymentRequest.additionalField(MessageConstants.PAYERID, "payerId");
 
         when(paymentResponseUtil.buildPaymentResponse(paymentRequest,
                 PayPalCheckoutPaymentGatewayType.PAYPAL_CHECKOUT,

@@ -47,6 +47,8 @@ import org.springframework.retry.policy.ExceptionClassifierRetryPolicy;
 import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
 
+import com.broadleafcommerce.paymentgateway.util.PaymentResponseUtil;
+
 @Configuration
 @EnableConfigurationProperties({PayPalCheckoutRestConfigurationProperties.class,
         DefaultPayPalGatewayConfiguration.class})
@@ -94,11 +96,13 @@ public class PayPalServiceAutoConfiguration {
             PayPalCheckoutExternalCallService paypalCheckoutService,
             PayPalPaymentService payPalPaymentService,
             PayPalCheckoutRestConfigurationProperties configProperties,
-            @Qualifier("payPalCheckoutExternalCallRetryTemplate") RetryTemplate retryTemplate) {
+            @Qualifier("payPalCheckoutExternalCallRetryTemplate") RetryTemplate retryTemplate,
+            PaymentResponseUtil paymentResponseUtil) {
         return new DefaultPayPalCheckoutTransactionService(paypalCheckoutService,
                 payPalPaymentService,
                 configProperties,
-                retryTemplate);
+                retryTemplate,
+                paymentResponseUtil);
     }
 
     @Bean
