@@ -446,12 +446,12 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
     }
 
     @Nullable
-    private String getStringAmount(@Nullable MonetaryAmount amount) {
+    protected String getStringAmount(@Nullable MonetaryAmount amount) {
         return Objects.toString(normalizePrice(amount), null);
     }
 
     @Nullable
-    private BigDecimal normalizePrice(@Nullable MonetaryAmount amount) {
+    protected BigDecimal normalizePrice(@Nullable MonetaryAmount amount) {
         if (amount == null) {
             return null;
         }
@@ -531,7 +531,7 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
         return null;
     }
 
-    private boolean isBillingAgreementRequest(@lombok.NonNull PaymentRequest paymentRequest) {
+    protected boolean isBillingAgreementRequest(@lombok.NonNull PaymentRequest paymentRequest) {
         return paymentRequest.getAdditionalFields()
                 .containsKey(MessageConstants.BILLINGAGREEMENTID);
     }
@@ -565,13 +565,13 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
         return Collections.singletonList(transaction);
     }
 
-    private Transaction getTransaction(Payment payment) {
+    protected Transaction getTransaction(Payment payment) {
         return payment.getTransactions().stream()
                 .findFirst()
                 .orElseThrow(NoSuchElementException::new);
     }
 
-    private Authorization getAuthorization(Transaction transaction) {
+    protected Authorization getAuthorization(Transaction transaction) {
         return transaction.getRelatedResources().stream()
                 .map(RelatedResources::getAuthorization)
                 .findFirst()
@@ -728,7 +728,7 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
         return response.getDetailedRefund();
     }
 
-    private Authorization getAuthorization(@lombok.NonNull PaymentRequest paymentRequest) {
+    protected Authorization getAuthorization(@lombok.NonNull PaymentRequest paymentRequest) {
         APIContext apiContext = paypalCheckoutService.constructAPIContext(paymentRequest);
         String authorizationId = getAuthorizationId(paymentRequest);
 
@@ -741,7 +741,7 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
         return response.getAuthorization();
     }
 
-    private Sale getSale(@lombok.NonNull PaymentRequest paymentRequest) {
+    protected Sale getSale(@lombok.NonNull PaymentRequest paymentRequest) {
         APIContext apiContext = paypalCheckoutService.constructAPIContext(paymentRequest);
         String saleId = getSaleId(paymentRequest);
 
@@ -753,7 +753,7 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
         return response.getSale();
     }
 
-    private Capture getCapture(@lombok.NonNull PaymentRequest paymentRequest) {
+    protected Capture getCapture(@lombok.NonNull PaymentRequest paymentRequest) {
         APIContext apiContext = paypalCheckoutService.constructAPIContext(paymentRequest);
         String captureId = getCaptureId(paymentRequest);
 
@@ -766,25 +766,28 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
         return response.getCapture();
     }
 
-    private String getPaymentId(@lombok.NonNull PaymentRequest paymentRequest) {
+    @Nullable
+    protected String getPaymentId(@lombok.NonNull PaymentRequest paymentRequest) {
         return (String) paymentRequest.getAdditionalFields().get(MessageConstants.PAYMENTID);
     }
 
-    private String getPayerId(@lombok.NonNull PaymentRequest paymentRequest) {
+    @Nullable
+    protected String getPayerId(@lombok.NonNull PaymentRequest paymentRequest) {
         return (String) paymentRequest.getAdditionalFields().get(MessageConstants.PAYERID);
     }
 
-    private String getAuthorizationId(@lombok.NonNull PaymentRequest paymentRequest) {
+    @Nullable
+    protected String getAuthorizationId(@lombok.NonNull PaymentRequest paymentRequest) {
         return (String) paymentRequest.getAdditionalFields().get(MessageConstants.AUTHORIZATIONID);
     }
 
     @Nullable
-    private String getSaleId(@lombok.NonNull PaymentRequest paymentRequest) {
+    protected String getSaleId(@lombok.NonNull PaymentRequest paymentRequest) {
         return (String) paymentRequest.getAdditionalFields().get(MessageConstants.SALEID);
     }
 
     @Nullable
-    private String getCaptureId(@lombok.NonNull PaymentRequest paymentRequest) {
+    protected String getCaptureId(@lombok.NonNull PaymentRequest paymentRequest) {
         return (String) paymentRequest.getAdditionalFields().get(MessageConstants.CAPTUREID);
     }
 
@@ -917,7 +920,7 @@ public class DefaultPayPalCheckoutTransactionService implements PayPalCheckoutTr
         return paymentDeclineCodes.contains(errorCode);
     }
 
-    private void populateErrorResponseMap(PaymentResponse responseDTO,
+    protected void populateErrorResponseMap(PaymentResponse responseDTO,
             PayPalRESTException restException) {
         Error error = restException.getDetails();
         if (error != null) {
