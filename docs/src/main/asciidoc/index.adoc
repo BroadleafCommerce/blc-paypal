@@ -7,3 +7,12 @@ include::Environment_Setup.adoc[]
 == Quick Start
 
 include::Quick_Start.adoc[]
+
+== Supported Transaction Types
+
+Using this library, you can execute the following types of transactions:
+
+- link:Authorize_Transaction.adoc[Authorize]
+- link:Capture_Transaction.adoc[Capture]
+- link:ReverseAuthorize_Transaction.adoc[Reverse Authorize]
+- link:Refund_Transaction.adoc[Refund]
