@@ -1,0 +1,60 @@
+= APS Capture Transaction
+
+== Prerequisites
+Before performing a Capture transaction with the PayPal Payment Services gateway, you'll first need to set up your environment as described in the link:Environment_Setup.adoc[Environment Setup Guide].
+
+== Executing a Capture Transaction
+Use the following code snippet to perform a Capture transaction:
+
+[source,java]
+----
+
+public class Capture {
+
+ @Autowired
+ PayPalCheckoutTransactionService transactionService;
+	
+ public void performCapture() {
+
+		 CurrencyUnit currency = Monetary.getCurrency(currencyCode);
+		 MonetaryAmount transactionTotal = Monetary.getDefaultAmountFactory().setCurrency(currency).setNumber(amount).create();
+		
+		 PaymentRequest paymentRequest = new PaymentRequest()
+                .paymentId(paymentId)
+                .transactionTotal(transactionTotal)
+                .orderSubtotal(transactionTotal)
+		        .paymentOwnerType("BLC_CART")
+		        .paymentOwnerId(cartId)
+		        .additionalField(MessageConstants.AUTHORIZATIONID, "AuthorizationId")
+                .transactionReferenceId(transactionReferenceId);
+
+	 	PaymentResponse paymentResponse = transactionService.capture(paymentRequest);
+
+		paymentResponse.isSuccessful();
+		paymentResponse.getGatewayResponseCode(); //PayPa Response Code
+		paymentResponse.getFailureType(); // Failure type in case the transaction was not successful.
+	  	paymentResponse.getResponseMap().get(MessageConstants.CAPTUREID); // PayPal Capture id
+	   	paymentResponse.getRawResponse(); // PayPal Raw response stored as a JSON object
+	}
+}
+----
+
+To set additional fields in the PaymentRequest, use method
+
+[source,java]
+---- 
+PaymentRequest.additionalField(key, value)
+---- 
+To get values from responseMap, use 
+
+[source,java]
+---- 
+PaymentResponse.getResponseMap().get(key, value)
+----
+
+To get the transaction reference ID from response:
+
+[source,java]
+---- 
+PaymentResponse.getTransactionReferenceId()
+----

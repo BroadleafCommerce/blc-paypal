@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.broadleafcommerce.microservices</groupId>
         <artifactId>broadleaf-common-parent</artifactId>
-        <version>1.7.0-SNAPSHOT</version>
+        <version>1.7.1-SNAPSHOT</version>
         <relativePath />
     </parent>
 
@@ -18,12 +18,11 @@
 
     <properties>
         <revision>1.4.0-SNAPSHOT</revision>
-        <broadleaf.payment.gateway.common>1.4.0-SNAPSHOT</broadleaf.payment.gateway.common>
-        <broadleaf.common.money.version>1.4.0-SNAPSHOT</broadleaf.common.money.version>
+        <broadleaf.common.build.dependencies.version>1.9999.0-SNAPSHOT</broadleaf.common.build.dependencies.version>
+        <paypal.sdk.version>1.14.0</paypal.sdk.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.uri>${user.dir}</project.uri>
-        <paypal.sdk.version>1.14.0</paypal.sdk.version>
     </properties>
 
     <repositories>
@@ -46,26 +45,6 @@
             <url>https://repository.broadleafcommerce.com/repository/microservices/</url>
         </repository>
     </distributionManagement>
-
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>com.broadleafcommerce.microservices</groupId>
-                <artifactId>broadleaf-payment-gateway-common</artifactId>
-                <version>${broadleaf.payment.gateway.common}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.broadleafcommerce.microservices</groupId>
-                <artifactId>broadleaf-common-money</artifactId>
-                <version>${broadleaf.common.money.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.paypal.sdk</groupId>
-                <artifactId>rest-api-sdk</artifactId>
-                <version>${paypal.sdk.version}</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 
     <build>
         <plugins>
@@ -90,6 +69,23 @@
             </build>
         </profile>
     </profiles>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.broadleafcommerce.microservices</groupId>
+                <artifactId>broadleaf-microservices-common-dependencies</artifactId>
+                <version>${broadleaf.common.build.dependencies.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.paypal.sdk</groupId>
+                <artifactId>rest-api-sdk</artifactId>
+                <version>${paypal.sdk.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <modules>
         <module>services</module>

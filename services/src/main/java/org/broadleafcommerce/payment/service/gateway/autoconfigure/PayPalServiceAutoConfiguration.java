@@ -21,18 +21,18 @@ import org.broadleafcommerce.payment.service.gateway.DefaultPayPalCheckoutHosted
 import org.broadleafcommerce.payment.service.gateway.DefaultPayPalCheckoutReportingService;
 import org.broadleafcommerce.payment.service.gateway.DefaultPayPalCheckoutRetryPolicyClassifier;
 import org.broadleafcommerce.payment.service.gateway.DefaultPayPalCheckoutRollbackService;
-import org.broadleafcommerce.payment.service.gateway.DefaultPayPalCheckoutTransactionConfirmationService;
 import org.broadleafcommerce.payment.service.gateway.DefaultPayPalCheckoutTransactionService;
 import org.broadleafcommerce.payment.service.gateway.DefaultPayPalGatewayConfiguration;
+import org.broadleafcommerce.payment.service.gateway.DefaultPayPalPaymentGatewayPaymentValidator;
 import org.broadleafcommerce.payment.service.gateway.DefaultPayPalSyncTransactionService;
 import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutExternalCallService;
 import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutHostedService;
 import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutReportingService;
 import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutRestConfigurationProperties;
 import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutRollbackService;
-import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutTransactionConfirmationService;
 import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutTransactionService;
 import org.broadleafcommerce.payment.service.gateway.PayPalGatewayConfiguration;
+import org.broadleafcommerce.payment.service.gateway.PayPalPaymentGatewayPaymentValidator;
 import org.broadleafcommerce.payment.service.gateway.PayPalSyncTransactionService;
 import org.broadleafcommerce.vendor.paypal.service.PayPalPaymentService;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -46,6 +46,8 @@ import org.springframework.retry.backoff.FixedBackOffPolicy;
 import org.springframework.retry.policy.ExceptionClassifierRetryPolicy;
 import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
+
+import com.broadleafcommerce.paymentgateway.util.PaymentResponseUtil;
 
 @Configuration
 @EnableConfigurationProperties({PayPalCheckoutRestConfigurationProperties.class,
@@ -94,11 +96,13 @@ public class PayPalServiceAutoConfiguration {
             PayPalCheckoutExternalCallService paypalCheckoutService,
             PayPalPaymentService payPalPaymentService,
             PayPalCheckoutRestConfigurationProperties configProperties,
-            @Qualifier("payPalCheckoutExternalCallRetryTemplate") RetryTemplate retryTemplate) {
+            @Qualifier("payPalCheckoutExternalCallRetryTemplate") RetryTemplate retryTemplate,
+            PaymentResponseUtil paymentResponseUtil) {
         return new DefaultPayPalCheckoutTransactionService(paypalCheckoutService,
                 payPalPaymentService,
                 configProperties,
-                retryTemplate);
+                retryTemplate,
+                paymentResponseUtil);
     }
 
     @Bean
@@ -110,19 +114,9 @@ public class PayPalServiceAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public PayPalCheckoutTransactionConfirmationService payPalCheckoutTransactionConfirmationService(
-            PayPalGatewayConfiguration gatewayConfiguration,
-            PayPalCheckoutTransactionService transactionService) {
-        return new DefaultPayPalCheckoutTransactionConfirmationService(gatewayConfiguration,
-                transactionService);
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
     public PayPalCheckoutHostedService payPalCheckoutHostedService(
-            PayPalGatewayConfiguration gatewayConfiguration,
             PayPalCheckoutTransactionService transactionService) {
-        return new DefaultPayPalCheckoutHostedService(gatewayConfiguration, transactionService);
+        return new DefaultPayPalCheckoutHostedService(transactionService);
     }
 
     @Bean
@@ -130,6 +124,13 @@ public class PayPalServiceAutoConfiguration {
     public PayPalCheckoutReportingService payPalCheckoutReportingService(
             PayPalCheckoutExternalCallService paypalCheckoutService) {
         return new DefaultPayPalCheckoutReportingService(paypalCheckoutService);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public PayPalPaymentGatewayPaymentValidator payPalPaymentGatewayPaymentValidator(
+            PayPalGatewayConfiguration gatewayConfiguration) {
+        return new DefaultPayPalPaymentGatewayPaymentValidator(gatewayConfiguration);
     }
 
 }

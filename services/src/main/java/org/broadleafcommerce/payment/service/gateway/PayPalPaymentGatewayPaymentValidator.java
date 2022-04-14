@@ -16,7 +16,13 @@
  */
 package org.broadleafcommerce.payment.service.gateway;
 
-import com.broadleafcommerce.paymentgateway.service.PaymentGatewayTransactionConfirmationService;
+import com.broadleafcommerce.paymentgateway.domain.PaymentValidationRequest;
+import com.broadleafcommerce.paymentgateway.service.PaymentGatewayPaymentValidator;
 
-public interface PayPalCheckoutTransactionConfirmationService
-        extends PaymentGatewayTransactionConfirmationService {}
+/**
+ * Validator meant to ensure that {@link PaymentValidationRequest} objects are sufficiently
+ * configured for the PayPal Payment Services gateway.
+ *
+ * @author Dima Myroniuk (dmyroniuk)
+ */
+public interface PayPalPaymentGatewayPaymentValidator extends PaymentGatewayPaymentValidator {}

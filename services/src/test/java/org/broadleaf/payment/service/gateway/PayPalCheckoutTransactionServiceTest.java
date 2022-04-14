@@ -25,8 +25,10 @@ import static org.mockito.Mockito.when;
 import org.broadleafcommerce.payment.service.gateway.DefaultPayPalCheckoutRetryPolicyClassifier;
 import org.broadleafcommerce.payment.service.gateway.DefaultPayPalCheckoutTransactionService;
 import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutExternalCallService;
+import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutPaymentGatewayType;
 import org.broadleafcommerce.payment.service.gateway.PayPalCheckoutRestConfigurationProperties;
 import org.broadleafcommerce.vendor.paypal.service.PayPalPaymentService;
+import org.broadleafcommerce.vendor.paypal.service.payment.MessageConstants;
 import org.broadleafcommerce.vendor.paypal.service.payment.PayPalRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,7 +45,9 @@ import org.springframework.retry.support.RetryTemplate;
 import com.broadleafcommerce.paymentgateway.domain.PaymentRequest;
 import com.broadleafcommerce.paymentgateway.domain.PaymentResponse;
 import com.broadleafcommerce.paymentgateway.domain.enums.DefaultTransactionFailureTypes;
+import com.broadleafcommerce.paymentgateway.domain.enums.DefaultTransactionTypes;
 import com.broadleafcommerce.paymentgateway.service.exception.PaymentException;
+import com.broadleafcommerce.paymentgateway.util.PaymentResponseUtil;
 import com.paypal.api.payments.Error;
 import com.paypal.base.rest.PayPalRESTException;
 
@@ -60,6 +64,9 @@ public class PayPalCheckoutTransactionServiceTest {
 
     @Mock
     PayPalCheckoutRestConfigurationProperties configProperties;
+
+    @Mock
+    PaymentResponseUtil paymentResponseUtil;
 
     @BeforeEach
     void setup() {
@@ -79,7 +86,8 @@ public class PayPalCheckoutTransactionServiceTest {
                     externalCallService,
                     payPalPaymentService,
                     configProperties,
-                    retryTemplate);
+                    retryTemplate,
+                    paymentResponseUtil);
 
             PayPalRESTException payPalRESTException =
                     new PayPalRESTException("Network error!");
@@ -93,6 +101,13 @@ public class PayPalCheckoutTransactionServiceTest {
     @Test
     void testTransactionRetryForNetworkError() {
         PaymentRequest paymentRequest = new PaymentRequest();
+
+        paymentRequest.additionalField(MessageConstants.PAYMENTID, "paymentId");
+        paymentRequest.additionalField(MessageConstants.PAYERID, "payerId");
+
+        when(paymentResponseUtil.buildPaymentResponse(paymentRequest,
+                PayPalCheckoutPaymentGatewayType.PAYPAL_CHECKOUT,
+                DefaultTransactionTypes.AUTHORIZE)).thenReturn(new PaymentResponse());
 
         PaymentResponse response = transactionService.authorize(paymentRequest);
 

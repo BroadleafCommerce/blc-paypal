@@ -66,7 +66,8 @@ public class DefaultPayPalPaymentService implements PayPalPaymentService {
 
     @Override
     public Payment createPayPalPayment(@lombok.NonNull PaymentRequest paymentRequest,
-            boolean performCheckoutOnReturn)
+            boolean performCheckoutOnReturn,
+            boolean capture)
             throws PaymentException {
         // Set payer details
         Payer payer = constructPayer(paymentRequest);
@@ -97,7 +98,7 @@ public class DefaultPayPalPaymentService implements PayPalPaymentService {
 
         // Add payment details
         Payment payment = new Payment();
-        payment.setIntent(getIntent(performCheckoutOnReturn));
+        payment.setIntent(getIntent(performCheckoutOnReturn, capture));
         payment.setPayer(payer);
         payment.setRedirectUrls(redirectUrls);
         payment.setTransactions(transactions);
@@ -185,8 +186,13 @@ public class DefaultPayPalPaymentService implements PayPalPaymentService {
                         paypalCheckoutService.constructAPIContext(paymentRequest)));
     }
 
+    @Deprecated
     public String getIntent(boolean performCheckoutOnReturn) {
-        if (gatewayConfiguration.isPerformAuthorizeAndCapture()) {
+        return getIntent(performCheckoutOnReturn, false);
+    }
+
+    protected String getIntent(boolean performCheckoutOnReturn, boolean capture) {
+        if (capture) {
             return "sale";
         }
 

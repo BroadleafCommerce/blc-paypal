@@ -33,14 +33,34 @@ public interface PayPalPaymentService {
      *
      * @return The new payment
      * @throws PaymentException
+     * @deprecated in favour of {@link #createPayPalPayment(PaymentRequest, boolean, boolean)}
      */
-    Payment createPayPalPayment(PaymentRequest paymentRequest, boolean performCheckoutOnReturn)
+    @Deprecated
+    default Payment createPayPalPayment(PaymentRequest paymentRequest,
+            boolean performCheckoutOnReturn)
+            throws PaymentException {
+        return createPayPalPayment(paymentRequest, performCheckoutOnReturn, false);
+    }
+
+    /**
+     * Creates a PayPal payment
+     *
+     * @param paymentRequest
+     * @param performCheckoutOnReturn Indicates if we should start checkout after the user has
+     *        authorized the payment
+     * @param capture whether or not capture the payment
+     * @return The new payment
+     * @throws PaymentException
+     */
+    Payment createPayPalPayment(PaymentRequest paymentRequest,
+            boolean performCheckoutOnReturn,
+            boolean capture)
             throws PaymentException;
 
     /**
      * Updates the PayPal payment to be in sync with the order. This method should be used when
      * fulfillment or pricing information changes after Payment creation. For creating payment use
-     * {@link #createPayPalPayment(PaymentRequest, boolean)}
+     * {@link #createPayPalPayment(PaymentRequest, boolean, boolean)}
      * 
      * @throws PaymentException
      * @param paymentRequest
