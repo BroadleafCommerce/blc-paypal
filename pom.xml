@@ -89,7 +89,6 @@
 
     <modules>
         <module>services</module>
-        <module>docs</module>
     </modules>
 
 </project>
