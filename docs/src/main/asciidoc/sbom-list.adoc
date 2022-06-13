@@ -1,3 +1,0 @@
-= Software Bill Of Materials
-
-- link:/sbom/Broadleaf PayPal Integration-1.4.X.sbom[Broadleaf PayPal Integration-1.4.X.sbom]
