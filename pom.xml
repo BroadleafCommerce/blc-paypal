@@ -17,7 +17,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <blc.version>6.0.19-SNAPSHOT</blc.version>
+        <blc.version>6.0.19-GA</blc.version>
         <project.uri>${user.dir}</project.uri>
     </properties>
     <scm>
