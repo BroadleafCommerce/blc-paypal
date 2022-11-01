@@ -4,17 +4,20 @@
     <parent>
         <groupId>org.broadleafcommerce</groupId>
         <artifactId>broadleaf-module-parent</artifactId>
-        <version>3.2.2-GA</version>
+        <version>3.2.5-GA</version>
     </parent>
 
-    <artifactId>broadleaf-paypal</artifactId>
     <name>BroadleafCommerce PayPal</name>
-    <description>BroadleafCommerce PayPal</description>
+    <description>BroadleafCommerce PayPal Module</description>
+    <groupId>com.broadleafcommerce</groupId>
+    <artifactId>broadleaf-paypal</artifactId>
     <version>3.1.2-SNAPSHOT</version>
+    <url>https://www.broadleafcommerce.com</url>
+
     <properties>
+        <project.uri>${project.baseUri}</project.uri>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <blc.version>6.1.7-GA</blc.version>
-        <project.uri>${user.dir}</project.uri>
+        <blc.version>6.1.12-GA</blc.version>
         <paypal.sdk.version>1.0.3</paypal.sdk.version>
     </properties>
     <scm>
@@ -24,7 +27,6 @@
         <tag>HEAD</tag>
     </scm>
 
-    <url>https://www.broadleafcommerce.com</url>
     <licenses>
         <license>
             <name>Broadleaf Fair Use 1.0</name>
@@ -41,29 +43,11 @@
     </licenses>
     <developers>
         <developer>
-            <id>jeff</id>
-            <name>Jeff Fischer</name>
-            <email>jfischer@broadleafcommerce.org</email>
+            <id>blcteam</id>
+            <name>Broadleaf Commerce Team</name>
+            <email>info@broadleafcommerce.com</email>
             <organization>Broadleaf Commerce</organization>
-            <organizationUrl>http://www.broadleafcommerce.org</organizationUrl>
-            <roles>
-                <role>cto</role>
-                <role>architect</role>
-                <role>developer</role>
-            </roles>
-            <timezone>-6</timezone>
-        </developer>
-        <developer>
-            <id>brian</id>
-            <name>Brian Polster</name>
-            <email>bpolster@broadleafcommerce.org</email>
-            <organization>Broadleaf Commerce</organization>
-            <organizationUrl>http://www.broadleafcommerce.org</organizationUrl>
-            <roles>
-                <role>president</role>
-                <role>architect</role>
-                <role>developer</role>
-            </roles>
+            <organizationUrl>https://www.broadleafcommerce.com</organizationUrl>
             <timezone>-6</timezone>
         </developer>
     </developers>
@@ -121,12 +105,12 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.6</version>
+            <version>3.12.0</version>
         </dependency>
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>20180813</version>
+            <version>20220924</version>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
