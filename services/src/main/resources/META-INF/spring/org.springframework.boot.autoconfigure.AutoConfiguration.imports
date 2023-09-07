@@ -1,0 +1,2 @@
+org.broadleafcommerce.payment.service.gateway.autoconfigure.PayPalServiceAutoConfiguration
+org.broadleafcommerce.vendor.paypal.service.autoconfigure.PayPalVendorServiceAutoConfiguration

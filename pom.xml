@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.broadleafcommerce.microservices</groupId>
         <artifactId>broadleaf-common-parent</artifactId>
-        <version>1.7.22-SNAPSHOT</version>
+        <version>2.0.0-BRANCH-feature-sb3-SNAPSHOT</version>
         <relativePath />
     </parent>
 
@@ -17,8 +17,8 @@
     <description>BroadleafCommerce PayPal Parent</description>
 
     <properties>
-        <revision>1.5.0-SNAPSHOT</revision>
-        <broadleaf.common.build.dependencies.version>1.9999.0-SNAPSHOT</broadleaf.common.build.dependencies.version>
+        <revision>2.0.0-SNAPSHOT</revision>
+        <broadleaf.common.build.dependencies.version>2.9999.0-BRANCH-feature-sb3-SNAPSHOT</broadleaf.common.build.dependencies.version>
         <!-- broadleaf.common.build.dependencies.version>1.7.3-GA</broadleaf.common.build.dependencies.version -->
         <paypal.sdk.version>1.14.0</paypal.sdk.version>
 
