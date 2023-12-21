@@ -17,7 +17,7 @@
     <description>BroadleafCommerce PayPal Parent</description>
 
     <properties>
-        <revision>2.0.0-SNAPSHOT</revision>
+        <revision>2.0.0-GA</revision>
         <!--
             <broadleaf.common.build.dependencies.version>2.9999.0-SNAPSHOT</broadleaf.common.build.dependencies.version>
         -->
