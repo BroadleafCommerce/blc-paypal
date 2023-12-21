@@ -21,7 +21,7 @@
         <!--
             <broadleaf.common.build.dependencies.version>2.9999.0-SNAPSHOT</broadleaf.common.build.dependencies.version>
         -->
-        <broadleaf.common.build.dependencies.version>1.7.3-GA</broadleaf.common.build.dependencies.version>
+        <broadleaf.common.build.dependencies.version>2.0.0-GA</broadleaf.common.build.dependencies.version>
         <paypal.sdk.version>1.14.0</paypal.sdk.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
