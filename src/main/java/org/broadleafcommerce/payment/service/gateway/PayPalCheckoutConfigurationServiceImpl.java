@@ -2,7 +2,7 @@
  * #%L
  * BroadleafCommerce PayPal
  * %%
- * Copyright (C) 2009 - 2022 Broadleaf Commerce
+ * Copyright (C) 2009 - 2023 Broadleaf Commerce
  * %%
  * Licensed under the Broadleaf Fair Use License Agreement, Version 1.0
  * (the "Fair Use License" located  at http://license.broadleafcommerce.org/fair_use_license-1.0.txt)
@@ -28,7 +28,7 @@ import org.broadleafcommerce.common.payment.service.PaymentGatewayTransactionSer
 import org.broadleafcommerce.common.payment.service.PaymentGatewayWebResponseService;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 /**
  * @author Elbert Bautista (elbertbautista)

@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.broadleafcommerce</groupId>
         <artifactId>broadleaf-module-parent</artifactId>
-        <version>3.2.5-GA</version>
+        <version>3.4.0-SNAPSHOT</version>
     </parent>
 
     <name>BroadleafCommerce PayPal</name>
@@ -17,7 +17,7 @@
     <properties>
         <project.uri>${project.baseUri}</project.uri>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <blc.version>6.1.12-GA</blc.version>
+        <blc.version>6.3.0-SNAPSHOT</blc.version>
         <paypal.sdk.version>1.0.3</paypal.sdk.version>
     </properties>
     <scm>
@@ -113,9 +113,8 @@
             <version>20220924</version>
         </dependency>
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
-            <version>2.5</version>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
             <type>jar</type>
             <scope>provided</scope>
         </dependency>
