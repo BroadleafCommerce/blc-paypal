@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.broadleafcommerce</groupId>
         <artifactId>broadleaf-module-parent</artifactId>
-        <version>3.4.0-SNAPSHOT</version>
+        <version>4.0.0-GA</version>
     </parent>
 
     <name>BroadleafCommerce PayPal</name>
@@ -17,7 +17,7 @@
     <properties>
         <project.uri>${project.baseUri}</project.uri>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <blc.version>6.3.0-SNAPSHOT</blc.version>
+        <blc.version>7.0.0-GA</blc.version>
         <paypal.sdk.version>1.0.3</paypal.sdk.version>
     </properties>
     <scm>
