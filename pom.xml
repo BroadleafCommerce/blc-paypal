@@ -11,7 +11,7 @@
     <description>BroadleafCommerce PayPal Module</description>
     <groupId>com.broadleafcommerce</groupId>
     <artifactId>broadleaf-paypal</artifactId>
-    <version>3.2.0-SNAPSHOT</version>
+    <version>3.2.0-M1</version>
     <url>https://www.broadleafcommerce.com</url>
 
     <properties>
@@ -24,7 +24,7 @@
         <connection>scm:git:git@github.com:BroadleafCommerce/blc-paypal.git</connection>
         <developerConnection>scm:git:git@github.com:BroadleafCommerce/blc-paypal.git</developerConnection>
         <url>https://github.com/BroadleafCommerce/blc-paypal</url>
-        <tag>HEAD</tag>
+        <tag>broadleaf-paypal-3.2.0-M1</tag>
     </scm>
 
     <licenses>
