@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 - 2020 Broadleaf Commerce
+ * Copyright (C) 2013 Broadleaf Commerce
  *
  * Licensed under the Broadleaf End User License Agreement (EULA), Version 1.1 (the
  * "Commercial License" located at http://license.broadleafcommerce.org/commercial_license-1.1.txt).
