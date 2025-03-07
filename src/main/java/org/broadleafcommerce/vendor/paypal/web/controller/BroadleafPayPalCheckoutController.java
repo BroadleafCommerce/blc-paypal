@@ -2,7 +2,7 @@
  * #%L
  * BroadleafCommerce PayPal
  * %%
- * Copyright (C) 2009 - 2022 Broadleaf Commerce
+ * Copyright (C) 2009 - 2025 Broadleaf Commerce
  * %%
  * Licensed under the Broadleaf Fair Use License Agreement, Version 1.0
  * (the "Fair Use License" located  at http://license.broadleafcommerce.org/fair_use_license-1.0.txt)
@@ -43,8 +43,8 @@ import com.paypal.api.payments.Payment;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * @author Elbert Bautista (elbertbautista)
