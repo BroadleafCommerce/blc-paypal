@@ -5,14 +5,14 @@
     <parent>
         <groupId>org.broadleafcommerce</groupId>
         <artifactId>broadleaf-module-parent</artifactId>
-        <version>4.0.0-GA</version>
+        <version>4.0.2-GA</version>
     </parent>
 
     <name>BroadleafCommerce PayPal</name>
     <description>BroadleafCommerce PayPal</description>
     <groupId>org.broadleafcommerce</groupId>
     <artifactId>broadleaf-paypal</artifactId>
-    <version>mlb-3.0.0-SNAPSHOT</version>
+    <version>3.0.0-mlb-SNAPSHOT</version>
     <url>https://www.broadleafcommerce.com</url>
 
     <properties>
