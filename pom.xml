@@ -12,7 +12,7 @@
     <description>BroadleafCommerce PayPal</description>
     <groupId>org.broadleafcommerce</groupId>
     <artifactId>broadleaf-paypal</artifactId>
-    <version>3.0.7-SNAPSHOT</version>
+    <version>3.0.7-OAA-CD1</version>
     <url>https://www.broadleafcommerce.com</url>
 
     <properties>
@@ -24,7 +24,7 @@
         <connection>scm:git:git@github.com:BroadleafCommerce/blc-paypal.git</connection>
         <developerConnection>scm:git:git@github.com:BroadleafCommerce/blc-paypal.git</developerConnection>
         <url>https://github.com/BroadleafCommerce/BroadleafCommerce</url>
-        <tag>HEAD</tag>
+        <tag>broadleaf-paypal-3.0.7-OAA-CD1</tag>
     </scm>
     <licenses>
         <license>
