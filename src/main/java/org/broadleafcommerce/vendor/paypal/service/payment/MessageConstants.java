@@ -41,7 +41,7 @@ public class MessageConstants {
     public static final String HTTP_HEADER_MOCK_RESPONSE = "PayPal-Mock-Response";
     public static final String IDEMPOTENCY_KEY = "idempotency_key";
     public static final String BN = "PayPal-Partner-Attribution-Id";
-    public static final String BNCODE = "BroadleafCommerce_SP_1AAuto";
+    public static final String BNCODE = "BroadleafCommerce_Cart_EC";
     public static final String HTTP_PAYERID = "payerId";
     public static final String HTTP_ORDER_ID = "orderId";
     public static final String HTTP_REQUEST = "HTTP_REQUEST";
