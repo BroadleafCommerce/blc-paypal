@@ -45,7 +45,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import com.broadleafcommerce.money.util.MonetaryUtils;
 import com.broadleafcommerce.paymentgateway.domain.PaymentRequest;
@@ -83,7 +83,7 @@ public class PayPalCheckoutTransactionServiceIT {
     private static final String VOIDED_AUTHORIZATION_ID = "voidedAuthorizationId";
     private static final String DETAIL_REFUND_ID = "detailRefundId";
 
-    @MockBean
+    @MockitoBean
     PayPalCheckoutExternalCallService paypalCheckoutService;
 
     @Autowired
