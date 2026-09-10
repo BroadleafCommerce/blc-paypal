@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.broadleafcommerce.microservices</groupId>
         <artifactId>broadleaf-common-parent</artifactId>
-        <version>4.1.0-SNAPSHOT</version>
+        <version>4.1.1-SNAPSHOT</version>
         <relativePath />
     </parent>
 
@@ -18,7 +18,7 @@
 
     <properties>
         <revision>4.0.0-SNAPSHOT</revision>
-        <broadleaf.common.build.dependencies.version>4.1.999.0-SNAPSHOT</broadleaf.common.build.dependencies.version>
+        <broadleaf.common.build.dependencies.version>4.1.9999.0-SNAPSHOT</broadleaf.common.build.dependencies.version>
         <!--
             <broadleaf.common.build.dependencies.version>4.1.0-GA</broadleaf.common.build.dependencies.version>
         -->
